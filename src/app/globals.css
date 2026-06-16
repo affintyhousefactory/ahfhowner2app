@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/* ============================================================
+   HOWNER / ARKO — DESIGN SYSTEM
+   Galerie claire & cinématographique. Le produit = la star.
+   ============================================================ */
+
+@theme {
+  /* Charte Affinity (affinityhome.io) — froide, minimale, voir DESIGN.md */
+  --color-canvas: #f6f7f9; /* off-white froid, base */
+  --color-surface: #ffffff; /* blocs / images */
+  --color-paper: #fbfcfd; /* surface alternative douce */
+  --color-ink: #0d141a; /* charcoal, quasi-noir */
+  --color-muted: #727586; /* gris Affinity (AA ≥4.5:1 sur fond clair) */
+  --color-line: #dadce0; /* filet / bordure */
+  --color-accent: #3a5a86; /* slate-blue profond, réservé aux CTA (texte blanc AA) */
+  --color-accent-ink: #2c466b; /* hover */
+  --color-blue: #357df9; /* azure Affinity */
+
+  /* Typographies — display suisse + texte net + mono */
+  --font-display: var(--font-display), system-ui, "Helvetica Neue", sans-serif;
+  --font-sans: var(--font-sans), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  /* Rythme */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Échelle fluide */
+  --text-display: clamp(3.2rem, 11vw, 11rem);
+  --text-h1: clamp(2.4rem, 6vw, 5rem);
+  --text-h2: clamp(1.9rem, 4vw, 3.4rem);
+  --text-h3: clamp(1.3rem, 2.2vw, 1.85rem);
+}
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv01";
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent; /* pas de flash bleu au tap mobile */
+}
+
+/* Veuves/orphelines : tout le texte courant se répartit proprement */
+p {
+  text-wrap: pretty;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Sélection */
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* Focus clavier visible (AA) — anneau accent, jamais au clic souris.
+   Pas de border-radius ici : l'outline suit déjà le rayon de l'élément. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Scrollbar discrète, tons chauds (cohérence DA) */
+html {
+  scrollbar-color: #d3cab8 var(--color-canvas);
+  scrollbar-width: thin;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: #d3cab8;
+  border-radius: 999px;
+  border: 3px solid var(--color-canvas);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c1b6a0;
+}
+
+/* Utilitaires de composition */
+@layer utilities {
+  .container-page {
+    width: 100%;
+    max-width: 84rem;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 4rem);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .hairline {
+    border-top: 1px solid var(--color-line);
+  }
+  /* Masque de révélation (clip-path) pour les titres */
+  .clip-reveal {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+/* Typo cinétique : sur-titres serrés (sans) */
+.kinetic {
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+}
+
+/* Display « suisse » (grotesque magistral) */
+.editorial {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.0;
+}
+/* Filet de section + numérotation */
+.rule {
+  border-top: 1px solid var(--color-line);
+}
+
+/* prefers-reduced-motion : tout se calme */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
