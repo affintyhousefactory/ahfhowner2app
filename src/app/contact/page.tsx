@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Contact | HOWNER",
   description:
     "Une question sur Arko One ou Arko Max ? Écrivez-nous, nous répondons sous 24 h ouvrées.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

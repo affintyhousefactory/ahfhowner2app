@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Votre terrain | HOWNER",
   description:
     "Vérifiez une adresse ou une annonce, estimez la livraison et la constructibilité indicative pour votre Arko. Ou trouvez une parcelle compatible.",
+  alternates: { canonical: "/terrain" },
 };
 
 export default function TerrainPage() {

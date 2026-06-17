@@ -6,6 +6,11 @@
    sans prénom. Fondateur = Puigbo (sans accent).
    ============================================================ */
 
+// URL canonique de prod — source unique pour metadataBase, sitemap, robots,
+// canonical (ADR-018). Surchargeable par env pour les previews Vercel.
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://affinityhome.fr";
+
 // Acompte : jamais en dur — lu depuis l'environnement (fallback 1500).
 const DEPOSIT_EUR = Number(
   process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR ?? 1500,

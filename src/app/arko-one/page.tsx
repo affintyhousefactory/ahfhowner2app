@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Arko One — 20 m² d'architecte | HOWNER",
   description:
     "Arko One : maison compacte d'architecte de 20 m², livrée prête à vivre. Série 01 — 12 exemplaires numérotés. Fabriquée au Pays-Basque.",
+  alternates: { canonical: "/arko-one" },
 };
 
 export default function ArkoOnePage() {

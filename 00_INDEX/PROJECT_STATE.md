@@ -21,7 +21,7 @@ Site **mono-produit** de réservation **ARKO** (série limitée 12 exemplaires).
 | Charte | Affinity (remap `@theme`) — `DESIGN.md` | 002 |
 | Data (Phase 4) | Supabase `ahfhownerdb` (ref `msrjocrcewvqkcehruny`) | 007 |
 | Paiement (Phase 4) | Stripe Checkout + webhook | 008 |
-| Hébergement | Vercel | — |
+| Hébergement | Vercel | 023 |
 
 ## Produit
 **Bi-produit** (ADR-022) — registre `PRODUCTS` (`src/lib/site.ts`) :
@@ -35,7 +35,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Phase | Périmètre | État | ADR |
 |---|---|---|---|
 | Phase 1 — Front | design, conversion, média, perf | ✅ Livré | 001,005,006 |
-| Phase 1.5 — SEO | sitemap/robots/OG/JSON-LD | ⏳ Audité, non implémenté | 018 |
+| Phase 1.5 — SEO | sitemap/robots/OG/JSON-LD | 🟡 P0 livré (2026-06-17) ; P1 (JSON-LD) + P2 restants | 018 |
 | Phase 4 — Backend | Stripe, Supabase, terrain, leads | ⛔ Non démarré | 007→013 |
 | Pré-lancement — Légal | acompte/arrhes, CGV | ⛔ Bloqué (avocat) | 015 |
 
@@ -51,7 +51,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Contact terrain | `LandTool.tsx` (~L392) | `setSent(true)` | lead Supabase | 013 |
 | Devis 3 couches multi-produit | `Configurator.tsx`, `config-store.tsx` | ✅ logique verrouillée, paramétrée par produit | — | 005,020 |
 | Email confirmations | — | absent | fournisseur à choisir | 014 |
-| SEO | `layout.tsx` + fichiers absents | métadonnées de base | socle complet | 018 |
+| SEO | `layout.tsx`, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `viewer/layout.tsx` | ✅ P0 (sitemap/robots/OG/twitter/canonical/noindex viewer) | + P1 JSON-LD, P2 polish | 018 |
 
 ## Risques principaux
 
@@ -98,14 +98,15 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 015 | Légal acompte/arrhes/CGV | **Bloqué (avocat)** | 🔴 |
 | 016 | Échéancier 10/30/40/20 % | Différé | 🟠 |
 | 017 | Enrichissement terrain Anthropic | Différé (option) | ⚪ |
-| 018 | Socle SEO | Proposé | ✅ |
+| 018 | Socle SEO | **Accepté — P0 livré** | ✅ |
 | 019 | Gouvernance cognitive INDEX/HUB/_RUNTIME | Accepté | ✅ |
 | 020 | Configurateur multi-produit (amende 005) | Accepté | ✅ |
 | 021 | Architecture multi-pages + nav Tesla | Accepté | ✅ |
 | 022 | Split produit One/Max + repositionnement | **Accepté — valider Albert** | 🟠 |
+| 023 | Déploiement production Vercel | Proposé | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
-1. **ADR-018** — SEO P0 (confirmer domaine `howner.fr` d'abord).
+1. **ADR-018 — SEO** : **P0 livré** (2026-06-17) — `robots.txt`, `sitemap.xml`, OG image 1200×630, twitter card, canonical par page, `/viewer` noindex. Domaine confirmé `affinityhome.fr` (`SITE_URL`). **Reste P1** : JSON-LD (Organization / Product+Offer / FAQPage), `llms.txt` ; **P2** : manifest/PWA, skip-link, trim fonts.
 2. **ADR-007** — Supabase schémas + RLS (repasser MCP en écriture) → débloque 009/010/013.
 3. **ADR-014** — choisir le fournisseur email → débloque ADR-008.
 
@@ -113,4 +114,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+**2026-06-17 (ADR-018 — SEO P0 livré)** — Socle SEO P0 implémenté et **vérifié au build** (`next build` vert, 16 routes statiques). Nouveaux fichiers : `src/app/sitemap.ts` (6 routes indexables, légal + `/viewer` exclus), `src/app/robots.ts` (`disallow /viewer` + host + sitemap), `src/app/opengraph-image.tsx` (généré `next/og`, 1200×630, tokens charte), `src/app/viewer/layout.tsx` (`noindex,nofollow`). `layout.tsx` : `metadataBase` recâblé + twitter card + canonical `/`. Canonical self-référent ajouté sur toutes les pages (légal inclus). **Domaine de prod confirmé = `affinityhome.fr`** (ex-`howner.fr`), centralisé dans `SITE_URL` (`src/lib/site.ts`, override `NEXT_PUBLIC_SITE_URL`). Incident env corrigé : binaire natif `lightningcss` manquant (WSL) → `npm install lightningcss-linux-x64-gnu`. **Reste** : P1 JSON-LD (Organization/Product+Offer/FAQPage) + `llms.txt`, P2 polish. ADR-018 → « Accepté — P0 livré ».
+
+**2026-06-17 (ingestion `claude-knowledge` + audit projet)** — Base de connaissances officielle ingérée dans `~/.claude/rules/` (14 thèmes, 119 fichiers : `claude-code`, `components`, `design`, `discovery`, `landing`, `landing-sections`, `mcp`, `modules`, `notion`, `saas`, `spa`, `supabase`, `vercel`, `workflow`). `~/.claude/CLAUDE.md` remplacé par celui du repo (charge les règles via `@import`). Audit projet contre les règles : **`PROFIL.md` créé** à la racine (convention `rules/discovery/profil-md-convention.md`) + câblé en tête de `CLAUDE.md` projet. **ADR-001 amendé** : dérogation actée (la règle landing impose Astro, Howner reste Next.js car livré). **Dette SEO confirmée** comme priorité 1 (ADR-018). Aucun code applicatif modifié.
+
 **2026-06-16 (refonte multi-pages bi-produit)** — Site passé en **multi-pages** (App Router) : `/`, `/arko-one`, `/arko-max`, `/configurer`, `/terrain`, `/contact`, `/cgv`, `/mentions-legales`, `/confidentialite`. **Bi-produit** Arko One (20 m², 12 ex, 59 900 €) + Arko Max (40 m², **5 ex**, 89 900 €) via registre `PRODUCTS` (`src/lib/site.ts`). **Nav type Tesla** (méga-menu Produits, compteur 12+5). Configurateur **multi-produit** (sélecteur One/Max, devis qui suit la base — ADR-020, amende 005). Wordmark ARKO retiré de l'accueil (baseline « Une maison compacte faite pour vous », « Fabriqué au Pays-Basque »). Pages légales = placeholders (bloqué ADR-015). ADR-020/021/022 créés. `tsc` propre, 10 routes en 200, console clean. **À fournir** : grille Arko One (perM2/options/dimensions), `reserved` par produit, asset vidéo Arko One (fallback provisoire = footage Max). **3 alertes Albert** : repositionnement bi-produit, déverrouillage configurateur, retrait wordmark ARKO. Charte Affinity (ADR-002) toujours à valider.

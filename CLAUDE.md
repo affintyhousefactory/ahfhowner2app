@@ -4,13 +4,17 @@
 
 Site mono-produit de réservation **ARKO** (série limitée 12 exemplaires). Front complet ; backend en attente (Phase 4).
 
+## ⚠️ Interlocuteur — lecture OBLIGATOIRE en début de session
+Avant toute reco ou décision, lire `PROFIL.md` (vulgarisation + posture). Convention : `rules/discovery/profil-md-convention.md`.
+
 ## ⚠️ Lecture obligatoire en début de session
 Avant toute reco, décision ou code, lire **dans cet ordre** (ADR-019) :
-1. `_RUNTIME/CURRENT_SESSION.md` — focus + décisions de la session courante.
-2. `_RUNTIME/active-context.md` — priorités + contraintes actives.
-3. `00_INDEX/PROJECT_STATE.md` — **état canonique** : phases, blockers, index ADR, prochaine action.
-4. `00_INDEX/INDEX.md` → le HUB du domaine concerné (`HUB_GOUVERNANCE/PRODUCT/FRONTEND/BACKEND/RELEASE`).
-5. `DESIGN.md`, puis l'ADR concernée dans `03_DECISIONS/` avant de toucher une feature.
+1. `PROFIL.md` — interlocuteur + posture (mandatory, en tête).
+2. `_RUNTIME/CURRENT_SESSION.md` — focus + décisions de la session courante.
+3. `_RUNTIME/active-context.md` — priorités + contraintes actives.
+4. `00_INDEX/PROJECT_STATE.md` — **état canonique** : phases, blockers, index ADR, prochaine action.
+5. `00_INDEX/INDEX.md` → le HUB du domaine concerné (`HUB_GOUVERNANCE/PRODUCT/FRONTEND/BACKEND/RELEASE`).
+6. `DESIGN.md`, puis l'ADR concernée dans `03_DECISIONS/` avant de toucher une feature.
 
 > `resume` / `memory-sync` restituent l'avancement depuis `00_INDEX/PROJECT_STATE.md` + `_RUNTIME/`. Tenir à jour « Dernier point » (PROJECT_STATE) et `CURRENT_SESSION.md` en fin de session. **Une seule vérité d'état = `00_INDEX/PROJECT_STATE.md`** ; ne pas dupliquer.
 

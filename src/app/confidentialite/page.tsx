@@ -4,6 +4,7 @@ import { LegalShell } from "@/components/site/LegalShell";
 export const metadata: Metadata = {
   title: "Politique de confidentialité | HOWNER",
   description: "Politique de confidentialité HOWNER — en cours de validation juridique.",
+  alternates: { canonical: "/confidentialite" },
   robots: { index: false, follow: true },
 };
 

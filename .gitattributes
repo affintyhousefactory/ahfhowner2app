@@ -1,0 +1,2 @@
+# Normalisation des fins de ligne — LF partout (évite le churn CRLF sous WSL).
+* text=auto eol=lf
