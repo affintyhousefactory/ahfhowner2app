@@ -3,11 +3,12 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CONFIG, BRAND, PRICING } from "@/lib/site";
+import { CONFIG, PRODUCT_LIST } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { useConfig, eur } from "./config-store";
+import { CountdownBanner } from "./CountdownBanner";
 
 type View = "exterieur" | "cuisine" | "chambre" | "interieur";
 
@@ -62,7 +63,7 @@ export function Configurator() {
         <Reveal>
           <div className="rule flex items-baseline justify-between pt-5">
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              007 — Configurer
+              Configurer · {c.active.name}
             </span>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
               Devis indicatif
@@ -70,14 +71,64 @@ export function Configurator() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-3xl text-balance text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:text-[5rem]">
-            Faites-en la vôtre.
-          </h2>
+          <h1 className="editorial mt-12 max-w-4xl text-balance text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:text-[5rem]">
+            Configurer votre {c.active.name}
+          </h1>
         </Reveal>
         <Reveal delay={0.1}>
-          <p className="mt-6 max-w-md text-sm leading-relaxed text-muted">
-            Vous choisissez l'essentiel, le total se calcule en direct.
+          <p className="mt-6 text-sm leading-relaxed text-muted md:whitespace-nowrap">
+            Choisissez votre modèle, puis l'essentiel : le total se calcule en direct.
           </p>
+        </Reveal>
+
+        {/* Sélecteur de produit (ADR-020) — affiche reserved/total par produit (FOMO) */}
+        <Reveal delay={0.12}>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div
+              role="tablist"
+              aria-label="Choix du modèle"
+              className="inline-flex rounded-full border border-line bg-canvas p-1"
+            >
+              {PRODUCT_LIST.map((p) => {
+                const on = c.product === p.key;
+                const reserved = c.reservedByProduct[p.key];
+                const total = p.total;
+                return (
+                  <button
+                    key={p.key}
+                    role="tab"
+                    aria-selected={on}
+                    onClick={() => c.setProduct(p.key)}
+                    className={cn(
+                      "flex flex-col items-start rounded-full px-5 py-2 text-sm transition-colors",
+                      on ? "bg-ink text-canvas" : "text-muted hover:text-ink",
+                    )}
+                  >
+                    <span className="flex items-baseline gap-2">
+                      {p.name}
+                      <span
+                        className={cn(
+                          "font-mono text-[0.7rem]",
+                          on ? "text-canvas/70" : "opacity-70",
+                        )}
+                      >
+                        {p.area}
+                      </span>
+                    </span>
+                    <span
+                      className={cn(
+                        "font-mono text-[0.65rem] tabular-nums",
+                        on ? "text-canvas/70" : "text-muted/80",
+                      )}
+                    >
+                      {reserved}/{total} réservés
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <CountdownBanner variant="compact" />
+          </div>
         </Reveal>
 
         <div className="mt-14 grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
@@ -187,7 +238,7 @@ export function Configurator() {
                 <div>
                   <p className="text-sm text-ink">Terrasse bois</p>
                   <p className="font-mono text-[0.7rem] text-muted">
-                    {PRICING.terrassePerM2} €/m²
+                    {c.active.pricing.terrassePerM2} €/m²
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -205,7 +256,7 @@ export function Configurator() {
               </div>
               {/* Packs */}
               <div className="mt-3 flex flex-wrap gap-2.5">
-                {PRICING.options.map((o) => {
+                {c.active.pricing.options.map((o) => {
                   const on = c.options.includes(o.id);
                   return (
                     <button
@@ -232,7 +283,7 @@ export function Configurator() {
               <div className="flex flex-wrap gap-2.5">
                 <Locked label="Baies toute hauteur" />
                 <Locked label="Angle vitré en retrait" />
-                <Locked label={`Volume ${BRAND.footprint}`} />
+                <Locked label={`Volume ${c.active.footprint}`} />
               </div>
             </Group>
 
@@ -246,21 +297,35 @@ export function Configurator() {
 
 function Devis() {
   const c = useConfig();
-  const selectedPacks = PRICING.options.filter((o) => c.options.includes(o.id));
+  const p = c.active.pricing;
+  const selectedPacks = p.options.filter((o) => c.options.includes(o.id));
 
   return (
     <div className="rounded-2xl border border-line bg-canvas p-6">
+      {/* Bande FOMO — countdown + jauge product-aware */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-3">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted">
+            {c.active.name}
+          </span>
+          <span className="font-mono text-xs tabular-nums text-ink">
+            {c.activeReserved}/{c.active.total} · {c.activeRemaining} restants
+          </span>
+        </div>
+        <CountdownBanner variant="compact" />
+      </div>
+
       <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-muted">
         Votre devis
       </p>
 
       {/* Couche 1 — la maison */}
       <div className="mt-4 space-y-2 text-sm">
-        <Line k={`ARKO ${BRAND.area} — clé en main`} v={eur(PRICING.base)} />
+        <Line k={`${c.active.name} ${c.active.area} — clé en main`} v={eur(p.base)} />
         {c.terrasseM2 > 0 && (
           <Line
             k={`Terrasse bois — ${c.terrasseM2} m²`}
-            v={"+ " + eur(c.terrasseM2 * PRICING.terrassePerM2)}
+            v={"+ " + eur(c.terrasseM2 * p.terrassePerM2)}
             sub
           />
         )}
@@ -279,7 +344,7 @@ function Devis() {
           <div>
             <p className="text-sm text-ink">Livraison & pose</p>
             <p className="font-mono text-[0.68rem] text-muted">
-              {eur(PRICING.delivery.grutage)} + {PRICING.delivery.perKm.toString().replace(".", ",")} €/km · depuis {PRICING.delivery.origin}
+              {eur(p.delivery.grutage)} + {p.delivery.perKm.toString().replace(".", ",")} €/km · depuis {p.delivery.origin}
             </p>
           </div>
           <span className="font-mono text-sm">
@@ -330,7 +395,7 @@ function Devis() {
           À prévoir — frais de terrain (hors total)
         </p>
         <div className="mt-3 space-y-1.5 text-xs">
-          {PRICING.landFees.map((f) => (
+          {p.landFees.map((f) => (
             <div key={f.label} className="flex items-baseline justify-between gap-4">
               <span className="text-muted">{f.label}</span>
               <span className="text-right font-mono text-ink/70">{f.value}</span>

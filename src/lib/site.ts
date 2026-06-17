@@ -14,15 +14,17 @@ const DEPOSIT_EUR = Number(
 export const BRAND = {
   maker: "HOWNER",
   model: "ARKO",
-  baseline: "Une maison. Réduite. Pas diminuée.",
-  subline: "40 m² d'architecte, livrés prêts à vivre. Série 01 — 12 exemplaires.",
+  baseline: "Une maison compacte faite pour vous",
+  subline:
+    "Deux modèles d'architecte, livrés prêts à vivre. Fabriqués au Pays-Basque.",
   series: "Série 01",
-  total: 12,
+  total: 12, // ⚠ compat héritée = total Arko Max ; voir PRODUCTS pour le par-produit
   reserved: 4, // jauge live (placeholder Phase 1, Supabase Realtime en Phase 4)
   deposit: DEPOSIT_EUR,
-  area: "40 m²",
-  footprint: "4 × 11 m",
+  area: "40 m²", // compat héritée (= Arko Max) — préférer PRODUCTS[key].area
+  footprint: "4 × 11 m", // compat héritée (= Arko Max)
   location: "Pays Basque",
+  madeIn: "Fabriqué au Pays-Basque", // rendu UI (ADR-022)
 } as const;
 
 export const MANIFESTO =
@@ -56,6 +58,82 @@ export const PRICING = {
     { label: "Permis + taxe d'aménagement", value: "selon commune" },
   ],
 } as const;
+
+/* ============================================================
+   PRODUITS — registre bi-produit (ADR-022)
+   Arko Max = produit historique (= PRICING/SPECS/BRAND ci-dessus).
+   Arko One = nouveau modèle 20 m². Les valeurs marquées TODO ARKO ONE
+   sont des PLACEHOLDERS provisoires (en attente des vraies données
+   métier) — jamais inventées comme définitives. base/area/total/ex
+   sont confirmés (59 900 € / 20 m² / 12 ex).
+   Montants en env via fallback (ADR-003), jamais en dur ailleurs.
+   ============================================================ */
+
+// Grille tarifaire Arko One (20 m²) — provisoire (TODO ARKO ONE).
+const ONE_PRICING = {
+  base: Number(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR ?? 59900),
+  perM2: 2250, // TODO ARKO ONE : confirmer €/m²
+  terrassePerM2: 300, // TODO ARKO ONE : confirmer
+  delivery: PRICING.delivery, // TODO ARKO ONE : confirmer (repris de Max)
+  options: PRICING.options, // TODO ARKO ONE : grille options propre à confirmer
+  landFees: PRICING.landFees,
+} as const;
+
+export type ProductKey = "one" | "max";
+
+export const PRODUCTS = {
+  one: {
+    key: "one" as const,
+    name: "Arko One",
+    slug: "/arko-one",
+    tagline: "20 m² d'architecte, l'essentiel juste.",
+    area: "20 m²",
+    footprint: "à confirmer", // TODO ARKO ONE : dimensions réelles du 20 m²
+    total: 12,
+    reserved: 2, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
+    series: "Série 01",
+    pricing: ONE_PRICING,
+    // Média scroll-zoom propre (TODO ARKO ONE : asset 20 m² absent du repo —
+    // fallback provisoire sur le footage 40 m²). Remplacer dès livraison.
+    video: "/assets/arko/video/turntable.mp4",
+    poster: "/assets/arko/video/turntable-poster.jpg",
+    scrub: "/assets/arko/video/film-scrub.mp4",
+    scrubPoster: "/assets/arko/video/film-scrub-poster.jpg",
+    placeholderMedia: true, // ⚠ assets provisoires (= Arko Max) — à remplacer
+  },
+  max: {
+    key: "max" as const,
+    name: "Arko Max",
+    slug: "/arko-max",
+    tagline: "40 m² d'architecte, livrés prêts à vivre.",
+    area: BRAND.area,
+    footprint: BRAND.footprint,
+    total: 5, // repositionnement : Arko Max = 5 exemplaires (ADR-022)
+    reserved: 1, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
+    series: BRAND.series,
+    pricing: PRICING,
+    video: "/assets/arko/video/turntable.mp4",
+    poster: "/assets/arko/video/turntable-poster.jpg",
+    scrub: "/assets/arko/video/film-scrub.mp4",
+    scrubPoster: "/assets/arko/video/film-scrub-poster.jpg",
+    placeholderMedia: false,
+  },
+} as const;
+
+export type Product = (typeof PRODUCTS)[ProductKey];
+
+export const PRODUCT_LIST = [PRODUCTS.one, PRODUCTS.max] as const;
+
+export const getProduct = (key: string | null | undefined): Product =>
+  key === "one" ? PRODUCTS.one : PRODUCTS.max;
+
+/* ============================================================
+   FOMO — fin des réservations Série 01
+   Date cible exposée comme constante, lue par useCountdown + bandeau.
+   À ajuster avec Albert si besoin (alerte si modifié).
+   ============================================================ */
+export const SERIES_DEADLINE_ISO = "2026-07-17T23:59:59+02:00";
+export const SERIES_DEADLINE_LABEL = "Fin des réservations Série 01";
 
 export const REASSURANCE = [
   {
@@ -99,11 +177,20 @@ export const FAQ = [
   },
 ] as const;
 
+// Navigation principale par routes (multi-pages — ADR-021).
+// « Produits » est rendu à part (méga-menu Tesla) via PRODUCT_LIST.
 export const NAV = [
-  { label: "Découvrir", href: "#decouvrir" },
-  { label: "Configurer", href: "#configurer" },
-  { label: "Caractéristiques", href: "#specs" },
-  { label: "Votre terrain", href: "#terrain" },
+  { label: "Configurer", href: "/configurer" },
+  { label: "Votre terrain", href: "/terrain" },
+  { label: "Contact", href: "/contact" },
+] as const;
+
+// Liens « Informations » (footer + légal). Contenu réel CGV/etc. bloqué ADR-015.
+export const INFO_NAV = [
+  { label: "CGV", href: "/cgv" },
+  { label: "Mentions légales", href: "/mentions-legales" },
+  { label: "Confidentialité", href: "/confidentialite" },
+  { label: "Contact", href: "/contact" },
 ] as const;
 
 /* — Comment ça se passe — (terrasse JAMAIS visible en transport/levage) */

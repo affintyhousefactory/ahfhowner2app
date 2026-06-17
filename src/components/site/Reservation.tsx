@@ -2,21 +2,29 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BRAND, CONFIG, PRICING } from "@/lib/site";
+import { BRAND, CONFIG } from "@/lib/site";
 import { Gauge } from "@/components/ui/Gauge";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { useConfig, eur } from "./config-store";
+import { CountdownBanner } from "./CountdownBanner";
 
 export function Reservation() {
-  const { reserved, total, deposit } = BRAND;
+  const c = useConfig();
+  const { name } = c.active;
+  const reserved = c.activeReserved;
+  const total = c.active.total;
+  const deposit = BRAND.deposit;
   const soldOut = reserved >= total;
   const [slot, setSlot] = useState<number | null>(null);
   const [sent, setSent] = useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!sent) {
+      c.incrementReserved(c.product); // FOMO démo : jauge bouge avant confirmation
+    }
     setSent(true); // Phase 1 : aucune transaction réelle, aucun backend.
   };
 
@@ -45,12 +53,15 @@ export function Reservation() {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="mt-5 max-w-md text-muted">
-                Douze Arko sur ce cycle. Ni un de plus.
+                {total} {name} sur ce cycle. Ni un de plus.
               </p>
             </Reveal>
 
             <div className="mt-10">
               <Gauge reserved={reserved} total={total} />
+              <div className="mt-4">
+                <CountdownBanner variant="compact" />
+              </div>
             </div>
 
             <ConfigRecap />
@@ -132,7 +143,7 @@ function ConfigRecap() {
   const c = useConfig();
   const claddingLabel =
     CONFIG.cladding.find((x) => x.id === c.cladding)?.label ?? "";
-  const packs = PRICING.options
+  const packs = c.active.pricing.options
     .filter((o) => c.options.includes(o.id))
     .map((o) => o.label);
   const extras = [
@@ -154,7 +165,7 @@ function ConfigRecap() {
         </a>
       </div>
       <p className="mt-3 text-sm leading-relaxed text-ink">
-        ARKO {BRAND.area} · bardage {claddingLabel.toLowerCase()}
+        {c.active.name} {c.active.area} · bardage {claddingLabel.toLowerCase()}
         {extras.length ? ` · ${extras.join(" · ")}` : ""}
       </p>
       <div className="mt-4 space-y-1.5 border-t border-line pt-3 font-mono text-sm">
@@ -208,7 +219,7 @@ function LegalNote() {
           (arrhes/acompte), conditions de rétractation et remboursement. */}
       Acompte de réservation de {BRAND.deposit.toLocaleString("fr-FR")} € —
       remboursable. Conditions précisées dans les{" "}
-      <a href="#" className="underline underline-offset-2 hover:text-ink">
+      <a href="/cgv" className="underline underline-offset-2 hover:text-ink">
         CGV
       </a>{" "}
       (en cours de validation juridique).
@@ -217,7 +228,7 @@ function LegalNote() {
 }
 
 function Confirmation({ slot }: { slot: number | null }) {
-  const { houseTotal, delivery } = useConfig();
+  const { houseTotal, delivery, active } = useConfig();
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -236,7 +247,7 @@ function Confirmation({ slot }: { slot: number | null }) {
         {slot
           ? `Le n°${String(slot).padStart(2, "0")} vous est pré-attribué. `
           : ""}
-        Configuration : ARKO {BRAND.area} — votre Arko {eur(houseTotal)} TTC
+        Configuration : {active.name} {active.area} — votre Arko {eur(houseTotal)} TTC
         {delivery != null ? ` + livraison ${eur(delivery)}` : ""}. En version
         finale, le paiement sécurisé de l'acompte confirmera votre réservation.
         On vous recontacte sous 24 h.

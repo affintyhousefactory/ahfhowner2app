@@ -1,0 +1,29 @@
+{
+  "project": "Howner-ARKO2",
+  "description": "Site mono-produit reservation ARKO. Front livre, backend Phase 4 en attente.",
+  "github": {
+    "owner": "affintyhousefactory",
+    "repo": "ahfhowner2app",
+    "allowedRepos": ["affintyhousefactory/ahfhowner2app"]
+  },
+  "supabase": {
+    "supabaseProjectRef": "msrjocrcewvqkcehruny",
+    "dbName": "ahfhownerdb",
+    "mode": "read-only",
+    "note": "Ecriture/migrations bloquees jusqu'a ADR-007 (schemas + RLS) valide."
+  },
+  "gmail": {
+    "allowedSendAs": [],
+    "sendPolicy": "explicit-confirmation",
+    "note": "Aucun envoi sans validation humaine explicite. Service email transactionnel non choisi (ADR-014)."
+  },
+  "drive": {
+    "allowedSharedDriveIds": [],
+    "allowedFolderIds": [],
+    "note": "Drive non utilise par ce projet. Toute recherche globale Drive refusee."
+  },
+  "outOfScope": [
+    "AHF_WEB2 (segments/Brevo/Smart Nano-Max/Villa Arko)",
+    "Serveurs MCP globaux: intelligence entreprise/SIRENE, plugins marketing/sales/productivity"
+  ]
+}

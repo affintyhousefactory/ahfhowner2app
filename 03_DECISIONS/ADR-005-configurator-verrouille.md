@@ -1,10 +1,12 @@
 # ADR-005 — Configurator / pricing 3 couches verrouillé
 
-- **Statut** : Accepté (guardrail)
+- **Statut** : Accepté (guardrail) — **amendé par ADR-020** (2026-06-16)
 - **Date** : 2026-06-16
 - **Phase** : 1
 - **Faisabilité** : ✅ Guardrail
 - **Alerte Albert** : Non
+
+> **Amendement (ADR-020)** : le verrou porte désormais sur la **logique de calcul 3 couches** (à ne pas modifier), et non plus sur les fichiers entiers. Le configurateur est devenu multi-produit (source des montants = `PRODUCTS[product].pricing`). Voir ADR-020.
 
 ## Contexte
 Le calcul de devis (3 couches : maison = base + bardage + options + terrasse ; livraison = km + grutage ; frais terrain = lignes indicatives séparées) est correct et validé. Le PASSATION le marque explicitement *« juste, ne pas toucher »*.

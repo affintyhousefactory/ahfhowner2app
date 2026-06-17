@@ -9,8 +9,8 @@
 
 ## HUBS (par domaine)
 - [[HUB_GOUVERNANCE]] — ADR, marque, secrets, alertes Albert
-- [[HUB_PRODUCT]] — ARKO, pricing 3 couches, réservation
-- [[HUB_FRONTEND]] — UI, charte, perf/média, SEO
+- [[HUB_PRODUCT]] — Arko One / Arko Max, pricing 3 couches, réservation
+- [[HUB_FRONTEND]] — multi-pages, nav Tesla, charte, perf/média, SEO
 - [[HUB_BACKEND]] — Phase 4 : Supabase, Stripe, terrain, leads
 - [[HUB_RELEASE]] — Vercel, QA, gates (perf/légal)
 
@@ -18,7 +18,7 @@
 - `CURRENT_SESSION.md` · `active-context.md` · `recent-decisions.md` · `pending-questions.md`
 
 ## Mémoire décisionnelle (`03_DECISIONS/`, durable)
-- `ADR_TEMPLATE.md` + `ADR-001 … ADR-019`
+- `ADR_TEMPLATE.md` + `ADR-001 … ADR-022`
 
 ## Règles (ADR-019)
 Une seule vérité d'état = `00_INDEX/PROJECT_STATE.md`. `_RUNTIME` ≠ backlog. Ne pas mélanger les projets. Toute décision durable → ADR.

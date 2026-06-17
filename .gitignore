@@ -21,3 +21,8 @@
 *.tsbuildinfo
 npm-debug.log*
 yarn-error.log*
+
+# Claude Code — local user config (preview launch.json reste suivi)
+.claude/commands/
+.claude/settings.local.json
+.claude/worktrees/

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { BRAND } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
 
@@ -76,12 +77,12 @@ export function AvantPremiere() {
 
         <Reveal delay={0.15}>
           <div className="mt-8 flex items-center gap-4">
-            <Button href="#reserver" variant="accent">
-              Réserver — 1 500 €
+            <Button href="/configurer?produit=one" variant="accent">
+              Réserver — {BRAND.deposit.toLocaleString("fr-FR")} €
               <Arrow />
             </Button>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-muted">
-              Série 01 · 12 exemplaires
+              Arko One · 12 exemplaires
             </span>
           </div>
         </Reveal>
