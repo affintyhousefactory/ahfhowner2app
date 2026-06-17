@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Configurer & réserver | HOWNER",
   description:
     "Configurez votre Arko One (20 m²) ou Arko Max (40 m²) et réservez votre exemplaire numéroté. Devis indicatif en direct.",
+  alternates: { canonical: "/configurer" },
 };
 
 export default function ConfigurerPage() {

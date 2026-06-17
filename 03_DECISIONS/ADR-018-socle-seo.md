@@ -1,7 +1,7 @@
 # ADR-018 — Socle SEO (sitemap / robots / OG / JSON-LD)
 
-- **Statut** : Proposé
-- **Date** : 2026-06-16
+- **Statut** : Accepté — **P0 livré** (2026-06-17, build vert) ; P1/P2 restants
+- **Date** : 2026-06-16 (P0 livré 2026-06-17)
 - **Phase** : 1.5
 - **Faisabilité** : ✅ Élevée
 - **Alerte Albert** : Non
@@ -21,7 +21,9 @@ Implémenter le socle SEO selon les conventions de fichiers Next 16 (vérifiées
 - **Risques** : respecter la blocklist marque (ADR-004) dans tout texte SEO ; ne pas régresser la perf (ADR-006).
 
 ## Conséquences
-Reprend et exécute `plans/seo-avancement.md` (qui reste le tracker détaillé jetable). Confirmer le domaine avant prod.
+Reprend et exécute `plans/seo-avancement.md` (qui reste le tracker détaillé jetable).
+
+**P0 livré (2026-06-17)** : `app/sitemap.ts`, `app/robots.ts` (disallow `/viewer`), `app/opengraph-image.tsx` (next/og), `app/viewer/layout.tsx` (noindex), twitter card + canonical par page. **Domaine de prod = `affinityhome.fr`** (centralisé `SITE_URL` dans `src/lib/site.ts`, override `NEXT_PUBLIC_SITE_URL`) — décision actée, remplace `howner.fr`. Build `next build` vert (16 routes). Reste P1 (JSON-LD + `llms.txt`) et P2 (manifest/PWA, skip-link, fonts).
 
 ## Sources
 `plans/seo-avancement.md`, `src/app/layout.tsx`, audit du 2026-06-15.

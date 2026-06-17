@@ -1,7 +1,8 @@
 # CURRENT_SESSION — Howner / ARKO
 
 ## Focus actuel
-Refonte **multi-pages bi-produit** (Arko One + Arko Max) + navigation type Tesla + pages légales/contact.
+**ADR-018 — SEO P0 livré** (sitemap, robots, OG, twitter, canonical, noindex `/viewer`). Domaine prod confirmé `affinityhome.fr`. Reste P1 (JSON-LD + `llms.txt`) / P2.
+(Session précédente : refonte **multi-pages bi-produit** Arko One + Arko Max, nav Tesla, pages légales/contact.)
 
 ## Objectif de la session
 Passer la landing mono-page mono-produit à un site multi-pages bi-produit (SEO/SSR par page, parcours Découvrir → Réserver), avec configurateur multi-produit et socle légal/contact.

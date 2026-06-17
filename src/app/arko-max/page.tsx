@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "Arko Max — 40 m² d'architecte | HOWNER",
   description:
     "Arko Max : maison compacte d'architecte de 40 m², livrée prête à vivre. Série 01 — 5 exemplaires numérotés. Fabriquée au Pays-Basque.",
+  alternates: { canonical: "/arko-max" },
 };
 
 export default function ArkoMaxPage() {

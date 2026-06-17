@@ -6,6 +6,7 @@ import { ConfigProvider } from "@/components/site/config-store";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CountdownBanner } from "@/components/site/CountdownBanner";
+import { SITE_URL } from "@/lib/site";
 
 // Display « suisse » (titres magistraux) — pairing B (ui-ux-pro-max)
 const display = Space_Grotesk({
@@ -29,11 +30,12 @@ const mono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://howner.fr"),
+  metadataBase: new URL(SITE_URL),
   title: "HOWNER — Une maison compacte faite pour vous",
   description:
     "HOWNER : deux maisons compactes d'architecte, Arko One (20 m²) et Arko Max (40 m²), livrées prêtes à vivre. Fabriquées au Pays-Basque. Découvrir, configurer, réserver.",
   keywords: ["HOWNER", "Arko One", "Arko Max", "maison compacte", "maison d'architecte", "Pays-Basque"],
+  alternates: { canonical: "/" },
   openGraph: {
     title: "HOWNER — Une maison compacte faite pour vous",
     description:
@@ -41,6 +43,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     siteName: "HOWNER",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HOWNER — Une maison compacte faite pour vous",
+    description:
+      "Deux maisons compactes d'architecte, Arko One (20 m²) et Arko Max (40 m²), livrées prêtes à vivre. Fabriquées au Pays-Basque.",
   },
   robots: { index: true, follow: true },
 };

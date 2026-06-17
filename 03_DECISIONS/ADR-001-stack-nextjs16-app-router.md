@@ -1,10 +1,12 @@
 # ADR-001 — Stack Next.js 16 App Router + Tailwind v4 + TypeScript
 
-- **Statut** : Accepté (livré)
-- **Date** : 2026-06-16
+- **Statut** : Accepté (livré) — **dérogation actée 2026-06-17** vs `landing-page-quality-checklist.md`
+- **Date** : 2026-06-16 (amendé 2026-06-17)
 - **Phase** : 1
 - **Faisabilité** : ✅ Fait
 - **Alerte Albert** : Non
+
+> **Amendement 2026-06-17 — dérogation Astro.** La règle globale `rules/landing/landing-page-quality-checklist.md` (ingérée dans `~/.claude/rules/` ce jour) impose **Astro** pour toute nouvelle landing SaaS. Howner-ARKO2 reste sur **Next.js 16** : projet déjà livré, Lighthouse 100/100/100/100 + LCP 0.8s atteints, refonte Astro = coût > bénéfice mesurable. La dérogation est **locale à ce projet** : toute prochaine landing SaaS du même owner partira en Astro par défaut.
 
 ## Contexte
 Le site ARKO nécessite SSR/SSG, SEO, et une base évolutive vers un backend (Phase 4). Next.js 16.2.9 (App Router, Turbopack) est en place, avec React 19, Tailwind v4 (`@theme` dans `globals.css`, pas `@config`), TypeScript.

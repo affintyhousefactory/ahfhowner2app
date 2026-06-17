@@ -4,6 +4,7 @@ import { LegalShell } from "@/components/site/LegalShell";
 export const metadata: Metadata = {
   title: "Mentions légales | HOWNER",
   description: "Mentions légales HOWNER — en cours de validation juridique.",
+  alternates: { canonical: "/mentions-legales" },
   robots: { index: false, follow: true },
 };
 

@@ -2,6 +2,12 @@
 
 ## Décisions récentes
 
+### 2026-06-17 (ingestion `claude-knowledge` + audit)
+- **Base de connaissances officielle ingérée** dans `~/.claude/rules/` (14 thèmes, 119 fichiers). `~/.claude/CLAUDE.md` remplacé par celui du repo (charge les règles via `@import`). Backup : `CLAUDE.md.pre-ingest-2026-06-17.bak`.
+- **`PROFIL.md` créé** à la racine du projet (convention `rules/discovery/profil-md-convention.md`) + câblé dans `CLAUDE.md` projet (directive lecture obligatoire).
+- **ADR-001 amendé** : dérogation actée — `rules/landing/landing-page-quality-checklist.md` impose Astro pour les nouvelles landings, Howner reste Next.js 16 (projet livré, Lighthouse 100, refonte coût > bénéfice). Prochaine landing SaaS partira en Astro.
+- **Dette SEO confirmée** comme priorité 1 (ADR-018) — règles `seo-setup.md` + `landing-page-quality-checklist.md` exigent robots.txt, sitemap.xml, llms.txt, OG image, JSON-LD.
+
 ### 2026-06-16 (refonte multi-pages bi-produit)
 - **Bi-produit** Arko One (20 m²/12 ex/59 900 €) + Arko Max (40 m²/5 ex/89 900 €) via registre `PRODUCTS`. → ADR-022 (valider Albert).
 - **Multi-pages** App Router (10 routes) + **nav type Tesla** (méga-menu Produits, compteur 12+5). → ADR-021.

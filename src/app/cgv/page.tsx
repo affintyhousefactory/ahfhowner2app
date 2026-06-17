@@ -4,6 +4,7 @@ import { LegalShell } from "@/components/site/LegalShell";
 export const metadata: Metadata = {
   title: "Conditions générales de vente | HOWNER",
   description: "Conditions générales de vente HOWNER — en cours de validation juridique.",
+  alternates: { canonical: "/cgv" },
   robots: { index: false, follow: true },
 };
 
