@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { PRODUCTS } from "@/lib/site";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { productSchema } from "@/lib/jsonld";
 import { ProductHero } from "@/components/site/ProductHero";
 import { RevealScrub } from "@/components/site/RevealScrub";
 import { Discover } from "@/components/site/Discover";
@@ -18,6 +20,7 @@ export const metadata: Metadata = {
 export default function ArkoMaxPage() {
   return (
     <main>
+      <JsonLd data={productSchema(PRODUCTS.max)} />
       <ProductHero product={PRODUCTS.max} backdrop="grid" />
       <RevealScrub scrub={PRODUCTS.max.scrub} poster={PRODUCTS.max.scrubPoster} />
       <Discover />

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { PRODUCTS } from "@/lib/site";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { productSchema } from "@/lib/jsonld";
 import { ProductHero } from "@/components/site/ProductHero";
 import { RevealScrub } from "@/components/site/RevealScrub";
 import { Discover } from "@/components/site/Discover";
@@ -15,6 +17,7 @@ export const metadata: Metadata = {
 export default function ArkoOnePage() {
   return (
     <main>
+      <JsonLd data={productSchema(PRODUCTS.one)} />
       <ProductHero product={PRODUCTS.one} />
       {/* Scroll-scrub : on entre dans le modèle Arko One (visuel provisoire). */}
       <RevealScrub scrub={PRODUCTS.one.scrub} poster={PRODUCTS.one.scrubPoster} />

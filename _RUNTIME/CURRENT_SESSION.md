@@ -1,8 +1,10 @@
 # CURRENT_SESSION — Howner / ARKO
 
 ## Focus actuel
-**ADR-018 — SEO P0 livré** (sitemap, robots, OG, twitter, canonical, noindex `/viewer`). Domaine prod confirmé `affinityhome.fr`. Reste P1 (JSON-LD + `llms.txt`) / P2.
-(Session précédente : refonte **multi-pages bi-produit** Arko One + Arko Max, nav Tesla, pages légales/contact.)
+**ADR-018 — SEO P0+P1 livrés** : robots/sitemap/OG/twitter/canonical/noindex `/viewer` + JSON-LD (Organization/Product+Offer/FAQPage) + `llms.txt`. Domaine `affinityhome.fr`. Reste P2 (polish, non bloquant).
+**Pages légales remplies** : mentions-legales + confidentialite (contenu réel AHF, `index:true`, sitemap) ; CGV reste placeholder (ADR-015).
+⚠ Alerte Albert RGPD à arbitrer : politique de confidentialité = doc mutualisée AHF déclarant GA4/cookies/Brevo non déployés sur ce site.
+(Sessions précédentes : refonte multi-pages bi-produit + déploiement preview Vercel `feat/`.)
 
 ## Objectif de la session
 Passer la landing mono-page mono-produit à un site multi-pages bi-produit (SEO/SSR par page, parcours Découvrir → Réserver), avec configurateur multi-produit et socle légal/contact.

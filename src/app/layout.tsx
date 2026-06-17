@@ -6,7 +6,9 @@ import { ConfigProvider } from "@/components/site/config-store";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CountdownBanner } from "@/components/site/CountdownBanner";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { SITE_URL } from "@/lib/site";
+import { organizationSchema } from "@/lib/jsonld";
 
 // Display « suisse » (titres magistraux) — pairing B (ui-ux-pro-max)
 const display = Space_Grotesk({
@@ -69,6 +71,7 @@ export default function RootLayout({
       className={`${display.variable} ${sans.variable} ${mono.variable} antialiased`}
     >
       <body>
+        <JsonLd data={organizationSchema()} />
         <SmoothScroll>
           <ConfigProvider>
             <CountdownBanner />

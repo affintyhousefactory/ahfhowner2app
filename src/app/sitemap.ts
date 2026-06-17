@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
-// Pages légales (noindex) et /viewer (Phase 2, disallow) volontairement
-// exclus du sitemap — on n'y déclare que les routes indexables (ADR-018).
+// /viewer (Phase 2, disallow) et CGV (placeholder noindex, ADR-015) exclus.
+// Mentions légales + confidentialité incluses (contenu réel, indexables).
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
   const routes: Array<{ path: string; priority: number }> = [
@@ -12,6 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/configurer", priority: 0.8 },
     { path: "/terrain", priority: 0.7 },
     { path: "/contact", priority: 0.6 },
+    { path: "/mentions-legales", priority: 0.3 },
+    { path: "/confidentialite", priority: 0.3 },
   ];
 
   return routes.map(({ path, priority }) => ({
