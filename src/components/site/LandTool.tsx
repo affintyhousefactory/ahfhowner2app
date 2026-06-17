@@ -166,9 +166,9 @@ export function LandTool() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-3xl text-balance text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:text-[4.4rem]">
+          <h1 className="editorial mt-12 max-w-3xl text-balance text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:text-[4.4rem]">
             Votre terrain peut-il accueillir un Arko ?
-          </h2>
+          </h1>
         </Reveal>
 
         {/* Branches */}

@@ -7,7 +7,7 @@
 Site **mono-produit** de réservation **ARKO** (série limitée 12 exemplaires). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Backend (Phase 4) non démarré**. **Lancement commercial bloqué par le légal.** Sources de vérité : `src/lib/site.ts` (marque/pricing), `DESIGN.md` (charte), `03_DECISIONS/` (ADR).
 
 ## État actuel
-- Phase 1 (front) livrée et validée. Phase 1.5 (SEO) auditée non implémentée. Phase 4 (backend) non démarrée. Légal bloqué.
+- Phase 1 (front) livrée et validée. **Refonte multi-pages bi-produit** (Arko One + Arko Max) livrée le 2026-06-16 (ADR-020/021/022). Phase 1.5 (SEO) métadonnées par page posées, reste sitemap/robots/JSON-LD. Phase 4 (backend) non démarrée. Légal bloqué.
 - Charte **Affinity** appliquée le 2026-06-16 (ADR-002) — **à valider par Albert** (contredit le verrou « Argile & Encre » du PASSATION).
 - MCP configurés : `github` (remote officiel), `supabase` (`ahfhownerdb`, read-only), `vercel` (OAuth). CLI Higgsfield + skills installés.
 
@@ -24,7 +24,11 @@ Site **mono-produit** de réservation **ARKO** (série limitée 12 exemplaires).
 | Hébergement | Vercel | — |
 
 ## Produit
-**ARKO** — maison compacte d'architecte 40 m², série 01, 12 exemplaires numérotés. Devis 3 couches (maison + livraison + frais terrain) — `Configurator.tsx` **verrouillé** (ADR-005). Réservation d'un numéro avec acompte 1 500 €. Pas de multi-segment, pas de catalogue.
+**Bi-produit** (ADR-022) — registre `PRODUCTS` (`src/lib/site.ts`) :
+- **Arko One** — 20 m², 12 exemplaires, 59 900 € (grille provisoire `TODO ARKO ONE`).
+- **Arko Max** — 40 m² (= ARKO historique), 5 exemplaires, 89 900 €.
+
+Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (ADR-005/020), montants par produit. Configurateur avec sélecteur One/Max (`/configurer?produit=`). Réservation d'un numéro avec acompte 1 500 €. Pas de multi-segment, pas de catalogue. Wordmark ARKO retiré de l'accueil ; noms produits conservés.
 
 ## Phases & backlog
 
@@ -45,7 +49,7 @@ Site **mono-produit** de réservation **ARKO** (série limitée 12 exemplaires).
 | Analyse terrain (zonage) | `LandTool.tsx` | BAN réel + zonage heuristique | GPU/IGN réel | 011 |
 | Analyse via lien d'annonce | `LandTool.tsx` mode `annonce` | dégradé | Apify + BAN | 012 |
 | Contact terrain | `LandTool.tsx` (~L392) | `setSent(true)` | lead Supabase | 013 |
-| Devis 3 couches | `Configurator.tsx`, `config-store.tsx` | ✅ juste — **ne pas toucher** | — | 005 |
+| Devis 3 couches multi-produit | `Configurator.tsx`, `config-store.tsx` | ✅ logique verrouillée, paramétrée par produit | — | 005,020 |
 | Email confirmations | — | absent | fournisseur à choisir | 014 |
 | SEO | `layout.tsx` + fichiers absents | métadonnées de base | socle complet | 018 |
 
@@ -96,6 +100,9 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 017 | Enrichissement terrain Anthropic | Différé (option) | ⚪ |
 | 018 | Socle SEO | Proposé | ✅ |
 | 019 | Gouvernance cognitive INDEX/HUB/_RUNTIME | Accepté | ✅ |
+| 020 | Configurateur multi-produit (amende 005) | Accepté | ✅ |
+| 021 | Architecture multi-pages + nav Tesla | Accepté | ✅ |
+| 022 | Split produit One/Max + repositionnement | **Accepté — valider Albert** | 🟠 |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. **ADR-018** — SEO P0 (confirmer domaine `howner.fr` d'abord).
@@ -106,4 +113,4 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
-**2026-06-16** — Gouvernance ADR (19 ADR), structure cognitive INDEX/HUB/_RUNTIME consolidée (purge contamination AHF_WEB2), `00_INDEX/PROJECT_STATE.md` canonique. Charte Affinity appliquée (ADR-002, à valider Albert). Aucun code applicatif modifié.
+**2026-06-16 (refonte multi-pages bi-produit)** — Site passé en **multi-pages** (App Router) : `/`, `/arko-one`, `/arko-max`, `/configurer`, `/terrain`, `/contact`, `/cgv`, `/mentions-legales`, `/confidentialite`. **Bi-produit** Arko One (20 m², 12 ex, 59 900 €) + Arko Max (40 m², **5 ex**, 89 900 €) via registre `PRODUCTS` (`src/lib/site.ts`). **Nav type Tesla** (méga-menu Produits, compteur 12+5). Configurateur **multi-produit** (sélecteur One/Max, devis qui suit la base — ADR-020, amende 005). Wordmark ARKO retiré de l'accueil (baseline « Une maison compacte faite pour vous », « Fabriqué au Pays-Basque »). Pages légales = placeholders (bloqué ADR-015). ADR-020/021/022 créés. `tsc` propre, 10 routes en 200, console clean. **À fournir** : grille Arko One (perM2/options/dimensions), `reserved` par produit, asset vidéo Arko One (fallback provisoire = footage Max). **3 alertes Albert** : repositionnement bi-produit, déverrouillage configurateur, retrait wordmark ARKO. Charte Affinity (ADR-002) toujours à valider.

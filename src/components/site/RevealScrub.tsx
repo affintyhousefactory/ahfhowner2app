@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useVisible } from "@/components/arko3d/useVisible";
 
-const SCRUB = "/assets/arko/video/film-scrub.mp4";
-const POSTER = "/assets/arko/video/film-scrub-poster.jpg";
+const DEFAULT_SCRUB = "/assets/arko/video/film-scrub.mp4";
+const DEFAULT_POSTER = "/assets/arko/video/film-scrub-poster.jpg";
 
 const BEATS: [string, number, number][] = [
   ["L'objet", 0, 0.18],
@@ -14,7 +14,13 @@ const BEATS: [string, number, number][] = [
   ["Le soir", 0.72, 1.01],
 ];
 
-export function RevealScrub() {
+export function RevealScrub({
+  scrub: SCRUB = DEFAULT_SCRUB,
+  poster: POSTER = DEFAULT_POSTER,
+}: {
+  scrub?: string;
+  poster?: string;
+} = {}) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { ref: nearRef, visible: near } = useVisible<HTMLDivElement>("120%");

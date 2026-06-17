@@ -55,7 +55,7 @@ export function StickyCta() {
                 </span>
               </div>
               <Button
-                href="#reserver"
+                href="/configurer"
                 variant="accent"
                 magnetic={false}
                 className="px-5 py-2.5 text-sm"
