@@ -6,7 +6,7 @@ Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², 12 ex, 59 
 ## Priorités actives
 1. **Fournir les données Arko One** (perM2, options, terrasse, dimensions/footprint), `reserved` par produit, **asset vidéo One** (fallback footage Max pour l'instant).
 2. Faire valider par Albert : repositionnement bi-produit + déverrouillage configurateur + retrait wordmark ARKO (ADR-022/020) ; charte Affinity (ADR-002).
-3. SEO (ADR-018) — **P0 livré** (sitemap/robots/OG/twitter/canonical/noindex viewer, domaine `affinityhome.fr` via `SITE_URL`). Reste **P1** : JSON-LD (Organization/Product+Offer/FAQPage) + `llms.txt`.
+3. SEO (ADR-018) — **P0+P1 livrés** (sitemap/robots/OG/twitter/canonical/noindex viewer + JSON-LD Org/Product/FAQ + `llms.txt`, domaine `affinityhome.fr` via `SITE_URL`). Reste **P2** (polish non bloquant). Pages légales mentions+confidentialité remplies (CGV bloqué ADR-015).
 4. Débloquer Phase 4 : Supabase schémas (ADR-007), choix email (ADR-014).
 
 ## Contraintes

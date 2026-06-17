@@ -21,13 +21,14 @@
 - [x] `/viewer` → `noindex, nofollow` via `app/viewer/layout.tsx` (page = client component, metadata impossible sur la page).
 - [~] `scroll-padding-top` — sans objet en multi-pages (plus de longue page ancrée sous header fixe ; `/configurer` gère déjà l'offset). À réévaluer si retour d'ancres intra-page.
 
-## Lot P1 — visibilité & structure
-- [ ] JSON-LD : `Product`+`Offer` (prix `PRICING.base` 89 900 €, dispo `BRAND.total` 12 ex.), `Organization`, **`FAQPage`** (réutiliser `FAQ` de `src/lib/site.ts`).
-- [ ] `/viewer` : `export const metadata = { robots: { index: false } }` (outil 3D « Phase 2 », contenu mince).
-- [ ] Compléter `NAV` (`src/lib/site.ts`) : ajouter Prix (`#prix`), FAQ (`#faq`) — 13 sections, 4 liées seulement.
-- [ ] Scrollspy (section active dans la nav).
-- [ ] Lazy-load 3D hors Hero via `next/dynamic` (perf LCP/TBT → impact SEO Core Web Vitals).
-- [ ] Audit Lenis : confirmer `prefers-reduced-motion`, offset ancres.
+## Lot P1 — visibilité & structure ✅ LIVRÉ 2026-06-17
+- [x] JSON-LD : `Product`+`Offer` (prix par produit, `LimitedAvailability`), `Organization` (sitewide, + adresse AHF/founder), **`FAQPage`** (home). Builders `src/lib/jsonld.ts`, composant `src/components/seo/JsonLd.tsx`. Logo Organization **omis** (charte non figée, ADR-002) ; prix exposé (déjà public).
+- [x] `/llms.txt` — route handler `src/app/llms.txt/route.ts` (statique, suit `SITE_URL`).
+- [x] Pages légales **mentions-legales** + **confidentialite** remplies (contenu réel mutualisé AHF), `index:true`, ajoutées au sitemap. `LegalShell` rendu conditionnel (`pending`/`updated`). CGV reste placeholder noindex (ADR-015).
+- [x] `/viewer` noindex — déjà fait en P0.
+- [~] Compléter `NAV` / Scrollspy — **sans objet** (nav Tesla multi-pages, plus de page-ancre unique).
+- [~] Lazy-load 3D — déjà couvert (bundle `arko3d/*` isolé à `/viewer`, ADR-006).
+- [ ] **Reste P1** : audit Lenis `prefers-reduced-motion` (vérifier `SmoothScroll.tsx`).
 
 ## Lot P2 — polish
 - [ ] Skip-link, focus-trap + `Escape` sur menu mobile.

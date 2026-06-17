@@ -72,7 +72,7 @@ export function Nav() {
               onClick={() => setMenu((v) => !v)}
               className="group relative text-sm text-ink/70 transition-colors hover:text-ink"
             >
-              Produits
+              Maisons
               <span
                 className={cn(
                   "absolute -bottom-1 left-0 h-px bg-accent transition-all duration-300",
@@ -209,9 +209,9 @@ export function Nav() {
         )}
       >
         <div className="container-page flex flex-col gap-1 py-6">
-          {/* Produits — déplié */}
+          {/* Maisons — déplié */}
           <p className="pt-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-muted">
-            Produits
+            Maisons
           </p>
           {PRODUCT_LIST.map((p) => (
             <div key={p.key} className="border-b border-line py-4">

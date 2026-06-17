@@ -35,7 +35,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Phase | Périmètre | État | ADR |
 |---|---|---|---|
 | Phase 1 — Front | design, conversion, média, perf | ✅ Livré | 001,005,006 |
-| Phase 1.5 — SEO | sitemap/robots/OG/JSON-LD | 🟡 P0 livré (2026-06-17) ; P1 (JSON-LD) + P2 restants | 018 |
+| Phase 1.5 — SEO | sitemap/robots/OG/JSON-LD | 🟢 P0+P1 livrés (2026-06-17) ; P2 polish restant | 018 |
 | Phase 4 — Backend | Stripe, Supabase, terrain, leads | ⛔ Non démarré | 007→013 |
 | Pré-lancement — Légal | acompte/arrhes, CGV | ⛔ Bloqué (avocat) | 015 |
 
@@ -51,7 +51,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Contact terrain | `LandTool.tsx` (~L392) | `setSent(true)` | lead Supabase | 013 |
 | Devis 3 couches multi-produit | `Configurator.tsx`, `config-store.tsx` | ✅ logique verrouillée, paramétrée par produit | — | 005,020 |
 | Email confirmations | — | absent | fournisseur à choisir | 014 |
-| SEO | `layout.tsx`, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `viewer/layout.tsx` | ✅ P0 (sitemap/robots/OG/twitter/canonical/noindex viewer) | + P1 JSON-LD, P2 polish | 018 |
+| SEO | `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `viewer/layout.tsx`, `lib/jsonld.ts`, `seo/JsonLd.tsx`, `llms.txt/route.ts` | ✅ P0+P1 (sitemap/robots/OG/twitter/canonical/noindex + JSON-LD Org/Product/FAQ + llms.txt) | P2 polish | 018 |
 
 ## Risques principaux
 
@@ -98,7 +98,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 015 | Légal acompte/arrhes/CGV | **Bloqué (avocat)** | 🔴 |
 | 016 | Échéancier 10/30/40/20 % | Différé | 🟠 |
 | 017 | Enrichissement terrain Anthropic | Différé (option) | ⚪ |
-| 018 | Socle SEO | **Accepté — P0 livré** | ✅ |
+| 018 | Socle SEO | **Accepté — P0+P1 livrés** | ✅ |
 | 019 | Gouvernance cognitive INDEX/HUB/_RUNTIME | Accepté | ✅ |
 | 020 | Configurateur multi-produit (amende 005) | Accepté | ✅ |
 | 021 | Architecture multi-pages + nav Tesla | Accepté | ✅ |
@@ -106,7 +106,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 023 | Déploiement production Vercel | Proposé | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
-1. **ADR-018 — SEO** : **P0 livré** (2026-06-17) — `robots.txt`, `sitemap.xml`, OG image 1200×630, twitter card, canonical par page, `/viewer` noindex. Domaine confirmé `affinityhome.fr` (`SITE_URL`). **Reste P1** : JSON-LD (Organization / Product+Offer / FAQPage), `llms.txt` ; **P2** : manifest/PWA, skip-link, trim fonts.
+1. **ADR-018 — SEO** : **P0+P1 livrés** (2026-06-17) — robots, sitemap, OG, twitter, canonical, `/viewer` noindex, JSON-LD (Organization/Product+Offer/FAQPage), `llms.txt`. Domaine `affinityhome.fr` (`SITE_URL`). **Reste P2** (polish, non bloquant) : manifest/PWA, skip-link, trim fonts, audit Lenis reduced-motion.
 2. **ADR-007** — Supabase schémas + RLS (repasser MCP en écriture) → débloque 009/010/013.
 3. **ADR-014** — choisir le fournisseur email → débloque ADR-008.
 
@@ -114,6 +114,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+**2026-06-17 (ADR-018 SEO P1 + pages légales)** — **SEO P1** livré (build vert, 17 routes) : JSON-LD via `src/lib/jsonld.ts` + `src/components/seo/JsonLd.tsx` — `Organization` sitewide (+ adresse AHF, founder Puigbo), `Product`+`Offer` sur `/arko-one` & `/arko-max` (prix par produit, `LimitedAvailability`), `FAQPage` sur la home. `/llms.txt` (route statique, suit `SITE_URL`). Logo Organization **omis** (charte non figée ADR-002), prix **exposé** (déjà public). **Pages légales remplies** : `mentions-legales` + `confidentialite` contenu réel mutualisé AHF (`LegalShell` rendu conditionnel `pending`/`updated`, style `.legal-prose`), passées `index:true` + ajoutées au sitemap ; **CGV reste placeholder noindex** (ADR-015). ⚠ **Alerte Albert RGPD** : la politique de confidentialité déclare GA4/cookies/Brevo + bandeau de consentement non déployés sur ce site (doc mutualisée multi-sites AHF) — à arbitrer avant mise en prod indexée. Blocklist marque OK. Reste **P2** (polish non bloquant).
+
 **2026-06-17 (ADR-018 — SEO P0 livré)** — Socle SEO P0 implémenté et **vérifié au build** (`next build` vert, 16 routes statiques). Nouveaux fichiers : `src/app/sitemap.ts` (6 routes indexables, légal + `/viewer` exclus), `src/app/robots.ts` (`disallow /viewer` + host + sitemap), `src/app/opengraph-image.tsx` (généré `next/og`, 1200×630, tokens charte), `src/app/viewer/layout.tsx` (`noindex,nofollow`). `layout.tsx` : `metadataBase` recâblé + twitter card + canonical `/`. Canonical self-référent ajouté sur toutes les pages (légal inclus). **Domaine de prod confirmé = `affinityhome.fr`** (ex-`howner.fr`), centralisé dans `SITE_URL` (`src/lib/site.ts`, override `NEXT_PUBLIC_SITE_URL`). Incident env corrigé : binaire natif `lightningcss` manquant (WSL) → `npm install lightningcss-linux-x64-gnu`. **Reste** : P1 JSON-LD (Organization/Product+Offer/FAQPage) + `llms.txt`, P2 polish. ADR-018 → « Accepté — P0 livré ».
 
 **2026-06-17 (ingestion `claude-knowledge` + audit projet)** — Base de connaissances officielle ingérée dans `~/.claude/rules/` (14 thèmes, 119 fichiers : `claude-code`, `components`, `design`, `discovery`, `landing`, `landing-sections`, `mcp`, `modules`, `notion`, `saas`, `spa`, `supabase`, `vercel`, `workflow`). `~/.claude/CLAUDE.md` remplacé par celui du repo (charge les règles via `@import`). Audit projet contre les règles : **`PROFIL.md` créé** à la racine (convention `rules/discovery/profil-md-convention.md`) + câblé en tête de `CLAUDE.md` projet. **ADR-001 amendé** : dérogation actée (la règle landing impose Astro, Howner reste Next.js car livré). **Dette SEO confirmée** comme priorité 1 (ADR-018). Aucun code applicatif modifié.

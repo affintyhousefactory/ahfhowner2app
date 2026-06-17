@@ -1,14 +1,21 @@
 import { BRAND } from "@/lib/site";
 
-/* Gabarit des pages légales. Contenu réel (CGV, mentions, RGPD) BLOQUÉ
-   tant que l'avocat n'a pas validé (ADR-015) → placeholders explicites. */
+/* Gabarit des pages légales.
+   - `pending` (défaut true) : document non validé → bandeau d'avertissement
+     juridique (ADR-015), ex. CGV.
+   - `pending={false}` + `updated` : document finalisé → mention « Dernière
+     mise à jour » + rendu riche (legal-prose). */
 export function LegalShell({
   eyebrow,
   title,
+  pending = true,
+  updated,
   children,
 }: {
   eyebrow: string;
   title: string;
+  pending?: boolean;
+  updated?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -27,21 +34,31 @@ export function LegalShell({
           {title}
         </h1>
 
-        {/* Bandeau d'état juridique (ADR-015) */}
-        <div className="mt-10 max-w-2xl rounded-2xl border border-line bg-surface p-6">
-          <p className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-accent">
-            Document en cours de validation juridique
+        {pending ? (
+          /* Bandeau d'état juridique (ADR-015) — documents non validés. */
+          <div className="mt-10 max-w-2xl rounded-2xl border border-line bg-surface p-6">
+            <p className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-accent">
+              Document en cours de validation juridique
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              Le contenu définitif de cette page est en cours de rédaction avec
+              notre conseil. Il sera publié avant toute mise en vente. Les
+              éléments ci-dessous sont indicatifs et non contractuels.
+            </p>
+          </div>
+        ) : updated ? (
+          <p className="mt-8 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-muted">
+            Dernière mise à jour · {updated}
           </p>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
-            Le contenu définitif de cette page est en cours de rédaction avec
-            notre conseil. Il sera publié avant toute mise en vente. Les
-            éléments ci-dessous sont indicatifs et non contractuels.
-          </p>
-        </div>
+        ) : null}
 
-        <div className="mt-10 max-w-2xl space-y-6 text-sm leading-relaxed text-ink/80">
-          {children}
-        </div>
+        {pending ? (
+          <div className="mt-10 max-w-2xl space-y-6 text-sm leading-relaxed text-ink/80">
+            {children}
+          </div>
+        ) : (
+          <div className="legal-prose mt-12 max-w-3xl">{children}</div>
+        )}
       </section>
     </main>
   );
