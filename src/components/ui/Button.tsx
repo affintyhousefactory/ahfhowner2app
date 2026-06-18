@@ -7,7 +7,7 @@ import { Magnetic } from "./Magnetic";
 type Variant = "accent" | "outline" | "ghost";
 
 const base =
-  "group relative inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 text-[0.95rem] font-medium tracking-tight transition-colors duration-300 will-change-transform";
+  "group relative inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 text-[0.95rem] font-medium tracking-tight transition-colors duration-300 will-change-transform whitespace-nowrap";
 
 const styles: Record<Variant, string> = {
   accent:
