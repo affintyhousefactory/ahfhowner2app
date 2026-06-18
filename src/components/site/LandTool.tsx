@@ -166,8 +166,8 @@ export function LandTool() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h1 className="editorial mt-12 max-w-3xl text-balance text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:text-[4.4rem]">
-            Votre terrain peut-il accueillir un Arko ?
+          <h1 className="editorial mt-12 text-pretty text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:text-[4.4rem]">
+            Votre terrain peut&#x2011;il accueillir un Arko&nbsp;?
           </h1>
         </Reveal>
 
@@ -200,7 +200,7 @@ export function LandTool() {
           </div>
         </Reveal>
 
-        <div className="mt-8 max-w-2xl rounded-2xl border border-canvas/15 bg-canvas/[0.03] p-6 md:p-8">
+        <div className="mt-8 rounded-2xl border border-canvas/15 bg-canvas/[0.03] p-6 md:p-8">
           {branch === "have" ? (
             <>
               <div className="flex gap-2">
@@ -243,8 +243,8 @@ export function LandTool() {
                   }
                   className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50"
                 />
-                <Button onClick={analyse} variant="accent" className="shrink-0">
-                  Pré-analyser
+                <Button onClick={analyse} variant="accent" className="shrink-0 whitespace-nowrap">
+                  Pré&#x2011;analyser
                   <Arrow />
                 </Button>
               </div>
