@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/arko-max", priority: 0.9 },
     { path: "/configurer", priority: 0.8 },
     { path: "/terrain", priority: 0.7 },
+    { path: "/rechercheterrain", priority: 0.75 },
     { path: "/contact", priority: 0.6 },
     { path: "/mentions-legales", priority: 0.3 },
     { path: "/confidentialite", priority: 0.3 },

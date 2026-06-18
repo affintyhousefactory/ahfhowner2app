@@ -367,53 +367,21 @@ function ResultPanel({ result }: { result: Result }) {
 }
 
 function SearchBranch() {
-  const [sent, setSent] = useState(false);
   return (
-    <div>
+    <div className="space-y-5">
       <p className="text-sm leading-relaxed text-canvas/70">
-        Dites-nous où vous cherchez et votre budget : on vous prépare une
-        sélection de parcelles compatibles avec l'ARKO.
+        Vous êtes à la recherche d'un terrain en vente&nbsp;? Vous souhaitez
+        acheter entre particuliers, sans agence&nbsp;? Vous avez un budget&nbsp;?
       </p>
-      {sent ? (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-5 text-sm text-accent"
-        >
-          C'est noté — on revient vers vous avec une sélection. (Recherche
-          automatisée activée avec le connecteur.)
-        </motion.p>
-      ) : (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSent(true);
-          }}
-          className="mt-5 flex flex-col gap-3"
-        >
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              required
-              placeholder="Zone (ville ou code postal)"
-              className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50"
-            />
-            <input
-              placeholder="Budget terrain"
-              className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50 sm:w-48"
-            />
-          </div>
-          <input
-            type="email"
-            required
-            placeholder="Votre email"
-            className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50"
-          />
-          <Button variant="accent" magnetic={false} className="justify-center">
-            Recevoir une sélection
-            <Arrow />
-          </Button>
-        </form>
-      )}
+      <p className="text-sm leading-relaxed text-canvas/55">
+        Précisez vos zones et vos critères : nous effectuons une recherche
+        cadastrale personnalisée et vous livrons un rapport complet sous 48 h —
+        parcelles candidates, historique DVF, géorisques et cartes isochrones.
+      </p>
+      <Button href="/rechercheterrain" variant="accent" magnetic={false}>
+        Lancer ma recherche personnalisée
+        <Arrow />
+      </Button>
     </div>
   );
 }
