@@ -7,6 +7,8 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CountdownBanner } from "@/components/site/CountdownBanner";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { CookieBanner } from "@/components/site/CookieBanner";
+import { Analytics } from "@/components/site/Analytics";
 import { SITE_URL } from "@/lib/site";
 import { organizationSchema } from "@/lib/jsonld";
 
@@ -72,12 +74,14 @@ export default function RootLayout({
     >
       <body>
         <JsonLd data={organizationSchema()} />
+        <Analytics />
         <SmoothScroll>
           <ConfigProvider>
             <CountdownBanner />
             <Nav />
             {children}
             <Footer />
+            <CookieBanner />
           </ConfigProvider>
         </SmoothScroll>
       </body>

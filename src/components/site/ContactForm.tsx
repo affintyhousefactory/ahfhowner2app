@@ -1,14 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { PRODUCT_LIST } from "@/lib/site";
 import { Arrow } from "@/components/ui/Button";
 
-/* Formulaire de contact — Phase 1 : validation client + état envoyé.
-   Aucun backend (envoi réel branché en Phase 4, service email ADR-014). */
+const SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
+
+/* Formulaire de contact — Phase 1 : validation client + Turnstile.
+   Envoi réel branché en Phase 4 (ADR-014). */
 export function ContactForm() {
   const [sent, setSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (captchaToken) {
+      const res = await fetch("/api/verify-turnstile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: captchaToken }),
+      });
+      if (!res.ok) {
+        turnstileRef.current?.reset();
+        setCaptchaToken(null);
+        return;
+      }
+    }
+    setSent(true);
+  }
 
   if (sent) {
     return (
@@ -35,10 +58,7 @@ export function ContactForm() {
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSent(true);
-      }}
+      onSubmit={handleSubmit}
       className="rounded-2xl border border-line bg-canvas p-6 md:p-8"
     >
       <div className="grid gap-3 sm:grid-cols-2">
@@ -74,9 +94,19 @@ export function ContactForm() {
         className="mt-3 w-full rounded-2xl border border-line bg-surface px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-muted/60 focus:border-accent"
       />
 
+      <Turnstile
+        ref={turnstileRef}
+        siteKey={SITE_KEY}
+        onSuccess={setCaptchaToken}
+        onExpire={() => setCaptchaToken(null)}
+        options={{ theme: "light", size: "invisible" }}
+        className="mt-3"
+      />
+
       <button
         type="submit"
-        className="group mt-4 inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-accent px-7 py-3.5 text-[0.95rem] font-medium tracking-tight text-white transition-colors duration-300 hover:bg-accent-ink"
+        disabled={captchaToken === null}
+        className="group mt-4 inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-accent px-7 py-3.5 text-[0.95rem] font-medium tracking-tight text-white transition-colors duration-300 hover:bg-accent-ink disabled:opacity-50"
       >
         Envoyer
         <Arrow />
