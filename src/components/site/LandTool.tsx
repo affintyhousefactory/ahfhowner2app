@@ -9,7 +9,6 @@ import { cn } from "@/lib/cn";
 import { useConfig, eur } from "./config-store";
 
 type Branch = "have" | "search";
-type Mode = "adresse" | "annonce";
 type Phase = "idle" | "loading" | "done" | "error";
 type Feu = "green" | "amber" | "red";
 
@@ -48,7 +47,6 @@ type Result = {
 export function LandTool() {
   const c = useConfig();
   const [branch, setBranch] = useState<Branch>("have");
-  const [mode, setMode] = useState<Mode>("adresse");
   const [value, setValue] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [step, setStep] = useState(0);
@@ -64,23 +62,6 @@ export function LandTool() {
     const tick = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length)), 600);
 
     try {
-      // Lien d'annonce : extraction via connecteur (à activer) — mode dégradé
-      if (mode === "annonce") {
-        clearInterval(tick);
-        setStep(STEPS.length);
-        setResult({
-          feu: "amber",
-          title: "Annonce reçue",
-          label: "Annonce reçue",
-          km: null,
-          delivery: null,
-          zone: "Extraction d'annonce activée avec le connecteur.",
-          note: "En attendant, collez l'adresse du bien pour une pré-analyse instantanée.",
-        });
-        setPhase("done");
-        return;
-      }
-
       // Géocodage BAN (réel, public, sans clé)
       const res = await fetch(
         `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(value)}&limit=1`,
@@ -203,32 +184,7 @@ export function LandTool() {
         <div className="mt-8 rounded-2xl border border-canvas/15 bg-canvas/[0.03] p-6 md:p-8">
           {branch === "have" ? (
             <>
-              <div className="flex gap-2">
-                {(
-                  [
-                    ["adresse", "Une adresse"],
-                    ["annonce", "Un lien d'annonce"],
-                  ] as [Mode, string][]
-                ).map(([m, label]) => (
-                  <button
-                    key={m}
-                    onClick={() => {
-                      setMode(m);
-                      setPhase("idle");
-                    }}
-                    className={cn(
-                      "rounded-full px-4 py-2 text-sm transition-colors",
-                      mode === m
-                        ? "bg-canvas text-ink"
-                        : "border border-canvas/20 text-canvas/60 hover:text-canvas",
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   value={value}
                   onChange={(e) => {
@@ -236,11 +192,7 @@ export function LandTool() {
                     setPhase("idle");
                   }}
                   onKeyDown={(e) => e.key === "Enter" && analyse()}
-                  placeholder={
-                    mode === "adresse"
-                      ? "12 chemin des Pins, 33000 Bordeaux"
-                      : "Collez l'URL de l'annonce"
-                  }
+                  placeholder="12 chemin des Pins, 33000 Bordeaux"
                   className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50"
                 />
                 <Button onClick={analyse} variant="accent" className="shrink-0 whitespace-nowrap">
@@ -367,53 +319,21 @@ function ResultPanel({ result }: { result: Result }) {
 }
 
 function SearchBranch() {
-  const [sent, setSent] = useState(false);
   return (
-    <div>
+    <div className="space-y-5">
       <p className="text-sm leading-relaxed text-canvas/70">
-        Dites-nous où vous cherchez et votre budget : on vous prépare une
-        sélection de parcelles compatibles avec l'ARKO.
+        Vous êtes à la recherche d'un terrain en vente&nbsp;? Vous souhaitez
+        acheter entre particuliers, sans agence&nbsp;? Vous avez un budget&nbsp;?
       </p>
-      {sent ? (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-5 text-sm text-accent"
-        >
-          C'est noté — on revient vers vous avec une sélection. (Recherche
-          automatisée activée avec le connecteur.)
-        </motion.p>
-      ) : (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSent(true);
-          }}
-          className="mt-5 flex flex-col gap-3"
-        >
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              required
-              placeholder="Zone (ville ou code postal)"
-              className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50"
-            />
-            <input
-              placeholder="Budget terrain"
-              className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50 sm:w-48"
-            />
-          </div>
-          <input
-            type="email"
-            required
-            placeholder="Votre email"
-            className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50"
-          />
-          <Button variant="accent" magnetic={false} className="justify-center">
-            Recevoir une sélection
-            <Arrow />
-          </Button>
-        </form>
-      )}
+      <p className="text-sm leading-relaxed text-canvas/55">
+        Précisez vos zones et vos critères : nous effectuons une recherche
+        cadastrale personnalisée et vous livrons un rapport complet sous 48 h —
+        parcelles candidates, historique DVF, géorisques et cartes isochrones.
+      </p>
+      <Button href="/rechercheterrain" variant="accent" magnetic={false}>
+        Lancer ma recherche personnalisée
+        <Arrow />
+      </Button>
     </div>
   );
 }
