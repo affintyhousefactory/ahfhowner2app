@@ -9,7 +9,6 @@ import { cn } from "@/lib/cn";
 import { useConfig, eur } from "./config-store";
 
 type Branch = "have" | "search";
-type Mode = "adresse" | "annonce";
 type Phase = "idle" | "loading" | "done" | "error";
 type Feu = "green" | "amber" | "red";
 
@@ -48,7 +47,6 @@ type Result = {
 export function LandTool() {
   const c = useConfig();
   const [branch, setBranch] = useState<Branch>("have");
-  const [mode, setMode] = useState<Mode>("adresse");
   const [value, setValue] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [step, setStep] = useState(0);
@@ -64,23 +62,6 @@ export function LandTool() {
     const tick = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length)), 600);
 
     try {
-      // Lien d'annonce : extraction via connecteur (à activer) — mode dégradé
-      if (mode === "annonce") {
-        clearInterval(tick);
-        setStep(STEPS.length);
-        setResult({
-          feu: "amber",
-          title: "Annonce reçue",
-          label: "Annonce reçue",
-          km: null,
-          delivery: null,
-          zone: "Extraction d'annonce activée avec le connecteur.",
-          note: "En attendant, collez l'adresse du bien pour une pré-analyse instantanée.",
-        });
-        setPhase("done");
-        return;
-      }
-
       // Géocodage BAN (réel, public, sans clé)
       const res = await fetch(
         `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(value)}&limit=1`,
@@ -203,32 +184,7 @@ export function LandTool() {
         <div className="mt-8 rounded-2xl border border-canvas/15 bg-canvas/[0.03] p-6 md:p-8">
           {branch === "have" ? (
             <>
-              <div className="flex gap-2">
-                {(
-                  [
-                    ["adresse", "Une adresse"],
-                    ["annonce", "Un lien d'annonce"],
-                  ] as [Mode, string][]
-                ).map(([m, label]) => (
-                  <button
-                    key={m}
-                    onClick={() => {
-                      setMode(m);
-                      setPhase("idle");
-                    }}
-                    className={cn(
-                      "rounded-full px-4 py-2 text-sm transition-colors",
-                      mode === m
-                        ? "bg-canvas text-ink"
-                        : "border border-canvas/20 text-canvas/60 hover:text-canvas",
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   value={value}
                   onChange={(e) => {
@@ -236,11 +192,7 @@ export function LandTool() {
                     setPhase("idle");
                   }}
                   onKeyDown={(e) => e.key === "Enter" && analyse()}
-                  placeholder={
-                    mode === "adresse"
-                      ? "12 chemin des Pins, 33000 Bordeaux"
-                      : "Collez l'URL de l'annonce"
-                  }
+                  placeholder="12 chemin des Pins, 33000 Bordeaux"
                   className="w-full rounded-full border border-canvas/20 bg-transparent px-5 py-3.5 text-sm text-canvas placeholder:text-canvas/35 outline-none focus:border-canvas/50"
                 />
                 <Button onClick={analyse} variant="accent" className="shrink-0 whitespace-nowrap">

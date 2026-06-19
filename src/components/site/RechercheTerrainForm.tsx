@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Arrow } from "@/components/ui/Button";
 
-type Zone = { commune: string; cp: string };
-
 const MAX_ZONES = 5;
 
 export function RechercheTerrainForm() {
   const router = useRouter();
-  const [zones, setZones] = useState<Zone[]>([{ commune: "", cp: "" }]);
+  const [zones, setZones] = useState<string[]>([""]);
+  const [budget, setBudget] = useState("");
   const [nom, setNom] = useState("");
   const [telephone, setTelephone] = useState("");
   const [email, setEmail] = useState("");
@@ -20,25 +19,24 @@ export function RechercheTerrainForm() {
   const [error, setError] = useState<string | null>(null);
 
   function addZone() {
-    if (zones.length < MAX_ZONES)
-      setZones((z) => [...z, { commune: "", cp: "" }]);
+    if (zones.length < MAX_ZONES) setZones((z) => [...z, ""]);
   }
 
   function removeZone(i: number) {
     setZones((z) => z.filter((_, idx) => idx !== i));
   }
 
-  function updateZone(i: number, field: keyof Zone, value: string) {
-    setZones((z) => z.map((z2, idx) => (idx === i ? { ...z2, [field]: value } : z2)));
+  function updateZone(i: number, value: string) {
+    setZones((z) => z.map((z2, idx) => (idx === i ? value : z2)));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    const validZones = zones.filter((z) => z.commune.trim());
+    const validZones = zones.filter((z) => z.trim());
     if (!validZones.length) {
-      setError("Indiquez au moins une commune de recherche.");
+      setError("Indiquez au moins une zone de recherche.");
       return;
     }
 
@@ -47,7 +45,7 @@ export function RechercheTerrainForm() {
       await fetch("/api/recherche-terrain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nom, telephone, email, zones: validZones, accepte_cgv: cgv }),
+        body: JSON.stringify({ nom, telephone, email, budget, zones: validZones, accepte_cgv: cgv }),
       });
     } catch {
       // fallback silencieux — on redirige quand même
@@ -78,18 +76,11 @@ export function RechercheTerrainForm() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <input
-                  value={z.commune}
-                  onChange={(e) => updateZone(i, "commune", e.target.value)}
-                  placeholder="Commune"
+                  value={z}
+                  onChange={(e) => updateZone(i, e.target.value)}
+                  placeholder="Zone (ville ou code postal)"
                   required={i === 0}
                   className="min-w-0 flex-1 rounded-full border border-line bg-surface px-5 py-3 text-sm outline-none transition-colors placeholder:text-muted/50 focus:border-accent"
-                />
-                <input
-                  value={z.cp}
-                  onChange={(e) => updateZone(i, "cp", e.target.value.replace(/\D/g, "").slice(0, 5))}
-                  placeholder="Code postal"
-                  inputMode="numeric"
-                  className="w-32 shrink-0 rounded-full border border-line bg-surface px-5 py-3 text-sm outline-none transition-colors placeholder:text-muted/50 focus:border-accent"
                 />
                 {zones.length > 1 && (
                   <button
@@ -120,6 +111,19 @@ export function RechercheTerrainForm() {
             Ajouter une zone
           </button>
         )}
+      </div>
+
+      {/* Budget terrain */}
+      <div>
+        <p className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-muted">
+          Budget terrain
+        </p>
+        <input
+          value={budget}
+          onChange={(e) => setBudget(e.target.value)}
+          placeholder="ex : 80 000 €"
+          className="w-full rounded-full border border-line bg-surface px-5 py-3 text-sm outline-none transition-colors placeholder:text-muted/50 focus:border-accent"
+        />
       </div>
 
       {/* Séparateur */}
