@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
-type Zone = { commune: string; cp: string };
-
 type Payload = {
   nom: string;
   telephone: string;
   email: string;
-  zones: Zone[];
+  budget?: string;
+  zones: string[];
   accepte_cgv: boolean;
 };
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as Payload;
 
-  const { nom, telephone, email, zones, accepte_cgv } = body;
+  const { nom, telephone, email, budget, zones, accepte_cgv } = body;
 
   if (!nom || !telephone || !email || !zones?.length || !accepte_cgv) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
@@ -36,7 +35,7 @@ export async function POST(req: NextRequest) {
       Authorization: `Bearer ${supabaseAnon}`,
       Prefer: "return=minimal",
     },
-    body: JSON.stringify({ nom, telephone, email, zones, accepte_cgv }),
+    body: JSON.stringify({ nom, telephone, email, budget, zones, accepte_cgv }),
   });
 
   if (!res.ok) {
