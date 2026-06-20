@@ -55,12 +55,12 @@ export const PRICING = {
     { id: "solaire", label: "Pack Solaire", price: 5880 },
     { id: "domotique", label: "Pack Domotique", price: 2640 },
   ],
-  // Couche 3 — frais terrain, à part, jamais dans le total maison.
+  // Couche 3 — frais complémentaires, hors proposition, jamais dans le total maison.
   landFees: [
-    { label: "Étude de sol G2", value: "dès 2 400 €" },
-    { label: "Assainissement (micro-station)", value: "dès 9 000 €" },
-    { label: "Raccordements · terrassement · accès grue", value: "sur étude" },
-    { label: "Permis + taxe d'aménagement", value: "selon commune" },
+    { label: "Étude de sol G2 si souhaité", value: "Estimé à partir de 2 400 €" },
+    { label: "Assainissement (micro-station)", value: "Estimé à 9 000 €" },
+    { label: "Raccordements · terrassement · accès grue", value: "Étude sur site externe (ENEDIS, etc.)" },
+    { label: "Permis de construire + taxe d'aménagement", value: "selon commune" },
   ],
 } as const;
 

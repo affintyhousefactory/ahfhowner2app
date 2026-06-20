@@ -1,14 +1,66 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { RechercheTerrainForm } from "@/components/site/RechercheTerrainForm";
 import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
-  title: "Recherche personnalisée de terrain | HOWNER",
+  title: "Recherche de terrain personnalisée | Réseau Affinity · HOWNER",
   description:
-    "Vous cherchez un terrain pour poser votre Arko ? Précisez vos zones et votre budget : nous vous livrons une sélection de parcelles candidates avec données cadastrales, DVF et géorisques.",
+    "Affinity vous met en relation avec un professionnel terrain spécialisé : terrains atypiques et résilients, PLU analysé, géorisques vérifiés. Dossier complet livré sous 48 h.",
   alternates: { canonical: "/rechercheterrain" },
   robots: { index: true, follow: true },
 };
+
+const ECUEILS = [
+  {
+    poste: "Étude géotechnique G2",
+    responsable: "Client",
+    detail: null,
+    estimation: "dès 2 400 €",
+  },
+  {
+    poste: "Micro-pieux (fourniture + pose)",
+    responsable: "Client",
+    detail: null,
+    estimation: "selon étude",
+  },
+  {
+    poste: "Raccordement eau potable",
+    responsable: "Client",
+    detail: null,
+    estimation: "selon commune",
+  },
+  {
+    poste: "Raccordement électricité (ENEDIS)",
+    responsable: "Client",
+    detail: null,
+    estimation: "selon distance",
+  },
+  {
+    poste: "Assainissement non collectif (micro-station)",
+    responsable: "Client",
+    detail: null,
+    estimation: "dès 9 000 €",
+  },
+  {
+    poste: "Terrassement et accès grue",
+    responsable: "Client",
+    detail: null,
+    estimation: "sur étude",
+  },
+  {
+    poste: "Permis de construire / DP",
+    responsable: "Client",
+    detail: "accompagnement AHF",
+    estimation: "honoraires archi + taxe commune",
+  },
+  {
+    poste: "Assurance dommages-ouvrage",
+    responsable: "Client",
+    detail: "obligatoire",
+    estimation: "selon assureur",
+  },
+];
 
 const LIVRABLES = [
   {
@@ -17,35 +69,35 @@ const LIVRABLES = [
         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
       </svg>
     ),
-    titre: "Carte interactive",
-    desc: "Parcelles candidates en mode carte et satellite — visualisez chaque bien dans son environnement immédiat.",
+    titre: "Carte & parcelles candidates",
+    desc: "Visualisation satellite et cadastrale de chaque terrain identifié dans vos zones — superficie, référence, localisation.",
   },
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="currentColor"/>
+        <path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z" fill="currentColor"/>
       </svg>
     ),
-    titre: "Fiche par parcelle",
-    desc: "Localisation, superficie, référence cadastrale, tarif estimé — une fiche complète par terrain candidat.",
+    titre: "Analyse PLU & constructibilité",
+    desc: "Zonage (U, AU, A, N), STECAL et compatibilité confirmée avec les habitats légers, résilients et les nouvelles économies résidentielles.",
   },
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" fill="currentColor"/>
+        <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99l1.5 1.5z" fill="currentColor"/>
       </svg>
     ),
-    titre: "DVF — 5 ans",
-    desc: "Demandes de Valeur Foncière : historique des ventes (date, montant, superficie, lots) sur les 5 dernières années.",
+    titre: "DVF & valorisation foncière",
+    desc: "Historique des ventes sur 5 ans (date, montant, lots) et dynamique de valorisation du foncier dans la zone étudiée.",
   },
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" fill="currentColor"/>
       </svg>
     ),
-    titre: "Géorisques & PEB",
-    desc: "Cartes de chaleur, zones isochrones et géorisques (inondation, sismicité, retrait-gonflement) par parcelle.",
+    titre: "Note de qualification terrain",
+    desc: "Synthèse experte du professionnel affilié Affinity : faisabilité, géorisques, pistes off-market et recommandation d'acquisition.",
   },
 ];
 
@@ -76,15 +128,53 @@ export default function RechercheTerrainPage() {
                   Votre terrain idéal,<br className="hidden md:block" /> trouvé pour vous.
                 </h1>
                 <p className="mt-6 text-[1.05rem] leading-relaxed text-canvas/70">
-                  Indiquez vos zones de recherche. Nous effectuons une analyse cadastrale
-                  complète et vous livrons un rapport détaillé : parcelles candidates,
-                  historique des ventes, géorisques et cartes isochrones — pour décider
-                  en connaissance de cause.
+                  Nous identifions les terrains adaptés à votre projet avec l'aide d'un
+                  partenaire mandataire immobilier&nbsp;— y compris off-market&nbsp;—
+                  et nous les qualifions en profondeur&nbsp;: constructibilité PLU,
+                  compatibilité habitat léger, DVF et sécurisation juridique.
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-canvas/50">
+                  Précisez vos zones et votre budget. Votre dossier vous parvient par
+                  email sous 48 h ouvrées.
                 </p>
               </div>
               {/* Illustration */}
-              <div className="w-full shrink-0 border-t border-canvas/10 lg:w-[460px] lg:border-t-0 lg:border-l overflow-hidden">
-                <ZoneRechercheSvg />
+              <div className="relative w-full shrink-0 overflow-hidden border-t border-canvas/10 lg:w-[460px] lg:border-t-0 lg:border-l">
+                <Image
+                  src="/terrain-affinity.png"
+                  alt="Recherche terrain — professionnel affilié Affinity"
+                  width={920}
+                  height={580}
+                  className="h-full w-full object-cover"
+                  priority
+                />
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Mandataire strip */}
+          <Reveal delay={0.12}>
+            <div className="mt-10 flex flex-col gap-5 rounded-2xl border border-accent/20 bg-accent/[0.04] p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/15 font-mono text-[0.7rem] font-semibold tracking-wider text-accent">
+                  AF
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-canvas">Réseau Affinity - Partenaires affiliés</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-canvas/50">
+                    Professionnel terrain spécialisé : parcelles atypiques, résilientes et nouvelles économies résidentielles
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {["Off-market", "PLU & STECAL", "DVF & valorisation", "Sécurisation juridique"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-canvas/15 px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-canvas/45"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
             </div>
           </Reveal>
@@ -93,17 +183,17 @@ export default function RechercheTerrainPage() {
           <Reveal delay={0.18}>
             <div className="mt-20 flex items-baseline justify-between border-t border-canvas/15 pt-5">
               <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-canvas/55">
-                Votre rapport
+                Votre dossier
               </span>
               <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-canvas/55">
-                4 livrables
+                4 livrables experts
               </span>
             </div>
           </Reveal>
 
           <Reveal delay={0.2}>
-            <h2 className="editorial mt-10 text-pretty text-[2rem] leading-[1.05] text-canvas md:text-[3rem]">
-              Un dossier complet.
+            <h2 className="editorial mt-10 text-pretty text-[2rem] leading-[1.05] text-canvas md:text-[2.6rem]">
+              Un dossier complet constitué par un professionnel spécialisé dans l'habitat léger.
             </h2>
           </Reveal>
 
@@ -123,8 +213,79 @@ export default function RechercheTerrainPage() {
         </div>
       </section>
 
+      {/* ── Écueils terrain ── */}
+      <section className="bg-canvas py-20 md:py-28">
+        <div className="container-page">
+          <Reveal>
+            <div className="rule flex items-baseline justify-between pt-5">
+              <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
+                Avant d'acheter
+              </span>
+              <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
+                Travaux réservés au client
+              </span>
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.05}>
+            <h2 className="editorial mt-10 text-pretty text-[2rem] leading-[1.05] text-ink md:text-[3rem]">
+              Votre terrain peut‑il accueillir un Arko&nbsp;?
+            </h2>
+            <p className="mt-6 text-[1.1rem] leading-relaxed text-muted md:text-[1.25rem]">
+              Certains postes sont systématiquement à la charge du client, indépendamment de la construction.
+              Les identifier avant l'achat évite les mauvaises surprises&nbsp;— c'est précisément ce que
+              qualifie notre dossier terrain.
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <div className="mt-12 overflow-hidden rounded-2xl border border-line">
+              {/* En-tête */}
+              <div className="grid grid-cols-[1fr_auto_auto] gap-x-6 border-b border-line bg-surface px-6 py-3 sm:grid-cols-[1fr_160px_200px]">
+                <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted">Poste</span>
+                <span className="hidden font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted sm:block">Responsable</span>
+                <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted text-right">Estimation indicative</span>
+              </div>
+
+              {/* Lignes */}
+              {ECUEILS.map((row, i) => (
+                <div
+                  key={row.poste}
+                  className={`grid grid-cols-[1fr_auto] gap-x-6 px-6 py-4 sm:grid-cols-[1fr_160px_200px] ${
+                    i < ECUEILS.length - 1 ? "border-b border-line" : ""
+                  }`}
+                >
+                  <div className="flex min-w-0 flex-col justify-center gap-0.5">
+                    <span className="text-sm font-medium leading-snug text-ink">{row.poste}</span>
+                    {row.detail && (
+                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-accent">
+                        {row.detail}
+                      </span>
+                    )}
+                  </div>
+                  <span className="hidden items-center font-mono text-[0.75rem] text-muted sm:flex">
+                    {row.responsable}
+                  </span>
+                  <span className="flex items-center justify-end font-mono text-[0.8rem] font-medium text-ink">
+                    {row.estimation}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.14}>
+            <p className="mt-6 rounded-xl border border-accent/20 bg-accent/[0.04] px-5 py-4 text-sm leading-relaxed text-muted">
+              <span className="font-medium text-ink">Notre dossier terrain anticipe ces postes&nbsp;:</span>{" "}
+              géotechnique, raccordements, assainissement et accès sont qualifiés par notre partenaire avant
+              que vous n'engagiez la moindre dépense.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ── Formulaire ── */}
-      <section className="bg-surface py-20 md:py-28">
+      <section className="bg-surface pt-12 pb-20 md:pt-14 md:pb-28">
         <div className="container-page">
           <Reveal>
             <div className="rule flex items-baseline justify-between pt-5">
@@ -132,17 +293,16 @@ export default function RechercheTerrainPage() {
                 Votre demande
               </span>
               <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-                Gratuit · sans engagement
+                À partir de 4 900 € TTC
               </span>
             </div>
           </Reveal>
           <Reveal delay={0.05}>
             <h2 className="editorial mt-10 text-pretty text-[2rem] leading-[1.05] text-ink md:text-[3rem]">
-              Précisez vos zones de recherche.
+              Choisissez Votre Pack Terrain.
             </h2>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted">
-              Jusqu'à 5 communes. Nous effectuons la recherche personnalisée et vous
-              envoyons votre rapport par email sous 48 h ouvrées.
+            <p className="mt-4 text-sm leading-relaxed text-muted">
+              Sélectionnez l'échelle de recherche adaptée à votre projet. Un conseiller AHF vous contacte sous 48 h ouvrées pour confirmer la mission et organiser le démarrage.
             </p>
           </Reveal>
 

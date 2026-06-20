@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CONFIG, PRODUCT_LIST } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
@@ -9,6 +10,12 @@ import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { useConfig, eur } from "./config-store";
 import { CountdownBanner } from "./CountdownBanner";
+
+const PACK_TERRAIN = [
+  { id: "essentiel", label: "Essentiel", prix: "4 900 € TTC" },
+  { id: "etendu", label: "Étendu", prix: "7 300 € TTC" },
+  { id: "departement", label: "Département", prix: "11 200 € TTC" },
+] as const;
 
 type View = "exterieur" | "cuisine" | "chambre" | "interieur";
 
@@ -298,7 +305,14 @@ export function Configurator() {
 function Devis() {
   const c = useConfig();
   const p = c.active.pricing;
+  const searchParams = useSearchParams();
   const selectedPacks = p.options.filter((o) => c.options.includes(o.id));
+
+  const initPack = searchParams.get("pack") as "essentiel" | "etendu" | "departement" | null;
+  const [terrainMode, setTerrainMode] = useState<"have" | "pack">(initPack ? "pack" : "have");
+  const [packTerrain, setPackTerrain] = useState<string | null>(initPack);
+  const packObj = PACK_TERRAIN.find((pt) => pt.id === packTerrain);
+  const [cgv, setCgv] = useState(false);
 
   return (
     <div className="rounded-2xl border border-line bg-canvas p-6">
@@ -338,7 +352,7 @@ function Devis() {
         </div>
       </div>
 
-      {/* Couche 2 — livraison */}
+      {/* Couche 2 — livraison & terrain */}
       <div className="mt-5 border-t border-line pt-4">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -348,25 +362,81 @@ function Devis() {
             </p>
           </div>
           <span className="font-mono text-sm">
-            {c.delivery != null ? eur(c.delivery) : "à estimer"}
+            {terrainMode === "pack" ? "À estimer" : c.delivery != null ? eur(c.delivery) : "à estimer"}
           </span>
         </div>
-        <div className="mt-2 flex items-center gap-2">
-          <input
-            type="number"
-            min={0}
-            value={c.distanceKm ?? ""}
-            onChange={(e) =>
-              c.setDistanceKm(e.target.value === "" ? null : Math.max(0, Number(e.target.value)))
-            }
-            placeholder="distance depuis Bayonne"
-            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
-          />
-          <span className="font-mono text-xs text-muted">km</span>
+
+        {/* Toggle terrain mode */}
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() => setTerrainMode("have")}
+            className={cn(
+              "rounded-full border px-3 py-1.5 text-xs transition-all",
+              terrainMode === "have" ? "border-accent bg-accent/5 text-ink" : "border-line text-muted hover:border-ink/30",
+            )}
+          >
+            J'ai un terrain
+          </button>
+          <button
+            onClick={() => setTerrainMode("pack")}
+            className={cn(
+              "rounded-full border px-3 py-1.5 text-xs transition-all",
+              terrainMode === "pack" ? "border-accent bg-accent/5 text-ink" : "border-line text-muted hover:border-ink/30",
+            )}
+          >
+            Pack Terrain Affinity
+          </button>
         </div>
-        <p className="mt-1.5 font-mono text-[0.65rem] text-muted">
-          Auto-calculée depuis votre adresse via l'outil terrain.
-        </p>
+
+        {terrainMode === "have" ? (
+          <>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type="number"
+                min={0}
+                value={c.distanceKm ?? ""}
+                onChange={(e) =>
+                  c.setDistanceKm(e.target.value === "" ? null : Math.max(0, Number(e.target.value)))
+                }
+                placeholder="distance depuis Bayonne"
+                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
+              />
+              <span className="font-mono text-xs text-muted">km</span>
+            </div>
+            <p className="mt-1.5 font-mono text-[0.65rem] text-muted">
+              Auto-calculée depuis votre adresse via l'outil terrain.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {PACK_TERRAIN.map((pt) => (
+                <button
+                  key={pt.id}
+                  onClick={() => setPackTerrain(pt.id)}
+                  className={cn(
+                    "flex flex-col rounded-xl border px-3 py-2 text-left text-xs transition-all",
+                    packTerrain === pt.id ? "border-accent bg-accent/5" : "border-line text-muted hover:border-ink/30",
+                  )}
+                >
+                  <span className={cn("font-mono text-[0.6rem] uppercase tracking-wider", packTerrain === pt.id ? "text-accent" : "text-muted/60")}>
+                    {pt.label}
+                  </span>
+                  <span className="mt-0.5 font-semibold text-ink">{pt.prix}</span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 font-mono text-[0.63rem] leading-relaxed text-muted">
+              Livraison auto-calculée si la recherche est fructueuse.{" "}
+              <a href="/rechercheterrain" className="text-accent underline underline-offset-2">
+                En savoir plus sur les packs terrain →
+              </a>
+            </p>
+            {packTerrain && (
+              <PackTerrainContactForm pack={packTerrain as PackId} />
+            )}
+          </>
+        )}
       </div>
 
       {/* Total */}
@@ -378,10 +448,16 @@ function Devis() {
         <div className="mt-1 flex items-baseline justify-between">
           <span className="text-sm text-canvas/70">+ Livraison estimée</span>
           <span className="font-mono">
-            {c.delivery != null ? eur(c.delivery) : "—"}
+            {terrainMode === "pack" ? "À estimer" : c.delivery != null ? eur(c.delivery) : "—"}
           </span>
         </div>
-        {c.delivery != null && (
+        {terrainMode === "pack" && packObj && (
+          <div className="mt-1 flex items-baseline justify-between">
+            <span className="text-sm text-canvas/70">Pack Terrain {packObj.label}</span>
+            <span className="font-mono">{packObj.prix}</span>
+          </div>
+        )}
+        {terrainMode !== "pack" && c.delivery != null && (
           <div className="mt-2 flex items-baseline justify-between border-t border-canvas/15 pt-2">
             <span className="font-medium">Total estimé</span>
             <span className="editorial text-xl">{eur(c.grandTotal)}</span>
@@ -389,10 +465,10 @@ function Devis() {
         )}
       </div>
 
-      {/* Couche 3 — frais terrain, à part */}
+      {/* Couche 3 — frais complémentaires hors proposition */}
       <div className="mt-5 border-t border-line pt-4">
         <p className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-muted">
-          À prévoir — frais de terrain (hors total)
+          Frais complémentaires Hors proposition (hors total)
         </p>
         <div className="mt-3 space-y-1.5 text-xs">
           {p.landFees.map((f) => (
@@ -404,7 +480,24 @@ function Devis() {
         </div>
       </div>
 
-      <Button href="#reserver" variant="accent" className="mt-6 w-full justify-center">
+      <label className="mt-5 flex items-start gap-2">
+        <input
+          type="checkbox"
+          checked={cgv}
+          onChange={(e) => setCgv(e.target.checked)}
+          className="mt-0.5 shrink-0 accent-accent"
+        />
+        <span className="font-mono text-[0.63rem] leading-relaxed text-muted">
+          J'accepte d'être recontacté par Affinity Home Factory dans le cadre de ma
+          recherche de terrain. Données traitées conformément à notre{" "}
+          <a href="/confidentialite" className="text-accent underline underline-offset-2">
+            politique de confidentialité
+          </a>
+          .
+        </span>
+      </label>
+
+      <Button href="#reserver" variant="accent" className="mt-4 w-full justify-center">
         Réserver cette configuration
         <Arrow />
       </Button>
@@ -412,6 +505,72 @@ function Devis() {
         Estimation indicative — document non contractuel, devis définitif après
         visite. Validité 3 mois. TVA 20 %.
       </p>
+    </div>
+  );
+}
+
+type PackId = "essentiel" | "etendu" | "departement";
+
+const PACK_LABELS: Record<PackId, string> = {
+  essentiel: "1 à 5 villes ciblées",
+  etendu: "Zone de recherche (intercommunalité, bassin de vie…)",
+  departement: "Département complet",
+};
+
+function PackTerrainContactForm({ pack }: { pack: PackId }) {
+  const [villes, setVilles] = useState("");
+  const [zones, setZones] = useState("");
+  const [departement, setDepartement] = useState("");
+
+  const inputCls =
+    "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent placeholder:text-muted/50";
+
+  return (
+    <div className="mt-4 space-y-2.5">
+      {pack === "essentiel" && (
+        <div>
+          <p className="mb-1 font-mono text-[0.63rem] text-muted">
+            {PACK_LABELS.essentiel} — séparées par une virgule
+          </p>
+          <textarea
+            rows={2}
+            value={villes}
+            onChange={(e) => setVilles(e.target.value)}
+            placeholder="Ex : Lyon, Bordeaux, Nantes, Rennes, Montpellier"
+            className={cn(inputCls, "resize-none")}
+          />
+        </div>
+      )}
+
+      {pack === "etendu" && (
+        <div>
+          <p className="mb-1 font-mono text-[0.63rem] text-muted">
+            {PACK_LABELS.etendu}
+          </p>
+          <textarea
+            rows={2}
+            value={zones}
+            onChange={(e) => setZones(e.target.value)}
+            placeholder="Ex : Bretagne, Auvergne-Rhône-Alpes, Grand Est"
+            className={cn(inputCls, "resize-none")}
+          />
+        </div>
+      )}
+
+      {pack === "departement" && (
+        <div>
+          <p className="mb-1 font-mono text-[0.63rem] text-muted">
+            {PACK_LABELS.departement}
+          </p>
+          <input
+            type="text"
+            value={departement}
+            onChange={(e) => setDepartement(e.target.value)}
+            placeholder="Ex : 69 — Rhône, 33 — Gironde, 44 — Loire-Atlantique"
+            className={inputCls}
+          />
+        </div>
+      )}
     </div>
   );
 }
