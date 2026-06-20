@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import { createElement } from "react";
 import ConfigurateurRecap from "../../../../emails/configurateur-recap";
+import { sendEmail } from "@/lib/email";
 
 type PackId = "essentiel" | "etendu" | "departement";
 
@@ -78,35 +79,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  // Envoi email Resend (fire-and-forget — n'impacte pas la réponse HTTP)
-  const resendKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM ?? "noreply@affinityhome.fr";
-  const toAhf = process.env.RESEND_TO_AHF ?? "";
+  // Envoi email Brevo (fire-and-forget — n'impacte pas la réponse HTTP)
+  const toAhf = process.env.EMAIL_TO_AHF ?? "";
+  const recipients = [email, ...(toAhf ? [toAhf] : [])].filter(Boolean);
+  const zonesFlat = villes ?? zones ?? (departement ? [departement] : null);
 
-  if (resendKey) {
-    const resend = new Resend(resendKey);
-    const recipients = [email, ...(toAhf ? [toAhf] : [])].filter(Boolean);
-    const zonesFlat = villes ?? zones ?? (departement ? [departement] : null);
-
-    resend.emails
-      .send({
-        from,
-        to: recipients,
-        subject: "Récapitulatif de votre demande ARKO — Affinity House Factory",
-        react: ConfigurateurRecap({
-          nom,
-          email,
-          tel: telephone ?? null,
-          modele: modele ?? null,
-          pack: pack ?? null,
-          zones: zonesFlat ?? null,
-          budget: body.budget ?? null,
-        }),
-      })
-      .catch((err) => console.error("[recherche-terrain] Resend error:", err));
-  } else {
-    console.warn("[recherche-terrain] RESEND_API_KEY manquant — email non envoyé.");
-  }
+  sendEmail({
+    to: recipients,
+    subject: "Récapitulatif de votre demande ARKO — Affinity House Factory",
+    template: createElement(ConfigurateurRecap, {
+      nom,
+      email,
+      tel: telephone ?? null,
+      modele: modele ?? null,
+      pack: pack ?? null,
+      zones: zonesFlat ?? null,
+      budget: body.budget ?? null,
+    }),
+  }).catch((err) => console.error("[recherche-terrain] Brevo error:", err));
 
   return NextResponse.json({ success: true, persisted: true });
 }

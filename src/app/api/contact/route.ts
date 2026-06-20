@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import { createElement } from "react";
 import ContactConfirmation from "../../../../emails/contact-confirmation";
+import { sendEmail } from "@/lib/email";
 
 type Payload = {
   prenom: string;
@@ -67,24 +68,15 @@ export async function POST(req: NextRequest) {
     console.warn("[contact] Supabase non configuré — contact non persisté.");
   }
 
-  // Envoi email Resend
-  const resendKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM ?? "noreply@affinityhome.fr";
-  const toAhf = process.env.RESEND_TO_AHF ?? "";
+  // Envoi email Brevo
+  const toAhf = process.env.EMAIL_TO_AHF ?? "";
+  const recipients = [email, ...(toAhf ? [toAhf] : [])].filter(Boolean);
 
-  if (resendKey) {
-    const resend = new Resend(resendKey);
-    const recipients = [email, ...(toAhf ? [toAhf] : [])].filter(Boolean);
-
-    await resend.emails.send({
-      from,
-      to: recipients,
-      subject: "Votre message a bien été reçu — Affinity House Factory",
-      react: ContactConfirmation({ prenom, nom, produit, message }),
-    });
-  } else {
-    console.warn("[contact] RESEND_API_KEY manquant — email non envoyé.");
-  }
+  await sendEmail({
+    to: recipients,
+    subject: "Votre message a bien été reçu — Affinity House Factory",
+    template: createElement(ContactConfirmation, { prenom, nom, produit, message }),
+  });
 
   return NextResponse.json({ success: true });
 }

@@ -72,6 +72,9 @@ SUPABASE_SERVICE_ROLE_KEY=         # serveur, jamais commité
 STRIPE_SECRET_KEY=                 # serveur
 STRIPE_WEBHOOK_SECRET=             # serveur
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY= # client
+BREVO_API_KEY=                     # serveur, jamais commité (ADR-026)
+EMAIL_FROM=noreply@affinityhome.fr # expéditeur Brevo (ADR-026)
+EMAIL_TO_AHF=contact@affinityhousefactory.com # copie interne (ADR-026)
 APIFY_TOKEN=                       # serveur (mode annonce)
 ANTHROPIC_API_KEY=                 # serveur, optionnel (ADR-017)
 ```

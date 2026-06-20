@@ -1,6 +1,6 @@
-# ADR-026 — Emails transactionnels Resend : templates + synchro Supabase contacts
+# ADR-026 — Emails transactionnels Brevo : templates + synchro Supabase contacts
 
-- **Statut** : Proposé
+- **Statut** : Accepté
 - **Date** : 2026-06-20
 - **Phase** : 4
 - **Faisabilité** : ✅ Élevée
@@ -10,114 +10,81 @@
 
 Deux formulaires collectent des données visiteurs sans les persister ni envoyer de confirmation :
 
-1. **`/contact` (`ContactForm.tsx`)** — prénom, nom, email, téléphone, produit, message. Appelle uniquement `/api/verify-turnstile` puis `setSent(true)`. Aucune route API `/api/contact`, aucune table Supabase `contacts`.
-2. **Configurateur (`/configurer`)** — appelle `POST /api/recherche-terrain` qui persiste en base (`recherche_terrain`) mais n'envoie aucun email de confirmation au client ni à AHF.
+1. **`/contact` (`ContactForm.tsx`)** — prénom, nom, email, téléphone, produit, message. Appelait uniquement `/api/verify-turnstile` puis `setSent(true)`. Aucune route API `/api/contact`, aucune table Supabase `contacts`.
+2. **Configurateur (`/configurer`)** — appelait `POST /api/recherche-terrain` qui persistait en base (`recherche_terrain`) mais n'envoyait aucun email de confirmation.
 
-ADR-014 posait la question du fournisseur email (ouvert). Ce besoin permet de la trancher : **Resend** est retenu (DX Next.js native, intégration serveur simple, deliverability correcte, SPF/DKIM configurables sur `affinityhome.fr`).
+ADR-014 posait la question du fournisseur email (ouvert). **Brevo** est retenu : déjà déclaré dans la politique de confidentialité AHF, cohérent avec l'écosystème existant. Envoi via REST API Brevo (`api.brevo.com/v3/smtp/email`) + rendu HTML via `@react-email/render`.
 
 ## Décision
 
-### Fournisseur : Resend + React Email
+### Fournisseur : Brevo REST API + React Email
 
-Librairies côté serveur uniquement : `resend`, `@react-email/components`. Jamais côté client. Clé API dans `RESEND_API_KEY` (secret serveur, jamais dans Git).
+Côté serveur uniquement. Helper partagé `src/lib/email.ts` : convertit un composant React Email en HTML via `@react-email/render`, envoie via `fetch` Brevo. Pas de SDK tiers (fetch natif suffit). Clé dans `BREVO_API_KEY` (jamais dans Git).
 
 ### Livrable 1 — Migration Supabase `contacts`
 
-```sql
--- supabase/migrations/20260620_contacts.sql
-CREATE TABLE IF NOT EXISTS contacts (
-  id           uuid        DEFAULT gen_random_uuid() PRIMARY KEY,
-  created_at   timestamptz DEFAULT now() NOT NULL,
-  prenom       text        NOT NULL,
-  nom          text        NOT NULL,
-  email        text        NOT NULL,
-  tel          text,
-  produit      text,          -- 'one' | 'max' | 'autre' | null
-  message      text        NOT NULL,
-  turnstile_ok boolean     NOT NULL DEFAULT false,
-  statut       text        NOT NULL DEFAULT 'nouveau'
-               CHECK (statut IN ('nouveau', 'en_cours', 'traite')),
-  notes        text
-);
+`supabase/migrations/20260620_contacts.sql` — table `contacts` : id, created_at, prenom, nom, email, tel, produit, message, turnstile_ok, statut, notes. RLS : insert public (anon), lecture/update réservés service_role.
 
-ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
--- Insert public (formulaire visiteur avec Turnstile vérifié côté serveur)
-CREATE POLICY "contacts_insert_public"
-  ON contacts FOR INSERT TO anon
-  WITH CHECK (true);
--- Lecture/update réservés service_role (pas de policy SELECT → anon aveugle)
-```
+### Livrable 2 — Helper email partagé
 
-### Livrable 2 — Route API `POST /api/contact`
+`src/lib/email.ts` — `sendEmail({ to, subject, template })` :
+1. Rend le template React Email → HTML (`@react-email/render`)
+2. POST Brevo avec `htmlContent`, `sender`, `to`, `subject`
+3. Log warn si `BREVO_API_KEY` absent (dev local), throw si erreur Brevo
+
+### Livrable 3 — Route API `POST /api/contact`
 
 `src/app/api/contact/route.ts` — pipeline :
 1. Parse body : `{ prenom, nom, email, tel?, produit?, message, captchaToken }`
 2. Vérification Turnstile (`TURNSTILE_SECRET_KEY`) → 400 si KO
 3. Insert Supabase `contacts` via `SUPABASE_SERVICE_ROLE_KEY`
-4. Envoi Resend template #1 (client) + copie AHF (`RESEND_TO_AHF`)
-5. `ContactForm.tsx` : remplacer l'appel `/api/verify-turnstile` par `/api/contact` (transmet tout le formData)
+4. `sendEmail` template #1 → client + copie `EMAIL_TO_AHF`
 
-### Livrable 3 — Template Resend #1 : confirmation contact
+`ContactForm.tsx` rewired : envoie tout le formData vers `/api/contact`.
 
-`emails/contact-confirmation.tsx` (React Email)
+### Livrable 4 — Template Brevo #1 : confirmation contact
 
-Champs affichés :
-- Prénom, nom
-- Produit sélectionné (Arko One / Arko Max / Autre demande)
-- Message (bloc citation)
-- Délai de réponse : « sous 24 h ouvrées »
-- Pied : `affinityhome.fr`, marque Affinity House Factory
+`emails/contact-confirmation.tsx` (React Email → HTML via `@react-email/render`)
 
-Expéditeur : `noreply@affinityhome.fr`
-Destinataires : client (accusé de réception) + `RESEND_TO_AHF` (notification interne)
+Champs : prénom, nom, produit sélectionné, message, délai 24 h ouvrées.
+Expéditeur : `EMAIL_FROM` (`noreply@affinityhome.fr`). Destinataires : client + AHF.
 
-### Livrable 4 — Template Resend #2 : récapitulatif configurateur
+### Livrable 5 — Template Brevo #2 : récapitulatif configurateur
 
-`emails/configurateur-recap.tsx` (React Email)
+`emails/configurateur-recap.tsx` (React Email → HTML)
 
-Champs affichés :
-- Modèle (Arko One / Arko Max), bardage, façade cuisine, barre, chambre, intérieur
-- Terrasse (m²), options sélectionnées, total estimé (€)
-- Pack terrain : pack choisi + zones/villes/département
-- Nom, email, téléphone du demandeur
+Champs : modèle, bardage, façade, barre, chambre, intérieur, terrasse, options, total, pack terrain, zones, coordonnées.
+Déclenchement : fin de `POST /api/recherche-terrain` (fire-and-forget, quelle que soit la `source`).
 
-Déclenchement : fin du `POST /api/recherche-terrain`, quelle que soit la `source` (`configurateur` ou `rechercheterrain`). Ajouter l'appel Resend après l'insert Supabase existant.
-
-Expéditeur : `noreply@affinityhome.fr`
-Destinataires : client + `RESEND_TO_AHF`
-
-### Variables d'environnement à ajouter
+### Variables d'environnement
 
 ```
-RESEND_API_KEY=             # serveur, jamais commité
-RESEND_FROM=noreply@affinityhome.fr
-RESEND_TO_AHF=contact@affinityhousefactory.com
+BREVO_API_KEY=              # serveur, jamais commité
+EMAIL_FROM=noreply@affinityhome.fr
+EMAIL_TO_AHF=contact@affinityhousefactory.com
 ```
 
-`TURNSTILE_SECRET_KEY` et `SUPABASE_SERVICE_ROLE_KEY` déjà prévus (ADR-003/007), à renseigner dans `.env.local`.
+`TURNSTILE_SECRET_KEY` et `SUPABASE_SERVICE_ROLE_KEY` déjà prévus (ADR-003/007).
 
 ## Faisabilité
 
-- **Verdict** : ✅ Élevée — Resend est opérationnel dès création du compte + configuration DNS. Aucune dépendance bloquante.
+- **Verdict** : ✅ Élevée — Brevo opérationnel dès configuration compte + DNS. Aucune dépendance bloquante.
 - **Dépendances externes** :
-  - Compte Resend + `RESEND_API_KEY` (à créer)
-  - SPF/DKIM sur `affinityhome.fr` (config DNS — 15 min)
-  - `SUPABASE_SERVICE_ROLE_KEY` (requise pour l'insert `contacts` côté serveur — ADR-007)
-  - MCP Supabase à repasser en écriture pour appliquer la migration (aujourd'hui read-only)
+  - Compte Brevo + `BREVO_API_KEY` (compte AHF existant)
+  - SPF/DKIM sur `affinityhome.fr` dans Brevo (DNS — 15 min)
+  - `SUPABASE_SERVICE_ROLE_KEY` pour l'insert `contacts` côté serveur
+  - Migration `20260620_contacts.sql` à appliquer (dashboard Supabase ou MCP en écriture)
 - **Risques** :
-  - Délivrabilité si SPF/DKIM non configuré avant mise en prod → tester en staging d'abord
-  - Table `contacts` bloquée tant que MCP Supabase reste read-only (migration à appliquer manuellement ou via dashboard Supabase)
-  - `ContactForm.tsx` : le refactor de l'appel API est minimal mais touche un composant visible → tester le Turnstile en environnement réel
+  - Délivrabilité si SPF/DKIM non configuré avant mise en prod → tester d'abord
+  - Table `contacts` inapplicable tant que MCP Supabase reste read-only
 
 ## Conséquences
 
-- **Ferme ADR-014** (fournisseur email tranché : Resend).
-- **Débloque ADR-008** (confirmation Stripe pourra utiliser le même client Resend).
-- `ContactForm.tsx` doit envoyer `formData` complet à `/api/contact` (aujourd'hui ne transmet que le token Turnstile).
-- `/api/recherche-terrain` reçoit un second effet de bord (send email) — veiller à ne pas bloquer la réponse HTTP si Resend échoue (fire-and-forget acceptable ou try/catch silencieux).
-- Templates React Email à valider visuellement dans `react-email` dev server avant mise en prod.
-- Index ADR `PROJECT_STATE.md` à mettre à jour (ADR-026 + clore ADR-014).
+- **Ferme ADR-014** (fournisseur tranché : Brevo).
+- **Débloque ADR-008** (confirmation Stripe pourra utiliser `sendEmail`).
+- `/api/recherche-terrain` : envoi email fire-and-forget après persist, ne bloque pas la réponse HTTP.
+- Templates React Email à valider visuellement (`email-preview` ou `react-email dev`) avant mise en prod.
 
 ## Sources
 
-`src/components/site/ContactForm.tsx`, `src/app/api/recherche-terrain/route.ts`, `src/components/site/config-store.tsx`, `supabase/migrations/20260618_recherche_terrain.sql`, ADR-007, ADR-014, ADR-003.
+`src/components/site/ContactForm.tsx`, `src/app/api/contact/route.ts`, `src/app/api/recherche-terrain/route.ts`, `src/lib/email.ts`, `emails/`, `supabase/migrations/20260620_contacts.sql`, ADR-007, ADR-014, ADR-003.
