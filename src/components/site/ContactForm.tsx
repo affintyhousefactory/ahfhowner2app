@@ -18,18 +18,29 @@ export function ContactForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (captchaToken) {
-      const res = await fetch("/api/verify-turnstile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: captchaToken }),
-      });
-      if (!res.ok) {
-        turnstileRef.current?.reset();
-        setCaptchaToken(null);
-        return;
-      }
+    const form = e.currentTarget as HTMLFormElement;
+    const data = new FormData(form);
+
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prenom: data.get("prenom"),
+        nom: data.get("nom"),
+        email: data.get("email"),
+        tel: data.get("tel") || null,
+        produit: data.get("produit") || null,
+        message: data.get("message"),
+        captchaToken,
+      }),
+    });
+
+    if (!res.ok) {
+      turnstileRef.current?.reset();
+      setCaptchaToken(null);
+      return;
     }
+
     setSent(true);
   }
 

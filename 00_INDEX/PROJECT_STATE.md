@@ -25,8 +25,8 @@ Site **mono-produit** de réservation **ARKO** (série limitée 12 exemplaires).
 
 ## Produit
 **Bi-produit** (ADR-022) — registre `PRODUCTS` (`src/lib/site.ts`) :
-- **Arko One** — 20 m², 12 exemplaires, 59 900 € (grille provisoire `TODO ARKO ONE`).
-- **Arko Max** — 40 m² (= ARKO historique), 5 exemplaires, 89 900 €.
+- **Arko One** — 20 m², 12 exemplaires, 59 900 € (grille confirmée).
+- **Arko Max** — 40 m² (= ARKO historique), 5 exemplaires, 89 900 € (**grille à reconfigurer** — perM2/options/terrasse/footprint/`reserved` en attente ; `TODO` actuellement sur `ONE_PRICING` dans `site.ts` → à corriger dès données reçues).
 
 Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (ADR-005/020), montants par produit. Configurateur avec sélecteur One/Max (`/configurer?produit=`). Réservation d'un numéro avec acompte 1 500 €. Pas de multi-segment, pas de catalogue. Wordmark ARKO retiré de l'accueil ; noms produits conservés.
 
@@ -50,7 +50,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Analyse via lien d'annonce | `LandTool.tsx` mode `annonce` | dégradé | Apify + BAN | 012 |
 | Contact terrain | `LandTool.tsx` (~L392) | `setSent(true)` | lead Supabase | 013 |
 | Devis 3 couches multi-produit | `Configurator.tsx`, `config-store.tsx` | ✅ logique verrouillée, paramétrée par produit | — | 005,020 |
-| Email confirmations | — | absent | fournisseur à choisir | 014 |
+| Email confirmations | `emails/contact-confirmation.tsx`, `emails/configurateur-recap.tsx`, `src/app/api/contact/route.ts` | absent — à implémenter Phase 4 | Resend + React Email | 026 |
 | SEO | `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `viewer/layout.tsx`, `lib/jsonld.ts`, `seo/JsonLd.tsx`, `llms.txt/route.ts` | ✅ P0+P1 (sitemap/robots/OG/twitter/canonical/noindex + JSON-LD Org/Product/FAQ + llms.txt) | P2 polish | 018 |
 
 ## Risques principaux
@@ -59,7 +59,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 |---|---|---|---|
 | Légal acompte/arrhes + CGV non validés | Pas de vente | 🔴 Critique | 015 |
 | RLS Supabase mal configurée | Fuite leads/réservations | 🔴 Critique | 007 |
-| Service email non choisi | Bloque confirmation Stripe | 🟠 Haute | 014 |
+| Service email non choisi | Bloque confirmation Stripe | 🟠 Haute | 026 |
 | Charte Affinity non validée Albert | Dérive identité vs PASSATION | 🟠 Moyenne | 002 |
 | API terrain externes (GPU/IGN/Apify) | Feature dégradée | 🟠 Moyenne | 011,012 |
 
@@ -94,7 +94,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 011 | LandTool zonage GPU/IGN | Proposé | 🟠 |
 | 012 | LandTool annonce Apify | Proposé | 🟠 |
 | 013 | Contact terrain → leads | Proposé | ✅ |
-| 014 | Service email transactionnel | **Proposé — ouvert** | ❓ |
+| 014 | Service email transactionnel | **Remplacé → ADR-026** | ✅ |
 | 015 | Légal acompte/arrhes/CGV | **Bloqué (avocat)** | 🔴 |
 | 016 | Échéancier 10/30/40/20 % | Différé | 🟠 |
 | 017 | Enrichissement terrain Anthropic | Différé (option) | ⚪ |
@@ -104,16 +104,20 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 021 | Architecture multi-pages + nav Tesla | Accepté | ✅ |
 | 022 | Split produit One/Max + repositionnement | **Accepté — valider Albert** | 🟠 |
 | 023 | Déploiement production Vercel | Proposé | ✅ |
+| 026 | Emails Resend templates + Supabase contacts | Proposé | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. **ADR-018 — SEO** : **P0+P1 livrés** (2026-06-17) — robots, sitemap, OG, twitter, canonical, `/viewer` noindex, JSON-LD (Organization/Product+Offer/FAQPage), `llms.txt`. Domaine `affinityhome.fr` (`SITE_URL`). **Reste P2** (polish, non bloquant) : manifest/PWA, skip-link, trim fonts, audit Lenis reduced-motion.
 2. **ADR-007** — Supabase schémas + RLS (repasser MCP en écriture) → débloque 009/010/013.
-3. **ADR-014** — choisir le fournisseur email → débloque ADR-008.
+3. **ADR-026** — Emails Resend : créer compte Resend + DNS SPF/DKIM → implémenter `/api/contact` + table `contacts` + 2 templates React Email → débloque ADR-008.
 
 ## Tokens / MCP
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-06-20 (ADR-025 Configurateur pack terrain + devops WSL2)** — Intégration pack terrain dans `/configurer` : champs villes/zones/département selon le pack Affinity sélectionné, champs contact (nom/tel/email) retirés du formulaire inline (récupérés à la réservation), case CGV déplacée juste avant le bouton Réserver. Section "Frais complémentaires Hors proposition (hors total)" avec nouvelles estimations. API `source` ajouté (`configurateur` / `rechercheterrain`). Migration `20260620_recherche_terrain_source.sql`. `Reservation.tsx` : label renommé + `ConfigRecap` détaillé par ligne (modèle/bardage/cuisine/barre/chambre/intérieur). Devops : `next.config.ts` `watchOptions.pollIntervalMs: 500` (corrige file-watching Turbopack sur `/mnt/d` WSL2). `.claude/settings.json` créé (`Edit(*)`, `Write(*)`, patterns Bash courants — réduit les prompts de validation). ADR-025 amendé.
+
 **2026-06-17 (ADR-018 SEO P1 + pages légales)** — **SEO P1** livré (build vert, 17 routes) : JSON-LD via `src/lib/jsonld.ts` + `src/components/seo/JsonLd.tsx` — `Organization` sitewide (+ adresse AHF, founder Puigbo), `Product`+`Offer` sur `/arko-one` & `/arko-max` (prix par produit, `LimitedAvailability`), `FAQPage` sur la home. `/llms.txt` (route statique, suit `SITE_URL`). Logo Organization **omis** (charte non figée ADR-002), prix **exposé** (déjà public). **Pages légales remplies** : `mentions-legales` + `confidentialite` contenu réel mutualisé AHF (`LegalShell` rendu conditionnel `pending`/`updated`, style `.legal-prose`), passées `index:true` + ajoutées au sitemap ; **CGV reste placeholder noindex** (ADR-015). ⚠ **Alerte Albert RGPD** : la politique de confidentialité déclare GA4/cookies/Brevo + bandeau de consentement non déployés sur ce site (doc mutualisée multi-sites AHF) — à arbitrer avant mise en prod indexée. Blocklist marque OK. Reste **P2** (polish non bloquant).
 
 **2026-06-17 (ADR-018 — SEO P0 livré)** — Socle SEO P0 implémenté et **vérifié au build** (`next build` vert, 16 routes statiques). Nouveaux fichiers : `src/app/sitemap.ts` (6 routes indexables, légal + `/viewer` exclus), `src/app/robots.ts` (`disallow /viewer` + host + sitemap), `src/app/opengraph-image.tsx` (généré `next/og`, 1200×630, tokens charte), `src/app/viewer/layout.tsx` (`noindex,nofollow`). `layout.tsx` : `metadataBase` recâblé + twitter card + canonical `/`. Canonical self-référent ajouté sur toutes les pages (légal inclus). **Domaine de prod confirmé = `affinityhome.fr`** (ex-`howner.fr`), centralisé dans `SITE_URL` (`src/lib/site.ts`, override `NEXT_PUBLIC_SITE_URL`). Incident env corrigé : binaire natif `lightningcss` manquant (WSL) → `npm install lightningcss-linux-x64-gnu`. **Reste** : P1 JSON-LD (Organization/Product+Offer/FAQPage) + `llms.txt`, P2 polish. ADR-018 → « Accepté — P0 livré ».

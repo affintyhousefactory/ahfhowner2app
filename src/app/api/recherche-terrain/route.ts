@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
+import ConfigurateurRecap from "../../../../emails/configurateur-recap";
 
 type PackId = "essentiel" | "etendu" | "departement";
 
@@ -16,6 +18,7 @@ type Payload = {
   // departement
   departement?: string;
   taif_zone?: string | null;
+  budget?: string | null;
   accepte_cgv: boolean;
 };
 
@@ -73,6 +76,36 @@ export async function POST(req: NextRequest) {
     const err = await res.text();
     console.error("[recherche-terrain] Supabase error:", err);
     return NextResponse.json({ error: "db_error" }, { status: 500 });
+  }
+
+  // Envoi email Resend (fire-and-forget — n'impacte pas la réponse HTTP)
+  const resendKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM ?? "noreply@affinityhome.fr";
+  const toAhf = process.env.RESEND_TO_AHF ?? "";
+
+  if (resendKey) {
+    const resend = new Resend(resendKey);
+    const recipients = [email, ...(toAhf ? [toAhf] : [])].filter(Boolean);
+    const zonesFlat = villes ?? zones ?? (departement ? [departement] : null);
+
+    resend.emails
+      .send({
+        from,
+        to: recipients,
+        subject: "Récapitulatif de votre demande ARKO — Affinity House Factory",
+        react: ConfigurateurRecap({
+          nom,
+          email,
+          tel: telephone ?? null,
+          modele: modele ?? null,
+          pack: pack ?? null,
+          zones: zonesFlat ?? null,
+          budget: body.budget ?? null,
+        }),
+      })
+      .catch((err) => console.error("[recherche-terrain] Resend error:", err));
+  } else {
+    console.warn("[recherche-terrain] RESEND_API_KEY manquant — email non envoyé.");
   }
 
   return NextResponse.json({ success: true, persisted: true });
