@@ -34,7 +34,7 @@ export function Reservation() {
         <Reveal>
           <div className="rule flex items-baseline justify-between pt-5">
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              011 — Réserver
+              RESERVER
             </span>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
               Série 01
@@ -143,13 +143,17 @@ function ConfigRecap() {
   const c = useConfig();
   const claddingLabel =
     CONFIG.cladding.find((x) => x.id === c.cladding)?.label ?? "";
+  const kitchenLabel =
+    CONFIG.kitchen.find((x) => x.id === c.facade)?.label ?? "";
+  const barLabel =
+    CONFIG.bar.find((x) => x.id === c.bar)?.label ?? "";
+  const bedroomLabel =
+    CONFIG.bedroom.find((x) => x.id === c.bedroom)?.label ?? "";
+  const interiorLabel =
+    CONFIG.interior.find((x) => x.id === c.interior)?.label ?? "";
   const packs = c.active.pricing.options
     .filter((o) => c.options.includes(o.id))
     .map((o) => o.label);
-  const extras = [
-    c.terrasseM2 > 0 ? `terrasse ${c.terrasseM2} m²` : null,
-    ...packs,
-  ].filter(Boolean);
 
   return (
     <div className="mt-8 rounded-2xl border border-line bg-surface p-5">
@@ -164,11 +168,35 @@ function ConfigRecap() {
           Ajuster →
         </a>
       </div>
-      <p className="mt-3 text-sm leading-relaxed text-ink">
-        {c.active.name} {c.active.area} · bardage {claddingLabel.toLowerCase()}
-        {extras.length ? ` · ${extras.join(" · ")}` : ""}
-      </p>
-      <div className="mt-4 space-y-1.5 border-t border-line pt-3 font-mono text-sm">
+
+      {/* Modèle */}
+      <div className="mt-3 space-y-1 text-sm">
+        <RecapLine label="Modèle" value={`${c.active.name} ${c.active.area}`} />
+        <RecapLine label="Bardage" value={claddingLabel} />
+      </div>
+
+      {/* Aménagements */}
+      <div className="mt-3 space-y-1 border-t border-line pt-3 text-sm">
+        <RecapLine label="Cuisine" value={kitchenLabel} />
+        <RecapLine label="Barre" value={barLabel} />
+        <RecapLine label="Chambre" value={bedroomLabel} />
+        <RecapLine label="Intérieur" value={interiorLabel} />
+      </div>
+
+      {/* Options en supplément */}
+      {(c.terrasseM2 > 0 || packs.length > 0) && (
+        <div className="mt-3 space-y-1 border-t border-line pt-3 text-sm">
+          {c.terrasseM2 > 0 && (
+            <RecapLine label="Terrasse bois" value={`${c.terrasseM2} m²`} />
+          )}
+          {packs.map((label) => (
+            <RecapLine key={label} label={label} value="inclus" />
+          ))}
+        </div>
+      )}
+
+      {/* Totaux */}
+      <div className="mt-3 space-y-1.5 border-t border-line pt-3 font-mono text-sm">
         <div className="flex items-baseline justify-between">
           <span className="text-muted">Votre Arko</span>
           <span className="text-ink">{eur(c.houseTotal)} TTC</span>
@@ -186,6 +214,15 @@ function ConfigRecap() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function RecapLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <span className="text-muted">{label}</span>
+      <span className="text-right text-ink">{value}</span>
     </div>
   );
 }

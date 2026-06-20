@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(*)",
+      "Write(*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(kill *)",
+      "Bash(kill -9 *)",
+      "Bash(pkill *)",
+      "Bash(pkill -f *)",
+      "Bash(curl -s http://localhost:*)",
+      "Bash(curl -s -X POST http://localhost:*)",
+      "Bash(curl -s -X POST *)",
+      "Bash(npm list *)",
+      "Bash(npm ls *)",
+      "Bash(rm -rf .next)",
+      "Bash(rm -rf /mnt/d/CCOWORK/Howner-ARKO2/.next)"
+    ]
+  }
+}
