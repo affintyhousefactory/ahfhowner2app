@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { PRICING } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
@@ -147,7 +148,7 @@ export function LandTool() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h1 className="editorial mt-12 text-pretty text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:text-[4.4rem]">
+          <h1 className="editorial mt-12 text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:whitespace-nowrap md:text-[3rem]">
             Votre terrain peut&#x2011;il accueillir un Arko&nbsp;?
           </h1>
         </Reveal>
@@ -318,19 +319,79 @@ function ResultPanel({ result }: { result: Result }) {
   );
 }
 
+const PACKS_MINI = [
+  { label: "Essentiel", scope: "1–5 villes", prix: "4 900 €" },
+  { label: "Étendu", scope: "Zones élargies", prix: "7 300 €" },
+  { label: "Département", scope: "Couverture dép.", prix: "11 200 €" },
+] as const;
+
 function SearchBranch() {
   return (
-    <div className="space-y-5">
-      <p className="text-sm leading-relaxed text-canvas/70">
-        Vous êtes à la recherche d'un terrain en vente&nbsp;? Vous souhaitez
-        acheter entre particuliers, sans agence&nbsp;? Vous avez un budget&nbsp;?
+    <div className="space-y-6">
+      {/* Vignette + headline */}
+      <div className="flex items-center gap-4">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-canvas/15">
+          <Image
+            src="/terrain-affinity.png"
+            alt="Réseau Affinity"
+            fill
+            className="object-cover"
+            sizes="96px"
+          />
+        </div>
+        <p className="text-[1.1rem] font-medium leading-snug text-canvas">
+          <span className="text-accent">Réseau Affinity - Mandataires —</span>{" "}
+          Le bon terrain existe. Laissez-nous le trouver pour vous.
+        </p>
+      </div>
+
+      <p className="text-sm leading-relaxed text-canvas/65">
+        Notre mandataire immobilier affilié Affinity prospecte pour vous&nbsp;—
+        y compris off-market&nbsp;— et vous livre un dossier complet sous 48 h&nbsp;:
+        parcelles candidates, constructibilité PLU, DVF 5 ans et note de qualification terrain.
       </p>
-      <p className="text-sm leading-relaxed text-canvas/55">
-        Précisez vos zones et vos critères : nous effectuons une recherche
-        cadastrale personnalisée et vous livrons un rapport complet sous 48 h —
-        parcelles candidates, historique DVF, géorisques et cartes isochrones.
-      </p>
-      <Button href="/rechercheterrain" variant="accent" magnetic={false}>
+
+      {/* Packs terrain */}
+      <div>
+        <p className="mb-2.5 font-mono text-[0.62rem] uppercase tracking-[0.15em] text-canvas/40">
+          Packs terrain — tarifs indicatifs selon zone
+        </p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {PACKS_MINI.map((p) => (
+            <div
+              key={p.label}
+              className="rounded-xl border border-canvas/15 bg-canvas/[0.04] px-3.5 py-3"
+            >
+              <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-canvas/40">
+                {p.label}
+              </p>
+              <p className="mt-1 font-mono text-[0.82rem] font-semibold text-canvas">
+                À partir de {p.prix} TTC
+              </p>
+              <p className="mt-0.5 text-[0.7rem] text-canvas/40">{p.scope}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tags */}
+      <div className="flex flex-wrap gap-2">
+        {["Off-market", "PLU & STECAL", "DVF · 5 ans", "Géorisques"].map((tag) => (
+          <span
+            key={tag}
+            className="rounded-full border border-canvas/20 px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.1em] text-canvas/45"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      <Button
+        href="/rechercheterrain"
+        variant="accent"
+        magnetic={false}
+        className="w-full justify-center py-4 text-[1rem]"
+      >
         Lancer ma recherche personnalisée
         <Arrow />
       </Button>

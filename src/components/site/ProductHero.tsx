@@ -100,7 +100,7 @@ export function ProductHero({
       >
         <div className="rule grid grid-cols-1 gap-8 pt-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
-            <h2 className="editorial max-w-xl text-balance text-[2rem] leading-[1.05] text-ink md:text-[2.9rem]">
+            <h2 className="editorial text-[2rem] leading-[1.05] text-ink md:whitespace-nowrap md:text-[2.9rem]">
               {product.tagline}
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">

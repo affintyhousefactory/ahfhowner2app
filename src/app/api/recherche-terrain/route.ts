@@ -1,20 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendBrevoTemplate } from "@/lib/email";
+
+type PackId = "essentiel" | "etendu" | "departement";
+
+const PACK_LABELS: Record<PackId, string> = {
+  essentiel: "Pack Essentiel — communes ciblées",
+  etendu: "Pack Étendu — zones élargies",
+  departement: "Pack Département",
+};
 
 type Payload = {
   nom: string;
   telephone: string;
   email: string;
-  budget?: string;
-  zones: string[];
+  modele?: string | null;
+  pack: PackId;
+  source?: "rechercheterrain" | "configurateur" | null;
+  // essentiel
+  villes?: string[];
+  // etendu
+  zones?: string[];
+  // departement
+  departement?: string;
+  taif_zone?: string | null;
+  budget?: string | null;
   accepte_cgv: boolean;
 };
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as Payload;
 
-  const { nom, telephone, email, budget, zones, accepte_cgv } = body;
+  const { nom, telephone, email, modele, pack, source, villes, zones, departement, taif_zone, accepte_cgv } = body;
 
-  if (!nom || !telephone || !email || !zones?.length || !accepte_cgv) {
+  if (!nom || !telephone || !email || !pack || !accepte_cgv) {
+    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+  }
+
+  if (pack === "essentiel" && !villes?.length) {
+    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+  }
+  if (pack === "etendu" && !zones?.length) {
+    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+  }
+  if (pack === "departement" && !departement) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
   }
 
@@ -22,7 +50,6 @@ export async function POST(req: NextRequest) {
   const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnon) {
-    // Phase 4 non activée : lead perdu côté base, mais UX préservée
     console.warn("[recherche-terrain] Supabase non configuré — lead non persisté.");
     return NextResponse.json({ success: true, persisted: false });
   }
@@ -35,7 +62,19 @@ export async function POST(req: NextRequest) {
       Authorization: `Bearer ${supabaseAnon}`,
       Prefer: "return=minimal",
     },
-    body: JSON.stringify({ nom, telephone, email, budget, zones, accepte_cgv }),
+    body: JSON.stringify({
+      nom,
+      telephone,
+      email,
+      modele: modele ?? null,
+      pack,
+      source: source ?? "rechercheterrain",
+      villes: villes ?? null,
+      zones: zones ?? null,
+      departement: departement ?? null,
+      taif_zone: taif_zone ?? null,
+      accepte_cgv,
+    }),
   });
 
   if (!res.ok) {
@@ -43,6 +82,32 @@ export async function POST(req: NextRequest) {
     console.error("[recherche-terrain] Supabase error:", err);
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
+
+  // Envoi email Brevo (fire-and-forget — n'impacte pas la réponse HTTP)
+  const templateId = parseInt(process.env.BREVO_TEMPLATE_RECAP ?? "0");
+  const toAhf = process.env.BREVO_TO_AHF ?? "";
+  const zonesFlat = villes ?? zones ?? (departement ? [departement] : null);
+
+  sendBrevoTemplate({
+    templateId,
+    to: [
+      { email, name: nom },
+      ...(toAhf ? [{ email: toAhf, name: "Affinity House Factory" }] : []),
+    ],
+    params: {
+      // Identité
+      PRENOM: "",
+      NOM: nom,
+      EMAIL: email,
+      TEL: telephone ?? "",
+      // Configuration (conditionnel sur MODELE)
+      MODELE: modele ?? "",
+      // Terrain (conditionnel sur PACK_LABEL)
+      PACK_LABEL: PACK_LABELS[pack] ?? pack,
+      ZONES: zonesFlat?.join(", ") ?? "",
+      BUDGET: body.budget ?? "",
+    },
+  }).catch((err) => console.error("[recherche-terrain] Brevo error:", err));
 
   return NextResponse.json({ success: true, persisted: true });
 }

@@ -13,7 +13,7 @@ export function Promesse() {
           </p>
         </Reveal>
         <Reveal delay={0.05}>
-          <p className="editorial mt-6 max-w-4xl text-balance text-[1.8rem] leading-[1.18] text-ink md:text-[3rem] md:leading-[1.16]">
+          <p className="editorial mt-6 text-[1.8rem] leading-[1.18] text-ink md:whitespace-nowrap md:text-[2.4rem] md:leading-[1.16]">
             {PROMISE}
           </p>
         </Reveal>

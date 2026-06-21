@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { NAV, BRAND, PRODUCT_LIST } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
@@ -52,7 +53,15 @@ export function Nav() {
       )}
     >
       <nav className="container-page flex h-16 items-center justify-between md:h-[4.5rem]">
-        <Link href="/" className="flex items-baseline gap-2">
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/images/howner-logo.png"
+            alt="Howner logo"
+            width={28}
+            height={28}
+            className="h-7 w-auto"
+            priority
+          />
           <span className="text-lg font-semibold tracking-tight">
             {BRAND.maker}
           </span>
@@ -92,6 +101,12 @@ export function Nav() {
               <span className="absolute -bottom-1 left-0 h-px w-0 bg-accent transition-all duration-300 group-hover:w-full" />
             </Link>
           ))}
+          <Link
+            href="/mandataire"
+            className="rounded-full bg-orange-400 px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-orange-500"
+          >
+            Accès Mandataire
+          </Link>
         </div>
 
         <div className="flex items-center gap-4">
@@ -253,7 +268,15 @@ export function Nav() {
             </Link>
           ))}
 
-          <div className="mt-6 flex items-center justify-between">
+          <Link
+            href="/mandataire"
+            onClick={() => setOpen(false)}
+            className="mt-4 flex w-full items-center justify-center rounded-full bg-orange-400 px-4 py-3 text-base font-bold text-white"
+          >
+            Accès Mandataire
+          </Link>
+
+          <div className="mt-4 flex items-center justify-between">
             <span className="font-mono text-xs text-muted">
               {PRODUCT_LIST.map((p) => p.total).join(" + ")} exemplaires
             </span>
