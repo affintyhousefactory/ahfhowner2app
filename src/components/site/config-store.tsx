@@ -38,6 +38,10 @@ type Ctx = {
   toggleOption: (id: string) => void;
   distanceKm: number | null;
   setDistanceKm: (v: number | null) => void;
+  terrainMode: "have" | "pack" | null;
+  setTerrainMode: (v: "have" | "pack" | null) => void;
+  packTerrain: string | null;
+  setPackTerrain: (v: string | null) => void;
   // calculs
   optionsTotal: number;
   houseTotal: number;
@@ -76,6 +80,8 @@ export function ConfigProvider({
   const [terrasseM2, setTerrasseM2] = useState(0);
   const [options, setOptions] = useState<string[]>([]);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
+  const [terrainMode, setTerrainMode] = useState<"have" | "pack" | null>(null);
+  const [packTerrain, setPackTerrain] = useState<string | null>(null);
   const [reservedByProduct, setReservedByProduct] =
     useState<ReservedMap>(initialReserved);
 
@@ -137,13 +143,14 @@ export function ConfigProvider({
       bedroom, setBedroom, interior, setInterior,
       terrasseM2, setTerrasseM2, options, toggleOption,
       distanceKm, setDistanceKm,
+      terrainMode, setTerrainMode, packTerrain, setPackTerrain,
       optionsTotal, houseTotal, delivery, grandTotal,
       reservedByProduct, remainingByProduct,
       activeReserved, activeRemaining, incrementReserved,
     };
   }, [
     product, cladding, facade, bar, bedroom, interior, terrasseM2,
-    options, distanceKm, reservedByProduct, incrementReserved,
+    options, distanceKm, terrainMode, packTerrain, reservedByProduct, incrementReserved,
   ]);
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;

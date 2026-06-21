@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createElement } from "react";
-import ContactConfirmation from "../../../../emails/contact-confirmation";
-import { sendEmail } from "@/lib/email";
+import { sendBrevoTemplate } from "@/lib/email";
+
+const PRODUIT_LABELS: Record<string, string> = {
+  one: "Arko One (20 m²)",
+  max: "Arko Max (40 m²)",
+  autre: "Autre demande",
+};
 
 type Payload = {
   prenom: string;
@@ -42,7 +46,6 @@ export async function POST(req: NextRequest) {
   } else if (turnstileSecret && !captchaToken) {
     return NextResponse.json({ error: "captcha_required" }, { status: 400 });
   } else {
-    // Pas de secret configuré (dev local) — on laisse passer
     turnstileOk = false;
   }
 
@@ -68,15 +71,23 @@ export async function POST(req: NextRequest) {
     console.warn("[contact] Supabase non configuré — contact non persisté.");
   }
 
-  // Envoi email Brevo
-  const toAhf = process.env.EMAIL_TO_AHF ?? "";
-  const recipients = [email, ...(toAhf ? [toAhf] : [])].filter(Boolean);
+  // Envoi email Brevo (fire-and-forget — n'impacte pas la réponse HTTP)
+  const templateId = parseInt(process.env.BREVO_TEMPLATE_CONTACT ?? "0");
+  const toAhf = process.env.BREVO_TO_AHF ?? "";
 
-  await sendEmail({
-    to: recipients,
-    subject: "Votre message a bien été reçu — Affinity House Factory",
-    template: createElement(ContactConfirmation, { prenom, nom, produit, message }),
-  });
+  sendBrevoTemplate({
+    templateId,
+    to: [
+      { email, name: `${prenom} ${nom}` },
+      ...(toAhf ? [{ email: toAhf, name: "Affinity House Factory" }] : []),
+    ],
+    params: {
+      prenom,
+      nom,
+      produit_label: produit ? (PRODUIT_LABELS[produit] ?? produit) : null,
+      message,
+    },
+  }).catch((err) => console.error("[contact] Brevo error:", err));
 
   return NextResponse.json({ success: true });
 }

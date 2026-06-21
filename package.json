@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "WATCHPACK_POLLING=true next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -11,8 +11,6 @@
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.3",
     "@next/third-parties": "^16.2.9",
-    "@react-email/components": "^1.0.12",
-    "@react-email/render": "^2.0.9",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@react-three/postprocessing": "^3.0.4",

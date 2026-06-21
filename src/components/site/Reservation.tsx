@@ -15,17 +15,52 @@ export function Reservation() {
   const { name } = c.active;
   const reserved = c.activeReserved;
   const total = c.active.total;
-  const deposit = BRAND.deposit;
   const soldOut = reserved >= total;
   const [slot, setSlot] = useState<number | null>(null);
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!sent) {
-      c.incrementReserved(c.product); // FOMO démo : jauge bouge avant confirmation
+    if (sending || sent) return;
+    setSending(true);
+    const fd = new FormData(e.currentTarget);
+    try {
+      const bardage = CONFIG.cladding.find((x) => x.id === c.cladding)?.label ?? c.cladding;
+      const facade = CONFIG.kitchen.find((x) => x.id === c.facade)?.label ?? c.facade;
+      const bar = CONFIG.bar.find((x) => x.id === c.bar)?.label ?? c.bar;
+      const chambre = CONFIG.bedroom.find((x) => x.id === c.bedroom)?.label ?? c.bedroom;
+      const interieur = CONFIG.interior.find((x) => x.id === c.interior)?.label ?? c.interior;
+      const optionsLabels = c.active.pricing.options
+        .filter((o) => c.options.includes(o.id))
+        .map((o) => o.label);
+      await fetch("/api/reservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prenom: fd.get("prenom"),
+          nom: fd.get("nom"),
+          email: fd.get("email"),
+          tel: fd.get("tel"),
+          slot,
+          produit: c.active.name,
+          surface: c.active.area,
+          houseTotal: c.houseTotal,
+          delivery: c.delivery,
+          terrainMode: c.terrainMode,
+          packTerrain: c.packTerrain,
+          bardage, facade, bar, chambre, interieur,
+          terrasseM2: c.terrasseM2,
+          optionsLabels,
+          grandTotal: c.grandTotal,
+        }),
+      });
+    } catch {
+      // silencieux — confirmation côté UI quand même
     }
-    setSent(true); // Phase 1 : aucune transaction réelle, aucun backend.
+    if (!sent) c.incrementReserved(c.product);
+    setSent(true);
+    setSending(false);
   };
 
   return (
@@ -116,16 +151,19 @@ export function Reservation() {
                     className="mt-2 w-full justify-center disabled:opacity-40"
                   >
                     {slot
-                      ? `Réserver le n°${String(slot).padStart(2, "0")} et payer ${deposit.toLocaleString("fr-FR")} €`
+                      ? `Envoyer ma demande — n°${String(slot).padStart(2, "0")}`
                       : "Choisissez un numéro ci-dessus"}
                     <Arrow />
                   </Button>
 
-                  {/* Réducteur de risque au point de clic */}
-                  <p className="mt-3 text-center text-xs leading-relaxed text-muted">
-                    Remboursable. Sans engagement de construction.
-                    <br className="hidden sm:block" /> Prochaine étape : 30 min
-                    avec notre architecte intégrée.
+                  <p className="mt-3 rounded-xl border border-line bg-surface px-4 py-3 text-[0.72rem] leading-relaxed text-muted">
+                    Après un échange avec notre conseiller, vous recevrez un lien
+                    de pré-paiement sécurisé pour confirmer votre réservation.
+                    Un acompte de{" "}
+                    <span className="font-semibold text-ink">
+                      {BRAND.deposit.toLocaleString("fr-FR")} €
+                    </span>{" "}
+                    vous sera demandé — remboursable, sans engagement de construction.
                   </p>
                 </form>
 
@@ -195,6 +233,26 @@ function ConfigRecap() {
         </div>
       )}
 
+      {/* Situation terrain */}
+      {(() => {
+        const PACK_LABELS: Record<string, string> = {
+          essentiel: "Pack Essentiel",
+          etendu: "Pack Étendu",
+          departement: "Pack Département",
+        };
+        const terrainValue =
+          c.terrainMode === "pack" && c.packTerrain
+            ? PACK_LABELS[c.packTerrain] ?? "Pack Terrain Affinity"
+            : c.terrainMode === "have"
+              ? "J'ai un terrain"
+              : null;
+        return terrainValue ? (
+          <div className="mt-3 border-t border-line pt-3 text-sm">
+            <RecapLine label="Situation terrain" value={terrainValue} />
+          </div>
+        ) : null;
+      })()}
+
       {/* Totaux */}
       <div className="mt-3 space-y-1.5 border-t border-line pt-3 font-mono text-sm">
         <div className="flex items-baseline justify-between">
@@ -204,10 +262,14 @@ function ConfigRecap() {
         <div className="flex items-baseline justify-between">
           <span className="text-muted">Livraison estimée</span>
           <span className="text-ink">
-            {c.delivery != null ? eur(c.delivery) : "à estimer"}
+            {c.terrainMode === "pack"
+              ? "Via pack terrain"
+              : c.delivery != null
+                ? eur(c.delivery)
+                : "À estimer"}
           </span>
         </div>
-        {c.delivery != null && (
+        {c.terrainMode !== "pack" && c.delivery != null && (
           <div className="flex items-baseline justify-between border-t border-line pt-2">
             <span className="font-medium text-ink">Total estimé</span>
             <span className="text-ink">{eur(c.grandTotal)}</span>
@@ -258,8 +320,8 @@ function LegalNote() {
       remboursable. Conditions précisées dans les{" "}
       <a href="/cgv" className="underline underline-offset-2 hover:text-ink">
         CGV
-      </a>{" "}
-      (en cours de validation juridique).
+      </a>
+      .
     </p>
   );
 }

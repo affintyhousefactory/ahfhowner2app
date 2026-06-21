@@ -11,9 +11,9 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://affinityhome.fr";
 
-// Acompte : jamais en dur — lu depuis l'environnement (fallback 1500).
+// Acompte : jamais en dur — lu depuis l'environnement (fallback 5000).
 const DEPOSIT_EUR = Number(
-  process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR ?? 1500,
+  process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR ?? 5000,
 );
 
 export const BRAND = {
@@ -151,7 +151,7 @@ export const REASSURANCE = [
   },
   {
     t: "Acompte remboursable",
-    d: "Vous réservez votre numéro avec 1 500 € remboursables. Sans engagement de construction.",
+    d: "Vous réservez votre numéro avec 5 000 € remboursables. Sans engagement de construction.",
   },
   {
     t: "Après votre réservation",
@@ -170,7 +170,7 @@ export const FAQ = [
   },
   {
     q: "Comment se passe le paiement ?",
-    a: "L'acompte de 1 500 € à la réservation s'impute sur le 1er appel. Échéancier 10 / 30 / 40 / 20 %.",
+    a: "L'acompte de 5 000 € à la réservation s'impute sur le 1er appel. Échéancier 10 / 30 / 40 / 20 %.",
   },
   {
     q: "Quelles garanties ?",

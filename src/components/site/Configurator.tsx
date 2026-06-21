@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CONFIG, PRODUCT_LIST } from "@/lib/site";
@@ -294,7 +294,9 @@ export function Configurator() {
               </div>
             </Group>
 
-            <Devis />
+            <Suspense>
+              <Devis />
+            </Suspense>
           </div>
         </div>
       </div>
@@ -309,10 +311,27 @@ function Devis() {
   const selectedPacks = p.options.filter((o) => c.options.includes(o.id));
 
   const initPack = searchParams.get("pack") as "essentiel" | "etendu" | "departement" | null;
-  const [terrainMode, setTerrainMode] = useState<"have" | "pack">(initPack ? "pack" : "have");
-  const [packTerrain, setPackTerrain] = useState<string | null>(initPack);
-  const packObj = PACK_TERRAIN.find((pt) => pt.id === packTerrain);
+  const packObj = PACK_TERRAIN.find((pt) => pt.id === c.packTerrain);
   const [cgv, setCgv] = useState(false);
+  const [cgvError, setCgvError] = useState(false);
+  const [adresse, setAdresse] = useState("");
+
+  // Initialiser depuis le query param ?pack= au premier rendu
+  useState(() => {
+    if (initPack) {
+      c.setTerrainMode("pack");
+      c.setPackTerrain(initPack);
+    }
+  });
+
+  function handleReserver() {
+    if (!cgv) {
+      setCgvError(true);
+      return;
+    }
+    setCgvError(false);
+    window.location.hash = "reserver";
+  }
 
   return (
     <div className="rounded-2xl border border-line bg-canvas p-6">
@@ -352,74 +371,69 @@ function Devis() {
         </div>
       </div>
 
-      {/* Couche 2 — livraison & terrain */}
+      {/* Votre situation terrain — avant l'encadré total */}
       <div className="mt-5 border-t border-line pt-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm text-ink">Livraison & pose</p>
-            <p className="font-mono text-[0.68rem] text-muted">
-              {eur(p.delivery.grutage)} + {p.delivery.perKm.toString().replace(".", ",")} €/km · depuis {p.delivery.origin}
-            </p>
-          </div>
-          <span className="font-mono text-sm">
-            {terrainMode === "pack" ? "À estimer" : c.delivery != null ? eur(c.delivery) : "à estimer"}
-          </span>
-        </div>
-
-        {/* Toggle terrain mode */}
-        <div className="mt-3 flex gap-2">
+        <p className="mb-3 text-sm font-semibold text-ink">Votre situation terrain</p>
+        <div className="flex gap-2">
           <button
-            onClick={() => setTerrainMode("have")}
+            onClick={() => c.setTerrainMode("have")}
             className={cn(
-              "rounded-full border px-3 py-1.5 text-xs transition-all",
-              terrainMode === "have" ? "border-accent bg-accent/5 text-ink" : "border-line text-muted hover:border-ink/30",
+              "flex-1 rounded-full border px-3 py-2 text-center text-xs transition-all",
+              c.terrainMode === "have"
+                ? "border-accent bg-accent/5 text-ink"
+                : "border-line text-muted hover:border-ink/30 hover:text-ink",
             )}
           >
             J'ai un terrain
           </button>
           <button
-            onClick={() => setTerrainMode("pack")}
+            onClick={() => c.setTerrainMode("pack")}
             className={cn(
-              "rounded-full border px-3 py-1.5 text-xs transition-all",
-              terrainMode === "pack" ? "border-accent bg-accent/5 text-ink" : "border-line text-muted hover:border-ink/30",
+              "flex-1 rounded-full border px-3 py-2 text-center text-xs transition-all",
+              c.terrainMode === "pack"
+                ? "border-accent bg-accent/5 text-ink"
+                : "border-line text-muted hover:border-ink/30 hover:text-ink",
             )}
           >
             Pack Terrain Affinity
           </button>
         </div>
 
-        {terrainMode === "have" ? (
-          <>
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                type="number"
-                min={0}
-                value={c.distanceKm ?? ""}
-                onChange={(e) =>
-                  c.setDistanceKm(e.target.value === "" ? null : Math.max(0, Number(e.target.value)))
-                }
-                placeholder="distance depuis Bayonne"
-                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
-              />
-              <span className="font-mono text-xs text-muted">km</span>
-            </div>
-            <p className="mt-1.5 font-mono text-[0.65rem] text-muted">
-              Auto-calculée depuis votre adresse via l'outil terrain.
-            </p>
-          </>
-        ) : (
+        {c.terrainMode === "have" && (
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <input
+              value={adresse}
+              onChange={(e) => setAdresse(e.target.value)}
+              placeholder="12 chemin des Pins, 33000 Bordeaux"
+              className="w-full rounded-full border border-line bg-surface px-4 py-2.5 text-sm outline-none focus:border-accent placeholder:text-muted/50"
+            />
+            <Button
+              variant="accent"
+              className="shrink-0 whitespace-nowrap"
+              magnetic={false}
+              onClick={() => {}}
+            >
+              Pré&#x2011;analyser
+              <Arrow />
+            </Button>
+          </div>
+        )}
+
+        {c.terrainMode === "pack" && (
           <>
             <div className="mt-3 flex flex-wrap gap-2">
               {PACK_TERRAIN.map((pt) => (
                 <button
                   key={pt.id}
-                  onClick={() => setPackTerrain(pt.id)}
+                  onClick={() => c.setPackTerrain(pt.id)}
                   className={cn(
                     "flex flex-col rounded-xl border px-3 py-2 text-left text-xs transition-all",
-                    packTerrain === pt.id ? "border-accent bg-accent/5" : "border-line text-muted hover:border-ink/30",
+                    c.packTerrain === pt.id
+                      ? "border-accent bg-accent/5"
+                      : "border-line text-muted hover:border-ink/30",
                   )}
                 >
-                  <span className={cn("font-mono text-[0.6rem] uppercase tracking-wider", packTerrain === pt.id ? "text-accent" : "text-muted/60")}>
+                  <span className={cn("font-mono text-[0.6rem] uppercase tracking-wider", c.packTerrain === pt.id ? "text-accent" : "text-muted/60")}>
                     {pt.label}
                   </span>
                   <span className="mt-0.5 font-semibold text-ink">{pt.prix}</span>
@@ -432,8 +446,8 @@ function Devis() {
                 En savoir plus sur les packs terrain →
               </a>
             </p>
-            {packTerrain && (
-              <PackTerrainContactForm pack={packTerrain as PackId} />
+            {c.packTerrain && (
+              <PackTerrainContactForm pack={c.packTerrain as PackId} />
             )}
           </>
         )}
@@ -445,23 +459,23 @@ function Devis() {
           <span className="text-sm text-canvas/70">Votre Arko</span>
           <span className="font-mono">{eur(c.houseTotal)} TTC</span>
         </div>
-        <div className="mt-1 flex items-baseline justify-between">
-          <span className="text-sm text-canvas/70">+ Livraison estimée</span>
-          <span className="font-mono">
-            {terrainMode === "pack" ? "À estimer" : c.delivery != null ? eur(c.delivery) : "—"}
-          </span>
-        </div>
-        {terrainMode === "pack" && packObj && (
+        {c.terrainMode === "pack" && packObj && (
           <div className="mt-1 flex items-baseline justify-between">
             <span className="text-sm text-canvas/70">Pack Terrain {packObj.label}</span>
             <span className="font-mono">{packObj.prix}</span>
           </div>
         )}
-        {terrainMode !== "pack" && c.delivery != null && (
-          <div className="mt-2 flex items-baseline justify-between border-t border-canvas/15 pt-2">
-            <span className="font-medium">Total estimé</span>
-            <span className="editorial text-xl">{eur(c.grandTotal)}</span>
-          </div>
+        {c.terrainMode === "have" && c.delivery != null && (
+          <>
+            <div className="mt-1 flex items-baseline justify-between">
+              <span className="text-sm text-canvas/70">+ Livraison estimée</span>
+              <span className="font-mono">{eur(c.delivery)}</span>
+            </div>
+            <div className="mt-2 flex items-baseline justify-between border-t border-canvas/15 pt-2">
+              <span className="font-medium">Total estimé</span>
+              <span className="editorial text-xl">{eur(c.grandTotal)}</span>
+            </div>
+          </>
         )}
       </div>
 
@@ -484,7 +498,10 @@ function Devis() {
         <input
           type="checkbox"
           checked={cgv}
-          onChange={(e) => setCgv(e.target.checked)}
+          onChange={(e) => {
+            setCgv(e.target.checked);
+            if (e.target.checked) setCgvError(false);
+          }}
           className="mt-0.5 shrink-0 accent-accent"
         />
         <span className="font-mono text-[0.63rem] leading-relaxed text-muted">
@@ -496,11 +513,22 @@ function Devis() {
           .
         </span>
       </label>
+      {cgvError && (
+        <p className="mt-1 font-mono text-[0.63rem] text-red-500">
+          Veuillez accepter la politique de confidentialité pour continuer.
+        </p>
+      )}
 
-      <Button href="#reserver" variant="accent" className="mt-4 w-full justify-center">
+      <Button
+        onClick={handleReserver}
+        variant="accent"
+        className="mt-4 w-full justify-center"
+        magnetic={false}
+      >
         Réserver cette configuration
         <Arrow />
       </Button>
+
       <p className="mt-3 font-mono text-[0.62rem] leading-relaxed text-muted">
         Estimation indicative — document non contractuel, devis définitif après
         visite. Validité 3 mois. TVA 20 %.
@@ -518,15 +546,116 @@ const PACK_LABELS: Record<PackId, string> = {
 };
 
 function PackTerrainContactForm({ pack }: { pack: PackId }) {
+  const c = useConfig();
+  const [nom, setNom] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [email, setEmail] = useState("");
   const [villes, setVilles] = useState("");
   const [zones, setZones] = useState("");
   const [departement, setDepartement] = useState("");
+  const [cgv, setCgv] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const inputCls =
     "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent placeholder:text-muted/50";
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (sending || sent) return;
+
+    const villesArr = pack === "essentiel"
+      ? villes.split(",").map((v) => v.trim()).filter(Boolean)
+      : undefined;
+    const zonesArr = pack === "etendu"
+      ? zones.split(",").map((v) => v.trim()).filter(Boolean)
+      : undefined;
+
+    if (pack === "essentiel" && !villesArr?.length) {
+      setError("Précisez au moins une ville.");
+      return;
+    }
+    if (pack === "etendu" && !zonesArr?.length) {
+      setError("Précisez au moins une zone.");
+      return;
+    }
+    if (pack === "departement" && !departement.trim()) {
+      setError("Précisez le département.");
+      return;
+    }
+
+    setError(null);
+    setSending(true);
+
+    const modele = `${c.active.name} ${c.active.area}`;
+    const budget = c.houseTotal > 0 ? `${c.houseTotal.toLocaleString("fr-FR")} €` : null;
+
+    try {
+      const res = await fetch("/api/recherche-terrain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nom: nom.trim(),
+          telephone: telephone.trim(),
+          email: email.trim(),
+          modele,
+          pack,
+          source: "configurateur",
+          villes: villesArr,
+          zones: zonesArr,
+          departement: pack === "departement" ? departement.trim() : undefined,
+          budget,
+          accepte_cgv: cgv,
+        }),
+      });
+      if (!res.ok) throw new Error("server");
+      setSent(true);
+    } catch {
+      setError("Une erreur est survenue — réessayez ou contactez-nous.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="mt-4 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-ink">
+        ✓ Demande envoyée — on vous recontacte sous 48 h.
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-4 space-y-2.5">
+    <form onSubmit={handleSubmit} className="mt-4 space-y-2.5">
+      {/* Identité */}
+      <div className="grid grid-cols-2 gap-2">
+        <input
+          required
+          value={nom}
+          onChange={(e) => setNom(e.target.value)}
+          placeholder="Nom complet"
+          className={inputCls}
+        />
+        <input
+          required
+          type="tel"
+          value={telephone}
+          onChange={(e) => setTelephone(e.target.value)}
+          placeholder="Téléphone"
+          className={inputCls}
+        />
+      </div>
+      <input
+        required
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        className={inputCls}
+      />
+
+      {/* Zone selon pack */}
       {pack === "essentiel" && (
         <div>
           <p className="mb-1 font-mono text-[0.63rem] text-muted">
@@ -534,6 +663,7 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           </p>
           <textarea
             rows={2}
+            required
             value={villes}
             onChange={(e) => setVilles(e.target.value)}
             placeholder="Ex : Lyon, Bordeaux, Nantes, Rennes, Montpellier"
@@ -541,7 +671,6 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           />
         </div>
       )}
-
       {pack === "etendu" && (
         <div>
           <p className="mb-1 font-mono text-[0.63rem] text-muted">
@@ -549,6 +678,7 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           </p>
           <textarea
             rows={2}
+            required
             value={zones}
             onChange={(e) => setZones(e.target.value)}
             placeholder="Ex : Bretagne, Auvergne-Rhône-Alpes, Grand Est"
@@ -556,7 +686,6 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           />
         </div>
       )}
-
       {pack === "departement" && (
         <div>
           <p className="mb-1 font-mono text-[0.63rem] text-muted">
@@ -564,6 +693,7 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           </p>
           <input
             type="text"
+            required
             value={departement}
             onChange={(e) => setDepartement(e.target.value)}
             placeholder="Ex : 69 — Rhône, 33 — Gironde, 44 — Loire-Atlantique"
@@ -571,7 +701,37 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           />
         </div>
       )}
-    </div>
+
+      {/* CGV */}
+      <label className="flex cursor-pointer items-start gap-2 pt-1">
+        <input
+          type="checkbox"
+          required
+          checked={cgv}
+          onChange={(e) => setCgv(e.target.checked)}
+          className="mt-0.5 accent-accent"
+        />
+        <span className="font-mono text-[0.63rem] leading-relaxed text-muted">
+          J'accepte les{" "}
+          <a href="/cgv" target="_blank" className="text-accent underline underline-offset-2">
+            CGV
+          </a>{" "}
+          et la politique de confidentialité.
+        </span>
+      </label>
+
+      {error && (
+        <p className="font-mono text-[0.65rem] text-red-500">{error}</p>
+      )}
+
+      <button
+        type="submit"
+        disabled={sending}
+        className="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-50"
+      >
+        {sending ? "Envoi…" : "Envoyer ma demande"}
+      </button>
+    </form>
   );
 }
 

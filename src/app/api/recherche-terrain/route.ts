@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createElement } from "react";
-import ConfigurateurRecap from "../../../../emails/configurateur-recap";
-import { sendEmail } from "@/lib/email";
+import { sendBrevoTemplate } from "@/lib/email";
 
 type PackId = "essentiel" | "etendu" | "departement";
+
+const PACK_LABELS: Record<PackId, string> = {
+  essentiel: "Pack Essentiel — communes ciblées",
+  etendu: "Pack Étendu — zones élargies",
+  departement: "Pack Département",
+};
 
 type Payload = {
   nom: string;
@@ -80,22 +84,29 @@ export async function POST(req: NextRequest) {
   }
 
   // Envoi email Brevo (fire-and-forget — n'impacte pas la réponse HTTP)
-  const toAhf = process.env.EMAIL_TO_AHF ?? "";
-  const recipients = [email, ...(toAhf ? [toAhf] : [])].filter(Boolean);
+  const templateId = parseInt(process.env.BREVO_TEMPLATE_RECAP ?? "0");
+  const toAhf = process.env.BREVO_TO_AHF ?? "";
   const zonesFlat = villes ?? zones ?? (departement ? [departement] : null);
 
-  sendEmail({
-    to: recipients,
-    subject: "Récapitulatif de votre demande ARKO — Affinity House Factory",
-    template: createElement(ConfigurateurRecap, {
-      nom,
-      email,
-      tel: telephone ?? null,
-      modele: modele ?? null,
-      pack: pack ?? null,
-      zones: zonesFlat ?? null,
-      budget: body.budget ?? null,
-    }),
+  sendBrevoTemplate({
+    templateId,
+    to: [
+      { email, name: nom },
+      ...(toAhf ? [{ email: toAhf, name: "Affinity House Factory" }] : []),
+    ],
+    params: {
+      // Identité
+      PRENOM: "",
+      NOM: nom,
+      EMAIL: email,
+      TEL: telephone ?? "",
+      // Configuration (conditionnel sur MODELE)
+      MODELE: modele ?? "",
+      // Terrain (conditionnel sur PACK_LABEL)
+      PACK_LABEL: PACK_LABELS[pack] ?? pack,
+      ZONES: zonesFlat?.join(", ") ?? "",
+      BUDGET: body.budget ?? "",
+    },
   }).catch((err) => console.error("[recherche-terrain] Brevo error:", err));
 
   return NextResponse.json({ success: true, persisted: true });

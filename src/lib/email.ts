@@ -1,27 +1,23 @@
-import { render } from "@react-email/render";
-import type { ReactElement } from "react";
-
 const BREVO_API = "https://api.brevo.com/v3/smtp/email";
 
-export async function sendEmail({
+export async function sendBrevoTemplate({
+  templateId,
   to,
-  subject,
-  template,
+  params,
 }: {
-  to: string[];
-  subject: string;
-  template: ReactElement;
+  templateId: number;
+  to: { email: string; name?: string }[];
+  params: Record<string, string | number | null | undefined>;
 }): Promise<void> {
   const apiKey = process.env.BREVO_API_KEY;
-  const fromEmail = process.env.BREVO_SENDER_EMAIL ?? process.env.EMAIL_FROM ?? "contact@affinityhousefactory.com";
-  const fromName = process.env.BREVO_SENDER_NAME ?? "Affinity House Factory";
-
   if (!apiKey) {
     console.warn("[email] BREVO_API_KEY manquant — email non envoyé.");
     return;
   }
-
-  const htmlContent = await render(template);
+  if (!templateId) {
+    console.warn("[email] templateId manquant — email non envoyé.");
+    return;
+  }
 
   const res = await fetch(BREVO_API, {
     method: "POST",
@@ -29,12 +25,7 @@ export async function sendEmail({
       "Content-Type": "application/json",
       "api-key": apiKey,
     },
-    body: JSON.stringify({
-      sender: { name: fromName, email: fromEmail },
-      to: to.map((email) => ({ email })),
-      subject,
-      htmlContent,
-    }),
+    body: JSON.stringify({ templateId, to, params }),
   });
 
   if (!res.ok) {
