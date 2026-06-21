@@ -54,12 +54,19 @@ export function ContactForm() {
 
   function handleTurnstileSuccess(token: string) {
     setCaptchaToken(token);
-    // Si une soumission est en attente du token, la déclencher
     if (pendingFormDataRef.current) {
       const data = pendingFormDataRef.current;
       pendingFormDataRef.current = null;
       doSubmit(token, data);
     }
+  }
+
+  function handleTurnstileError() {
+    pendingFormDataRef.current = null;
+    setLoading(false);
+    setSubmitError(true);
+    turnstileRef.current?.reset();
+    setCaptchaToken(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -71,10 +78,9 @@ export function ContactForm() {
 
     if (CAPTCHA_REQUIRED) {
       if (captchaToken) {
-        // Token déjà prêt — soumettre directement
         await doSubmit(captchaToken, data);
       } else {
-        // Déclencher Turnstile, soumettre quand le token arrive
+        setLoading(true);
         pendingFormDataRef.current = data;
         turnstileRef.current?.execute();
       }
@@ -153,7 +159,8 @@ export function ContactForm() {
         ref={turnstileRef}
         siteKey={SITE_KEY}
         onSuccess={handleTurnstileSuccess}
-        onExpire={() => setCaptchaToken(null)}
+        onError={handleTurnstileError}
+        onExpire={() => { setCaptchaToken(null); pendingFormDataRef.current = null; setLoading(false); }}
         options={{ theme: "light", size: "invisible", execution: "execute" }}
         className="mt-3"
       />
