@@ -19,12 +19,21 @@ export function Reservation() {
   const [slot, setSlot] = useState<number | null>(null);
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (sending || sent) return;
-    setSending(true);
     const fd = new FormData(e.currentTarget);
+    const errs: Record<string, boolean> = {};
+    if (!String(fd.get("prenom") ?? "").trim()) errs.prenom = true;
+    if (!String(fd.get("nom") ?? "").trim()) errs.nom = true;
+    if (!String(fd.get("email") ?? "").trim()) errs.email = true;
+    if (!String(fd.get("tel") ?? "").trim()) errs.tel = true;
+    if (!slot) errs.slot = true;
+    if (Object.keys(errs).length > 0) { setFieldErrors(errs); return; }
+    setFieldErrors({});
+    setSending(true);
     try {
       const bardage = CONFIG.cladding.find((x) => x.id === c.cladding)?.label ?? c.cladding;
       const facade = CONFIG.kitchen.find((x) => x.id === c.facade)?.label ?? c.facade;
@@ -137,34 +146,55 @@ export function Reservation() {
                   })}
                 </div>
 
+                {fieldErrors.slot && (
+                  <p className="mb-2 font-mono text-[0.65rem] text-red-500">
+                    Sélectionnez un numéro ci-dessus pour continuer.
+                  </p>
+                )}
+
                 <form onSubmit={submit} className="mt-7 space-y-3">
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <Field name="prenom" placeholder="Prénom" />
-                    <Field name="nom" placeholder="Nom" />
+                    <Field name="prenom" placeholder="Prénom" error={fieldErrors.prenom} />
+                    <Field name="nom" placeholder="Nom" error={fieldErrors.nom} />
                   </div>
-                  <Field name="email" type="email" placeholder="Email" required />
-                  <Field name="tel" type="tel" placeholder="Téléphone" />
+                  <Field name="email" type="email" placeholder="Email" error={fieldErrors.email} />
+                  <Field name="tel" type="tel" placeholder="Téléphone" error={fieldErrors.tel} />
 
-                  <Button
-                    variant="accent"
-                    magnetic={false}
-                    className="mt-2 w-full justify-center disabled:opacity-40"
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-medium text-white transition-opacity disabled:opacity-50"
                   >
-                    {slot
-                      ? `Envoyer ma demande — n°${String(slot).padStart(2, "0")}`
-                      : "Choisissez un numéro ci-dessus"}
-                    <Arrow />
-                  </Button>
+                    {sending
+                      ? "Envoi en cours…"
+                      : slot
+                        ? `Envoyer ma demande — n°${String(slot).padStart(2, "0")}`
+                        : "Choisissez un numéro ci-dessus"}
+                    {!sending && <Arrow />}
+                  </button>
 
-                  <p className="mt-3 rounded-xl border border-line bg-surface px-4 py-3 text-[0.72rem] leading-relaxed text-muted">
-                    Après un échange avec notre conseiller, vous recevrez un lien
-                    de pré-paiement sécurisé pour confirmer votre réservation.
-                    Un acompte de{" "}
-                    <span className="font-semibold text-ink">
-                      {BRAND.deposit.toLocaleString("fr-FR")} €
-                    </span>{" "}
-                    vous sera demandé — remboursable, sans engagement de construction.
-                  </p>
+                  <div className="mt-3 rounded-xl border border-line bg-surface px-4 py-3 text-[0.72rem] leading-relaxed text-muted">
+                    <p>
+                      Après votre échange avec notre conseiller, vous recevrez un devis
+                      mentionnant et un paiement de :
+                    </p>
+                    <ul className="mt-2 space-y-1">
+                      <li>
+                        <span className="font-semibold text-ink">
+                          {BRAND.deposit.toLocaleString("fr-FR")} €
+                        </span>
+                        {" "}· Acompte de réservation Arko — remboursable, sans engagement de construction
+                      </li>
+                      <li>
+                        <span className="font-semibold text-ink">1 500 €</span>
+                        {" "}· Acompte Pack Recherche Terrain (optionnel — réservé aux acquéreurs d'un module Arko)
+                      </li>
+                    </ul>
+                    <p className="mt-2">
+                      Conditions précisées dans les{" "}
+                      <a href="/cgv" className="underline underline-offset-2 hover:text-ink">CGV</a>.
+                    </p>
+                  </div>
                 </form>
 
                 <LegalNote />
@@ -294,19 +324,24 @@ function Field({
   type = "text",
   placeholder,
   required,
+  error,
 }: {
   name: string;
   type?: string;
   placeholder: string;
   required?: boolean;
+  error?: boolean;
 }) {
   return (
     <input
       name={name}
       type={type}
       required={required}
-      placeholder={placeholder}
-      className="w-full rounded-full border border-line bg-surface px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-muted/60 focus:border-accent"
+      placeholder={error ? `${placeholder} — requis` : placeholder}
+      className={cn(
+        "w-full rounded-full border bg-surface px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-muted/60 focus:border-accent",
+        error ? "border-red-400 placeholder:text-red-400/80" : "border-line",
+      )}
     />
   );
 }

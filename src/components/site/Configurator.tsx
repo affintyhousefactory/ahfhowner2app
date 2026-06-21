@@ -314,6 +314,8 @@ function Devis() {
   const packObj = PACK_TERRAIN.find((pt) => pt.id === c.packTerrain);
   const [cgv, setCgv] = useState(false);
   const [cgvError, setCgvError] = useState(false);
+  const [acceptCgv, setAcceptCgv] = useState(false);
+  const [acceptCgvError, setAcceptCgvError] = useState(false);
   const [adresse, setAdresse] = useState("");
 
   // Initialiser depuis le query param ?pack= au premier rendu
@@ -325,12 +327,11 @@ function Devis() {
   });
 
   function handleReserver() {
-    if (!cgv) {
-      setCgvError(true);
-      return;
-    }
-    setCgvError(false);
-    window.location.hash = "reserver";
+    let blocked = false;
+    if (!cgv) { setCgvError(true); blocked = true; } else { setCgvError(false); }
+    if (!acceptCgv) { setAcceptCgvError(true); blocked = true; } else { setAcceptCgvError(false); }
+    if (blocked) return;
+    window.location.href = "/configurer#reserver";
   }
 
   return (
@@ -519,6 +520,27 @@ function Devis() {
         </p>
       )}
 
+      <label className="mt-3 flex items-start gap-2">
+        <input
+          type="checkbox"
+          checked={acceptCgv}
+          onChange={(e) => { setAcceptCgv(e.target.checked); if (e.target.checked) setAcceptCgvError(false); }}
+          className="mt-0.5 shrink-0 accent-accent"
+        />
+        <span className="font-mono text-[0.63rem] leading-relaxed text-muted">
+          J'accepte les{" "}
+          <a href="/cgv" target="_blank" className="text-accent underline underline-offset-2">
+            CGV
+          </a>{" "}
+          et la politique de confidentialité.
+        </span>
+      </label>
+      {acceptCgvError && (
+        <p className="mt-1 font-mono text-[0.63rem] text-red-500">
+          Veuillez accepter les CGV pour continuer.
+        </p>
+      )}
+
       <Button
         onClick={handleReserver}
         variant="accent"
@@ -546,116 +568,15 @@ const PACK_LABELS: Record<PackId, string> = {
 };
 
 function PackTerrainContactForm({ pack }: { pack: PackId }) {
-  const c = useConfig();
-  const [nom, setNom] = useState("");
-  const [telephone, setTelephone] = useState("");
-  const [email, setEmail] = useState("");
   const [villes, setVilles] = useState("");
   const [zones, setZones] = useState("");
   const [departement, setDepartement] = useState("");
-  const [cgv, setCgv] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const inputCls =
     "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent placeholder:text-muted/50";
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (sending || sent) return;
-
-    const villesArr = pack === "essentiel"
-      ? villes.split(",").map((v) => v.trim()).filter(Boolean)
-      : undefined;
-    const zonesArr = pack === "etendu"
-      ? zones.split(",").map((v) => v.trim()).filter(Boolean)
-      : undefined;
-
-    if (pack === "essentiel" && !villesArr?.length) {
-      setError("Précisez au moins une ville.");
-      return;
-    }
-    if (pack === "etendu" && !zonesArr?.length) {
-      setError("Précisez au moins une zone.");
-      return;
-    }
-    if (pack === "departement" && !departement.trim()) {
-      setError("Précisez le département.");
-      return;
-    }
-
-    setError(null);
-    setSending(true);
-
-    const modele = `${c.active.name} ${c.active.area}`;
-    const budget = c.houseTotal > 0 ? `${c.houseTotal.toLocaleString("fr-FR")} €` : null;
-
-    try {
-      const res = await fetch("/api/recherche-terrain", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nom: nom.trim(),
-          telephone: telephone.trim(),
-          email: email.trim(),
-          modele,
-          pack,
-          source: "configurateur",
-          villes: villesArr,
-          zones: zonesArr,
-          departement: pack === "departement" ? departement.trim() : undefined,
-          budget,
-          accepte_cgv: cgv,
-        }),
-      });
-      if (!res.ok) throw new Error("server");
-      setSent(true);
-    } catch {
-      setError("Une erreur est survenue — réessayez ou contactez-nous.");
-    } finally {
-      setSending(false);
-    }
-  }
-
-  if (sent) {
-    return (
-      <div className="mt-4 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-ink">
-        ✓ Demande envoyée — on vous recontacte sous 48 h.
-      </div>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-2.5">
-      {/* Identité */}
-      <div className="grid grid-cols-2 gap-2">
-        <input
-          required
-          value={nom}
-          onChange={(e) => setNom(e.target.value)}
-          placeholder="Nom complet"
-          className={inputCls}
-        />
-        <input
-          required
-          type="tel"
-          value={telephone}
-          onChange={(e) => setTelephone(e.target.value)}
-          placeholder="Téléphone"
-          className={inputCls}
-        />
-      </div>
-      <input
-        required
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        className={inputCls}
-      />
-
-      {/* Zone selon pack */}
+    <div className="mt-4 space-y-2.5">
       {pack === "essentiel" && (
         <div>
           <p className="mb-1 font-mono text-[0.63rem] text-muted">
@@ -663,7 +584,6 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           </p>
           <textarea
             rows={2}
-            required
             value={villes}
             onChange={(e) => setVilles(e.target.value)}
             placeholder="Ex : Lyon, Bordeaux, Nantes, Rennes, Montpellier"
@@ -678,7 +598,6 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           </p>
           <textarea
             rows={2}
-            required
             value={zones}
             onChange={(e) => setZones(e.target.value)}
             placeholder="Ex : Bretagne, Auvergne-Rhône-Alpes, Grand Est"
@@ -693,7 +612,6 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           </p>
           <input
             type="text"
-            required
             value={departement}
             onChange={(e) => setDepartement(e.target.value)}
             placeholder="Ex : 69 — Rhône, 33 — Gironde, 44 — Loire-Atlantique"
@@ -701,37 +619,7 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
           />
         </div>
       )}
-
-      {/* CGV */}
-      <label className="flex cursor-pointer items-start gap-2 pt-1">
-        <input
-          type="checkbox"
-          required
-          checked={cgv}
-          onChange={(e) => setCgv(e.target.checked)}
-          className="mt-0.5 accent-accent"
-        />
-        <span className="font-mono text-[0.63rem] leading-relaxed text-muted">
-          J'accepte les{" "}
-          <a href="/cgv" target="_blank" className="text-accent underline underline-offset-2">
-            CGV
-          </a>{" "}
-          et la politique de confidentialité.
-        </span>
-      </label>
-
-      {error && (
-        <p className="font-mono text-[0.65rem] text-red-500">{error}</p>
-      )}
-
-      <button
-        type="submit"
-        disabled={sending}
-        className="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-50"
-      >
-        {sending ? "Envoi…" : "Envoyer ma demande"}
-      </button>
-    </form>
+    </div>
   );
 }
 
