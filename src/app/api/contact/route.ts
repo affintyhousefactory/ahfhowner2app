@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
   // Envoi email Brevo (fire-and-forget — n'impacte pas la réponse HTTP)
   const templateId = parseInt(process.env.BREVO_TEMPLATE_CONTACT ?? "0");
-  const toAhf = process.env.BREVO_TO_AHF ?? "";
+  const toAhf = process.env.EMAIL_TO_AHF ?? process.env.BREVO_TO_AHF ?? "";
 
   sendBrevoTemplate({
     templateId,

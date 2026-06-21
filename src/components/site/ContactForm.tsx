@@ -20,17 +20,9 @@ export function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
+  const pendingFormDataRef = useRef<FormData | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (loading) return;
-
-    // En prod avec vraie clé, le token doit être présent (widget auto-execute)
-    if (CAPTCHA_REQUIRED && !captchaToken) return;
-
-    const form = e.currentTarget as HTMLFormElement;
-    const data = new FormData(form);
-
+  async function doSubmit(token: string | null, data: FormData) {
     setLoading(true);
     setSubmitError(false);
 
@@ -44,7 +36,7 @@ export function ContactForm() {
         tel: data.get("tel") || null,
         produit: data.get("produit") || null,
         message: data.get("message"),
-        captchaToken,
+        captchaToken: token,
       }),
     });
 
@@ -58,6 +50,37 @@ export function ContactForm() {
     }
 
     setSent(true);
+  }
+
+  function handleTurnstileSuccess(token: string) {
+    setCaptchaToken(token);
+    // Si une soumission est en attente du token, la déclencher
+    if (pendingFormDataRef.current) {
+      const data = pendingFormDataRef.current;
+      pendingFormDataRef.current = null;
+      doSubmit(token, data);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (loading) return;
+
+    const form = e.currentTarget as HTMLFormElement;
+    const data = new FormData(form);
+
+    if (CAPTCHA_REQUIRED) {
+      if (captchaToken) {
+        // Token déjà prêt — soumettre directement
+        await doSubmit(captchaToken, data);
+      } else {
+        // Déclencher Turnstile, soumettre quand le token arrive
+        pendingFormDataRef.current = data;
+        turnstileRef.current?.execute();
+      }
+    } else {
+      await doSubmit(null, data);
+    }
   }
 
   if (sent) {
@@ -129,9 +152,9 @@ export function ContactForm() {
       <Turnstile
         ref={turnstileRef}
         siteKey={SITE_KEY}
-        onSuccess={setCaptchaToken}
+        onSuccess={handleTurnstileSuccess}
         onExpire={() => setCaptchaToken(null)}
-        options={{ theme: "light", size: "invisible" }}
+        options={{ theme: "light", size: "invisible", execution: "execute" }}
         className="mt-3"
       />
 
