@@ -9,8 +9,9 @@
   "supabase": {
     "supabaseProjectRef": "msrjocrcewvqkcehruny",
     "dbName": "ahfhownerdb",
-    "mode": "read-only",
-    "note": "Ecriture/migrations bloquees jusqu'a ADR-007 (schemas + RLS) valide."
+    "mode": "read-write",
+    "allowedTables": ["leads", "contacts", "recherche_terrain"],
+    "note": "ADR-007 partiel valide (table leads). Stripe/Realtime/waitlist = ADR-008/009/010."
   },
   "gmail": {
     "allowedSendAs": [],

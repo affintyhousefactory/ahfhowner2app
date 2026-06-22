@@ -219,6 +219,10 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
 
       const data = (await res.json()) as ParcelleData;
       setResult(data);
+      // Persiste pour le formulaire de réservation (compact mode = configurateur)
+      if (mode === "compact" && data.found) {
+        try { sessionStorage.setItem("plu_result", JSON.stringify(data)); } catch {}
+      }
     } catch {
       clearInterval(tick);
       setLoading(false);
