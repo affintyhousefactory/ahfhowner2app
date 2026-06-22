@@ -38,14 +38,25 @@ export const MANIFESTO =
 export const PROMISE =
   "Une maison d'architecte, livrée prête à vivre, en 12 semaines.";
 
+// Paramètres transport convoi — source de vérité en DB (config_variables namespace 'transport').
+// Fallback env/constante jusqu'à implémentation du chargement DB (Phase 4).
+export const TRANSPORT = {
+  tarifEurTonneKm: 0.24,   // €/tonne/km — DB: transport.tarif_eur_tonne_km
+  grutageEur: Number(process.env.NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR ?? 1440),
+  roadFactor: 1.3,          // haversine → distance route (×1.3)
+  usine: { lat: 43.4933, lon: -1.4748 }, // Bayonne — à affiner avec adresse exacte atelier
+  poids: { one: 6, max: 9 } as Record<string, number>, // tonnes par produit
+} as const;
+
 // Prix — base & livraison en env (jamais en dur), catalogue d'options en données.
 export const PRICING = {
   base: Number(process.env.NEXT_PUBLIC_ARKO_BASE_EUR ?? 89900),
   perM2: 2250,
   terrassePerM2: 300,
   delivery: {
-    grutage: Number(process.env.NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR ?? 1440),
-    perKm: Number(process.env.NEXT_PUBLIC_DELIVERY_PER_KM_EUR ?? 5.4),
+    grutage: TRANSPORT.grutageEur,
+    // perKm = poids Arko Max × tarif/tonne/km (DB: transport.poids_arko_max_tonnes × tarif_eur_tonne_km)
+    perKm: Number(process.env.NEXT_PUBLIC_DELIVERY_PER_KM_EUR ?? +(TRANSPORT.poids.max * TRANSPORT.tarifEurTonneKm).toFixed(4)),
     origin: "Bayonne",
   },
   options: [
@@ -79,7 +90,12 @@ const ONE_PRICING = {
   base: Number(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR ?? 59900),
   perM2: 2250, // TODO ARKO ONE : confirmer €/m²
   terrassePerM2: 300, // TODO ARKO ONE : confirmer
-  delivery: PRICING.delivery, // TODO ARKO ONE : confirmer (repris de Max)
+  delivery: {
+    grutage: TRANSPORT.grutageEur,
+    // perKm = poids Arko One × tarif/tonne/km (DB: transport.poids_arko_one_tonnes × tarif_eur_tonne_km)
+    perKm: Number(process.env.NEXT_PUBLIC_ARKO_ONE_DELIVERY_PER_KM_EUR ?? +(TRANSPORT.poids.one * TRANSPORT.tarifEurTonneKm).toFixed(4)),
+    origin: "Bayonne",
+  }, // TODO ARKO ONE : confirmer poids exact
   options: PRICING.options, // TODO ARKO ONE : grille options propre à confirmer
   landFees: PRICING.landFees,
 } as const;

@@ -4,6 +4,8 @@ export type ParcelleData = {
   found: boolean;
   parcelle: string;
   address_label?: string;
+  lon?: number;  // coordonnées WGS84 du centroïde parcelle — pour calcul livraison
+  lat?: number;
   zone_urba?: string;
   libelong?: string;
   typezone?: string;
@@ -192,6 +194,8 @@ async function analyseCoords(
     found: true,
     parcelle,
     address_label: addressLabel,
+    lon,
+    lat,
     zone_urba: z.libelle as string,
     libelong: (z.libelong ?? z.destdomi) as string | undefined,
     typezone: z.typezone as string,

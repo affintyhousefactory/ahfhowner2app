@@ -1,14 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BRAND, CONFIG } from "@/lib/site";
+import { BRAND, CONFIG, TRANSPORT } from "@/lib/site";
 import { Gauge } from "@/components/ui/Gauge";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { useConfig, eur } from "./config-store";
 import { CountdownBanner } from "./CountdownBanner";
+import type { ParcelleData } from "@/app/api/parcelle/route";
+
+function haversineKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLon = ((b.lon - a.lon) * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.lat * Math.PI) / 180) *
+      Math.cos((b.lat * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.asin(Math.sqrt(h));
+}
 
 export function Reservation() {
   const c = useConfig();
@@ -223,6 +236,20 @@ export function Reservation() {
 
 function ConfigRecap() {
   const c = useConfig();
+
+  // Calcul livraison GPS depuis l'analyse PLU stockée en session
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("plu_result");
+      if (!raw) return;
+      const plu = JSON.parse(raw) as ParcelleData;
+      if (plu.lon == null || plu.lat == null) return;
+      const distKm = haversineKm(TRANSPORT.usine, { lat: plu.lat, lon: plu.lon }) * TRANSPORT.roadFactor;
+      c.setDistanceKm(Math.round(distKm));
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const claddingLabel =
     CONFIG.cladding.find((x) => x.id === c.cladding)?.label ?? "";
   const kitchenLabel =
@@ -303,15 +330,22 @@ function ConfigRecap() {
           <span className="text-muted">Votre Arko</span>
           <span className="text-ink">{eur(c.houseTotal)} TTC</span>
         </div>
-        <div className="flex items-baseline justify-between">
-          <span className="text-muted">Livraison estimée</span>
-          <span className="text-ink">
-            {c.terrainMode === "pack"
-              ? "Via pack terrain"
-              : c.delivery != null
-                ? eur(c.delivery)
-                : "À estimer"}
-          </span>
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-baseline justify-between">
+            <span className="text-muted">Livraison estimée</span>
+            <span className="text-ink">
+              {c.terrainMode === "pack"
+                ? "Via pack terrain"
+                : c.delivery != null
+                  ? eur(c.delivery)
+                  : "À estimer"}
+            </span>
+          </div>
+          {c.delivery != null && c.distanceKm != null && c.terrainMode !== "pack" && (
+            <p className="text-right font-mono text-[0.62rem] text-muted/70">
+              ~{c.distanceKm} km · {c.active.key === "one" ? TRANSPORT.poids.one : TRANSPORT.poids.max} t · {TRANSPORT.tarifEurTonneKm} €/t/km + grutage
+            </p>
+          )}
         </div>
         {c.terrainMode !== "pack" && c.delivery != null && (
           <div className="flex items-baseline justify-between border-t border-line pt-2">
