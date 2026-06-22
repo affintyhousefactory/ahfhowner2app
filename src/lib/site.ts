@@ -162,23 +162,23 @@ export const REASSURANCE = [
 export const FAQ = [
   {
     q: "Quel est le délai ?",
-    a: "12 semaines de fabrication en atelier, puis la pose en une journée sur vos fondations.",
+    a: "12 semaines de fabrication en atelier à compter de la levée des conditions du contrat de construction — urbanisme obtenu, financement confirmé, fondations réceptionnées. La pose se fait ensuite en une journée. Vous êtes informé par email à chaque étape clé : lancement, structure, finitions, module prêt à livrer, pose.",
   },
   {
     q: "Et si je n'ai pas encore de terrain ?",
-    a: "Notre outil terrain vérifie une adresse ou une annonce. Sinon, on vous aide à trouver une parcelle compatible.",
+    a: "Notre outil terrain vérifie en ligne la compatibilité d'une adresse ou d'une annonce : PLU, accessibilité convoi, exposition. Si vous partez de zéro, le Pack Recherche Terrain (acompte de 1 500 €, optionnel et accessoire à la réservation) vous donne accès à un Mandataire Partenaire Howner-Affinity qualifié, titulaire de la carte T, qui conduit la recherche sur 3 mois. L'acompte est intégralement remboursable si aucun terrain compatible n'est trouvé dans le délai.",
   },
   {
     q: "Comment se passe le paiement ?",
-    a: "L'acompte de 5 000 € à la réservation s'impute sur le 1er appel. Échéancier 10 / 30 / 40 / 20 %.",
+    a: "La réservation déclenche un acompte de 5 000 €, remboursable à tout moment avant la signature du contrat de construction, sans condition ni justification. Cet acompte s'impute sur le premier appel de fonds. L'échéancier est adapté à la fabrication en atelier selon le décret du 6 février 2020 : 10 % à l'ouverture, 40 % à l'achèvement de la structure, 60 % aux finitions intérieures, 80 % au module prêt à livrer, 95 % à la réception, 100 % après levée des réserves.",
   },
   {
     q: "Quelles garanties ?",
-    a: "Les garanties légales du bâtiment s'appliquent. Détails et CGV communiqués avant signature (en cours de validation juridique).",
+    a: "Trois garanties légales s'appliquent à chaque Maison ARKO : parfait achèvement (1 an — tous les désordres signalés à la réception ou dans l'année), biennale de bon fonctionnement (2 ans — volets, robinetterie, équipements électriques et éléments dissociables), et décennale (10 ans — structure et éléments indissociables). La garantie décennale est transférable en cas de revente. L'assurance dommages-ouvrage est à la charge du Client, obligatoire avant ouverture de chantier.",
   },
   {
     q: "Et l'après-vente ?",
-    a: "Un interlocuteur dédié, et notre architecte intégrée reste votre référente après la pose.",
+    a: "Un interlocuteur dédié vous accompagne après la pose. Notre architecte intégrée reste votre référente technique pour les questions de conformité, d'urbanisme et d'adaptation. Les désordres signalés dans l'année suivant la réception sont traités dans le cadre de la garantie de parfait achèvement, sans frais.",
   },
 ] as const;
 

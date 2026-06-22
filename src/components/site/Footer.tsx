@@ -34,8 +34,7 @@ export function Footer() {
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-canvas/60">
               Deux maisons compactes d'architecte, conçues avec notre architecte
-              intégrée et livrées prêtes à vivre. {BRAND.madeIn} — fondé par
-              Puigbo.
+              intégrée et livrées prêtes à vivre. Fabriquées au Pays-Basque.
             </p>
           </div>
 
