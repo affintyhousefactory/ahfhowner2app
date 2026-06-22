@@ -10,6 +10,7 @@ import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { useConfig, eur } from "./config-store";
 import { CountdownBanner } from "./CountdownBanner";
+import { ParcelleAnalyse } from "./ParcelleAnalyse";
 
 const PACK_TERRAIN = [
   { id: "essentiel", label: "Essentiel", prix: "4 900 € TTC" },
@@ -311,18 +312,21 @@ function Devis() {
   const selectedPacks = p.options.filter((o) => c.options.includes(o.id));
 
   const initPack = searchParams.get("pack") as "essentiel" | "etendu" | "departement" | null;
+  const initParcelle = searchParams.get("parcelle") ?? "";
   const packObj = PACK_TERRAIN.find((pt) => pt.id === c.packTerrain);
   const [cgv, setCgv] = useState(false);
   const [cgvError, setCgvError] = useState(false);
   const [acceptCgv, setAcceptCgv] = useState(false);
   const [acceptCgvError, setAcceptCgvError] = useState(false);
-  const [adresse, setAdresse] = useState("");
 
-  // Initialiser depuis le query param ?pack= au premier rendu
+  // Initialiser depuis les query params au premier rendu
   useState(() => {
     if (initPack) {
       c.setTerrainMode("pack");
       c.setPackTerrain(initPack);
+    }
+    if (initParcelle) {
+      c.setTerrainMode("have");
     }
   });
 
@@ -401,22 +405,8 @@ function Devis() {
         </div>
 
         {c.terrainMode === "have" && (
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <input
-              value={adresse}
-              onChange={(e) => setAdresse(e.target.value)}
-              placeholder="12 chemin des Pins, 33000 Bordeaux"
-              className="w-full rounded-full border border-line bg-surface px-4 py-2.5 text-sm outline-none focus:border-accent placeholder:text-muted/50"
-            />
-            <Button
-              variant="accent"
-              className="shrink-0 whitespace-nowrap"
-              magnetic={false}
-              onClick={() => {}}
-            >
-              Pré&#x2011;analyser
-              <Arrow />
-            </Button>
+          <div className="mt-3">
+            <ParcelleAnalyse mode="compact" initialParcelle={initParcelle} />
           </div>
         )}
 
