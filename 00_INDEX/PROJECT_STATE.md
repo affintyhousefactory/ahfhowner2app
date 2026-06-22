@@ -50,7 +50,11 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Analyse via lien d'annonce | `LandTool.tsx` mode `annonce` | dégradé | Apify + BAN | 012 |
 | Contact terrain | `LandTool.tsx` (~L392) | `setSent(true)` | lead Supabase | 013 |
 | Devis 3 couches multi-produit | `Configurator.tsx`, `config-store.tsx` | ✅ logique verrouillée, paramétrée par produit | — | 005,020 |
-| Email confirmations | `emails/contact-confirmation.tsx`, `emails/configurateur-recap.tsx`, `src/app/api/contact/route.ts` | absent — à implémenter Phase 4 | Resend + React Email | 026 |
+| Email confirmations contact | `src/app/api/contact/route.ts`, `src/lib/email.ts` | ✅ Brevo template `10` — câblé | — | 026 |
+| Email recap configurateur/terrain | `src/app/api/recherche-terrain/route.ts` | ✅ Brevo template `9` — câblé | — | 026 |
+| Analyse terrain (adresse + PLU) | `src/components/site/ParcelleAnalyse.tsx`, `src/app/api/parcelle/route.ts` | BAN → apicarto geom → GPU coords | — | 011,025 |
+| Stockage leads + consentement PLU | `src/app/api/reservation/route.ts`, `src/lib/supabase.ts` | Non-bloquant, lazy client | Migration preprod/prod | 007 |
+| Calcul livraison GPS | `src/components/site/Reservation.tsx`, `src/lib/site.ts` (TRANSPORT) | Haversine × road_factor × poids × tarif | Coordonnées atelier à affiner | — |
 | SEO | `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `viewer/layout.tsx`, `lib/jsonld.ts`, `seo/JsonLd.tsx`, `llms.txt/route.ts` | ✅ P0+P1 (sitemap/robots/OG/twitter/canonical/noindex + JSON-LD Org/Product/FAQ + llms.txt) | P2 polish | 018 |
 
 ## Risques principaux
@@ -66,19 +70,32 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 ## Variables d'environnement manquantes (Phase 4)
 
 ```
+# Supabase (3 projets — scoper par env Vercel : Production / Preview / Development)
 NEXT_PUBLIC_SUPABASE_URL=          # client
 NEXT_PUBLIC_SUPABASE_ANON_KEY=     # client
 SUPABASE_SERVICE_ROLE_KEY=         # serveur, jamais commité
-STRIPE_SECRET_KEY=                 # serveur
-STRIPE_WEBHOOK_SECRET=             # serveur
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY= # client
-BREVO_API_KEY=                     # serveur, jamais commité (ADR-026)
-EMAIL_FROM=noreply@affinityhome.fr # expéditeur Brevo (ADR-026)
-EMAIL_TO_AHF=contact@affinityhousefactory.com # copie interne (ADR-026)
-APIFY_TOKEN=                       # serveur (mode annonce)
-ANTHROPIC_API_KEY=                 # serveur, optionnel (ADR-017)
+
+# Stripe (Phase 4)
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+
+# Brevo — configuré prod ; à ajouter scope Preview (ADR-026)
+BREVO_API_KEY=                     # serveur, jamais commité
+BREVO_SENDER_EMAIL=contact@affinityhousefactory.com
+BREVO_SENDER_NAME=Howner - By Affinity House Factory
+BREVO_TO_AHF=contact@affinityhousefactory.com
+BREVO_TEMPLATE_CONTACT=10
+BREVO_TEMPLATE_RECAP=9
+
+# Transport livraison (surcharge possible — valeurs par défaut dans site.ts)
+NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR=1440
+
+# Divers (Phase 4)
+APIFY_TOKEN=
+ANTHROPIC_API_KEY=                 # optionnel (ADR-017)
 ```
-Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO_BASE_EUR`, tarifs livraison) — ADR-003.
+Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO_BASE_EUR`) — ADR-003.
 
 ## Index ADR (`03_DECISIONS/`)
 
@@ -110,14 +127,18 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
-1. **ADR-018 — SEO** : **P0+P1 livrés** (2026-06-17) — robots, sitemap, OG, twitter, canonical, `/viewer` noindex, JSON-LD (Organization/Product+Offer/FAQPage), `llms.txt`. Domaine `affinityhome.fr` (`SITE_URL`). **Reste P2** (polish, non bloquant) : manifest/PWA, skip-link, trim fonts, audit Lenis reduced-motion.
-2. **ADR-007** — Supabase schémas + RLS (repasser MCP en écriture) → débloque 009/010/013.
-3. **ADR-026 ✅ livré** — Emails Brevo : `/api/contact` + `/api/recherche-terrain` → `sendBrevoTemplate` (templates IDs `10`/`9`). Reste : migration SQL `contacts` (dashboard Supabase), bouton submit `PackTerrainContactForm`, SPF/DKIM prod.
+1. **Merger `feat/terrain-address-lookup`** — valider Preview Vercel (env vars Supabase Preview scope à configurer) → merger → appliquer migrations sur prod.
+2. **Migrations Supabase** : `20260622_leads.sql`, `20260622_config_tarifs.sql`, `20260620_contacts.sql` — à appliquer sur preprod + prod via dashboard SQL Editor (ou GitHub Actions — non tranché).
+3. **ADR-026** reste : migration `contacts`, `PackTerrainContactForm` submit câblé, SPF/DKIM prod.
+4. **ADR-018 SEO reste P2** (polish non bloquant) : manifest/PWA, skip-link, trim fonts.
+5. **ADR-007** — Supabase RLS complet (slots Realtime, waitlist, contact terrain) — débloque ADR-009/010/013.
 
 ## Tokens / MCP
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-06-22 (feat/terrain-address-lookup — analyse PLU par adresse + calcul livraison GPS + schéma Supabase)** — Branche `feat/terrain-address-lookup` poussée (PR en attente de merge). `ParcelleAnalyse.tsx` : saisie par adresse (champ primaire) + bascule numéro de parcelle. Pipeline BAN → apicarto `geom=Point` → GPU `/feature-info/du?lon&lat&typeName` + `/feature-info/sup` (endpoint `/parcel/{id}/` abandonné — rejette tous formats). Fix `source_ign=PCI` (retournait aléatoirement 1000 parcelles Aix). `Reservation.tsx` : calcul livraison depuis `plu_result.lon/lat` sessionStorage (haversine × roadFactor 1.3 × poids × 0,24 €/t/km + grutage 1440 €). `TRANSPORT` dans `site.ts` (Arko One 6 t, Arko Max 9 t). `src/lib/supabase.ts` lazy client — résout `supabaseUrl is required` au build Preview. Migrations : `20260622_leads.sql` (table `leads` + RLS, colonnes PLU), `20260622_config_tarifs.sql` (`config_variables`, `options_produits`, `options_bardage`). `project-access.json` passé `read-write`. `docs/supabase-environments.md` créé (architecture Prod/Preview/Dev, scoping Vercel, workflow `feat/*`). ADR-022/025/026 mis à jour. Coordonnées atelier = placeholder Bayonne (43.4933, −1.4748) — à affiner. Question non tranchée : migrations automatiques GitHub Actions vs Supabase Branching.
 
 **2026-06-22 (bugfix contact + contenu FAQ/footer)** — `ContactForm.tsx` : Turnstile invisible passé de l'auto-execute silencieux à `execute()` au clic (`execution: "execute"`) + pattern `pendingFormDataRef` (soumission relancée dans `onSuccess`). Handlers `onError`/`onExpire` : vident la file d'attente, reset loading, affichent l'erreur — plus de bouton silencieux. `/api/contact route.ts` : fallback `EMAIL_TO_AHF || BREVO_TO_AHF` (mismatch env Vercel — AHF ne recevait pas les notifications contact). FAQ (`src/lib/site.ts`, 5 questions) : réponses réécrites et détaillées — délai + 3 conditions suspensives de déclenchement fabrication, Pack Recherche Terrain 1 500 € + Mandataire Partenaire Howner-Affinity qualifié carte T + remboursement si terrain non trouvé, paiement 6 paliers décret 6 fév. 2020, garanties 1/2/10 ans + transférabilité décennale + DO obligatoire, après-vente GPA. Footer : « Fabriqué » → « **Fabriquées** » (accord féminin pluriel avec « deux maisons »), suppression « fondé par Puigbo ». DNS howner.fr non encore configuré → contact form non testable en conditions réelles (Turnstile rejette le headless Playwright). **ADR-026 reste** : migration SQL `contacts`, `PackTerrainContactForm` submit, SPF/DKIM prod.
 
