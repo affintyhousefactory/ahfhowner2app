@@ -107,17 +107,21 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 021 | Architecture multi-pages + nav Tesla | Accepté | ✅ |
 | 022 | Split produit One/Max + repositionnement | **Accepté — valider Albert** | 🟠 |
 | 023 | Déploiement production Vercel | Proposé | ✅ |
-| 026 | Emails Resend templates + Supabase contacts | Proposé | ✅ |
+| 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. **ADR-018 — SEO** : **P0+P1 livrés** (2026-06-17) — robots, sitemap, OG, twitter, canonical, `/viewer` noindex, JSON-LD (Organization/Product+Offer/FAQPage), `llms.txt`. Domaine `affinityhome.fr` (`SITE_URL`). **Reste P2** (polish, non bloquant) : manifest/PWA, skip-link, trim fonts, audit Lenis reduced-motion.
 2. **ADR-007** — Supabase schémas + RLS (repasser MCP en écriture) → débloque 009/010/013.
-3. **ADR-026** — Emails Resend : créer compte Resend + DNS SPF/DKIM → implémenter `/api/contact` + table `contacts` + 2 templates React Email → débloque ADR-008.
+3. **ADR-026 ✅ livré** — Emails Brevo : `/api/contact` + `/api/recherche-terrain` → `sendBrevoTemplate` (templates IDs `10`/`9`). Reste : migration SQL `contacts` (dashboard Supabase), bouton submit `PackTerrainContactForm`, SPF/DKIM prod.
 
 ## Tokens / MCP
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-06-22 (bugfix contact + contenu FAQ/footer)** — `ContactForm.tsx` : Turnstile invisible passé de l'auto-execute silencieux à `execute()` au clic (`execution: "execute"`) + pattern `pendingFormDataRef` (soumission relancée dans `onSuccess`). Handlers `onError`/`onExpire` : vident la file d'attente, reset loading, affichent l'erreur — plus de bouton silencieux. `/api/contact route.ts` : fallback `EMAIL_TO_AHF || BREVO_TO_AHF` (mismatch env Vercel — AHF ne recevait pas les notifications contact). FAQ (`src/lib/site.ts`, 5 questions) : réponses réécrites et détaillées — délai + 3 conditions suspensives de déclenchement fabrication, Pack Recherche Terrain 1 500 € + Mandataire Partenaire Howner-Affinity qualifié carte T + remboursement si terrain non trouvé, paiement 6 paliers décret 6 fév. 2020, garanties 1/2/10 ans + transférabilité décennale + DO obligatoire, après-vente GPA. Footer : « Fabriqué » → « **Fabriquées** » (accord féminin pluriel avec « deux maisons »), suppression « fondé par Puigbo ». DNS howner.fr non encore configuré → contact form non testable en conditions réelles (Turnstile rejette le headless Playwright). **ADR-026 reste** : migration SQL `contacts`, `PackTerrainContactForm` submit, SPF/DKIM prod.
+
+**2026-06-20 (ADR-026 Emails Brevo + devops)** — Emails transactionnels livrés : `sendBrevoTemplate` (Brevo REST + `templateId` + `params` Jinja2, pas de SDK tiers). `/api/contact` câblé (Turnstile + Supabase `contacts` + Brevo template `10`). `/api/recherche-terrain` migré de Resend → Brevo template `9`. `ContactForm.tsx` : tous champs obligatoires (tel, produit select, email regex), bouton disabled sur `loading` uniquement. Bugfix : `<Devis>` wrappé dans `<Suspense>` (build cassé silencieusement). Devops : `WATCHPACK_POLLING=true` dans script `dev` (hotreload WSL2 NTFS). Packages retirés : `resend`, `@react-email/components`, `@react-email/render`. Clés Turnstile test configurées en dev (`1x00000000000000000000AA`). **Reste ADR-026** : migration SQL `contacts` (dashboard Supabase), `PackTerrainContactForm` sans submit, SPF/DKIM prod. ADR-014 fermé.
 
 **2026-06-20 (ADR-025 Configurateur pack terrain + devops WSL2)** — Intégration pack terrain dans `/configurer` : champs villes/zones/département selon le pack Affinity sélectionné, champs contact (nom/tel/email) retirés du formulaire inline (récupérés à la réservation), case CGV déplacée juste avant le bouton Réserver. Section "Frais complémentaires Hors proposition (hors total)" avec nouvelles estimations. API `source` ajouté (`configurateur` / `rechercheterrain`). Migration `20260620_recherche_terrain_source.sql`. `Reservation.tsx` : label renommé + `ConfigRecap` détaillé par ligne (modèle/bardage/cuisine/barre/chambre/intérieur). Devops : `next.config.ts` `watchOptions.pollIntervalMs: 500` (corrige file-watching Turbopack sur `/mnt/d` WSL2). `.claude/settings.json` créé (`Edit(*)`, `Write(*)`, patterns Bash courants — réduit les prompts de validation). ADR-025 amendé.
 
