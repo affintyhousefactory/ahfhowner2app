@@ -42,11 +42,28 @@ Carte Google Maps parcelles candidates (mode carte + satellite), récapitulatif 
 - Ajouter la route `/rechercheterrain` au sitemap (ADR-018).
 - Phase 4 : activer les env Supabase, appliquer la migration SQL.
 
+## Amendements (2026-06-20)
+
+### Intégration Configurateur
+- Champs de zone (villes / zones / département) injectés dans `Configurator.tsx > Devis` quand "Pack Terrain Affinity" est sélectionné — sans champs contact (nom/tel/email retirés, récupérés lors de la réservation).
+- Case CGV déplacée juste avant le bouton "Réserver" (toujours visible, indépendante du mode terrain).
+- Section "À prévoir" renommée **"Frais complémentaires Hors proposition (hors total)"** avec estimations mises à jour (G2 dès 2 400 €, micro-station dès 9 000 €, ENEDIS, selon commune).
+- API `POST /api/recherche-terrain` : champ `source` ajouté (`"rechercheterrain"` | `"configurateur"`).
+- Migration `supabase/migrations/20260620_recherche_terrain_source.sql` : colonne `source text DEFAULT 'rechercheterrain'`.
+
+### Placeholders zone
+- Essentiel → "Lyon, Bordeaux, Nantes, Rennes, Montpellier"
+- Étendu → "Bretagne, Auvergne-Rhône-Alpes, Grand Est"
+- Département → "69 — Rhône, 33 — Gironde, 44 — Loire-Atlantique"
+
 ## Sources
 
 - `src/app/rechercheterrain/page.tsx`
 - `src/components/site/RechercheTerrainForm.tsx`
+- `src/components/site/Configurator.tsx` (intégration pack terrain)
 - `src/app/api/recherche-terrain/route.ts`
 - `supabase/migrations/20260618_recherche_terrain.sql`
+- `supabase/migrations/20260619_recherche_terrain_modele_budget.sql`
+- `supabase/migrations/20260620_recherche_terrain_source.sql`
 - `ADR-007` — Supabase schémas + RLS
 - `ADR-013` — Contact terrain → leads
