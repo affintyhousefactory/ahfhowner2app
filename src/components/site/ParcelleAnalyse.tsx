@@ -17,7 +17,14 @@ const CAPTCHA_REQUIRED = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !TEST_K
 
 /* ── Étapes chargement ─────────────────────────────────────────── */
 
-const STEPS = [
+const STEPS_ADDRESS = [
+  "Géocodage de l'adresse",
+  "Identification de la parcelle cadastrale",
+  "Consultation du Géoportail de l'Urbanisme",
+  "Extraction des prescriptions et servitudes",
+];
+
+const STEPS_PARCELLE = [
   "Vérification de la référence parcellaire",
   "Consultation du Géoportail de l'Urbanisme",
   "Lecture du document d'urbanisme (PLU / CC)",
@@ -68,12 +75,10 @@ function computeEligibility(result: ParcelleData): Eligibility {
   const { typezone, prescriptions = [], servitudes = [] } = result;
   const allText = [...prescriptions, ...servitudes].join(" ").toLowerCase();
 
-  // Zone non constructible → inéligible
   if (typezone && !["U", "AU"].includes(typezone.toUpperCase())) {
     return { verdict: "ineligible", confirmedCriteria: [], flags: [] };
   }
 
-  // Critères confirmés depuis le GPU
   const confirmedCriteria: string[] = [];
   if (typezone) {
     confirmedCriteria.push(
@@ -89,7 +94,6 @@ function computeEligibility(result: ParcelleData): Eligibility {
     );
   }
 
-  // Détection des zones/prescriptions d'exclusion
   const flags: { label: string; detail: string }[] = [];
 
   if (/ppri|risque inondation|plan de pr[eé]vention|zone inondable|crues/.test(allText)) {
@@ -120,6 +124,8 @@ function computeEligibility(result: ParcelleData): Eligibility {
 
 /* ── Props ──────────────────────────────────────────────────────── */
 
+type InputMode = "address" | "parcelle";
+
 type Props = {
   mode: "full" | "compact";
   initialParcelle?: string;
@@ -128,23 +134,28 @@ type Props = {
 /* ── Composant principal ────────────────────────────────────────── */
 
 export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
-  const [parcelle, setParcelle] = useState(initialParcelle);
+  // Si un numéro de parcelle est pré-rempli (depuis le configurateur), partir en mode parcelle
+  const defaultMode: InputMode = initialParcelle ? "parcelle" : "address";
+
+  const [inputMode, setInputMode] = useState<InputMode>(defaultMode);
+  const [inputValue, setInputValue] = useState(initialParcelle);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [result, setResult] = useState<ParcelleData | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
-  const pendingRef = useRef<string | null>(null);
+  const pendingRef = useRef<{ mode: InputMode; value: string } | null>(null);
 
   const isDark = mode === "full";
+  const steps = inputMode === "address" ? STEPS_ADDRESS : STEPS_PARCELLE;
 
   function handleTurnstileSuccess(token: string) {
     setCaptchaToken(token);
-    if (pendingRef.current !== null) {
-      const p = pendingRef.current;
+    if (pendingRef.current) {
+      const { mode: m, value: v } = pendingRef.current;
       pendingRef.current = null;
-      doAnalyse(p, token);
+      doAnalyse(m, v, token);
     }
   }
 
@@ -156,30 +167,45 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
     setCaptchaToken(null);
   }
 
-  async function doAnalyse(val: string, token: string | null) {
+  async function doAnalyse(iMode: InputMode, value: string, token: string | null) {
     setLoading(true);
     setStep(0);
     setResult(null);
     setErrorMsg(null);
 
-    const tick = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length)), 700);
+    const activeSteps = iMode === "address" ? STEPS_ADDRESS : STEPS_PARCELLE;
+    const tick = setInterval(() => setStep((s) => Math.min(s + 1, activeSteps.length)), 700);
 
     try {
+      const payload =
+        iMode === "address"
+          ? { address: value, turnstileToken: token }
+          : { parcelle: value, turnstileToken: token };
+
       const res = await fetch("/api/parcelle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ parcelle: val, turnstileToken: token }),
+        body: JSON.stringify(payload),
       });
 
       clearInterval(tick);
-      setStep(STEPS.length);
+      setStep(activeSteps.length);
       setLoading(false);
 
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
-        if (body.error === "invalid_parcelle") {
-          setErrorMsg("Format non reconnu — vérifiez le numéro (ex : 6400530000A0123).");
-        } else if (body.error === "captcha_required" || body.error === "captcha_failed") {
+        const errCode = body.error;
+        if (errCode === "invalid_input" || errCode === "invalid_parcelle") {
+          setErrorMsg(
+            iMode === "address"
+              ? "Adresse non reconnue — saisissez une adresse plus précise (numéro + rue + ville)."
+              : "Format non reconnu — vérifiez le numéro (ex : 6400530000A0123).",
+          );
+        } else if (errCode === "address_not_found") {
+          setErrorMsg("Adresse introuvable — vérifiez la saisie ou essayez le numéro de parcelle directement.");
+        } else if (errCode === "parcelle_not_found") {
+          setErrorMsg("Aucune parcelle cadastrale trouvée à cette adresse. Essayez le numéro de parcelle directement.");
+        } else if (errCode === "captcha_required" || errCode === "captcha_failed") {
           setErrorMsg("Vérification de sécurité échouée — réessayez.");
           turnstileRef.current?.reset();
           setCaptchaToken(null);
@@ -201,21 +227,41 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
   }
 
   function handleAnalyse() {
-    const val = parcelle.trim().toUpperCase().replace(/\s/g, "");
-    if (val.length < 10) {
-      setErrorMsg("Saisissez un numéro de parcelle cadastrale (ex : 6400530000A0123).");
+    const value = inputValue.trim();
+    if (!value) {
+      setErrorMsg(
+        inputMode === "address"
+          ? "Saisissez l'adresse du terrain (numéro, rue, ville)."
+          : "Saisissez un numéro de parcelle cadastrale (ex : 6400530000A0123).",
+      );
       return;
     }
+    if (inputMode === "address" && value.length < 5) {
+      setErrorMsg("Adresse trop courte — saisissez une adresse plus précise.");
+      return;
+    }
+    if (inputMode === "parcelle" && value.replace(/\s/g, "").length < 10) {
+      setErrorMsg("Format non reconnu — vérifiez le numéro (ex : 6400530000A0123).");
+      return;
+    }
+
     setErrorMsg(null);
     setResult(null);
 
     if (CAPTCHA_REQUIRED && !captchaToken) {
-      pendingRef.current = val;
+      pendingRef.current = { mode: inputMode, value };
       setLoading(true);
       turnstileRef.current?.execute();
     } else {
-      doAnalyse(val, captchaToken);
+      doAnalyse(inputMode, value, captchaToken);
     }
+  }
+
+  function switchMode(m: InputMode) {
+    setInputMode(m);
+    setInputValue("");
+    setResult(null);
+    setErrorMsg(null);
   }
 
   const inputCls = isDark
@@ -231,20 +277,30 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
     ? "mt-5 rounded-xl border border-canvas/15 bg-canvas/[0.04] p-5 md:p-6"
     : "mt-3 rounded-xl border border-line bg-surface/60 p-4";
 
+  const placeholder =
+    inputMode === "address"
+      ? "Ex : 12 rue de la Paix, 64100 Bayonne"
+      : "Ex : 6400530000A0123";
+
   return (
     <div>
       {/* Saisie */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <input
-          value={parcelle}
-          onChange={(e) => { setParcelle(e.target.value.toUpperCase()); setErrorMsg(null); }}
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(inputMode === "parcelle" ? e.target.value.toUpperCase() : e.target.value);
+            setErrorMsg(null);
+          }}
           onKeyDown={(e) => e.key === "Enter" && !loading && handleAnalyse()}
-          placeholder="Ex : 6400530000A0123"
+          placeholder={placeholder}
           className={inputCls}
           disabled={loading}
-          maxLength={20}
-          autoComplete="off"
+          maxLength={inputMode === "address" ? 120 : 20}
+          autoComplete={inputMode === "address" ? "street-address" : "off"}
           spellCheck={false}
+          type="text"
+          inputMode={inputMode === "address" ? "text" : "url"}
         />
         <button onClick={handleAnalyse} disabled={loading} className={btnCls}>
           {loading ? "Analyse…" : "Pré‑analyser"}
@@ -252,9 +308,30 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
         </button>
       </div>
 
-      <p className={cn("mt-2 font-mono text-[0.65rem]", isDark ? "text-canvas/45" : "text-muted/70")}>
-        Référence cadastrale française — département + commune + préfixe + section + n°
-      </p>
+      {/* Bascule de mode */}
+      <div className={cn("mt-2 flex items-center gap-1 font-mono text-[0.63rem]", isDark ? "text-canvas/40" : "text-muted/60")}>
+        {inputMode === "address" ? (
+          <>
+            Saisie par adresse postale ·{" "}
+            <button
+              onClick={() => switchMode("parcelle")}
+              className={cn("underline underline-offset-2 transition-opacity hover:opacity-80", isDark ? "text-canvas/60" : "text-muted/80")}
+            >
+              Saisir un numéro de parcelle
+            </button>
+          </>
+        ) : (
+          <>
+            Saisie par numéro de parcelle ·{" "}
+            <button
+              onClick={() => switchMode("address")}
+              className={cn("underline underline-offset-2 transition-opacity hover:opacity-80", isDark ? "text-canvas/60" : "text-muted/80")}
+            >
+              Revenir à la saisie par adresse
+            </button>
+          </>
+        )}
+      </div>
 
       {/* Turnstile invisible */}
       <Turnstile
@@ -282,7 +359,7 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
             exit={{ opacity: 0 }}
             className="mt-5 space-y-2.5"
           >
-            {STEPS.map((s, i) => (
+            {steps.map((s, i) => (
               <li
                 key={s}
                 className={cn(
@@ -362,6 +439,9 @@ function FoundResult({
                                       "Non constructible";
     return (
       <div>
+        {result.address_label && (
+          <p className={cn("mb-1.5 text-xs", textMuted)}>{result.address_label}</p>
+        )}
         <div className="flex items-center gap-2">
           <span className={cn("h-2 w-2 shrink-0 rounded-full", dot)} />
           <span className={cn("text-sm font-medium", textBase)}>{label}</span>
@@ -377,24 +457,30 @@ function FoundResult({
             ⚠ {eli.flags.map((f) => f.label).join(" · ")}
           </p>
         )}
-        <p className={cn("mt-1 font-mono text-[0.63rem]", textMuted)}>Pré-analyse indicative — à confirmer.</p>
+        <p className={cn("mt-1 font-mono text-[0.6rem]", textMuted)}>
+          Parcelle {result.parcelle} · Pré-analyse indicative
+        </p>
       </div>
     );
   }
 
-  /* ── Mode full (page terrain) ── */
-
+  /* ── Mode full (page terrain) — inéligible ── */
   if (eli.verdict === "ineligible") {
     return <IneligibleResult result={result} meta={meta} isDark={isDark} textBase={textBase} textMuted={textMuted} divider={divider} />;
   }
 
+  /* ── Mode full — éligible / conditionné ── */
   return (
     <div>
-      {/* En-tête verdict */}
       <EligibleHeader verdict={eli.verdict} isDark={isDark} />
 
-      {/* Zone PLU */}
+      {/* Adresse géocodée + référence parcelle */}
       <div className={cn("mt-5 flex flex-wrap gap-x-6 gap-y-1 border-t pt-4 font-mono text-xs", divider)}>
+        {result.address_label && (
+          <span className={textMuted}>
+            Adresse · <span className={textBase}>{result.address_label}</span>
+          </span>
+        )}
         <span className={textMuted}>
           Parcelle · <span className={textBase}>{result.parcelle}</span>
         </span>
@@ -420,7 +506,7 @@ function FoundResult({
         )}
       </div>
 
-      {/* Critères confirmés depuis le GPU */}
+      {/* Critères confirmés GPU */}
       <div className={cn("mt-5 border-t pt-4", divider)}>
         <p className={cn("font-mono text-[0.65rem] uppercase tracking-[0.12em]", textMuted)}>
           ✓ Critères vérifiés depuis le PLU
@@ -435,10 +521,10 @@ function FoundResult({
         </ul>
       </div>
 
-      {/* Points de vigilance (conditioned) */}
+      {/* Points de vigilance */}
       {eli.flags.length > 0 && (
         <div className={cn("mt-5 border-t pt-4", divider)}>
-          <p className={cn("font-mono text-[0.65rem] uppercase tracking-[0.12em] text-amber-400")}>
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-amber-400">
             ⚠ Points d&apos;attention identifiés
           </p>
           <ul className="mt-2.5 space-y-3">
@@ -480,7 +566,7 @@ function FoundResult({
         </div>
       )}
 
-      {/* Critères à confirmer terrain */}
+      {/* Critères à confirmer */}
       <div className={cn("mt-5 border-t pt-4", divider)}>
         <p className={cn("font-mono text-[0.65rem] uppercase tracking-[0.12em]", textMuted)}>
           À confirmer avec notre Mandataire Affinity
@@ -498,13 +584,12 @@ function FoundResult({
         </ul>
       </div>
 
-      {/* Pitch Mandataire + CTA */}
       <MandatairePitch verdict={eli.verdict} parcelle={result.parcelle} isDark={isDark} divider={divider} />
     </div>
   );
 }
 
-/* ── En-tête selon verdict ──────────────────────────────────────── */
+/* ── En-tête verdict ────────────────────────────────────────────── */
 
 function EligibleHeader({ verdict, isDark }: { verdict: "eligible" | "conditioned"; isDark: boolean }) {
   if (verdict === "eligible") {
@@ -513,7 +598,7 @@ function EligibleHeader({ verdict, isDark }: { verdict: "eligible" | "conditione
         <div className="flex items-center gap-2.5">
           <span className="text-lg">🎉</span>
           <p className={cn("font-semibold tracking-tight", isDark ? "text-green-300" : "text-green-700")}>
-            Votre parcelle est éligible à l&apos;Arko&nbsp;!
+            Votre terrain est éligible à l&apos;Arko&nbsp;!
           </p>
         </div>
         <p className={cn("mt-2 text-sm leading-relaxed", isDark ? "text-canvas/70" : "text-green-800/80")}>
@@ -539,7 +624,7 @@ function EligibleHeader({ verdict, isDark }: { verdict: "eligible" | "conditione
   );
 }
 
-/* ── Pitch Mandataire Affinity + CTA ───────────────────────────── */
+/* ── Pitch Mandataire + CTA ─────────────────────────────────────── */
 
 function MandatairePitch({
   verdict,
@@ -557,26 +642,24 @@ function MandatairePitch({
 
   return (
     <div className={cn("mt-5 border-t pt-4", divider)}>
-      {/* Avantages Mandataire */}
       <p className={cn("font-mono text-[0.65rem] uppercase tracking-[0.12em]", textMuted)}>
         Votre Mandataire Partenaire Howner-Affinity
       </p>
       <ul className="mt-2.5 space-y-1.5">
         {[
-          { icon: "✓", text: "Qualification complète du terrain en 48 h (voirie, réseaux, sol, orientation)" },
-          { icon: "✓", text: "Accompagnement du dépôt de permis jusqu'à la réception" },
-          { icon: "✓", text: "Titulaire de la carte T — mandataire indépendant certifié" },
-          { icon: "✓", text: "Coordonne l'étude géotechnique G2 et la pose des micro-pieux" },
-          { icon: "✓", text: "Interlocuteur unique du terrain à la livraison" },
+          "Qualification complète du terrain en 48 h (voirie, réseaux, sol, orientation)",
+          "Accompagnement du dépôt de permis jusqu'à la réception",
+          "Titulaire de la carte T — mandataire indépendant certifié",
+          "Coordonne l'étude géotechnique G2 et la pose des micro-pieux",
+          "Interlocuteur unique du terrain à la livraison",
         ].map((item, i) => (
           <li key={i} className={cn("flex items-start gap-2 text-xs", textBase)}>
-            <span className="mt-0.5 shrink-0 text-accent">{item.icon}</span>
-            <span>{item.text}</span>
+            <span className="mt-0.5 shrink-0 text-accent">✓</span>
+            <span>{item}</span>
           </li>
         ))}
       </ul>
 
-      {/* Accroche impactante */}
       <div className={cn("mt-4 rounded-lg p-3.5", isDark ? "bg-accent/10 border border-accent/25" : "bg-accent/5 border border-accent/20")}>
         <p className={cn("text-sm font-medium leading-snug", isDark ? "text-canvas" : "text-ink")}>
           {verdict === "eligible"
@@ -588,7 +671,6 @@ function MandatairePitch({
         </p>
       </div>
 
-      {/* CTA */}
       <div className="mt-4">
         <a
           href={`/configurer?parcelle=${encodeURIComponent(parcelle)}`}
@@ -629,6 +711,7 @@ function IneligibleResult({
           </p>
         </div>
         <p className={cn("mt-2 text-sm leading-relaxed", isDark ? "text-canvas/70" : "text-red-800/80")}>
+          {result.address_label && <span className="block mb-1">{result.address_label}</span>}
           Cette parcelle est classée{" "}
           <strong>{result.zone_urba ?? result.typezone}</strong>
           {meta && ` — ${meta.label}`}.
