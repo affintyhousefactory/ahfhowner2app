@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendBrevoTemplate } from "@/lib/email";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import type { ParcelleData } from "@/app/api/parcelle/route";
 
 const TEMPLATE_ID = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
   // ── Supabase insert ──────────────────────────────────────────────
   try {
-    await supabaseAdmin.from("leads").insert({
+    await getSupabaseAdmin().from("leads").insert({
       prenom: prenom ?? "",
       nom: nom ?? "",
       email: email ?? "",
