@@ -67,20 +67,23 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Charte Affinity non validée Albert | Dérive identité vs PASSATION | 🟠 Moyenne | 002 |
 | API terrain externes (GPU/IGN/Apify) | Feature dégradée | 🟠 Moyenne | 011,012 |
 
-## Variables d'environnement manquantes (Phase 4)
+## Variables d'environnement — état par scope Vercel
 
 ```
-# Supabase (3 projets — scoper par env Vercel : Production / Preview / Development)
-NEXT_PUBLIC_SUPABASE_URL=          # client
-NEXT_PUBLIC_SUPABASE_ANON_KEY=     # client
+# Supabase — 3 scopes Vercel (Production / Preview / Development)
+# ✅ Production : configuré (2026-06-27) → ahfhownerdb (msrjocrcewvqkcehruny)
+# ⏳ Preview    : à configurer → ahfhownerdb-preprod (à créer sur dashboard Supabase)
+# ⏳ Development: à configurer → ahfhownerdb-dev ou Supabase local CLI
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=         # serveur, jamais commité
 
-# Stripe (Phase 4)
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+# Stripe — RETIRÉ DU MVP (ADR-008 amendé 2026-06-27 — paiement hors-ligne)
+# STRIPE_SECRET_KEY=              ← ne pas configurer
+# STRIPE_WEBHOOK_SECRET=          ← ne pas configurer
+# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY= ← ne pas configurer
 
-# Brevo — configuré prod ; à ajouter scope Preview (ADR-026)
+# Brevo — ✅ Production + Preview configurés (ADR-026)
 BREVO_API_KEY=                     # serveur, jamais commité
 BREVO_SENDER_EMAIL=contact@affinityhousefactory.com
 BREVO_SENDER_NAME=Howner - By Affinity House Factory
@@ -88,10 +91,10 @@ BREVO_TO_AHF=contact@affinityhousefactory.com
 BREVO_TEMPLATE_CONTACT=10
 BREVO_TEMPLATE_RECAP=9
 
-# Transport livraison (surcharge possible — valeurs par défaut dans site.ts)
+# Transport livraison (valeurs par défaut dans site.ts)
 NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR=1440
 
-# Divers (Phase 4)
+# Divers (Phase 4+)
 APIFY_TOKEN=
 ANTHROPIC_API_KEY=                 # optionnel (ADR-017)
 ```
@@ -108,7 +111,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 005 | Configurator/pricing verrouillé | Accepté (guardrail) | ✅ |
 | 006 | Guardrails perf & média | Accepté (guardrail) | ✅ |
 | 007 | Supabase schémas + RLS | Proposé | ✅ |
-| 008 | Acompte Stripe + webhook | Proposé | 🟠 |
+| 008 | Réservation paiement (hors-ligne — Stripe retiré MVP) | **Différé** | ⚪ |
 | 009 | Jauge/slots Realtime | Proposé | 🟠 |
 | 010 | Waitlist insert | Proposé | ✅ |
 | 011 | LandTool zonage GPU/IGN | Proposé | 🟠 |

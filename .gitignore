@@ -26,3 +26,7 @@ yarn-error.log*
 .claude/commands/
 .claude/settings.local.json
 .claude/worktrees/
+.env*
+
+# Vault local (notes personnelles, non versionné)
+vault/
