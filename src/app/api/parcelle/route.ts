@@ -51,6 +51,20 @@ async function geocodeAddress(address: string): Promise<{ lon: number; lat: numb
   return { lon, lat, label: f.properties.label };
 }
 
+/* ── Géocodage inverse coords → adresse littérale (BAN) ──────────── */
+
+async function reverseGeocode(lon: number, lat: number): Promise<string | null> {
+  const url = `https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { features: BanFeature[] };
+    return data.features?.[0]?.properties?.label ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /* ── Parcelle par coordonnées (apicarto) → idu ──────────────────── */
 
 type CartoParcelle = {
@@ -274,7 +288,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "parcelle_not_found" }, { status: 404 });
     }
 
-    return analyseCoords(parcelleData.lon, parcelleData.lat, parcelleData.idu);
+    // Reverse geocode en parallèle des appels GPU (pas de latence supplémentaire)
+    const [gpuResponse, addressLabel] = await Promise.all([
+      analyseCoords(parcelleData.lon, parcelleData.lat, parcelleData.idu),
+      reverseGeocode(parcelleData.lon, parcelleData.lat),
+    ]);
+
+    if (addressLabel) {
+      const data = (await gpuResponse.json()) as ParcelleData;
+      return NextResponse.json<ParcelleData>({ ...data, address_label: addressLabel });
+    }
+    return gpuResponse;
   } catch {
     return NextResponse.json({ error: "gpu_unavailable" }, { status: 503 });
   }
