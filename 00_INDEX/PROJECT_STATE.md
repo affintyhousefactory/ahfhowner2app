@@ -130,11 +130,11 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
-1. **Merger `feat/terrain-address-lookup`** — valider Preview Vercel (env vars Supabase Preview scope à configurer) → merger → appliquer migrations sur prod.
-2. **Migrations Supabase** : `20260622_leads.sql`, `20260622_config_tarifs.sql`, `20260620_contacts.sql` — à appliquer sur preprod + prod via dashboard SQL Editor (ou GitHub Actions — non tranché).
-3. **ADR-026** reste : migration `contacts`, `PackTerrainContactForm` submit câblé, SPF/DKIM prod.
-4. **ADR-018 SEO reste P2** (polish non bloquant) : manifest/PWA, skip-link, trim fonts.
-5. **ADR-007** — Supabase RLS complet (slots Realtime, waitlist, contact terrain) — débloque ADR-009/010/013.
+1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27 — migrations appliquées preprod + prod.
+2. **ADR-026 reste** : `PackTerrainContactForm` submit câblé + SPF/DKIM prod.
+3. **ADR-018 SEO reste P2** (polish non bloquant) : manifest/PWA, skip-link, trim fonts.
+4. **ADR-007** — Supabase RLS complet (slots Realtime, waitlist, contact terrain) — débloque ADR-009/010/013.
+5. **Coordonnées atelier** : `transport.usine_lat/lon` dans `config_variables` = placeholder Bayonne (43.4933 / −1.4748) — à affiner.
 
 ## Tokens / MCP
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
