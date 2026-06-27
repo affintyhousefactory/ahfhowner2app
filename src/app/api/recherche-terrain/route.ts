@@ -54,6 +54,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, persisted: false });
   }
 
+  // zones JSONB stocke l'ensemble des données géographiques (pack + détail)
+  const zonesJson = {
+    pack,
+    villes: villes ?? null,
+    regions: zones ?? null,
+    departement: departement ?? null,
+  };
+
   const res = await fetch(`${supabaseUrl}/rest/v1/recherche_terrain`, {
     method: "POST",
     headers: {
@@ -67,12 +75,8 @@ export async function POST(req: NextRequest) {
       telephone,
       email,
       modele: modele ?? null,
-      pack,
       source: source ?? "rechercheterrain",
-      villes: villes ?? null,
-      zones: zones ?? null,
-      departement: departement ?? null,
-      taif_zone: taif_zone ?? null,
+      zones: zonesJson,
       accepte_cgv,
     }),
   });

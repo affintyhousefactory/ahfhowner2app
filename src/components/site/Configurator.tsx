@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CONFIG, PRODUCT_LIST } from "@/lib/site";
@@ -561,6 +561,13 @@ function PackTerrainContactForm({ pack }: { pack: PackId }) {
   const [villes, setVilles] = useState("");
   const [zones, setZones] = useState("");
   const [departement, setDepartement] = useState("");
+
+  // Expose les zones au formulaire de réservation via sessionStorage
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("pack_terrain_zones", JSON.stringify({ pack, villes, zones, departement }));
+    } catch {}
+  }, [pack, villes, zones, departement]);
 
   const inputCls =
     "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent placeholder:text-muted/50";

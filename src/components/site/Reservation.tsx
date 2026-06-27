@@ -35,6 +35,8 @@ export function Reservation() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
   const [pluConsent, setPluConsent] = useState(false);
 
+  const isPack = c.terrainMode === "pack" && !!c.packTerrain;
+
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (sending || sent) return;
@@ -44,55 +46,88 @@ export function Reservation() {
     if (!String(fd.get("nom") ?? "").trim()) errs.nom = true;
     if (!String(fd.get("email") ?? "").trim()) errs.email = true;
     if (!String(fd.get("tel") ?? "").trim()) errs.tel = true;
-    if (!slot) errs.slot = true;
+    if (!isPack && !slot) errs.slot = true;
     if (Object.keys(errs).length > 0) { setFieldErrors(errs); return; }
     setFieldErrors({});
     setSending(true);
     try {
-      const bardage = CONFIG.cladding.find((x) => x.id === c.cladding)?.label ?? c.cladding;
-      const facade = CONFIG.kitchen.find((x) => x.id === c.facade)?.label ?? c.facade;
-      const bar = CONFIG.bar.find((x) => x.id === c.bar)?.label ?? c.bar;
-      const chambre = CONFIG.bedroom.find((x) => x.id === c.bedroom)?.label ?? c.bedroom;
-      const interieur = CONFIG.interior.find((x) => x.id === c.interior)?.label ?? c.interior;
-      const optionsLabels = c.active.pricing.options
-        .filter((o) => c.options.includes(o.id))
-        .map((o) => o.label);
-      // Lire l'analyse PLU stockée par le configurateur (si consentement)
-      let pluData: unknown = null;
-      if (pluConsent) {
+      if (isPack) {
+        // Flux pack terrain → /api/recherche-terrain
+        let villesArr: string[] | undefined;
+        let zonesArr: string[] | undefined;
+        let departementStr: string | undefined;
         try {
-          const raw = sessionStorage.getItem("plu_result");
-          if (raw) pluData = JSON.parse(raw);
+          const raw = sessionStorage.getItem("pack_terrain_zones");
+          if (raw) {
+            const d = JSON.parse(raw) as { pack: string; villes: string; zones: string; departement: string };
+            if (d.pack === c.packTerrain) {
+              if (d.villes) villesArr = d.villes.split(",").map((s) => s.trim()).filter(Boolean);
+              if (d.zones) zonesArr = d.zones.split(",").map((s) => s.trim()).filter(Boolean);
+              if (d.departement) departementStr = d.departement.trim();
+            }
+          }
         } catch {}
+        await fetch("/api/recherche-terrain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nom: `${String(fd.get("prenom") ?? "").trim()} ${String(fd.get("nom") ?? "").trim()}`.trim(),
+            telephone: String(fd.get("tel") ?? ""),
+            email: String(fd.get("email") ?? ""),
+            modele: c.active.name,
+            pack: c.packTerrain,
+            source: "configurateur" as const,
+            villes: villesArr,
+            zones: zonesArr,
+            departement: departementStr,
+            accepte_cgv: true,
+          }),
+        });
+      } else {
+        // Flux réservation standard → /api/reservation
+        const bardage = CONFIG.cladding.find((x) => x.id === c.cladding)?.label ?? c.cladding;
+        const facade = CONFIG.kitchen.find((x) => x.id === c.facade)?.label ?? c.facade;
+        const bar = CONFIG.bar.find((x) => x.id === c.bar)?.label ?? c.bar;
+        const chambre = CONFIG.bedroom.find((x) => x.id === c.bedroom)?.label ?? c.bedroom;
+        const interieur = CONFIG.interior.find((x) => x.id === c.interior)?.label ?? c.interior;
+        const optionsLabels = c.active.pricing.options
+          .filter((o) => c.options.includes(o.id))
+          .map((o) => o.label);
+        let pluData: unknown = null;
+        if (pluConsent) {
+          try {
+            const raw = sessionStorage.getItem("plu_result");
+            if (raw) pluData = JSON.parse(raw);
+          } catch {}
+        }
+        await fetch("/api/reservation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prenom: fd.get("prenom"),
+            nom: fd.get("nom"),
+            email: fd.get("email"),
+            tel: fd.get("tel"),
+            slot,
+            produit: c.active.name,
+            surface: c.active.area,
+            houseTotal: c.houseTotal,
+            delivery: c.delivery,
+            terrainMode: c.terrainMode,
+            packTerrain: c.packTerrain,
+            bardage, facade, bar, chambre, interieur,
+            terrasseM2: c.terrasseM2,
+            optionsLabels,
+            grandTotal: c.grandTotal,
+            pluConsent,
+            pluData,
+          }),
+        });
+        if (!sent) c.incrementReserved(c.product);
       }
-
-      await fetch("/api/reservation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prenom: fd.get("prenom"),
-          nom: fd.get("nom"),
-          email: fd.get("email"),
-          tel: fd.get("tel"),
-          slot,
-          produit: c.active.name,
-          surface: c.active.area,
-          houseTotal: c.houseTotal,
-          delivery: c.delivery,
-          terrainMode: c.terrainMode,
-          packTerrain: c.packTerrain,
-          bardage, facade, bar, chambre, interieur,
-          terrasseM2: c.terrasseM2,
-          optionsLabels,
-          grandTotal: c.grandTotal,
-          pluConsent,
-          pluData,
-        }),
-      });
     } catch {
       // silencieux — confirmation côté UI quand même
     }
-    if (!sent) c.incrementReserved(c.product);
     setSent(true);
     setSending(false);
   };
@@ -144,37 +179,49 @@ export function Reservation() {
               <Confirmation slot={slot} />
             ) : (
               <>
-                <p className="eyebrow mb-4">Numéro disponible</p>
-                <div className="grid grid-cols-6 gap-2">
-                  {Array.from({ length: total }).map((_, i) => {
-                    const n = i + 1;
-                    const taken = i < reserved;
-                    const active = slot === n;
-                    return (
-                      <button
-                        key={n}
-                        disabled={taken}
-                        onClick={() => setSlot(n)}
-                        className={cn(
-                          "aspect-square rounded-lg border font-mono text-sm tabular-nums transition-all",
-                          taken &&
-                            "cursor-not-allowed border-line bg-ink/[0.04] text-muted/40 line-through",
-                          !taken &&
-                            !active &&
-                            "border-line text-ink hover:border-accent hover:text-accent",
-                          active && "border-accent bg-accent text-white",
-                        )}
-                      >
-                        {String(n).padStart(2, "0")}
-                      </button>
-                    );
-                  })}
-                </div>
+                {!isPack && (
+                  <>
+                    <p className="eyebrow mb-4">Numéro disponible</p>
+                    <div className="grid grid-cols-6 gap-2">
+                      {Array.from({ length: total }).map((_, i) => {
+                        const n = i + 1;
+                        const taken = i < reserved;
+                        const active = slot === n;
+                        return (
+                          <button
+                            key={n}
+                            disabled={taken}
+                            onClick={() => setSlot(n)}
+                            className={cn(
+                              "aspect-square rounded-lg border font-mono text-sm tabular-nums transition-all",
+                              taken &&
+                                "cursor-not-allowed border-line bg-ink/[0.04] text-muted/40 line-through",
+                              !taken &&
+                                !active &&
+                                "border-line text-ink hover:border-accent hover:text-accent",
+                              active && "border-accent bg-accent text-white",
+                            )}
+                          >
+                            {String(n).padStart(2, "0")}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {fieldErrors.slot && (
+                      <p className="mb-2 font-mono text-[0.65rem] text-red-500">
+                        Sélectionnez un numéro ci-dessus pour continuer.
+                      </p>
+                    )}
+                  </>
+                )}
 
-                {fieldErrors.slot && (
-                  <p className="mb-2 font-mono text-[0.65rem] text-red-500">
-                    Sélectionnez un numéro ci-dessus pour continuer.
-                  </p>
+                {isPack && (
+                  <div className="mb-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
+                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-accent">Pack Terrain Affinity</p>
+                    <p className="mt-1 text-sm text-muted">
+                      Notre Mandataire Affinity recherche le terrain pour vous. Laissez vos coordonnées — on vous recontacte sous 24 h.
+                    </p>
+                  </div>
                 )}
 
                 <form onSubmit={submit} className="mt-7 space-y-3">
@@ -185,7 +232,7 @@ export function Reservation() {
                   <Field name="email" type="email" placeholder="Email" error={fieldErrors.email} />
                   <Field name="tel" type="tel" placeholder="Téléphone" error={fieldErrors.tel} />
 
-                  <PluConsentBlock pluConsent={pluConsent} onChange={setPluConsent} />
+                  {!isPack && <PluConsentBlock pluConsent={pluConsent} onChange={setPluConsent} />}
 
                   <button
                     type="submit"
@@ -194,9 +241,11 @@ export function Reservation() {
                   >
                     {sending
                       ? "Envoi en cours…"
-                      : slot
-                        ? `Envoyer ma demande — n°${String(slot).padStart(2, "0")}`
-                        : "Choisissez un numéro ci-dessus"}
+                      : isPack
+                        ? "Envoyer ma demande de recherche terrain"
+                        : slot
+                          ? `Envoyer ma demande — n°${String(slot).padStart(2, "0")}`
+                          : "Choisissez un numéro ci-dessus"}
                     {!sending && <Arrow />}
                   </button>
 
