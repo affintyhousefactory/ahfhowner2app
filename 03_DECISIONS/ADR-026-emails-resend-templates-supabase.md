@@ -1,6 +1,6 @@
-# ADR-026 — Emails transactionnels Brevo : templates + synchro Supabase contacts
+# ADR-026 — Emails transactionnels Brevo : templates dashboard + Supabase contacts
 
-- **Statut** : Accepté
+- **Statut** : Accepté — livré (2026-06-20)
 - **Date** : 2026-06-20
 - **Phase** : 4
 - **Faisabilité** : ✅ Élevée
@@ -8,83 +8,96 @@
 
 ## Contexte
 
-Deux formulaires collectent des données visiteurs sans les persister ni envoyer de confirmation :
+Deux formulaires collectaient des données visiteurs sans les persister ni envoyer de confirmation :
 
-1. **`/contact` (`ContactForm.tsx`)** — prénom, nom, email, téléphone, produit, message. Appelait uniquement `/api/verify-turnstile` puis `setSent(true)`. Aucune route API `/api/contact`, aucune table Supabase `contacts`.
-2. **Configurateur (`/configurer`)** — appelait `POST /api/recherche-terrain` qui persistait en base (`recherche_terrain`) mais n'envoyait aucun email de confirmation.
+1. **`/contact` (`ContactForm.tsx`)** — prénom, nom, email, téléphone, produit, message.
+2. **Configurateur (`/configurer`)** — `POST /api/recherche-terrain` persistait en base mais sans email.
 
-ADR-014 posait la question du fournisseur email (ouvert). **Brevo** est retenu : déjà déclaré dans la politique de confidentialité AHF, cohérent avec l'écosystème existant. Envoi via REST API Brevo (`api.brevo.com/v3/smtp/email`) + rendu HTML via `@react-email/render`.
+ADR-014 laissait le fournisseur email ouvert. **Brevo** est retenu : déjà déclaré sous-traitant UE dans `/confidentialite`, pas de SCC requis (contrairement à Resend US). Templates HTML créés dans le dashboard Brevo et référencés par ID entier — aucune dépendance React Email côté serveur.
+
+> **Note d'implémentation** : un premier jet utilisait `@react-email/render` + `sendEmail()` (HTML inline). Remplacé par `sendBrevoTemplate(templateId, to, params)` via Brevo REST (`/v3/smtp/email`) avec `templateId` + `params`. `resend`, `@react-email/components` et `@react-email/render` désinstallés.
 
 ## Décision
 
-### Fournisseur : Brevo REST API + React Email
+### Fournisseur : Brevo REST API — templates dashboard
 
-Côté serveur uniquement. Helper partagé `src/lib/email.ts` : convertit un composant React Email en HTML via `@react-email/render`, envoie via `fetch` Brevo. Pas de SDK tiers (fetch natif suffit). Clé dans `BREVO_API_KEY` (jamais dans Git).
+`src/lib/email.ts` : `sendBrevoTemplate({ templateId, to, params })` — POST Brevo avec `templateId` (entier) + `params` (variables Jinja2 `{{ params.x }}`). Pas de SDK tiers, fetch natif. `BREVO_API_KEY` jamais dans Git.
 
 ### Livrable 1 — Migration Supabase `contacts`
 
-`supabase/migrations/20260620_contacts.sql` — table `contacts` : id, created_at, prenom, nom, email, tel, produit, message, turnstile_ok, statut, notes. RLS : insert public (anon), lecture/update réservés service_role.
+`supabase/migrations/20260620_contacts.sql` — table `contacts` : id, created_at, prenom, nom, email, tel, produit, message, turnstile_ok, statut (`nouveau`/`en_cours`/`traite`), notes. RLS : insert anon (formulaire public), lecture/update réservés service_role.
 
-### Livrable 2 — Helper email partagé
+> **Statut** : fichier SQL créé, **migration non appliquée** (MCP Supabase read-only). À appliquer via dashboard Supabase avant mise en prod.
 
-`src/lib/email.ts` — `sendEmail({ to, subject, template })` :
-1. Rend le template React Email → HTML (`@react-email/render`)
-2. POST Brevo avec `htmlContent`, `sender`, `to`, `subject`
-3. Log warn si `BREVO_API_KEY` absent (dev local), throw si erreur Brevo
-
-### Livrable 3 — Route API `POST /api/contact`
+### Livrable 2 — Route API `POST /api/contact`
 
 `src/app/api/contact/route.ts` — pipeline :
 1. Parse body : `{ prenom, nom, email, tel?, produit?, message, captchaToken }`
-2. Vérification Turnstile (`TURNSTILE_SECRET_KEY`) → 400 si KO
-3. Insert Supabase `contacts` via `SUPABASE_SERVICE_ROLE_KEY`
-4. `sendEmail` template #1 → client + copie `EMAIL_TO_AHF`
+2. Vérification Turnstile (`TURNSTILE_SECRET_KEY`) — passe silencieusement si secret absent (dev)
+3. Insert Supabase `contacts` via `SUPABASE_SERVICE_ROLE_KEY` (skip si non configuré)
+4. `sendBrevoTemplate` — `BREVO_TEMPLATE_CONTACT` + `params: { prenom, nom, produit_label, message }`
+5. Fire-and-forget (`.catch(console.error)`) — ne bloque pas la réponse HTTP
 
-`ContactForm.tsx` rewired : envoie tout le formData vers `/api/contact`.
+### Livrable 3 — Route API `POST /api/recherche-terrain` (amendée)
 
-### Livrable 4 — Template Brevo #1 : confirmation contact
+Remplacement de l'envoi Resend par `sendBrevoTemplate` — `BREVO_TEMPLATE_RECAP` + `params: { nom, email, tel, modele, pack_label, zones, budget }`. Fire-and-forget.
 
-`emails/contact-confirmation.tsx` (React Email → HTML via `@react-email/render`)
+### Livrable 4 — `ContactForm.tsx` refactorisé
 
-Champs : prénom, nom, produit sélectionné, message, délai 24 h ouvrées.
-Expéditeur : `EMAIL_FROM` (`noreply@affinityhome.fr`). Destinataires : client + AHF.
+- Tous les champs obligatoires : prénom, nom, email (`pattern` regex), téléphone, produit (select `required`), message
+- Bouton disabled uniquement pendant `loading` (plus lié au token captcha)
+- Clé de test Turnstile `1x00000000000000000000AA` — widget auto-execute, pas d'appel `execute()` manuel
+- Message d'erreur serveur affiché si `fetch` KO
 
-### Livrable 5 — Template Brevo #2 : récapitulatif configurateur
+### Livrable 5 — Templates Brevo dashboard
 
-`emails/configurateur-recap.tsx` (React Email → HTML)
+Deux templates HTML créés dans Brevo > Email Templates, syntaxe Jinja2 (`{{ params.x }}`, `{% if %}`).
 
-Champs : modèle, bardage, façade, barre, chambre, intérieur, terrasse, options, total, pack terrain, zones, coordonnées.
-Déclenchement : fin de `POST /api/recherche-terrain` (fire-and-forget, quelle que soit la `source`).
+| Template | ID | Sujet |
+|---|---|---|
+| Confirmation contact | `BREVO_TEMPLATE_CONTACT` (= `10`) | `Votre message a bien été reçu — Affinity House Factory` |
+| Récap configurateur/terrain | `BREVO_TEMPLATE_RECAP` (= `9`) | `Récapitulatif de votre demande ARKO — Affinity House Factory` |
+
+Brief de création des templates : `docs/brief-artefact-email-templates.md`.
 
 ### Variables d'environnement
 
 ```
 BREVO_API_KEY=              # serveur, jamais commité
-EMAIL_FROM=noreply@affinityhome.fr
-EMAIL_TO_AHF=contact@affinityhousefactory.com
+BREVO_SENDER_EMAIL=contact@affinityhousefactory.com
+BREVO_SENDER_NAME=Howner - By Affinity House Factory
+BREVO_TO_AHF=contact@affinityhousefactory.com
+BREVO_TEMPLATE_CONTACT=10  # ID entier — dashboard Brevo > Email Templates
+BREVO_TEMPLATE_RECAP=9     # ID entier — dashboard Brevo > Email Templates
+# Turnstile
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=   # 1x00000000000000000000AA en dev (test key)
+TURNSTILE_SECRET_KEY=             # 1x0000000000000000000000000000000AA en dev
 ```
 
-`TURNSTILE_SECRET_KEY` et `SUPABASE_SERVICE_ROLE_KEY` déjà prévus (ADR-003/007).
+## Devops
+
+- `package.json` `dev` : `WATCHPACK_POLLING=true next dev` (hot reload WSL2 NTFS)
+- `Configurator.tsx` : `<Devis>` wrappé dans `<Suspense>` (bugfix `useSearchParams` — build était cassé)
+- `emails/` vide (templates migrés vers Brevo dashboard)
+
+## Ce qui reste (non bloquant pour les tests)
+
+- **Migration `contacts`** : à appliquer manuellement via dashboard Supabase (SQL dans `supabase/migrations/20260620_contacts.sql`)
+- **`PackTerrainContactForm`** dans `/configurer` : affiche les champs villes/zones/département mais pas encore de bouton submit connecté à `/api/recherche-terrain`
+- **SPF/DKIM** `affinityhome.fr` dans Brevo : à configurer avant mise en prod (délivrabilité)
 
 ## Faisabilité
 
-- **Verdict** : ✅ Élevée — Brevo opérationnel dès configuration compte + DNS. Aucune dépendance bloquante.
-- **Dépendances externes** :
-  - Compte Brevo + `BREVO_API_KEY` (compte AHF existant)
-  - SPF/DKIM sur `affinityhome.fr` dans Brevo (DNS — 15 min)
-  - `SUPABASE_SERVICE_ROLE_KEY` pour l'insert `contacts` côté serveur
-  - Migration `20260620_contacts.sql` à appliquer (dashboard Supabase ou MCP en écriture)
-- **Risques** :
-  - Délivrabilité si SPF/DKIM non configuré avant mise en prod → tester d'abord
-  - Table `contacts` inapplicable tant que MCP Supabase reste read-only
+- **Verdict** : ✅ — Brevo opérationnel, templates testés (`/contact` fonctionnel en dev)
+- **Dépendances résolues** : compte Brevo AHF existant, `BREVO_API_KEY` configurée, templates IDs `10`/`9`
+- **Dépendances restantes** : `SUPABASE_SERVICE_ROLE_KEY` (insert `contacts`), migration SQL, SPF/DKIM prod
 
 ## Conséquences
 
-- **Ferme ADR-014** (fournisseur tranché : Brevo).
-- **Débloque ADR-008** (confirmation Stripe pourra utiliser `sendEmail`).
-- `/api/recherche-terrain` : envoi email fire-and-forget après persist, ne bloque pas la réponse HTTP.
-- Templates React Email à valider visuellement (`email-preview` ou `react-email dev`) avant mise en prod.
+- **Ferme ADR-014** (fournisseur email tranché : Brevo)
+- **Débloque ADR-008** (confirmation Stripe utilisera `sendBrevoTemplate`)
+- RGPD : Brevo déjà déclaré dans `/confidentialite` — aucune mise à jour requise
 
 ## Sources
 
-`src/components/site/ContactForm.tsx`, `src/app/api/contact/route.ts`, `src/app/api/recherche-terrain/route.ts`, `src/lib/email.ts`, `emails/`, `supabase/migrations/20260620_contacts.sql`, ADR-007, ADR-014, ADR-003.
+`src/lib/email.ts`, `src/app/api/contact/route.ts`, `src/app/api/recherche-terrain/route.ts`, `src/components/site/ContactForm.tsx`, `src/components/site/Configurator.tsx`, `supabase/migrations/20260620_contacts.sql`, `docs/brief-artefact-email-templates.md`, ADR-007, ADR-014, ADR-003, ADR-024.

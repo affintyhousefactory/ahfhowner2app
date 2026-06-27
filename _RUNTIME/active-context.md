@@ -4,11 +4,12 @@
 Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², 12 ex, 59 900 €) + **Arko Max** (40 m², 5 ex, 89 900 €). Front livré ; backend Phase 4 en attente ; lancement bloqué par le légal (ADR-015).
 
 ## Priorités actives
-1. **DNS howner.fr** — configurer CNAME/A chez le registrar (Settings → Domains Vercel) pour activer le domaine de prod et tester le formulaire contact en conditions réelles.
-2. **Reconfigurer Arko Max** (perM2, options, terrasse, dimensions/footprint, `reserved`) — données métier à fournir. ⚠️ `TODO` sur `ONE_PRICING` dans `site.ts` (mauvais produit) ; à corriger dès réception. Asset vidéo Arko One absent (fallback footage Max).
-3. Faire valider par Albert : repositionnement bi-produit + déverrouillage configurateur + retrait wordmark ARKO (ADR-022/020) ; charte Affinity (ADR-002).
-4. SEO (ADR-018) — **P0+P1 livrés** ; reste **P2** (polish non bloquant). CGV bloqué ADR-015.
-5. **ADR-026 reste** : migration SQL `contacts` (Supabase), `PackTerrainContactForm` submit câblé, SPF/DKIM prod.
+1. **Merger `feat/terrain-address-lookup`** — PR prête ; valider d'abord le build Preview Vercel (env vars Supabase scope Preview à configurer : SUPABASE_URL + ANON_KEY + SERVICE_ROLE_KEY → projet preprod).
+2. **Appliquer migrations SQL** sur Supabase preprod puis prod : `20260622_leads.sql`, `20260622_config_tarifs.sql` (+ `20260620_contacts.sql` ADR-026). Option : automatiser via GitHub Actions `supabase db push` (question non tranchée).
+3. **DNS howner.fr** — configurer CNAME/A chez le registrar (Settings → Domains Vercel) pour tester en conditions réelles.
+4. **Reconfigurer Arko Max** (perM2, options, terrasse, footprint, `reserved`) — données métier à fournir. ⚠️ `TODO` sur `ONE_PRICING` dans `site.ts` → corriger en `MAX_PRICING` dès réception.
+5. Faire valider par Albert : repositionnement bi-produit + wordmark ARKO (ADR-022) ; charte Affinity (ADR-002).
+6. **ADR-026 reste** : `PackTerrainContactForm` submit câblé, SPF/DKIM prod.
 
 ## Contraintes
 - Ne pas mélanger les projets (ce projet ≠ AHF_WEB2 : pas de segments/Brevo/Smart Nano-Max/Villa Arko).
