@@ -20,7 +20,7 @@ Site **mono-produit** de réservation **ARKO** (série limitée 12 exemplaires).
 | 3D | three / r3f / drei — **`/viewer` only** | 006 |
 | Charte | Affinity (remap `@theme`) — `DESIGN.md` | 002 |
 | Data (Phase 4) | Supabase `ahfhownerdb` (ref `msrjocrcewvqkcehruny`) | 007 |
-| Paiement (Phase 4) | Stripe Checkout + webhook | 008 |
+| Paiement (Phase 4) | **Hors-ligne** (Stripe retiré MVP — ADR-008 amendé 2026-06-27) | 008 |
 | Hébergement | Vercel | 023 |
 
 ## Produit
@@ -43,18 +43,19 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 
 | Feature | Fichier | État | Cible | ADR |
 |---|---|---|---|---|
-| Réservation + acompte | `Reservation.tsx` `submit()` | `setSent(true)` | Stripe Checkout + webhook | 008 |
+| Réservation + acompte | `Reservation.tsx` `submit()` | `setSent(true)` — paiement hors-ligne (Stripe retiré MVP) | Supabase lead + acompte offline | 008 |
 | Slots / jauge | `Reservation.tsx`, `Gauge.tsx` | statique 4/12 | Supabase Realtime | 007,009 |
 | Liste d'attente | `Reservation.tsx` `<Waitlist/>` | `setSent(true)` | insert Supabase | 010 |
 | Analyse terrain (zonage) | `LandTool.tsx` | BAN réel + zonage heuristique | GPU/IGN réel | 011 |
 | Analyse via lien d'annonce | `LandTool.tsx` mode `annonce` | dégradé | Apify + BAN | 012 |
-| Contact terrain | `LandTool.tsx` (~L392) | `setSent(true)` | lead Supabase | 013 |
+| Contact terrain (annonce) | `LandTool.tsx` (~L392) | `setSent(true)` | lead Supabase | 013 |
+| Pack Terrain submit (configurateur) | `Configurator.tsx` `PackTerrainContactForm`, `Reservation.tsx` `submit()` | ✅ câblé → `/api/recherche-terrain` (sessionStorage bridge) | — | 025 |
 | Devis 3 couches multi-produit | `Configurator.tsx`, `config-store.tsx` | ✅ logique verrouillée, paramétrée par produit | — | 005,020 |
 | Email confirmations contact | `src/app/api/contact/route.ts`, `src/lib/email.ts` | ✅ Brevo template `10` — câblé | — | 026 |
 | Email recap configurateur/terrain | `src/app/api/recherche-terrain/route.ts` | ✅ Brevo template `9` — câblé | — | 026 |
 | Analyse terrain (adresse + PLU) | `src/components/site/ParcelleAnalyse.tsx`, `src/app/api/parcelle/route.ts` | BAN → apicarto geom → GPU coords | — | 011,025 |
 | Stockage leads + consentement PLU | `src/app/api/reservation/route.ts`, `src/lib/supabase.ts` | Non-bloquant, lazy client | Migration preprod/prod | 007 |
-| Calcul livraison GPS | `src/components/site/Reservation.tsx`, `src/lib/site.ts` (TRANSPORT) | Haversine × road_factor × poids × tarif | Coordonnées atelier à affiner | — |
+| Calcul livraison GPS | `src/components/site/Reservation.tsx`, `src/lib/site.ts` (TRANSPORT) | ✅ Haversine × road_factor × poids × tarif — réactif via `plu_result_updated` | Coordonnées atelier à affiner | — |
 | SEO | `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `viewer/layout.tsx`, `lib/jsonld.ts`, `seo/JsonLd.tsx`, `llms.txt/route.ts` | ✅ P0+P1 (sitemap/robots/OG/twitter/canonical/noindex + JSON-LD Org/Product/FAQ + llms.txt) | P2 polish | 018 |
 
 ## Risques principaux
@@ -131,15 +132,18 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27 — migrations appliquées preprod + prod.
-2. **ADR-026 reste** : `PackTerrainContactForm` submit câblé + SPF/DKIM prod.
-3. **ADR-018 SEO reste P2** (polish non bloquant) : manifest/PWA, skip-link, trim fonts.
-4. **ADR-007** — Supabase RLS complet (slots Realtime, waitlist, contact terrain) — débloque ADR-009/010/013.
-5. **Coordonnées atelier** : `transport.usine_lat/lon` dans `config_variables` = placeholder Bayonne (43.4933 / −1.4748) — à affiner.
+2. ~~**`PackTerrainContactForm` submit câblé**~~ ✅ câblé 2026-06-27 — sessionStorage bridge + `/api/recherche-terrain`.
+3. **ADR-026 reste** : SPF/DKIM prod (DNS au registrar — bloqueur externe).
+4. **ADR-018 SEO reste P2** (polish non bloquant) : manifest/PWA, skip-link, trim fonts.
+5. **ADR-007** — Supabase RLS complet (slots Realtime, waitlist, contact terrain) — débloque ADR-009/010/013.
+6. **Coordonnées atelier** : `transport.usine_lat/lon` dans `config_variables` = placeholder Bayonne (43.4933 / −1.4748) — à affiner.
 
 ## Tokens / MCP
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-06-27 (câblage PackTerrain + bugfixes PLU + env Supabase 3 scopes)** — **Supabase 3 scopes Vercel** : vars Production (`ahfhownerdb`), Preview (`ahfhownerdb-preprod` / `ixozlavseaykxmjtkkrk`), Development configurées — `.env.local` resynchronisé. **6 migrations appliquées** preprod + prod via MCP Supabase OAuth (`apply_migration`). **PR `feat/terrain-address-lookup` mergée** ✅. **`PackTerrainContactForm` submit câblé** : `Configurator.tsx` écrit `pack_terrain_zones` en sessionStorage à chaque keystroke ; `Reservation.tsx` branche en mode pack vers `/api/recherche-terrain` (sans `incrementReserved` ni slot selector). **Fix livraison "À estimer"** : `ConfigRecap` réactif via événement DOM `plu_result_updated` (était one-shot au mount). **Fix `plu_adresse` NULL sur IDU path** : `reverseGeocode()` BAN lancé en `Promise.all` avec les appels GPU dans Voie B. **Fix champs PLU NULL en leads** : `PluConsentBlock` converti en `useEffect` + listener `plu_result_updated` + auto-check `onChange(true)` dès que la donnée arrive. **ADR-008 amendé** : Stripe retiré du MVP — paiement hors-ligne après qualification lead. **PR `fix/delivery-recap` mergée** ✅.
 
 **2026-06-22 (feat/terrain-address-lookup — analyse PLU par adresse + calcul livraison GPS + schéma Supabase)** — Branche `feat/terrain-address-lookup` poussée (PR en attente de merge). `ParcelleAnalyse.tsx` : saisie par adresse (champ primaire) + bascule numéro de parcelle. Pipeline BAN → apicarto `geom=Point` → GPU `/feature-info/du?lon&lat&typeName` + `/feature-info/sup` (endpoint `/parcel/{id}/` abandonné — rejette tous formats). Fix `source_ign=PCI` (retournait aléatoirement 1000 parcelles Aix). `Reservation.tsx` : calcul livraison depuis `plu_result.lon/lat` sessionStorage (haversine × roadFactor 1.3 × poids × 0,24 €/t/km + grutage 1440 €). `TRANSPORT` dans `site.ts` (Arko One 6 t, Arko Max 9 t). `src/lib/supabase.ts` lazy client — résout `supabaseUrl is required` au build Preview. Migrations : `20260622_leads.sql` (table `leads` + RLS, colonnes PLU), `20260622_config_tarifs.sql` (`config_variables`, `options_produits`, `options_bardage`). `project-access.json` passé `read-write`. `docs/supabase-environments.md` créé (architecture Prod/Preview/Dev, scoping Vercel, workflow `feat/*`). ADR-022/025/026 mis à jour. Coordonnées atelier = placeholder Bayonne (43.4933, −1.4748) — à affiner. Question non tranchée : migrations automatiques GitHub Actions vs Supabase Branching.
 
