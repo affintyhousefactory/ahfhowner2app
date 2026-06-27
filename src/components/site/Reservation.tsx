@@ -545,10 +545,19 @@ function PluConsentBlock({
 }) {
   const [hasPlu, setHasPlu] = useState(false);
 
-  // Vérifie si une analyse PLU est disponible dans la session
-  useState(() => {
-    try { setHasPlu(!!sessionStorage.getItem("plu_result")); } catch {}
-  });
+  // Réactif : s'affiche et se pré-coche dès que plu_result est disponible
+  useEffect(() => {
+    function check() {
+      const has = !!sessionStorage.getItem("plu_result");
+      setHasPlu(has);
+      if (has) onChange(true);
+    }
+    check();
+    window.addEventListener("plu_result_updated", check);
+    return () => window.removeEventListener("plu_result_updated", check);
+  // onChange est setPluConsent — stable, pas de boucle
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!hasPlu) return null;
 
