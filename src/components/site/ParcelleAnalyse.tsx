@@ -221,7 +221,10 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
       setResult(data);
       // Persiste pour le formulaire de réservation (compact mode = configurateur)
       if (mode === "compact" && data.found) {
-        try { sessionStorage.setItem("plu_result", JSON.stringify(data)); } catch {}
+        try {
+          sessionStorage.setItem("plu_result", JSON.stringify(data));
+          window.dispatchEvent(new Event("plu_result_updated"));
+        } catch {}
       }
     } catch {
       clearInterval(tick);

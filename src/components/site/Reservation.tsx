@@ -286,16 +286,21 @@ export function Reservation() {
 function ConfigRecap() {
   const c = useConfig();
 
-  // Calcul livraison GPS depuis l'analyse PLU stockée en session
+  // Calcul livraison GPS — lit plu_result au montage ET à chaque analyse terrain complétée
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("plu_result");
-      if (!raw) return;
-      const plu = JSON.parse(raw) as ParcelleData;
-      if (plu.lon == null || plu.lat == null) return;
-      const distKm = haversineKm(TRANSPORT.usine, { lat: plu.lat, lon: plu.lon }) * TRANSPORT.roadFactor;
-      c.setDistanceKm(Math.round(distKm));
-    } catch {}
+    function readPlu() {
+      try {
+        const raw = sessionStorage.getItem("plu_result");
+        if (!raw) return;
+        const plu = JSON.parse(raw) as ParcelleData;
+        if (plu.lon == null || plu.lat == null) return;
+        const distKm = haversineKm(TRANSPORT.usine, { lat: plu.lat, lon: plu.lon }) * TRANSPORT.roadFactor;
+        c.setDistanceKm(Math.round(distKm));
+      } catch {}
+    }
+    readPlu();
+    window.addEventListener("plu_result_updated", readPlu);
+    return () => window.removeEventListener("plu_result_updated", readPlu);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
