@@ -13,11 +13,11 @@ export async function POST(req: NextRequest) {
 
   const supabase = getSupabaseAdmin();
 
-  // 1. Créer le compte auth avec l'admin API (bypass confirmation email)
+  // 1. Créer le compte auth avec l'admin API
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
     password,
-    email_confirm: true, // marque l'email comme confirmé directement
+    email_confirm: true,
     user_metadata: { role: "mandataire" },
   });
 
@@ -33,6 +33,9 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = authData.user.id;
+
+  // Forcer la confirmation email (email_confirm dans createUser ignoré dans certaines versions)
+  await supabase.auth.admin.updateUserById(userId, { email_confirm: true });
 
   // 2. Créer le profil mandataire
   const { error: dbError } = await supabase.from("mandataires").insert({
