@@ -59,7 +59,6 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
 
   const handleAccountCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,54 +73,32 @@ export default function SignupPage() {
       return;
     }
 
-    setLoading(true);
-    const supabase = getSupabaseBrowser();
-
-    const { data, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { role: "mandataire" },
-      },
-    });
-
-    if (authError) {
-      setError(authError.message);
-      setLoading(false);
-      return;
-    }
-
-    setUserId(data.user?.id ?? null);
+    // Pré-validation : on passe directement à l'étape contrat,
+    // le compte sera créé côté serveur avec le contrat signé.
     setStep("contrat");
-    setLoading(false);
   };
 
   const handleContratComplete = async (contratData: ContratData) => {
     setLoading(true);
     setError("");
 
-    const supabase = getSupabaseBrowser();
-
-    const { error: dbError } = await supabase.from("mandataires").insert({
-      user_id: userId,
-      statut: "en_attente",
-      nom: contratData.nom_raison_sociale,
-      prenom: contratData.signature_prenom,
-      email: contratData.email,
-      siret: contratData.siret,
-      reseau_carte_t: contratData.reseau_carte_t || null,
-      carte_t_numero: contratData.carte_t_numero || null,
-      forme_juridique: contratData.forme_juridique,
-      adresse: contratData.adresse,
-      contrat_signe_at: new Date().toISOString(),
-      contrat_data: contratData,
+    const res = await fetch("/api/mandataire/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, contrat: contratData }),
     });
 
-    if (dbError) {
-      setError("Erreur lors de l'enregistrement. Veuillez contacter AHF.");
+    const json = await res.json();
+
+    if (!res.ok) {
+      setError(json.error ?? "Erreur lors de l'enregistrement. Veuillez contacter AHF.");
       setLoading(false);
       return;
     }
+
+    // Connexion automatique après création
+    const supabase = getSupabaseBrowser();
+    await supabase.auth.signInWithPassword({ email, password });
 
     setStep("done");
     setLoading(false);
