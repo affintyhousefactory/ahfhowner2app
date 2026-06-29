@@ -12,7 +12,16 @@ alter table public.leads
   add column if not exists affecte_at timestamptz,
   add column if not exists notes_ahf text,
   add column if not exists plu_lon numeric,
-  add column if not exists plu_lat numeric;
+  add column if not exists plu_lat numeric,
+  add column if not exists departement text;
+
+-- Élargir le domaine des statuts pour le portail admin
+alter table public.leads drop constraint if exists leads_statut_check;
+alter table public.leads add constraint leads_statut_check
+  check (statut in (
+    'nouveau', 'contacte', 'devis_envoye', 'signe', 'annule',
+    'qualifié', 'affecté', 'en_cours', 'finalisé', 'perdu'
+  ));
 
 -- ── Table dossiers ──────────────────────────────────────────────────────────
 create table if not exists public.dossiers (
