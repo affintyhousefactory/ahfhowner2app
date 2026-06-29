@@ -3,6 +3,9 @@
 ## Focus actuel
 **Prochaine étape** : SPF/DKIM prod (DNS registrar — bloqueur externe), puis ADR-007 RLS complet ou ADR-018 SEO P2.
 
+## Décisions prises — 2026-06-29
+- **Workflow git 3 niveaux** instauré : `feat/*` → `dev` → `main`. Branche `dev` créée sur GitHub depuis `main` (SHA f24afde6). À configurer : `dev` comme branche Preview dans Vercel (Settings → Git → Preview Branches).
+
 ## Décisions prises — 2026-06-27
 - **Supabase 3 scopes Vercel** configurés : Production (`ahfhownerdb`), Preview (`ahfhownerdb-preprod`), Development. `.env.local` resynchronisé via `vercel env pull --environment=development`.
 - **6 migrations appliquées** preprod + prod via MCP Supabase OAuth (`apply_migration`) : `20260618_recherche_terrain.sql`, `20260619_*_modele_budget.sql`, `20260620_contacts.sql`, `20260620_*_source.sql`, `20260622_leads.sql`, `20260622_config_tarifs.sql`.
