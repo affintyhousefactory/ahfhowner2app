@@ -10,7 +10,9 @@ alter table public.leads
   add column if not exists total_estime numeric,
   add column if not exists mandataire_id uuid references public.mandataires(id) on delete set null,
   add column if not exists affecte_at timestamptz,
-  add column if not exists notes_ahf text;
+  add column if not exists notes_ahf text,
+  add column if not exists plu_lon numeric,
+  add column if not exists plu_lat numeric;
 
 -- ── Table dossiers ──────────────────────────────────────────────────────────
 create table if not exists public.dossiers (

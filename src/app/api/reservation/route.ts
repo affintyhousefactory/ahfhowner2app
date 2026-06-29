@@ -89,6 +89,8 @@ export async function POST(req: NextRequest) {
       plu_etat_doc: plu?.etat_doc ?? null,
       plu_datappro: plu?.datappro ?? null,
       plu_prescriptions: plu?.prescriptions ?? [],
+      plu_lon: plu?.lon ?? null,
+      plu_lat: plu?.lat ?? null,
       plu_servitudes: plu?.servitudes ?? [],
     });
   } catch (err) {
