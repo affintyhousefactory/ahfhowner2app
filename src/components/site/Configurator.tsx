@@ -7,10 +7,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CONFIG, PRODUCT_LIST } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
-import { cn } from "@/lib/cn";
+import { cn } from "@/shared/lib/cn";
 import { useConfig, eur } from "./config-store";
 import { CountdownBanner } from "./CountdownBanner";
-import { ParcelleAnalyse } from "./ParcelleAnalyse";
+import { ParcelleAnalyse } from "@/shared/components/plu/ParcelleAnalyse";
 
 const PACK_TERRAIN = [
   { id: "essentiel", label: "Essentiel", prix: "4 900 € TTC" },

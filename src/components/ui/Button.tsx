@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { cn } from "@/lib/cn";
+import { cn } from "@/shared/lib/cn";
 import { Magnetic } from "./Magnetic";
 
 type Variant = "accent" | "outline" | "ghost";

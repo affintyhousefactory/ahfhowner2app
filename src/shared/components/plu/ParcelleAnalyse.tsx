@@ -4,8 +4,8 @@ import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Arrow } from "@/components/ui/Button";
-import { cn } from "@/lib/cn";
-import type { ParcelleData } from "@/app/api/parcelle/route";
+import { cn } from "@/shared/lib/cn";
+import type { ParcelleData } from "@/shared/types/plu";
 
 export type { ParcelleData };
 
@@ -134,7 +134,6 @@ type Props = {
 /* ── Composant principal ────────────────────────────────────────── */
 
 export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
-  // Si un numéro de parcelle est pré-rempli (depuis le configurateur), partir en mode parcelle
   const defaultMode: InputMode = initialParcelle ? "parcelle" : "address";
 
   const [inputMode, setInputMode] = useState<InputMode>(defaultMode);
@@ -219,7 +218,6 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
 
       const data = (await res.json()) as ParcelleData;
       setResult(data);
-      // Persiste pour le formulaire de réservation (compact mode = configurateur)
       if (mode === "compact" && data.found) {
         try {
           sessionStorage.setItem("plu_result", JSON.stringify(data));
@@ -434,7 +432,6 @@ function FoundResult({
   const textBase  = isDark ? "text-canvas"    : "text-ink";
   const divider   = isDark ? "border-canvas/15" : "border-line";
 
-  /* ── Mode compact (Configurateur) ── */
   if (mode === "compact") {
     const dot =
       eli.verdict === "eligible"    ? "bg-green-400" :
@@ -471,17 +468,14 @@ function FoundResult({
     );
   }
 
-  /* ── Mode full (page terrain) — inéligible ── */
   if (eli.verdict === "ineligible") {
     return <IneligibleResult result={result} meta={meta} isDark={isDark} textBase={textBase} textMuted={textMuted} divider={divider} />;
   }
 
-  /* ── Mode full — éligible / conditionné ── */
   return (
     <div>
       <EligibleHeader verdict={eli.verdict} isDark={isDark} />
 
-      {/* Adresse géocodée + référence parcelle */}
       <div className={cn("mt-5 flex flex-wrap gap-x-6 gap-y-1 border-t pt-4 font-mono text-xs", divider)}>
         {result.address_label && (
           <span className={textMuted}>
@@ -513,7 +507,6 @@ function FoundResult({
         )}
       </div>
 
-      {/* Critères confirmés GPU */}
       <div className={cn("mt-5 border-t pt-4", divider)}>
         <p className={cn("font-mono text-[0.65rem] uppercase tracking-[0.12em]", textMuted)}>
           ✓ Critères vérifiés depuis le PLU
@@ -528,7 +521,6 @@ function FoundResult({
         </ul>
       </div>
 
-      {/* Points de vigilance */}
       {eli.flags.length > 0 && (
         <div className={cn("mt-5 border-t pt-4", divider)}>
           <p className="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-amber-400">
@@ -545,7 +537,6 @@ function FoundResult({
         </div>
       )}
 
-      {/* Prescriptions GPU brutes */}
       {result.prescriptions && result.prescriptions.length > 0 && (
         <div className={cn("mt-5 border-t pt-4", divider)}>
           <p className={cn("font-mono text-[0.65rem] uppercase tracking-[0.12em]", textMuted)}>
@@ -559,7 +550,6 @@ function FoundResult({
         </div>
       )}
 
-      {/* Servitudes GPU brutes */}
       {result.servitudes && result.servitudes.length > 0 && (
         <div className={cn("mt-5 border-t pt-4", divider)}>
           <p className={cn("font-mono text-[0.65rem] uppercase tracking-[0.12em]", textMuted)}>
@@ -573,7 +563,6 @@ function FoundResult({
         </div>
       )}
 
-      {/* Critères à confirmer */}
       <div className={cn("mt-5 border-t pt-4", divider)}>
         <p className={cn("font-mono text-[0.65rem] uppercase tracking-[0.12em]", textMuted)}>
           À confirmer avec notre Mandataire Affinity

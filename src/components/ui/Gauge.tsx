@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/cn";
+import { cn } from "@/shared/lib/cn";
 
 /* Jauge FOMO « X / 12 réservées ». Phase 1 : valeurs statiques,
    branchées sur Supabase Realtime en Phase 4. */
