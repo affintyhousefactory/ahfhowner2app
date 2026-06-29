@@ -6,8 +6,8 @@ Trois environnements étanches, un par contexte de déploiement :
 
 | Environnement | Branche Git | Déploiement Vercel | Base Supabase |
 |---|---|---|---|
-| **Production** | `main` | `howner.fr` (domaine prod) | `ahfhownerdb` — `msrjocrcewvqkcehruny` |
-| **Preview** | `feat/*`, `fix/*` | URL Vercel Preview auto-générée | `ahfhownerdb-preprod` _(à créer)_ |
+| **Production** | `main` | `howner.fr` / `affinityhome.fr` | `ahfhownerdb` — `msrjocrcewvqkcehruny` |
+| **Preview** | `dev`, `feat/*`, `fix/*` | URL Vercel Preview auto-générée | `ahfhownerdb-preprod` — `ixozlavseaykxmjtkkrk` |
 | **Development** | toutes (local) | `localhost:3000` | `ahfhownerdb-dev` _(à créer)_ |
 
 Les données de test n'atteignent jamais la prod. Les migrations sont appliquées en avance sur preprod/dev avant d'être mergées sur main.
@@ -128,6 +128,7 @@ npm run dev
 feat/ma-feature (local)
   └─ npm run dev → localhost:3000 → Supabase DEV
   └─ git push → Vercel Preview → Supabase PREPROD
+  └─ PR merge sur dev → Vercel Preview (dev) → Supabase PREPROD
   └─ PR merge sur main → Vercel Production → Supabase PROD
 ```
 
@@ -159,9 +160,9 @@ Si tu ajoutes un fichier dans `supabase/migrations/`, l'appliquer manuellement s
 ## Référence rapide
 
 ```
-Prod    msrjocrcewvqkcehruny   → main → howner.fr
-Preprod <ref-preprod>           → feat/* push → vercel.app/preview
-Dev     <ref-dev>               → local → localhost:3000
+Prod    msrjocrcewvqkcehruny   → main          → howner.fr / affinityhome.fr
+Preprod ixozlavseaykxmjtkkrk   → dev, feat/*   → <slug>.vercel.app (preview)
+Dev     <ref-dev>               → local         → localhost:3000
 ```
 
 Fichier de migration à appliquer sur chaque nouvelle base : `supabase/migrations/*.sql` dans l'ordre alphabétique/chronologique.
