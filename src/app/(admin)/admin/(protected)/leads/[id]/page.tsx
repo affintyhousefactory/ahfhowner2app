@@ -1,9 +1,9 @@
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { notFound } from "next/navigation";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
 import AssignMandataire from "@/components/admin/AssignMandataire";
 
-const LeadMap = dynamic(() => import("@/components/admin/LeadMap"), { ssr: false });
+const LeadMap = dynamicImport(() => import("@/components/admin/LeadMap"), { ssr: false });
 
 export const dynamic = "force-dynamic";
 
