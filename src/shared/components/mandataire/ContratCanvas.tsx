@@ -235,7 +235,7 @@ export function ContratCanvas({ onComplete, className }: Props) {
               type="text"
               value={data.nom_raison_sociale}
               onChange={(e) => set("nom_raison_sociale", e.target.value)}
-              placeholder="Ex : LABRADOR Immobilier ou Jean LABRADOR"
+              placeholder="Ex : MonAgence Immo"
               className={inputCls}
             />
           </FieldRow>
@@ -279,7 +279,7 @@ export function ContratCanvas({ onComplete, className }: Props) {
               type="text"
               value={data.immatriculation_rsac}
               onChange={(e) => set("immatriculation_rsac", e.target.value)}
-              placeholder="Ex : Greffe de Bayonne N° 12345"
+              placeholder="Ex : Greffe de Bordeaux N° 2024AC00123"
               className={inputCls}
             />
           </FieldRow>
