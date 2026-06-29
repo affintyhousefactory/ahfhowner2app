@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBrevoTemplate } from "@/shared/lib/email";
+import { sendBrevoTemplate, addBrevoContactDOI } from "@/shared/lib/email";
 
 type PackId = "essentiel" | "etendu" | "departement";
 
@@ -25,12 +25,13 @@ type Payload = {
   taif_zone?: string | null;
   budget?: string | null;
   accepte_cgv: boolean;
+  optIn?: boolean;
 };
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as Payload;
 
-  const { nom, telephone, email, modele, pack, source, villes, zones, departement, taif_zone, accepte_cgv } = body;
+  const { nom, telephone, email, modele, pack, source, villes, zones, departement, taif_zone, accepte_cgv, optIn } = body;
 
   if (!nom || !telephone || !email || !pack || !accepte_cgv) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
@@ -112,6 +113,19 @@ export async function POST(req: NextRequest) {
       BUDGET: body.budget ?? "",
     },
   }).catch((err) => console.error("[recherche-terrain] Brevo error:", err));
+
+  // Opt-in newsletter prospects (DOI — list 8)
+  if (optIn) {
+    const doiTemplateId = parseInt(process.env.BREVO_DOI_TEMPLATE_ID ?? "0");
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
+    addBrevoContactDOI(
+      email,
+      { NOM: nom, SMS: telephone ?? undefined },
+      parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8"),
+      doiTemplateId,
+      `${siteUrl}/confirmation-inscription`,
+    ).catch((err) => console.error("[recherche-terrain] Brevo DOI error:", err));
+  }
 
   return NextResponse.json({ success: true, persisted: true });
 }
