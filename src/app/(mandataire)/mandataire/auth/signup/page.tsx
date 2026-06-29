@@ -91,7 +91,11 @@ export default function SignupPage() {
     const json = await res.json();
 
     if (!res.ok) {
-      setError(json.error ?? "Erreur lors de l'enregistrement. Veuillez contacter AHF.");
+      if (res.status === 409) {
+        setError("__duplicate__");
+      } else {
+        setError(json.error ?? "Erreur lors de l'enregistrement. Veuillez contacter AHF.");
+      }
       setLoading(false);
       return;
     }
@@ -288,11 +292,21 @@ export default function SignupPage() {
               onComplete={handleContratComplete}
               className={loading ? "pointer-events-none opacity-60" : ""}
             />
-            {error && (
+            {error === "__duplicate__" ? (
+              <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+                <p className="font-semibold">Email déjà associé à un compte.</p>
+                <p className="mt-1">
+                  Vous avez peut-être déjà créé un compte avec cet email.{" "}
+                  <Link href="/mandataire/auth/signin" className="font-medium underline hover:text-orange-900">
+                    Se connecter →
+                  </Link>
+                </p>
+              </div>
+            ) : error ? (
               <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
-            )}
+            ) : null}
           </div>
 
           <p className="mt-6 text-center text-xs text-gray-400">
