@@ -69,7 +69,7 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
 
           {/* Actions admin */}
           <div className="mt-6">
-            <MandataireActions mandataireId={m.id} currentStatut={m.statut as "en_attente" | "actif" | "suspendu"} />
+            <MandataireActions mandataireId={m.id} currentStatut={m.statut as "invite" | "en_attente" | "actif" | "suspendu"} />
           </div>
         </div>
 

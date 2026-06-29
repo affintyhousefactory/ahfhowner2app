@@ -4,6 +4,7 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 const STATUT_COLORS: Record<string, string> = {
+  invite: "bg-[#7469F4]/20 text-[#7469F4]",
   en_attente: "bg-[#e07b28]/20 text-[#e07b28]",
   actif: "bg-[#2d6b27]/30 text-green-400",
   suspendu: "bg-white/10 text-white/30",
@@ -19,12 +20,20 @@ export default async function MandatairesPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-white">Mandataires</h1>
-        <Link
-          href="/admin/mandataires/nouveau"
-          className="rounded-xl bg-[#7469F4] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-        >
-          + Nouveau mandataire
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/mandataires/inviter"
+            className="rounded-xl border border-[#7469F4]/40 px-4 py-2 text-sm text-[#7469F4] hover:bg-[#7469F4]/10 transition-colors"
+          >
+            Inviter par email
+          </Link>
+          <Link
+            href="/admin/mandataires/nouveau"
+            className="rounded-xl bg-[#7469F4] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          >
+            + Créer manuellement
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#252521]">

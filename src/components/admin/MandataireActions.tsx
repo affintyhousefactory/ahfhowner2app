@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Statut = "en_attente" | "actif" | "suspendu";
+type Statut = "invite" | "en_attente" | "actif" | "suspendu";
 
 interface MandataireActionsProps {
   mandataireId: string;
@@ -34,6 +34,14 @@ export default function MandataireActions({ mandataireId, currentStatut }: Manda
     } finally {
       setLoading(null);
     }
+  }
+
+  if (currentStatut === "invite") {
+    return (
+      <p className="text-xs text-[#7469F4]/70">
+        Invitation envoyée — en attente que le mandataire complète son profil.
+      </p>
+    );
   }
 
   return (
