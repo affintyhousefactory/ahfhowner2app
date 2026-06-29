@@ -4,12 +4,12 @@
 Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², 12 ex, 59 900 €) + **Arko Max** (40 m², 5 ex, 89 900 €). Front livré ; backend Phase 4 en attente ; lancement bloqué par le légal (ADR-015).
 
 ## Priorités actives
-1. **Merger `feat/terrain-address-lookup`** — PR prête ; valider d'abord le build Preview Vercel (env vars Supabase scope Preview à configurer : SUPABASE_URL + ANON_KEY + SERVICE_ROLE_KEY → projet preprod).
-2. **Appliquer migrations SQL** sur Supabase preprod puis prod : `20260622_leads.sql`, `20260622_config_tarifs.sql` (+ `20260620_contacts.sql` ADR-026). Option : automatiser via GitHub Actions `supabase db push` (question non tranchée).
-3. **DNS howner.fr** — configurer CNAME/A chez le registrar (Settings → Domains Vercel) pour tester en conditions réelles.
-4. **Reconfigurer Arko Max** (perM2, options, terrasse, footprint, `reserved`) — données métier à fournir. ⚠️ `TODO` sur `ONE_PRICING` dans `site.ts` → corriger en `MAX_PRICING` dès réception.
-5. Faire valider par Albert : repositionnement bi-produit + wordmark ARKO (ADR-022) ; charte Affinity (ADR-002).
-6. **ADR-026 reste** : `PackTerrainContactForm` submit câblé, SPF/DKIM prod.
+1. **`feat/admin-portal` — continuer Étapes 3-5** (carte lead, recalcul PLU, formulaire création lead, matching affectation + email T4, création mandataire, validation/suspension, Pappers MCP). Branche locale, pas encore pushée.
+2. **Appliquer `20260629_admin_tables.sql`** sur preprod au merge dev, puis prod au merge main (ne pas appliquer manuellement avant).
+3. **SPF/DKIM prod** — DNS au registrar howner.fr (bloqueur externe). ADR-026.
+4. **DNS howner.fr** — configurer CNAME/A chez le registrar.
+5. **Reconfigurer Arko Max** (perM2, options, terrasse, footprint, `reserved`) — données métier à fournir.
+6. Faire valider par Albert : charte Affinity (ADR-002) + repositionnement bi-produit (ADR-022).
 
 ## Contraintes
 - Ne pas mélanger les projets (ce projet ≠ AHF_WEB2 : pas de segments/Brevo/Smart Nano-Max/Villa Arko).

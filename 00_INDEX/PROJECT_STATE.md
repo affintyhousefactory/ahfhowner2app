@@ -131,17 +131,20 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
-1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27 — migrations appliquées preprod + prod.
-2. ~~**`PackTerrainContactForm` submit câblé**~~ ✅ câblé 2026-06-27 — sessionStorage bridge + `/api/recherche-terrain`.
-3. **ADR-026 reste** : SPF/DKIM prod (DNS au registrar — bloqueur externe).
-4. **ADR-018 SEO reste P2** (polish non bloquant) : manifest/PWA, skip-link, trim fonts.
-5. **ADR-007** — Supabase RLS complet (slots Realtime, waitlist, contact terrain) — débloque ADR-009/010/013.
-6. **Coordonnées atelier** : `transport.usine_lat/lon` dans `config_variables` = placeholder Bayonne (43.4933 / −1.4748) — à affiner.
+1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
+2. ~~**`PackTerrainContactForm` submit câblé**~~ ✅ câblé 2026-06-27.
+3. ~~**Brevo contacts opt-in (DOI)**~~ ✅ livré 2026-06-29 — PRs #12+#13 mergées sur main.
+4. **`feat/admin-portal` Étapes 3-5** — carte, matching, création lead/mandataire, Pappers MCP. En cours sur branche locale.
+5. **ADR-026 reste** : SPF/DKIM prod (DNS au registrar — bloqueur externe).
+6. **ADR-018 SEO reste P2** (polish non bloquant).
+7. **Coordonnées atelier** : placeholder Bayonne (43.4933 / −1.4748) — à affiner.
 
 ## Tokens / MCP
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-06-29 (Brevo contacts opt-in + portail mandataire finalisé + admin-portal Étapes 1+2)** — **Brevo opt-in (ADR-026 complété)** : `addBrevoContact()` direct (mandataires, list 7) + `addBrevoContactDOI()` DOI (prospects, list 8) dans `src/shared/lib/email.ts`. Checkbox opt-in dans `ContactForm.tsx` et `Reservation.tsx`. 3 routes API mises à jour (`/api/contact`, `/api/reservation`, `/api/recherche-terrain`). `/api/mandataire/notify-contrat` ajoute le mandataire direct en list 7 à la signature. PRs #12 (feat/brevo-contacts → dev) et #13 (dev → main) mergées. **Variables Vercel complétées** : `BREVO_TO_AHF`, `EMAIL_TO_AHF` (Preview), `BREVO_DOI_TEMPLATE_ID=13`, `BREVO_LIST_PROSPECTS=8`, `BREVO_LIST_MANDATAIRES=7`. **Migration `20260629_mandataires_documents_bucket.sql` appliquée sur prod** ✅. **`feat/admin-portal` Étapes 1+2 commitées** (branche locale, non pushée) : route group `(admin)`, signin (rôle `admin`), layout sidebar sombre (#1a1a18), dashboard KPIs (CA brut, revenus AHF, rémunérations, alertes 48h, donuts leads/dossiers, entonnoir, bar mandataires par perf), liste+fiche leads, liste+fiche mandataires, page affectations, grille article 4. Migration `20260629_admin_tables.sql` créée (**non encore appliquée**). `recharts` installé. Prochaine étape : Étapes 3-5 admin-portal (carte, matching, création lead/mandataire).
 
 **2026-06-27 (câblage PackTerrain + bugfixes PLU + env Supabase 3 scopes)** — **Supabase 3 scopes Vercel** : vars Production (`ahfhownerdb`), Preview (`ahfhownerdb-preprod` / `ixozlavseaykxmjtkkrk`), Development configurées — `.env.local` resynchronisé. **6 migrations appliquées** preprod + prod via MCP Supabase OAuth (`apply_migration`). **PR `feat/terrain-address-lookup` mergée** ✅. **`PackTerrainContactForm` submit câblé** : `Configurator.tsx` écrit `pack_terrain_zones` en sessionStorage à chaque keystroke ; `Reservation.tsx` branche en mode pack vers `/api/recherche-terrain` (sans `incrementReserved` ni slot selector). **Fix livraison "À estimer"** : `ConfigRecap` réactif via événement DOM `plu_result_updated` (était one-shot au mount). **Fix `plu_adresse` NULL sur IDU path** : `reverseGeocode()` BAN lancé en `Promise.all` avec les appels GPU dans Voie B. **Fix champs PLU NULL en leads** : `PluConsentBlock` converti en `useEffect` + listener `plu_result_updated` + auto-check `onChange(true)` dès que la donnée arrive. **ADR-008 amendé** : Stripe retiré du MVP — paiement hors-ligne après qualification lead. **PR `fix/delivery-recap` mergée** ✅.
 
