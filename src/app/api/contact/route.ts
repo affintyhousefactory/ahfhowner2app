@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBrevoTemplate } from "@/shared/lib/email";
+import { sendBrevoTemplate, addBrevoContactDOI } from "@/shared/lib/email";
 
 const PRODUIT_LABELS: Record<string, string> = {
   one: "Arko One (20 m²)",
@@ -15,11 +15,12 @@ type Payload = {
   produit?: string | null;
   message: string;
   captchaToken?: string | null;
+  optIn?: boolean;
 };
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as Payload;
-  const { prenom, nom, email, tel, produit, message, captchaToken } = body;
+  const { prenom, nom, email, tel, produit, message, captchaToken, optIn } = body;
 
   if (!prenom || !nom || !email || !message) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
@@ -88,6 +89,19 @@ export async function POST(req: NextRequest) {
       message,
     },
   }).catch((err) => console.error("[contact] Brevo error:", err));
+
+  // Opt-in newsletter prospects (DOI — list 8)
+  if (optIn) {
+    const doiTemplateId = parseInt(process.env.BREVO_DOI_TEMPLATE_ID ?? "0");
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
+    addBrevoContactDOI(
+      email,
+      { PRENOM: prenom, NOM: nom, SMS: tel ?? undefined },
+      parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8"),
+      doiTemplateId,
+      `${siteUrl}/confirmation-inscription`,
+    ).catch((err) => console.error("[contact] Brevo DOI error:", err));
+  }
 
   return NextResponse.json({ success: true });
 }

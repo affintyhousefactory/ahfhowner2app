@@ -34,6 +34,7 @@ export function Reservation() {
   const [sending, setSending] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
   const [pluConsent, setPluConsent] = useState(false);
+  const [optIn, setOptIn] = useState(false);
 
   const isPack = c.terrainMode === "pack" && !!c.packTerrain;
 
@@ -81,6 +82,7 @@ export function Reservation() {
             zones: zonesArr,
             departement: departementStr,
             accepte_cgv: true,
+            optIn,
           }),
         });
       } else {
@@ -121,6 +123,7 @@ export function Reservation() {
             grandTotal: c.grandTotal,
             pluConsent,
             pluData,
+            optIn,
           }),
         });
         if (!sent) c.incrementReserved(c.product);
@@ -233,6 +236,19 @@ export function Reservation() {
                   <Field name="tel" type="tel" placeholder="Téléphone" error={fieldErrors.tel} />
 
                   {!isPack && <PluConsentBlock pluConsent={pluConsent} onChange={setPluConsent} />}
+
+                  <label className="mt-3 flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-muted">
+                    <input
+                      type="checkbox"
+                      checked={optIn}
+                      onChange={(e) => setOptIn(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded accent-accent"
+                    />
+                    <span>
+                      J&apos;accepte de recevoir des informations et actualités sur l&apos;ARKO par email.
+                      Désinscription possible à tout moment.
+                    </span>
+                  </label>
 
                   <button
                     type="submit"

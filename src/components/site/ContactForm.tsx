@@ -19,6 +19,7 @@ export function ContactForm() {
   const [submitError, setSubmitError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [optIn, setOptIn] = useState(false);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
   const pendingFormDataRef = useRef<FormData | null>(null);
 
@@ -37,6 +38,7 @@ export function ContactForm() {
         produit: data.get("produit") || null,
         message: data.get("message"),
         captchaToken: token,
+        optIn,
       }),
     });
 
@@ -154,6 +156,19 @@ export function ContactForm() {
         placeholder="Votre message *"
         className="mt-3 w-full rounded-2xl border border-line bg-surface px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-muted/60 focus:border-accent"
       />
+
+      <label className="mt-4 flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-muted">
+        <input
+          type="checkbox"
+          checked={optIn}
+          onChange={(e) => setOptIn(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded accent-accent"
+        />
+        <span>
+          J&apos;accepte de recevoir des informations et actualités sur l&apos;ARKO par email.
+          Désinscription possible à tout moment.
+        </span>
+      </label>
 
       <Turnstile
         ref={turnstileRef}

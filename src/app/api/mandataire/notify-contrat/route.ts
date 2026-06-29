@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
-import { sendBrevoTemplate } from "@/shared/lib/email";
+import { sendBrevoTemplate, addBrevoContact } from "@/shared/lib/email";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -83,6 +83,17 @@ export async function POST(req: NextRequest) {
       errors.push(`mandataire: ${e}`);
     }
   }
+
+  // Ajout direct mandataire dans liste Brevo 7 (base contractuelle, pas DOI)
+  addBrevoContact(
+    m.email,
+    {
+      PRENOM: m.prenom,
+      NOM: m.nom,
+      STATUT_MANDATAIRE: "en_attente",
+    },
+    [parseInt(process.env.BREVO_LIST_MANDATAIRES ?? "7")],
+  ).catch((err) => errors.push(`brevo_contact: ${err}`));
 
   return NextResponse.json({
     success: true,

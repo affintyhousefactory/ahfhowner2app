@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBrevoTemplate } from "@/shared/lib/email";
+import { sendBrevoTemplate, addBrevoContactDOI } from "@/shared/lib/email";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import type { ParcelleData } from "@/shared/types/plu";
 
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     terrainMode, packTerrain,
     bardage, facade, bar, chambre, interieur,
     terrasseM2, optionsLabels, grandTotal,
-    pluConsent, pluData,
+    pluConsent, pluData, optIn,
   } = body as {
     prenom: string; nom: string; email: string; tel: string;
     slot: number | null; produit: string; surface: string;
@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     chambre: string; interieur: string; terrasseM2: number;
     optionsLabels: string[]; grandTotal: number;
     pluConsent: boolean; pluData: ParcelleData | null;
+    optIn?: boolean;
   };
 
   const plu = pluConsent && pluData?.found ? pluData : null;
@@ -137,6 +138,19 @@ export async function POST(req: NextRequest) {
   if (TO_AHF) recipients.push({ email: TO_AHF, name: "Howner" });
 
   await sendBrevoTemplate({ templateId: TEMPLATE_ID, to: recipients, params });
+
+  // Opt-in newsletter prospects (DOI — list 8)
+  if (optIn) {
+    const doiTemplateId = parseInt(process.env.BREVO_DOI_TEMPLATE_ID ?? "0");
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
+    addBrevoContactDOI(
+      email,
+      { PRENOM: prenom, NOM: nom, SMS: tel ?? undefined },
+      parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8"),
+      doiTemplateId,
+      `${siteUrl}/confirmation-inscription`,
+    ).catch((err) => console.error("[reservation] Brevo DOI error:", err));
+  }
 
   return NextResponse.json({ ok: true });
 }
