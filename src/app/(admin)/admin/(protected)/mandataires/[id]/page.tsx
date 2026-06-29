@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { notFound } from "next/navigation";
+import MandataireActions from "@/components/admin/MandataireActions";
 
 export const dynamic = "force-dynamic";
 
@@ -67,17 +68,8 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
           </dl>
 
           {/* Actions admin */}
-          <div className="mt-6 flex gap-3">
-            {m.statut === "en_attente" && (
-              <button className="rounded-xl bg-[#2d6b27]/30 px-4 py-2 text-sm text-green-400 hover:bg-[#2d6b27]/50 transition-colors">
-                Valider
-              </button>
-            )}
-            {m.statut !== "suspendu" && (
-              <button className="rounded-xl bg-white/5 px-4 py-2 text-sm text-white/40 hover:bg-white/10 transition-colors">
-                Suspendre
-              </button>
-            )}
+          <div className="mt-6">
+            <MandataireActions mandataireId={m.id} currentStatut={m.statut as "en_attente" | "actif" | "suspendu"} />
           </div>
         </div>
 
