@@ -86,6 +86,13 @@ export default function ContratPage() {
       return;
     }
 
+    // 3. Notifications email (non bloquantes)
+    fetch("/api/mandataire/notify-contrat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mandataireId }),
+    }).catch(() => null);
+
     router.push("/mandataire/documents");
   };
 
