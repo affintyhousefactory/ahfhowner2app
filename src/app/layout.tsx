@@ -1,31 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
-import SmoothScroll from "@/components/providers/SmoothScroll";
-import { ConfigProvider } from "@/components/site/config-store";
-import { Nav } from "@/components/site/Nav";
-import { Footer } from "@/components/site/Footer";
-import { CountdownBanner } from "@/components/site/CountdownBanner";
-import { JsonLd } from "@/components/seo/JsonLd";
-import { CookieBanner } from "@/components/site/CookieBanner";
-import { Analytics } from "@/components/site/Analytics";
 import { SITE_URL } from "@/lib/site";
-import { organizationSchema } from "@/lib/jsonld";
 
-// Display « suisse » (titres magistraux) — pairing B (ui-ux-pro-max)
 const display = Space_Grotesk({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
-// Texte courant net
 const sans = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
 });
-// Légendes / labels
 const mono = Space_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
@@ -72,19 +60,7 @@ export default function RootLayout({
       lang="fr"
       className={`${display.variable} ${sans.variable} ${mono.variable} antialiased`}
     >
-      <body>
-        <JsonLd data={organizationSchema()} />
-        <Analytics />
-        <SmoothScroll>
-          <ConfigProvider>
-            <CountdownBanner />
-            <Nav />
-            {children}
-            <Footer />
-            <CookieBanner />
-          </ConfigProvider>
-        </SmoothScroll>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
