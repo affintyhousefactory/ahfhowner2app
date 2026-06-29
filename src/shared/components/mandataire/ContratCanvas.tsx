@@ -96,6 +96,8 @@ export function ContratCanvas({ onComplete, className }: Props) {
         data.forme_juridique &&
         data.siret &&
         data.adresse &&
+        data.reseau_carte_t &&
+        data.carte_t_numero &&
         data.email
       );
     }
@@ -282,7 +284,7 @@ export function ContratCanvas({ onComplete, className }: Props) {
             />
           </FieldRow>
 
-          <FieldRow label="Nom du Réseau carte T">
+          <FieldRow label="Nom du Réseau carte T *">
             <input
               type="text"
               value={data.reseau_carte_t}
@@ -292,7 +294,7 @@ export function ContratCanvas({ onComplete, className }: Props) {
             />
           </FieldRow>
 
-          <FieldRow label="Carte professionnelle T">
+          <FieldRow label="Carte professionnelle T *">
             <input
               type="text"
               value={data.carte_t_numero}
