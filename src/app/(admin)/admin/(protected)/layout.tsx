@@ -25,7 +25,7 @@ export default function AdminProtectedLayout({ children }: { children: React.Rea
     const check = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { router.replace("/admin/auth/signin"); return; }
-      const role = session.user.user_metadata?.role;
+      const role = session.user.app_metadata?.role;
       if (role !== "admin") { router.replace("/admin/auth/signin"); return; }
       setUserEmail(session.user.email ?? "");
       setChecking(false);

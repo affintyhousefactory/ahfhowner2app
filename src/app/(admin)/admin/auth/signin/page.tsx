@@ -25,7 +25,7 @@ export default function AdminSignin() {
       return;
     }
 
-    const role = data.session.user.user_metadata?.role;
+    const role = data.session.user.app_metadata?.role;
     if (role !== "admin") {
       await supabase.auth.signOut();
       setError("Accès réservé aux administrateurs.");
