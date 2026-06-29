@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { SERIES_DEADLINE_ISO, SERIES_DEADLINE_LABEL } from "@/lib/site";
 import { useCountdown } from "@/components/effects/useCountdown";
-import { cn } from "@/lib/cn";
+import { cn } from "@/shared/lib/cn";
 
 const pad = (n: number) => n.toString().padStart(2, "0");
 

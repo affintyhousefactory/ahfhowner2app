@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBrevoTemplate } from "@/lib/email";
+import { sendBrevoTemplate } from "@/shared/lib/email";
 
 type PackId = "essentiel" | "etendu" | "departement";
 

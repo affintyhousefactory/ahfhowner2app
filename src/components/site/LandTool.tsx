@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
-import { cn } from "@/lib/cn";
-import { ParcelleAnalyse } from "./ParcelleAnalyse";
+import { cn } from "@/shared/lib/cn";
+import { ParcelleAnalyse } from "@/shared/components/plu/ParcelleAnalyse";
 
 type Branch = "have" | "search";
 

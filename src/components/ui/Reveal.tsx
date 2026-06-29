@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { cn } from "@/lib/cn";
+import { cn } from "@/shared/lib/cn";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
