@@ -122,80 +122,86 @@ export default function NouveauMandatairePage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-8">
       <a href="/admin/mandataires" className="text-sm text-white/30 hover:text-white">← Mandataires</a>
       <h1 className="mt-2 text-xl font-semibold text-white mb-6">Nouveau mandataire</h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
 
-        {/* ── 1. Identité ── */}
-        <Section title="Identité">
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Prénom *" value={prenom} onChange={setPrenom} required />
-            <Field label="Nom *" value={nom} onChange={setNom} required />
-            <Field label="Email *" type="email" value={email} onChange={setEmail} required />
-            <Field label="Téléphone" value={tel} onChange={setTel} />
-          </div>
-        </Section>
+        {/* ── Ligne 1 : Identité + Entreprise côte à côte ── */}
+        <div className="grid gap-5 lg:grid-cols-2">
 
-        {/* ── 2. Entreprise + Pappers ── */}
-        <Section title="Entreprise">
-          <div className="mb-4">
-            <label className="mb-1.5 block text-xs text-white/40">SIRET</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={siret}
-                onChange={(e) => { setSiret(e.target.value); setPappersResult(null); }}
-                placeholder="xxx xxx xxx xxxxx"
-                maxLength={17}
-                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#7469F4] font-mono"
-              />
-              <button
-                type="button"
-                onClick={lookupPappers}
-                disabled={pappersLoading || siret.replace(/\s/g, "").length < 9}
-                className="rounded-xl bg-[#7469F4]/20 px-4 py-2.5 text-sm text-[#7469F4] hover:bg-[#7469F4]/30 transition-opacity disabled:opacity-40"
-              >
-                {pappersLoading ? "…" : "Vérifier Pappers"}
-              </button>
+          {/* ── 1. Identité ── */}
+          <Section title="Identité">
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Prénom *" value={prenom} onChange={setPrenom} required />
+              <Field label="Nom *" value={nom} onChange={setNom} required />
             </div>
-            {pappersError && <p className="mt-1 text-xs text-red-400">{pappersError}</p>}
-          </div>
-
-          {/* Résultat Pappers */}
-          {pappersResult && (
-            <div className={cn(
-              "mb-4 rounded-xl border p-4 text-sm",
-              pappersResult.cessee
-                ? "border-red-500/30 bg-red-500/5"
-                : "border-[#7469F4]/30 bg-[#7469F4]/5",
-            )}>
-              <p className="font-medium text-white">{pappersResult.nom_entreprise}</p>
-              <p className="text-xs text-white/50 mt-0.5">{pappersResult.forme_juridique} · SIREN {pappersResult.siren}</p>
-              {pappersResult.adresse && <p className="text-xs text-white/40 mt-1">{pappersResult.adresse}</p>}
-              {pappersResult.dirigeant && (
-                <p className="text-xs text-white/40 mt-1">
-                  {pappersResult.dirigeant.qualite} : {pappersResult.dirigeant.prenom} {pappersResult.dirigeant.nom}
-                </p>
-              )}
-              {pappersResult.cessee && (
-                <p className="mt-1 text-xs font-medium text-red-400">⚠ Entreprise cessée</p>
-              )}
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <Field label="Email *" type="email" value={email} onChange={setEmail} required />
+              <Field label="Téléphone" value={tel} onChange={setTel} />
             </div>
-          )}
+          </Section>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Forme juridique" value={formeJuridique} onChange={setFormeJuridique} />
-            <div className="col-span-2">
-              <Field label="Adresse siège" value={adresse} onChange={setAdresse} />
+          {/* ── 2. Entreprise + Pappers ── */}
+          <Section title="Entreprise">
+            <div className="mb-4">
+              <label className="mb-1.5 block text-xs text-white/40">SIRET</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={siret}
+                  onChange={(e) => { setSiret(e.target.value); setPappersResult(null); }}
+                  placeholder="xxx xxx xxx xxxxx"
+                  maxLength={17}
+                  className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#7469F4] font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={lookupPappers}
+                  disabled={pappersLoading || siret.replace(/\s/g, "").length < 9}
+                  className="rounded-xl bg-[#7469F4]/20 px-3 py-2.5 text-sm text-[#7469F4] hover:bg-[#7469F4]/30 transition-opacity disabled:opacity-40 whitespace-nowrap"
+                >
+                  {pappersLoading ? "…" : "Vérifier"}
+                </button>
+              </div>
+              {pappersError && <p className="mt-1 text-xs text-red-400">{pappersError}</p>}
             </div>
-          </div>
-        </Section>
 
-        {/* ── 3. Carte T ── */}
-        <Section title="Carte T — Transaction immobilière">
-          <div className="grid grid-cols-2 gap-4">
+            {/* Résultat Pappers */}
+            {pappersResult && (
+              <div className={cn(
+                "mb-4 rounded-xl border p-3 text-sm",
+                pappersResult.cessee
+                  ? "border-red-500/30 bg-red-500/5"
+                  : "border-[#7469F4]/30 bg-[#7469F4]/5",
+              )}>
+                <p className="font-medium text-white text-sm">{pappersResult.nom_entreprise}</p>
+                <p className="text-xs text-white/50 mt-0.5">{pappersResult.forme_juridique} · SIREN {pappersResult.siren}</p>
+                {pappersResult.adresse && <p className="text-xs text-white/40 mt-1">{pappersResult.adresse}</p>}
+                {pappersResult.dirigeant && (
+                  <p className="text-xs text-white/40 mt-1">
+                    {pappersResult.dirigeant.qualite} : {pappersResult.dirigeant.prenom} {pappersResult.dirigeant.nom}
+                  </p>
+                )}
+                {pappersResult.cessee && <p className="mt-1 text-xs font-medium text-red-400">⚠ Entreprise cessée</p>}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Forme juridique" value={formeJuridique} onChange={setFormeJuridique} />
+              <div className="col-span-2">
+                <Field label="Adresse siège" value={adresse} onChange={setAdresse} />
+              </div>
+            </div>
+          </Section>
+        </div>
+
+        {/* ── Ligne 2 : Carte T + Zone d'activité côte à côte ── */}
+        <div className="grid gap-5 lg:grid-cols-2">
+
+          {/* ── 3. Carte T ── */}
+          <Section title="Carte T — Transaction immobilière">
             <div>
               <label className="mb-1.5 block text-xs text-white/40">Réseau / détenteur carte T</label>
               <select
@@ -207,53 +213,54 @@ export default function NouveauMandatairePage() {
                 {RESEAUX_CARTE_T.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
-            <Field label="Numéro carte T" value={carteTNumero} onChange={setCarteTNumero} placeholder="CPI 75 2025 000 XXX" />
-          </div>
-        </Section>
-
-        {/* ── 4. Zone d'activité ── */}
-        <Section title="Zone d'activité">
-          <p className="mb-2 text-xs text-white/30">Départements, communes ou zones couverts. Appuyez Entrée ou virgule pour ajouter.</p>
-
-          {/* Tags */}
-          {zones.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-1.5">
-              {zones.map((z) => (
-                <span key={z} className="flex items-center gap-1.5 rounded-full bg-[#7469F4]/20 px-3 py-1 text-xs text-[#7469F4]">
-                  {z}
-                  <button type="button" onClick={() => removeZone(z)} className="opacity-60 hover:opacity-100">×</button>
-                </span>
-              ))}
+            <div className="mt-4">
+              <Field label="Numéro carte T" value={carteTNumero} onChange={setCarteTNumero} placeholder="CPI 75 2025 000 XXX" />
             </div>
-          )}
+          </Section>
 
-          <div className="flex gap-2">
-            <input
-              ref={zoneRef}
-              type="text"
-              value={zoneInput}
-              onChange={(e) => setZoneInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === ",") {
-                  e.preventDefault();
-                  addZone(zoneInput);
-                }
-              }}
-              placeholder="ex: 64, Pyrénées-Atlantiques, Bayonne…"
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#7469F4]"
-            />
-            <button
-              type="button"
-              onClick={() => addZone(zoneInput)}
-              disabled={!zoneInput.trim()}
-              className="rounded-xl bg-white/10 px-4 py-2.5 text-sm text-white/60 hover:bg-white/15 disabled:opacity-40 transition-colors"
-            >
-              Ajouter
-            </button>
-          </div>
-        </Section>
+          {/* ── 4. Zone d'activité ── */}
+          <Section title="Zone d'activité">
+            <p className="mb-2 text-xs text-white/30">Départements, communes ou zones. Entrée ou virgule pour ajouter.</p>
 
-        {/* ── 5. Description ── */}
+            {zones.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-1.5">
+                {zones.map((z) => (
+                  <span key={z} className="flex items-center gap-1.5 rounded-full bg-[#7469F4]/20 px-3 py-1 text-xs text-[#7469F4]">
+                    {z}
+                    <button type="button" onClick={() => removeZone(z)} className="opacity-60 hover:opacity-100">×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <input
+                ref={zoneRef}
+                type="text"
+                value={zoneInput}
+                onChange={(e) => setZoneInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === ",") {
+                    e.preventDefault();
+                    addZone(zoneInput);
+                  }
+                }}
+                placeholder="ex: 64, Bayonne, Pyrénées-Atl."
+                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#7469F4]"
+              />
+              <button
+                type="button"
+                onClick={() => addZone(zoneInput)}
+                disabled={!zoneInput.trim()}
+                className="rounded-xl bg-white/10 px-4 py-2.5 text-sm text-white/60 hover:bg-white/15 disabled:opacity-40 transition-colors"
+              >
+                +
+              </button>
+            </div>
+          </Section>
+        </div>
+
+        {/* ── 5. Description pleine largeur ── */}
         <Section title="Description (optionnel)">
           <textarea
             value={description}
