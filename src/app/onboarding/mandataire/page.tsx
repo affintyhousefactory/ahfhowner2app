@@ -233,7 +233,7 @@ function OnboardingForm() {
                 <div>
                   <label className="mb-1.5 block text-xs text-white/40">Réseau / détenteur</label>
                   <select value={reseauCarteT} onChange={(e) => setReseauCarteT(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[#7469F4]">
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[#7469F4] [color-scheme:dark]">
                     <option value="">— Sélectionner —</option>
                     {RESEAUX_CARTE_T.map((r) => <option key={r} value={r}>{r}</option>)}
                   </select>
