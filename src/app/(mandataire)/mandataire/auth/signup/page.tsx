@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 import { ContratCanvas, type ContratData } from "@/shared/components/mandataire/ContratCanvas";
 
 type SignupStep = "landing" | "account" | "contrat" | "done";
@@ -99,10 +98,6 @@ export default function SignupPage() {
       setLoading(false);
       return;
     }
-
-    // Connexion automatique après création
-    const supabase = getSupabaseBrowser();
-    await supabase.auth.signInWithPassword({ email, password });
 
     setStep("done");
     setLoading(false);
