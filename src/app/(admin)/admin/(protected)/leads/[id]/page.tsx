@@ -1,9 +1,7 @@
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { notFound } from "next/navigation";
-import dynamicImport from "next/dynamic";
 import AssignMandataire from "@/components/admin/AssignMandataire";
-
-const LeadMap = dynamicImport(() => import("@/components/admin/LeadMap"), { ssr: false });
+import LeadMapClient from "@/components/admin/LeadMapClient";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +79,7 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
 
           {/* Carte parcelle */}
           {lead.plu_lat && lead.plu_lon && (
-            <LeadMap lon={Number(lead.plu_lon)} lat={Number(lead.plu_lat)} label={lead.plu_adresse ?? undefined} />
+            <LeadMapClient lon={Number(lead.plu_lon)} lat={Number(lead.plu_lat)} label={lead.plu_adresse ?? undefined} />
           )}
 
           {/* Zone PLU */}
