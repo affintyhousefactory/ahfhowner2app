@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
+import { cn } from "@/shared/lib/cn";
 
 export default function ProtectedLayout({
   children,
@@ -62,8 +64,14 @@ export default function ProtectedLayout({
   );
 }
 
+const NAV_LINKS = [
+  { href: "/mandataire", label: "Dashboard" },
+  { href: "/mandataire/documents", label: "Documents" },
+];
+
 function MandataireNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = getSupabaseBrowser();
 
   const handleSignOut = async () => {
@@ -74,11 +82,29 @@ function MandataireNav() {
   return (
     <header className="border-b border-gray-200 bg-white shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-lg bg-[#7469F4] flex items-center justify-center">
-            <span className="text-xs font-bold text-white">H</span>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="h-7 w-7 rounded-lg bg-[#7469F4] flex items-center justify-center">
+              <span className="text-xs font-bold text-white">H</span>
+            </div>
+            <span className="hidden font-semibold text-gray-900 sm:inline">Portail Mandataire</span>
           </div>
-          <span className="font-semibold text-gray-900">HOWNER · Portail Mandataire</span>
+          <nav className="flex items-center gap-1">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-sm transition-colors",
+                  pathname === link.href
+                    ? "bg-[#7469F4]/10 font-medium text-[#7469F4]"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
         </div>
         <button
           onClick={handleSignOut}
