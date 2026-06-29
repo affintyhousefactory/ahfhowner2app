@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
   try {
     await sendBrevoTemplate({
       templateId,
-      to: [{ email: process.env.AHF_NOTIFICATION_EMAIL ?? "contact@affinityhome.fr" }],
+      to: [{ email: process.env.AHF_NOTIFICATION_EMAIL ?? "contact@affinityhousefactory.com" }],
       params: { PRENOM: m.prenom, NOM: m.nom, EMAIL: m.email },
     });
   } catch {
