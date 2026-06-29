@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 import { ContratCanvas, type ContratData } from "@/shared/components/mandataire/ContratCanvas";
+import { generateContratPdf } from "@/shared/lib/contrat-pdf";
 
 export default function ContratPage() {
   const router = useRouter();
@@ -43,11 +44,34 @@ export default function ContratPage() {
     setError("");
 
     const supabase = getSupabaseBrowser();
+    const now = new Date();
+    const fileName = `${mandataireId}/contrat-${now.toISOString().slice(0, 10)}.pdf`;
+
+    // 1. Générer le PDF
+    let contratUrl: string | null = null;
+    try {
+      const pdfBlob = await generateContratPdf(contratData);
+      const { error: uploadError } = await supabase.storage
+        .from("mandataires-documents")
+        .upload(fileName, pdfBlob, { contentType: "application/pdf", upsert: true });
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from("mandataires-documents")
+          .getPublicUrl(fileName);
+        contratUrl = urlData?.publicUrl ?? null;
+      }
+    } catch {
+      // PDF non bloquant — on continue sans URL
+    }
+
+    // 2. Mettre à jour le profil
     const { error: dbError } = await supabase
       .from("mandataires")
       .update({
-        contrat_signe_at: new Date().toISOString(),
+        contrat_signe_at: now.toISOString(),
         contrat_data: contratData,
+        contrat_url: contratUrl,
         reseau_carte_t: contratData.reseau_carte_t || null,
         carte_t_numero: contratData.carte_t_numero || null,
         siret: contratData.siret,
@@ -62,7 +86,7 @@ export default function ContratPage() {
       return;
     }
 
-    router.push("/mandataire");
+    router.push("/mandataire/documents");
   };
 
   if (loading) {
