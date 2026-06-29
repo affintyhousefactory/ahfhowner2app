@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Notifier AHF
-  const templateId = parseInt(process.env.BREVO_TEMPLATE_NOUVEAU_MANDATAIRE ?? "0", 10);
+  const templateId = parseInt(process.env.BREVO_TEMPLATE_MANDATAIRE_NEW ?? "0", 10);
   try {
     await sendBrevoTemplate({
       templateId,
