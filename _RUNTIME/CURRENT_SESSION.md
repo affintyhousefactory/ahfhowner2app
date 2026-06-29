@@ -1,10 +1,25 @@
 # CURRENT_SESSION — Howner / ARKO
 
 ## Focus actuel
-**Prochaine étape** : SPF/DKIM prod (DNS registrar — bloqueur externe), puis ADR-007 RLS complet ou ADR-018 SEO P2.
+**En cours** : `feat/admin-portal` — Étapes 3-5 (carte Mapbox/Leaflet, formulaire création lead, matching affectation, création mandataire, Pappers MCP). Ne pas pousser de PR avant la fin de l'Étape 4 minimum.
 
-## Décisions prises — 2026-06-29
-- **Workflow git 3 niveaux** instauré : `feat/*` → `dev` → `main`. Branche `dev` créée sur GitHub depuis `main` (SHA f24afde6). À configurer : `dev` comme branche Preview dans Vercel (Settings → Git → Preview Branches).
+## Décisions prises — 2026-06-29 (session brevo-contacts + admin-portal)
+- **Brevo contacts opt-in livré** (PR #12 → dev → PR #13 → main) :
+  - `addBrevoContact()` direct liste 7 (mandataires, base contractuelle)
+  - `addBrevoContactDOI()` DOI liste 8 (prospects — ContactForm + Reservation + RechercheTerrainForm)
+  - Template DOI = **13**, liste prospects = **8**, liste mandataires = **7**
+  - Variables Vercel complétées : `BREVO_TO_AHF`, `EMAIL_TO_AHF` (Preview), listes + DOI template
+- **Migration `20260629_mandataires_documents_bucket.sql` appliquée sur prod** ✅
+- **Migration `20260629_admin_tables.sql` créée** sur `feat/admin-portal` — **PAS encore appliquée** (à appliquer sur preprod au merge dev, puis prod au merge main)
+- **feat/admin-portal démarré** — Étapes 1+2 committées (branche en cours, non pushée) :
+  - Route group `(admin)` : signin, layout sidebar sombre, auth guard rôle `admin`
+  - Dashboard KPIs : CA brut, revenus AHF, rémunérations, alertes 48h, donuts, entonnoir, bar mandataires
+  - Liste + fiche leads, liste + fiche mandataires, page affectations
+  - `recharts` installé
+- **Redéploiement prod** déclenché depuis branche `dev` par erreur (contenu identique à `main` — pas d'impact)
+
+## Décisions prises — 2026-06-29 (session portail mandataire)
+- **Workflow git 3 niveaux** instauré : `feat/*` → `dev` → `main`.
 
 ## Décisions prises — 2026-06-27
 - **Supabase 3 scopes Vercel** configurés : Production (`ahfhownerdb`), Preview (`ahfhownerdb-preprod`), Development. `.env.local` resynchronisé via `vercel env pull --environment=development`.
