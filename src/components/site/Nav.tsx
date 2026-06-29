@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { NAV, BRAND, PRODUCT_LIST } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
-import { cn } from "@/lib/cn";
+import { cn } from "@/shared/lib/cn";
 
 export function Nav() {
   const [solid, setSolid] = useState(false);

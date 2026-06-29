@@ -6,10 +6,10 @@ import { BRAND, CONFIG, TRANSPORT } from "@/lib/site";
 import { Gauge } from "@/components/ui/Gauge";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
-import { cn } from "@/lib/cn";
+import { cn } from "@/shared/lib/cn";
 import { useConfig, eur } from "./config-store";
 import { CountdownBanner } from "./CountdownBanner";
-import type { ParcelleData } from "@/app/api/parcelle/route";
+import type { ParcelleData } from "@/shared/types/plu";
 
 function haversineKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
   const R = 6371;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBrevoTemplate } from "@/lib/email";
-import { getSupabaseAdmin } from "@/lib/supabase";
-import type { ParcelleData } from "@/app/api/parcelle/route";
+import { sendBrevoTemplate } from "@/shared/lib/email";
+import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import type { ParcelleData } from "@/shared/types/plu";
 
 const TEMPLATE_ID = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
 const TO_AHF = process.env.BREVO_TO_AHF ?? "";
