@@ -16,9 +16,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     const supabase = getSupabaseBrowser();
-    const redirectTo =
-      (process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr") +
-      "/mandataire/auth/reset-password";
+    const redirectTo = window.location.origin + "/mandataire/auth/reset-password";
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
