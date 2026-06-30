@@ -1,7 +1,7 @@
 # CURRENT_SESSION — Howner / ARKO
 
 ## Focus actuel
-**En cours** : `feat/admin-portal` — Étapes 3-5 (carte Mapbox/Leaflet, formulaire création lead, matching affectation, création mandataire, Pappers MCP). Ne pas pousser de PR avant la fin de l'Étape 4 minimum.
+**`feat/admin-portal` COMPLET** — Étapes 1→6 mergées sur `dev` via PR #14 (commit 614b5f0c). Portail admin opérationnel : dashboard, leads, mandataires, affectations, carte Leaflet, formulaire lead/mandataire, Pappers, validation/suspension, invitation onboarding.
 
 ## Décisions prises — 2026-06-29 (session brevo-contacts + admin-portal)
 - **Brevo contacts opt-in livré** (PR #12 → dev → PR #13 → main) :

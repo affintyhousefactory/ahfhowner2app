@@ -111,7 +111,7 @@ export default function ContratPage() {
         <h1 className="mt-3 text-xl font-semibold text-gray-900">Contrat déjà signé</h1>
         <p className="mt-2 text-sm text-gray-500">Votre contrat-cadre AHF est enregistré.</p>
         <button
-          onClick={() => router.push("/mandataire")}
+          onClick={() => router.push("/mandataire/dashboard")}
           className="mt-6 rounded-xl bg-[#7469F4] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#5a54d4] transition-colors"
         >
           Retour au dashboard
