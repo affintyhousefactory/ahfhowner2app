@@ -1,28 +1,27 @@
-export async function loadGooglePlacesScript(apiKey: string): Promise<void> {
-  if (typeof window === "undefined") return;
+export function loadGooglePlacesScript(apiKey: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") return;
 
-  // Si le bootstrap est déjà prêt, charger la lib places directement
-  if (window.google?.maps?.importLibrary) {
-    await window.google.maps.importLibrary("places");
-    return;
-  }
+    // Déjà chargé
+    if (window.google?.maps?.places) { resolve(); return; }
 
-  // Injecter le bootstrap script (loading=async, sans &libraries=)
-  await new Promise<void>((resolve, reject) => {
     const existing = document.getElementById("gplaces-script");
     if (existing) {
+      // Script en cours de chargement — attendre le onload
       existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => reject(new Error("Google Maps failed")));
       return;
     }
+
     const script = document.createElement("script");
     script.id = "gplaces-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&language=fr`;
+    // loading=async nécessite importLibrary() et casse window.google.maps.places
+    // On utilise le pattern classique &libraries=places qui expose places après onload
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=fr`;
     script.async = true;
+    script.defer = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Google Maps bootstrap failed to load"));
+    script.onerror = () => reject(new Error("Google Maps failed to load"));
     document.head.appendChild(script);
   });
-
-  // Charger dynamiquement la librairie Places
-  await window.google.maps.importLibrary("places");
 }
