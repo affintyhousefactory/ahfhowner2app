@@ -32,6 +32,11 @@
 - **ADR-008 amendé** : Stripe retiré du MVP — paiement hors-ligne. Variables Stripe non à configurer Vercel.
 - **PR `fix/delivery-recap` mergée** ✅.
 
+## Décisions prises — 2026-06-30 (portail mandataire + PR #17)
+- **PR #16 mergée sur dev** : landing `/mandataire`, dashboard `/mandataire/dashboard`, signup épuré, forgot/reset-password
+- **Template Brevo 15** (affectation) créé — `BREVO_TEMPLATE_AFFECTATION=15` en `.env.local` + Vercel dev. À ajouter Vercel Prod+Preview avant merge #17.
+- **PR #17 `dev`→`main` ouverte** — en attente checklist : (a) Vercel `BREVO_TEMPLATE_AFFECTATION=15` Prod+Preview, (b) Supabase Redirect URL reset-password, (c) merge, (d) appliquer 2 migrations prod.
+
 ## Questions en suspens
 - Migrations automatiques : GitHub Actions `supabase db push` vs Supabase Branching (Pro) vs manuel. Pas tranché.
 - Supabase local (CLI Docker) vs cloud `ahfhownerdb-dev` pour Development. Pas tranché.
