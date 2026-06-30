@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
+    mandataire_id: m.id,
     prenom: m.prenom,
     nom: m.nom,
     email: m.email,

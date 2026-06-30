@@ -16,10 +16,10 @@ export async function POST(req: NextRequest) {
   const body = (await req.json()) as {
     token?: string;
     contratData?: ContratData;
-    pdfBase64?: string | null;
+    pdfStoragePath?: string | null;
   };
 
-  const { token, contratData, pdfBase64 } = body;
+  const { token, contratData, pdfStoragePath } = body;
   if (!token || !contratData) {
     return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
   }
@@ -36,24 +36,13 @@ export async function POST(req: NextRequest) {
   const supabase = getSupabaseAdmin();
   const now = new Date();
 
-  // Upload PDF
+  // Résoudre l'URL publique depuis le path uploadé par le client
   let contratUrl: string | null = null;
-  if (pdfBase64) {
-    try {
-      const pdfBuffer = Buffer.from(pdfBase64, "base64");
-      const fileName = `${m.id}/contrat-${now.toISOString().slice(0, 10)}.pdf`;
-      const { error: uploadError } = await supabase.storage
-        .from("mandataires-documents")
-        .upload(fileName, pdfBuffer, { contentType: "application/pdf", upsert: true });
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage
-          .from("mandataires-documents")
-          .getPublicUrl(fileName);
-        contratUrl = urlData?.publicUrl ?? null;
-      }
-    } catch {
-      // non-bloquant
-    }
+  if (pdfStoragePath) {
+    const { data: urlData } = supabase.storage
+      .from("mandataires-documents")
+      .getPublicUrl(pdfStoragePath);
+    contratUrl = urlData?.publicUrl ?? null;
   }
 
   // Sauvegarder tous les champs + signer le contrat

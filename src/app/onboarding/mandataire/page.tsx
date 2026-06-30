@@ -4,8 +4,10 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ContratCanvas, type ContratData } from "@/shared/components/mandataire/ContratCanvas";
 import { generateContratPdf } from "@/shared/lib/contrat-pdf";
+import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 
 interface PrefillData {
+  mandataire_id: string;
   prenom: string;
   nom: string;
   email: string;
@@ -39,13 +41,16 @@ function OnboardingForm() {
     setError("");
 
     // 1. Générer le PDF côté client
-    let pdfBase64: string | null = null;
+    let pdfStoragePath: string | null = null;
     try {
       const pdfBlob = await generateContratPdf(contratData);
-      const bytes = new Uint8Array(await pdfBlob.arrayBuffer());
-      let binary = "";
-      for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-      pdfBase64 = btoa(binary);
+      const date = new Date().toISOString().slice(0, 10);
+      const filePath = `${prefill!.mandataire_id}/contrat-${date}.pdf`;
+      const supabase = getSupabaseBrowser();
+      const { error: uploadErr } = await supabase.storage
+        .from("mandataires-documents")
+        .upload(filePath, pdfBlob, { contentType: "application/pdf", upsert: true });
+      if (!uploadErr) pdfStoragePath = filePath;
     } catch {
       // non-bloquant
     }
@@ -55,7 +60,7 @@ function OnboardingForm() {
       const res = await fetch("/api/onboarding/mandataire/contrat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, contratData, pdfBase64 }),
+        body: JSON.stringify({ token, contratData, pdfStoragePath }),
       });
       const body = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) throw new Error(body.error ?? "Erreur serveur");
