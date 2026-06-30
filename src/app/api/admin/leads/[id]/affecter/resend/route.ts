@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
 
-export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 
@@ -39,7 +39,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         LEAD_NUMBER:       `#${lead.lead_number ?? ""}`,
         LEAD_COMMUNE:      lead.commune ?? "",
         LEAD_PACK:         lead.pack_terrain ?? lead.produit ?? "",
-        PORTAL_URL:        `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/mandataire/dossiers`,
+        PORTAL_URL:        `${req.nextUrl.origin}/mandataire/dossiers`,
       },
     });
   }
