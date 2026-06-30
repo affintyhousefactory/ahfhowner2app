@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { getSiteUrl } from "@/shared/lib/site-url";
 
 const VALID_STATUTS = ["en_attente", "actif", "suspendu"] as const;
 type Statut = (typeof VALID_STATUTS)[number];
@@ -26,7 +27,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (statut === "actif" && !mandataire.user_id && mandataire.email) {
     const { data: inviteData, error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(
       mandataire.email,
-      { data: { role: "mandataire" } },
+      {
+        data: { role: "mandataire" },
+        redirectTo: `${getSiteUrl(req)}/mandataire/auth/reset-password`,
+      },
     );
 
     if (inviteErr) {

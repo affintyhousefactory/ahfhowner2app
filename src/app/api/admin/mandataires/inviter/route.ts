@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
+import { getSiteUrl } from "@/shared/lib/site-url";
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as {
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const invitationUrl = `${req.nextUrl.origin}/onboarding/mandataire?token=${token}`;
+  const invitationUrl = `${getSiteUrl(req)}/onboarding/mandataire?token=${token}`;
 
   const templateId = parseInt(process.env.BREVO_TEMPLATE_INVITATION_MANDATAIRE ?? "0", 10);
   try {

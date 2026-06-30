@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
+import { getSiteUrl } from "@/shared/lib/site-url";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         LEAD_NUMBER:       `#${lead?.lead_number ?? ""}`,
         LEAD_COMMUNE:      lead?.commune ?? "",
         LEAD_PACK:         lead?.pack_terrain ?? lead?.produit ?? "",
-        PORTAL_URL:        `${req.nextUrl.origin}/mandataire/dossiers`,
+        PORTAL_URL:        `${getSiteUrl(req)}/mandataire/dossiers`,
       },
     }).catch(console.error);
   }
