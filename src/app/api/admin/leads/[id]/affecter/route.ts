@@ -39,7 +39,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // 3. Email mandataire — fire-and-forget
   const templateId = parseInt(process.env.BREVO_TEMPLATE_AFFECTATION ?? "0");
-  if (mandataire?.email && templateId) {
+  if (!templateId) {
+    console.error("[affecter] BREVO_TEMPLATE_AFFECTATION non défini — email non envoyé");
+  } else if (mandataire?.email) {
     sendBrevoTemplate({
       templateId,
       to: [{ email: mandataire.email, name: `${mandataire.prenom} ${mandataire.nom}` }],

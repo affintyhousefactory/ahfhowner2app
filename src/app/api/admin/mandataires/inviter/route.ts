@@ -41,19 +41,23 @@ export async function POST(req: NextRequest) {
   const invitationUrl = `${getSiteUrl(req)}/onboarding/mandataire?token=${token}`;
 
   const templateId = parseInt(process.env.BREVO_TEMPLATE_INVITATION_MANDATAIRE ?? "0", 10);
-  try {
-    await sendBrevoTemplate({
-      templateId,
-      to: [{ email, name: `${prenom} ${nom}` }],
-      params: {
-        PRENOM: prenom,
-        NOM: nom,
-        INVITATION_URL: invitationUrl,
-        EXPIRES_DATE: expires.toLocaleDateString("fr-FR"),
-      },
-    });
-  } catch (e) {
-    console.error("[inviter] email non envoyé:", e);
+  if (!templateId) {
+    console.error("[inviter] BREVO_TEMPLATE_INVITATION_MANDATAIRE non défini — email non envoyé");
+  } else {
+    try {
+      await sendBrevoTemplate({
+        templateId,
+        to: [{ email, name: `${prenom} ${nom}` }],
+        params: {
+          PRENOM: prenom,
+          NOM: nom,
+          INVITATION_URL: invitationUrl,
+          EXPIRES_DATE: expires.toLocaleDateString("fr-FR"),
+        },
+      });
+    } catch (e) {
+      console.error("[inviter] email non envoyé:", e);
+    }
   }
 
   return NextResponse.json({ id: data.id, invitation_url: invitationUrl });
