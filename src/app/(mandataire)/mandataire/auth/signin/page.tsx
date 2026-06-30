@@ -133,13 +133,15 @@ export default function SigninPage() {
               />
             </div>
 
-            <Turnstile
-              ref={turnstileRef}
-              siteKey={SITE_KEY}
-              onSuccess={setCaptchaToken}
-              onExpire={() => setCaptchaToken(null)}
-              options={{ theme: "light", size: "flexible" }}
-            />
+            <div className="w-full overflow-hidden rounded-lg">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={SITE_KEY}
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+                options={{ theme: "light", size: "flexible" }}
+              />
+            </div>
 
             {error && (
               <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">

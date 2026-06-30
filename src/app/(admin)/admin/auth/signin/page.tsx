@@ -92,13 +92,15 @@ export default function AdminSignin() {
             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-[#7469F4]"
           />
 
-          <Turnstile
-            ref={turnstileRef}
-            siteKey={SITE_KEY}
-            onSuccess={setCaptchaToken}
-            onExpire={() => setCaptchaToken(null)}
-            options={{ theme: "dark", size: "flexible" }}
-          />
+          <div className="w-full overflow-hidden rounded-lg">
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={SITE_KEY}
+              onSuccess={setCaptchaToken}
+              onExpire={() => setCaptchaToken(null)}
+              options={{ theme: "dark", size: "flexible" }}
+            />
+          </div>
 
           {error && <p className="text-xs text-red-400">{error}</p>}
 
