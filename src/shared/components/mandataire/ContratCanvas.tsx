@@ -514,7 +514,7 @@ export function ContratCanvas({ onComplete, prefill, className }: Props) {
 
           {/* Bloc 5 — Profil d'intervention */}
           <Bloc title="Profil d'intervention">
-            <FieldRow label="Rayon d'intervention *">
+            <FieldRow label="Zone d'intervention *">
               <div className="flex flex-wrap gap-2">
                 {RAYONS.map(({ value, label }) => (
                   <button key={value} type="button"
