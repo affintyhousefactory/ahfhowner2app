@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
+
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 
 export default function SigninPage() {
   const router = useRouter();
@@ -11,11 +14,32 @@ export default function SigninPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!captchaToken) {
+      setError("Veuillez compléter la vérification de sécurité.");
+      return;
+    }
+
     setLoading(true);
+
+    const verif = await fetch("/api/verify-turnstile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: captchaToken }),
+    });
+    if (!verif.ok) {
+      setError("Vérification de sécurité échouée. Réessayez.");
+      turnstileRef.current?.reset();
+      setCaptchaToken(null);
+      setLoading(false);
+      return;
+    }
 
     const supabase = getSupabaseBrowser();
     const { data, error: authError } = await supabase.auth.signInWithPassword({
@@ -25,6 +49,8 @@ export default function SigninPage() {
 
     if (authError) {
       setError("Email ou mot de passe incorrect.");
+      turnstileRef.current?.reset();
+      setCaptchaToken(null);
       setLoading(false);
       return;
     }
@@ -33,8 +59,23 @@ export default function SigninPage() {
     if (role !== "mandataire") {
       await supabase.auth.signOut();
       setError("Accès réservé aux mandataires partenaires.");
+      turnstileRef.current?.reset();
+      setCaptchaToken(null);
       setLoading(false);
       return;
+    }
+
+    // Lier user_id au mandataire si pas encore fait (premier login après invitation)
+    const { data: m } = await supabase
+      .from("mandataires")
+      .select("id, user_id")
+      .eq("email", data.user.email)
+      .maybeSingle();
+    if (m && !m.user_id) {
+      await supabase
+        .from("mandataires")
+        .update({ user_id: data.user.id })
+        .eq("id", m.id);
     }
 
     router.push("/mandataire/dashboard");
@@ -92,6 +133,16 @@ export default function SigninPage() {
               />
             </div>
 
+            <div className="w-full">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={SITE_KEY}
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+                options={{ theme: "light", size: "flexible" }}
+              />
+            </div>
+
             {error && (
               <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
@@ -100,7 +151,7 @@ export default function SigninPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !captchaToken}
               className="mt-2 w-full rounded-xl bg-[#7469F4] py-3 text-sm font-semibold text-white hover:bg-[#5a54d4] disabled:opacity-60 transition-colors"
             >
               {loading ? "Connexion…" : "Se connecter"}

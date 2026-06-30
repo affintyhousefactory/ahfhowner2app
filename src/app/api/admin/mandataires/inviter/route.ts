@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
-import { SITE_URL } from "@/lib/site";
+import { getSiteUrl } from "@/shared/lib/site-url";
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as {
@@ -38,22 +38,26 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const invitationUrl = `${SITE_URL}/onboarding/mandataire?token=${token}`;
+  const invitationUrl = `${getSiteUrl(req)}/onboarding/mandataire?token=${token}`;
 
   const templateId = parseInt(process.env.BREVO_TEMPLATE_INVITATION_MANDATAIRE ?? "0", 10);
-  try {
-    await sendBrevoTemplate({
-      templateId,
-      to: [{ email, name: `${prenom} ${nom}` }],
-      params: {
-        PRENOM: prenom,
-        NOM: nom,
-        INVITATION_URL: invitationUrl,
-        EXPIRES_DATE: expires.toLocaleDateString("fr-FR"),
-      },
-    });
-  } catch (e) {
-    console.error("[inviter] email non envoyé:", e);
+  if (!templateId) {
+    console.error("[inviter] BREVO_TEMPLATE_INVITATION_MANDATAIRE non défini — email non envoyé");
+  } else {
+    try {
+      await sendBrevoTemplate({
+        templateId,
+        to: [{ email, name: `${prenom} ${nom}` }],
+        params: {
+          PRENOM: prenom,
+          NOM: nom,
+          INVITATION_URL: invitationUrl,
+          EXPIRES_DATE: expires.toLocaleDateString("fr-FR"),
+        },
+      });
+    } catch (e) {
+      console.error("[inviter] email non envoyé:", e);
+    }
   }
 
   return NextResponse.json({ id: data.id, invitation_url: invitationUrl });

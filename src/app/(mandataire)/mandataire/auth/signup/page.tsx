@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { ContratCanvas, type ContratData } from "@/shared/components/mandataire/ContratCanvas";
+
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 
 type SignupStep = "account" | "contrat" | "done";
 
@@ -15,6 +18,8 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   const handleAccountCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +31,24 @@ export default function SignupPage() {
     }
     if (password.length < 8) {
       setError("Le mot de passe doit comporter au moins 8 caractères.");
+      return;
+    }
+    if (!captchaToken) {
+      setError("Veuillez compléter la vérification de sécurité.");
+      return;
+    }
+
+    setLoading(true);
+    const verif = await fetch("/api/verify-turnstile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: captchaToken }),
+    });
+    setLoading(false);
+    if (!verif.ok) {
+      setError("Vérification de sécurité échouée. Réessayez.");
+      turnstileRef.current?.reset();
+      setCaptchaToken(null);
       return;
     }
 
@@ -190,6 +213,16 @@ export default function SignupPage() {
                   />
                 </div>
 
+                <div className="w-full">
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={SITE_KEY}
+                    onSuccess={setCaptchaToken}
+                    onExpire={() => setCaptchaToken(null)}
+                    options={{ theme: "light", size: "flexible" }}
+                  />
+                </div>
+
                 {error && (
                   <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                     {error}
@@ -198,10 +231,10 @@ export default function SignupPage() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !captchaToken}
                   className="mt-2 w-full rounded-xl bg-[#7469F4] py-3 text-sm font-semibold text-white hover:bg-[#5a54d4] disabled:opacity-60 transition-colors"
                 >
-                  Continuer vers le contrat →
+                  {loading ? "Vérification…" : "Continuer vers le contrat →"}
                 </button>
               </form>
             </div>

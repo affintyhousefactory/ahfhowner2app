@@ -25,11 +25,6 @@ export default function ResetPasswordPage() {
       }
     });
 
-    // Si la session recovery est déjà active (rechargement de page)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true);
-    });
-
     return () => listener.subscription.unsubscribe();
   }, []);
 

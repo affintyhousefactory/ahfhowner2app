@@ -38,6 +38,9 @@ export async function GET(req: NextRequest) {
   if (res.status === 404) {
     return NextResponse.json({ error: "Entreprise introuvable" }, { status: 404 });
   }
+  if (res.status === 401) {
+    return NextResponse.json({ error: "Pappers erreur 401 : privilèges insuffisants. Saisie libre." }, { status: 502 });
+  }
   if (!res.ok) {
     return NextResponse.json({ error: `Pappers erreur ${res.status}` }, { status: 502 });
   }

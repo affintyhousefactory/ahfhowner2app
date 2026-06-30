@@ -1,24 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
+
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!captchaToken) {
+      setError("Veuillez compléter la vérification de sécurité.");
+      return;
+    }
+
     setLoading(true);
 
+    const verif = await fetch("/api/verify-turnstile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: captchaToken }),
+    });
+    if (!verif.ok) {
+      setError("Vérification de sécurité échouée. Réessayez.");
+      turnstileRef.current?.reset();
+      setCaptchaToken(null);
+      setLoading(false);
+      return;
+    }
+
     const supabase = getSupabaseBrowser();
-    const redirectTo =
-      (process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr") +
-      "/mandataire/auth/reset-password";
+    const redirectTo = window.location.origin + "/mandataire/auth/reset-password";
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
@@ -26,6 +48,8 @@ export default function ForgotPasswordPage() {
 
     if (resetError) {
       setError("Une erreur est survenue. Vérifiez l'adresse email et réessayez.");
+      turnstileRef.current?.reset();
+      setCaptchaToken(null);
       setLoading(false);
       return;
     }
@@ -96,6 +120,16 @@ export default function ForgotPasswordPage() {
                   />
                 </div>
 
+                <div className="w-full">
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={SITE_KEY}
+                    onSuccess={setCaptchaToken}
+                    onExpire={() => setCaptchaToken(null)}
+                    options={{ theme: "light", size: "flexible" }}
+                  />
+                </div>
+
                 {error && (
                   <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                     {error}
@@ -104,7 +138,7 @@ export default function ForgotPasswordPage() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !captchaToken}
                   className="w-full rounded-xl bg-[#7469F4] py-3 text-sm font-semibold text-white hover:bg-[#5a54d4] disabled:opacity-60 transition-colors"
                 >
                   {loading ? "Envoi en cours…" : "Envoyer le lien de réinitialisation"}
