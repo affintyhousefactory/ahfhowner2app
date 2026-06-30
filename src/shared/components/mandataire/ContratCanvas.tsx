@@ -170,44 +170,44 @@ export function ContratCanvas({ onComplete, prefill, className }: Props) {
   const lastPos     = useRef<{ x: number; y: number } | null>(null);
 
   // Google Places
-  const addressRef      = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const containerRef    = useRef<HTMLDivElement>(null);
+  const placeElementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY ?? "";
 
   useEffect(() => {
     if (step !== "fields" || !apiKey) return;
 
     loadGooglePlacesScript(apiKey).then(() => {
-      if (!addressRef.current || autocompleteRef.current) return;
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(
-        addressRef.current,
-        { types: ["address"], componentRestrictions: { country: "fr" }, fields: ["formatted_address", "address_components", "geometry"] },
-      );
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current!.getPlace();
-        if (!place.address_components) return;
+      if (!containerRef.current || placeElementRef.current) return;
+      const element = new window.google.maps.places.PlaceAutocompleteElement({
+        includedRegionCodes:  ["fr"],
+        includedPrimaryTypes: ["address"],
+      });
+      containerRef.current.appendChild(element);
+      placeElementRef.current = element;
+
+      element.addEventListener("gmp-select", async (event) => {
+        const place = event.placePrediction.toPlace();
+        await place.fetchFields({ fields: ["formattedAddress", "addressComponents", "location"] });
         let cp = ""; let ville = "";
-        for (const c of place.address_components) {
-          if (c.types.includes("postal_code")) cp = c.long_name;
-          if (c.types.includes("locality"))    ville = c.long_name;
+        for (const c of place.addressComponents ?? []) {
+          if (c.types.includes("postal_code")) cp = c.longText ?? "";
+          if (c.types.includes("locality"))    ville = c.longText ?? "";
         }
-        const loc = place.geometry?.location;
         setData((prev) => ({
           ...prev,
-          adresse_principale: place.formatted_address ?? prev.adresse_principale,
-          cp_principal:   cp    || prev.cp_principal,
-          ville_principale: ville || prev.ville_principale,
-          lat: loc ? loc.lat() : prev.lat,
-          lon: loc ? loc.lng() : prev.lon,
+          adresse_principale: place.formattedAddress ?? prev.adresse_principale,
+          cp_principal:       cp    || prev.cp_principal,
+          ville_principale:   ville || prev.ville_principale,
+          lat: place.location?.lat() ?? prev.lat,
+          lon: place.location?.lng() ?? prev.lon,
         }));
       });
     });
 
     return () => {
-      if (autocompleteRef.current) {
-        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
-        autocompleteRef.current = null;
-      }
+      placeElementRef.current?.remove();
+      placeElementRef.current = null;
     };
   }, [step, apiKey]);
 
@@ -489,25 +489,20 @@ export function ContratCanvas({ onComplete, prefill, className }: Props) {
             <p className="text-xs text-gray-400">
               Votre adresse personnelle — utilisée pour calculer votre rayon d'intervention.
             </p>
-            <FieldRow label="Adresse *">
-              <input
-                ref={addressRef}
-                type="text"
-                value={data.adresse_principale}
-                onChange={(e) => set("adresse_principale", e.target.value)}
-                placeholder="Commencez à taper votre adresse…"
-                autoComplete="off"
-                className={inputCls}
-              />
+            <FieldRow label="Rechercher votre adresse *">
+              <div ref={containerRef} className="gmap-autocomplete" />
             </FieldRow>
+            {data.adresse_principale && (
+              <p className="text-xs text-[#7469F4]">✓ {data.adresse_principale}</p>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <FieldRow label="Code postal">
-                <input type="text" value={data.cp_principal}
-                  onChange={(e) => set("cp_principal", e.target.value)} className={inputCls} />
+                <input type="text" value={data.cp_principal} readOnly
+                  placeholder="auto" className={cn(inputCls, "bg-gray-50 text-gray-500")} />
               </FieldRow>
               <FieldRow label="Ville">
-                <input type="text" value={data.ville_principale}
-                  onChange={(e) => set("ville_principale", e.target.value)} className={inputCls} />
+                <input type="text" value={data.ville_principale} readOnly
+                  placeholder="auto" className={cn(inputCls, "bg-gray-50 text-gray-500")} />
               </FieldRow>
             </div>
             {data.lat && data.lon && (

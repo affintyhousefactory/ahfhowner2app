@@ -362,3 +362,13 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* Google PlaceAutocompleteElement — reset width + z-index */
+.gmap-autocomplete {
+  display: block;
+  width: 100%;
+}
+.gmap-autocomplete gmp-placeautocomplete {
+  display: block;
+  width: 100%;
+}

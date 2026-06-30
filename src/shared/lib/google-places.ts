@@ -11,7 +11,7 @@ export function loadGooglePlacesScript(apiKey: string): Promise<void> {
 
     const script = document.createElement("script");
     script.id = "gplaces-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=fr`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=fr&loading=async`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();

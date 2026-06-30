@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-
-declare global {
-  interface Window {
-    google: typeof google;
-  }
-}
+import { loadGooglePlacesScript } from "@/shared/lib/google-places";
 
 interface LeadIdentite {
   id: string;
@@ -32,34 +27,13 @@ const STATUTS = [
   "qualifié", "affecté", "en_cours", "finalisé", "perdu",
 ];
 
-function loadGooglePlaces(apiKey: string): Promise<void> {
-  return new Promise((resolve) => {
-    if (typeof window === "undefined") return;
-    if (window.google?.maps?.places) { resolve(); return; }
-
-    const existing = document.getElementById("gplaces-script");
-    if (existing) {
-      existing.addEventListener("load", () => resolve());
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = "gplaces-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=fr`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    document.head.appendChild(script);
-  });
-}
-
 export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const addressRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const containerRef    = useRef<HTMLDivElement>(null);
+  const placeElementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
 
   const [form, setForm] = useState({
     prenom: lead.prenom ?? "",
@@ -84,43 +58,35 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
   useEffect(() => {
     if (!editing || !apiKey) return;
 
-    loadGooglePlaces(apiKey).then(() => {
-      if (!addressRef.current || autocompleteRef.current) return;
+    loadGooglePlacesScript(apiKey).then(() => {
+      if (!containerRef.current || placeElementRef.current) return;
+      const element = new window.google.maps.places.PlaceAutocompleteElement({
+        includedRegionCodes:  ["fr"],
+        includedPrimaryTypes: ["address"],
+      });
+      containerRef.current.appendChild(element);
+      placeElementRef.current = element;
 
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(
-        addressRef.current,
-        {
-          types: ["address"],
-          componentRestrictions: { country: "fr" },
-          fields: ["formatted_address", "address_components"],
-        },
-      );
-
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current!.getPlace();
-        if (!place.address_components) return;
-
-        let cp = "";
-        let ville = "";
-        for (const comp of place.address_components) {
-          if (comp.types.includes("postal_code")) cp = comp.long_name;
-          if (comp.types.includes("locality")) ville = comp.long_name;
+      element.addEventListener("gmp-select", async (event) => {
+        const place = event.placePrediction.toPlace();
+        await place.fetchFields({ fields: ["formattedAddress", "addressComponents"] });
+        let cp = ""; let ville = "";
+        for (const comp of place.addressComponents ?? []) {
+          if (comp.types.includes("postal_code")) cp = comp.longText ?? "";
+          if (comp.types.includes("locality"))    ville = comp.longText ?? "";
         }
-
         setForm((prev) => ({
           ...prev,
-          adresse_postale_client: place.formatted_address ?? prev.adresse_postale_client,
-          cp_client: cp || prev.cp_client,
+          adresse_postale_client: place.formattedAddress ?? prev.adresse_postale_client,
+          cp_client:   cp    || prev.cp_client,
           ville_client: ville || prev.ville_client,
         }));
       });
     });
 
     return () => {
-      if (autocompleteRef.current) {
-        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
-        autocompleteRef.current = null;
-      }
+      placeElementRef.current?.remove();
+      placeElementRef.current = null;
     };
   }, [editing, apiKey]);
 
@@ -285,14 +251,10 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
           <p className="text-xs text-white/30 mb-2 uppercase tracking-wider">Adresse postale client</p>
           <div>
             <label className={labelCls}>Adresse (autocomplete)</label>
-            <input
-              ref={addressRef}
-              className={inputCls}
-              value={form.adresse_postale_client}
-              onChange={set("adresse_postale_client")}
-              placeholder="Commencez à taper l'adresse…"
-              autoComplete="off"
-            />
+            <div ref={containerRef} className="gmap-autocomplete" />
+            {form.adresse_postale_client && (
+              <p className="mt-1 text-[11px] text-[#7469F4]/80">✓ {form.adresse_postale_client}</p>
+            )}
           </div>
           <div className="mt-2 grid grid-cols-2 gap-3">
             <div>
