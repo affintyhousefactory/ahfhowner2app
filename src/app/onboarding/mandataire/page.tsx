@@ -55,11 +55,12 @@ function OnboardingForm() {
         const supabase = getSupabaseBrowser();
         const { error: uploadErr } = await supabase.storage
           .from("mandataires-documents")
-          .uploadToSignedUrl(path, uploadToken, pdfBlob, { contentType: "application/pdf", upsert: true });
-        if (!uploadErr) pdfStoragePath = path;
+          .uploadToSignedUrl(path, uploadToken, pdfBlob, { contentType: "application/pdf" });
+        if (uploadErr) console.error("[onboarding] upload PDF error:", uploadErr);
+        else pdfStoragePath = path;
       }
-    } catch {
-      // non-bloquant
+    } catch (e) {
+      console.error("[onboarding] upload PDF exception:", e);
     }
 
     // 2. Sauvegarder via endpoint token-authentifié

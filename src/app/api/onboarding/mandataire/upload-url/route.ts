@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabase.storage
     .from("mandataires-documents")
-    .createSignedUploadUrl(path);
+    .createSignedUploadUrl(path, { upsert: true });
 
   if (error || !data) {
     return NextResponse.json({ error: "Impossible de générer l'URL d'upload" }, { status: 500 });
