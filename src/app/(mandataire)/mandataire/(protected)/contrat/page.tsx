@@ -38,7 +38,7 @@ export default function ContratPage() {
         .from("mandataires")
         .select("id, contrat_signe_at, prenom, nom, email, tel, siret, forme_juridique, adresse, reseau_carte_t, carte_t_numero")
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (data?.contrat_signe_at) {
         setAlreadySigned(true);
