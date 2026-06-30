@@ -37,7 +37,7 @@ export default function SigninPage() {
       return;
     }
 
-    router.push("/mandataire");
+    router.push("/mandataire/dashboard");
   };
 
   return (
@@ -72,9 +72,15 @@ export default function SigninPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                Mot de passe
-              </label>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">Mot de passe</label>
+                <Link
+                  href="/mandataire/auth/forgot-password"
+                  className="text-xs text-gray-400 hover:text-[#7469F4] transition-colors"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
               <input
                 type="password"
                 value={password}

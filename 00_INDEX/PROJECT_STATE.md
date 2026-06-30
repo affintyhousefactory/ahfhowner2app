@@ -134,15 +134,19 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
 2. ~~**`PackTerrainContactForm` submit câblé**~~ ✅ câblé 2026-06-27.
 3. ~~**Brevo contacts opt-in (DOI)**~~ ✅ livré 2026-06-29 — PRs #12+#13 mergées sur main.
-4. **`feat/admin-portal` Étapes 3-5** — carte, matching, création lead/mandataire, Pappers MCP. En cours sur branche locale.
-5. **ADR-026 reste** : SPF/DKIM prod (DNS au registrar — bloqueur externe).
-6. **ADR-018 SEO reste P2** (polish non bloquant).
-7. **Coordonnées atelier** : placeholder Bayonne (43.4933 / −1.4748) — à affiner.
+4. ~~**`feat/admin-portal` Étapes 1→6**~~ ✅ livré 2026-06-30 — PR #14 mergée sur dev.
+5. ~~**Portail mandataire redesign + auth**~~ ✅ livré 2026-06-30 — PR #16 mergée sur dev.
+6. **PR #17 `dev` → `main`** ⏳ — à merger après : (a) `BREVO_TEMPLATE_AFFECTATION=15` sur Vercel Prod+Preview, (b) Supabase Redirect URL `/mandataire/auth/reset-password`. Post-merge : appliquer `20260629_admin_tables.sql` + `20260630_mandataires_invitation.sql` sur prod.
+7. **ADR-026 reste** : SPF/DKIM prod (DNS au registrar — bloqueur externe).
+8. **ADR-018 SEO reste P2** (polish non bloquant).
+9. **Coordonnées atelier** : placeholder Bayonne (43.4933 / −1.4748) — à affiner.
 
 ## Tokens / MCP
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-06-30 (portail admin complet + mandataire redesign + PR #17 dev→main)** — **Portail admin Étapes 1→6** (PR #14 sur dev) : dashboard KPIs, liste+fiche leads, liste+fiche mandataires, affectations, carte Leaflet PLU, formulaire création lead/mandataire avec PLU + Pappers, matching zones, validation/suspension, invitation onboarding. **Portail mandataire redesign** (PR #16 sur dev) : landing publique `/mandataire` (pitch + 2 CTA), dashboard déplacé `/mandataire/dashboard`, signup épuré (sans landing step), mot de passe oublié (`forgot-password` + `reset-password` via Supabase Auth). **Template Brevo 15** créé (affectation lead → mandataire). **PR #17 `dev`→`main` en attente** : 2 migrations à appliquer post-merge (`20260629_admin_tables.sql`, `20260630_mandataires_invitation.sql`), var Vercel `BREVO_TEMPLATE_AFFECTATION=15` à ajouter, Supabase Redirect URL reset-password à configurer.
 
 **2026-06-29 (Brevo contacts opt-in + portail mandataire finalisé + admin-portal Étapes 1+2)** — **Brevo opt-in (ADR-026 complété)** : `addBrevoContact()` direct (mandataires, list 7) + `addBrevoContactDOI()` DOI (prospects, list 8) dans `src/shared/lib/email.ts`. Checkbox opt-in dans `ContactForm.tsx` et `Reservation.tsx`. 3 routes API mises à jour (`/api/contact`, `/api/reservation`, `/api/recherche-terrain`). `/api/mandataire/notify-contrat` ajoute le mandataire direct en list 7 à la signature. PRs #12 (feat/brevo-contacts → dev) et #13 (dev → main) mergées. **Variables Vercel complétées** : `BREVO_TO_AHF`, `EMAIL_TO_AHF` (Preview), `BREVO_DOI_TEMPLATE_ID=13`, `BREVO_LIST_PROSPECTS=8`, `BREVO_LIST_MANDATAIRES=7`. **Migration `20260629_mandataires_documents_bucket.sql` appliquée sur prod** ✅. **`feat/admin-portal` Étapes 1+2 commitées** (branche locale, non pushée) : route group `(admin)`, signin (rôle `admin`), layout sidebar sombre (#1a1a18), dashboard KPIs (CA brut, revenus AHF, rémunérations, alertes 48h, donuts leads/dossiers, entonnoir, bar mandataires par perf), liste+fiche leads, liste+fiche mandataires, page affectations, grille article 4. Migration `20260629_admin_tables.sql` créée (**non encore appliquée**). `recharts` installé. Prochaine étape : Étapes 3-5 admin-portal (carte, matching, création lead/mandataire).
 
