@@ -104,9 +104,29 @@ function OnboardingForm() {
             </svg>
           </div>
           <p className="text-lg font-semibold text-white mb-2">Contrat signé — dossier soumis</p>
-          <p className="text-sm text-white/50">
-            Merci {prefill?.prenom}. Votre contrat-cadre est enregistré. L'équipe Affinity House Factory
-            validera votre compte et vous contactera très prochainement.
+          <p className="text-sm text-white/50 mb-6">
+            Merci {prefill?.prenom}. Votre contrat-cadre est enregistré et votre dossier est en cours de validation par l'équipe Affinity House Factory.
+          </p>
+          <div className="rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-left space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-white/30">Prochaines étapes</p>
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#7469F4]/20 text-[10px] font-bold text-[#7469F4]">1</span>
+              <p className="text-sm text-white/60">L'équipe AHF valide votre dossier (sous 48h ouvrées).</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#7469F4]/20 text-[10px] font-bold text-[#7469F4]">2</span>
+              <p className="text-sm text-white/60">Vous recevez un email à <span className="text-white">{prefill?.email}</span> avec un lien pour créer votre mot de passe.</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#7469F4]/20 text-[10px] font-bold text-[#7469F4]">3</span>
+              <p className="text-sm text-white/60">Vous accédez à votre espace mandataire pour suivre vos dossiers.</p>
+            </div>
+          </div>
+          <p className="mt-6 text-xs text-white/20">
+            Une question ?{" "}
+            <a href="mailto:contact@affinityhousefactory.com" className="text-[#7469F4] underline">
+              contact@affinityhousefactory.com
+            </a>
           </p>
         </div>
       </div>
