@@ -218,7 +218,7 @@ export default function SignupPage() {
                   siteKey={SITE_KEY}
                   onSuccess={setCaptchaToken}
                   onExpire={() => setCaptchaToken(null)}
-                  options={{ theme: "light" }}
+                  options={{ theme: "light", size: "flexible" }}
                 />
 
                 {error && (

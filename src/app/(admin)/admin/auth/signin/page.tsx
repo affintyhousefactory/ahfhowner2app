@@ -97,7 +97,7 @@ export default function AdminSignin() {
             siteKey={SITE_KEY}
             onSuccess={setCaptchaToken}
             onExpire={() => setCaptchaToken(null)}
-            options={{ theme: "dark" }}
+            options={{ theme: "dark", size: "flexible" }}
           />
 
           {error && <p className="text-xs text-red-400">{error}</p>}

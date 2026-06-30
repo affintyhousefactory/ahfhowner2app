@@ -125,7 +125,7 @@ export default function ForgotPasswordPage() {
                   siteKey={SITE_KEY}
                   onSuccess={setCaptchaToken}
                   onExpire={() => setCaptchaToken(null)}
-                  options={{ theme: "light" }}
+                  options={{ theme: "light", size: "flexible" }}
                 />
 
                 {error && (
