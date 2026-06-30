@@ -1,27 +1,33 @@
+// Shared promise so concurrent callers all wait on the same load
+let _loadPromise: Promise<void> | null = null;
+
 export function loadGooglePlacesScript(apiKey: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") return;
+  if (typeof window === "undefined") return Promise.resolve();
 
-    // Déjà chargé
-    if (window.google?.maps?.places) { resolve(); return; }
+  // Already fully loaded
+  if (window.google?.maps?.places?.PlaceAutocompleteElement) return Promise.resolve();
 
-    const existing = document.getElementById("gplaces-script");
-    if (existing) {
-      // Script en cours de chargement — attendre le onload
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("Google Maps failed")));
-      return;
-    }
+  if (!_loadPromise) {
+    _loadPromise = new Promise<void>((resolve, reject) => {
+      // callback=__gmpReady satisfies loading=async and fires when bootstrap is ready
+      const callbackName = "__gmpReady";
+      (window as unknown as Record<string, unknown>)[callbackName] = async () => {
+        try {
+          await window.google.maps.importLibrary("places");
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      };
 
-    const script = document.createElement("script");
-    script.id = "gplaces-script";
-    // loading=async nécessite importLibrary() et casse window.google.maps.places
-    // On utilise le pattern classique &libraries=places qui expose places après onload
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=fr`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Google Maps failed to load"));
-    document.head.appendChild(script);
-  });
+      const script = document.createElement("script");
+      script.id = "gplaces-script";
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&language=fr&callback=${callbackName}`;
+      script.async = true;
+      script.onerror = () => reject(new Error("Google Maps failed to load"));
+      document.head.appendChild(script);
+    });
+  }
+
+  return _loadPromise;
 }
