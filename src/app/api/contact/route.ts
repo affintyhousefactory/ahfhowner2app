@@ -72,11 +72,10 @@ export async function POST(req: NextRequest) {
     console.warn("[contact] Supabase non configuré — contact non persisté.");
   }
 
-  // Envoi email Brevo (fire-and-forget — n'impacte pas la réponse HTTP)
   const templateId = parseInt(process.env.BREVO_TEMPLATE_CONTACT ?? "0");
   const toAhf = process.env.EMAIL_TO_AHF ?? process.env.BREVO_TO_AHF ?? "";
 
-  sendBrevoTemplate({
+  await sendBrevoTemplate({
     templateId,
     to: [
       { email, name: `${prenom} ${nom}` },
@@ -94,7 +93,7 @@ export async function POST(req: NextRequest) {
   if (optIn) {
     const doiTemplateId = parseInt(process.env.BREVO_DOI_TEMPLATE_ID ?? "0");
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
-    addBrevoContactDOI(
+    await addBrevoContactDOI(
       email,
       { PRENOM: prenom, NOM: nom, SMS: tel ?? undefined },
       parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8"),
