@@ -136,7 +136,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 3. ~~**Brevo contacts opt-in (DOI)**~~ ✅ livré 2026-06-29 — PRs #12+#13 mergées sur main.
 4. ~~**`feat/admin-portal` Étapes 1→6**~~ ✅ livré 2026-06-30 — PR #14 mergée sur dev.
 5. ~~**Portail mandataire redesign + auth**~~ ✅ livré 2026-06-30 — PR #16 mergée sur dev.
-6. **PR #17 `dev` → `main`** ⏳ — à merger après : (a) `BREVO_TEMPLATE_AFFECTATION=15` sur Vercel Prod+Preview, (b) Supabase Redirect URL `/mandataire/auth/reset-password`. Post-merge : appliquer `20260629_admin_tables.sql` + `20260630_mandataires_invitation.sql` sur prod.
+6. ~~**PR #17 `dev` → `main`**~~ ✅ mergée 2026-06-30. Migrations prod appliquées : `20260629_admin_tables` + `20260630_mandataires_invitation`.
 7. **ADR-026 reste** : SPF/DKIM prod (DNS au registrar — bloqueur externe).
 8. **ADR-018 SEO reste P2** (polish non bloquant).
 9. **Coordonnées atelier** : placeholder Bayonne (43.4933 / −1.4748) — à affiner.

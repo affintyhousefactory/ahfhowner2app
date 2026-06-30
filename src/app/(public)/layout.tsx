@@ -21,7 +21,7 @@ export default function PublicLayout({
         <ConfigProvider>
           <CountdownBanner />
           <Nav />
-          {children}
+          <main id="main-content">{children}</main>
           <Footer />
           <CookieBanner />
         </ConfigProvider>
