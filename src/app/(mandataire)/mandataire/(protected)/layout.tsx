@@ -65,7 +65,7 @@ export default function ProtectedLayout({
 }
 
 const NAV_LINKS = [
-  { href: "/mandataire", label: "Dashboard" },
+  { href: "/mandataire/dashboard", label: "Dashboard" },
   { href: "/mandataire/documents", label: "Documents" },
 ];
 
@@ -76,7 +76,7 @@ function MandataireNav() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push("/mandataire/auth/signin");
+    router.push("/mandataire");
   };
 
   return (
