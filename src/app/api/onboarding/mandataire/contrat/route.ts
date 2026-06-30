@@ -85,11 +85,11 @@ export async function POST(req: NextRequest) {
 
   // Notifier AHF
   const templateId = parseInt(process.env.BREVO_TEMPLATE_MANDATAIRE_NEW ?? "0", 10);
-  sendBrevoTemplate({
+  await sendBrevoTemplate({
     templateId,
     to: [{ email: process.env.AHF_NOTIFICATION_EMAIL ?? "contact@affinityhousefactory.com" }],
     params: { PRENOM: m.prenom, NOM: m.nom, EMAIL: m.email },
-  }).catch(() => null);
+  }).catch((err) => console.error("[contrat] Brevo error:", err));
 
   return NextResponse.json({ ok: true });
 }

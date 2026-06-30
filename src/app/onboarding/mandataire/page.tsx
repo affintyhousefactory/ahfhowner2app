@@ -40,17 +40,24 @@ function OnboardingForm() {
     setSaving(true);
     setError("");
 
-    // 1. Générer le PDF côté client
+    // 1. Générer le PDF et l'uploader via signed URL (service role côté serveur)
     let pdfStoragePath: string | null = null;
     try {
       const pdfBlob = await generateContratPdf(contratData);
-      const date = new Date().toISOString().slice(0, 10);
-      const filePath = `${prefill!.mandataire_id}/contrat-${date}.pdf`;
-      const supabase = getSupabaseBrowser();
-      const { error: uploadErr } = await supabase.storage
-        .from("mandataires-documents")
-        .upload(filePath, pdfBlob, { contentType: "application/pdf", upsert: true });
-      if (!uploadErr) pdfStoragePath = filePath;
+
+      const urlRes = await fetch(`/api/onboarding/mandataire/upload-url?token=${token}`);
+      if (urlRes.ok) {
+        const { signedUrl, token: uploadToken, path } = (await urlRes.json()) as {
+          signedUrl: string;
+          token: string;
+          path: string;
+        };
+        const supabase = getSupabaseBrowser();
+        const { error: uploadErr } = await supabase.storage
+          .from("mandataires-documents")
+          .uploadToSignedUrl(path, uploadToken, pdfBlob, { contentType: "application/pdf", upsert: true });
+        if (!uploadErr) pdfStoragePath = path;
+      }
     } catch {
       // non-bloquant
     }
