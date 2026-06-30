@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import AdminPluAnalyser, { type ParcelleData } from "@/components/admin/AdminPluAnalyser";
 
 interface LeadLocalisation {
   id: string;
@@ -9,6 +10,21 @@ interface LeadLocalisation {
   commune: string | null;
   code_postal: string | null;
   departement: string | null;
+}
+
+interface PluPatch {
+  plu_adresse?: string | null;
+  plu_zone?: string | null;
+  plu_libelong?: string | null;
+  plu_typezone?: string | null;
+  plu_typedoc?: string | null;
+  plu_etat_doc?: string | null;
+  plu_datappro?: string | null;
+  plu_prescriptions?: string[] | null;
+  plu_servitudes?: string[] | null;
+  plu_lon?: number | null;
+  plu_lat?: number | null;
+  parcelle_idu?: string | null;
 }
 
 export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation }) {
@@ -24,6 +40,9 @@ export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation 
     departement: lead.departement ?? "",
   });
 
+  // Données PLU en attente d'application (non encore sauvegardées)
+  const [pendingPlu, setPendingPlu] = useState<PluPatch | null>(null);
+
   const handleCancel = useCallback(() => {
     setForm({
       adresse_recherche: lead.adresse_recherche ?? "",
@@ -31,9 +50,32 @@ export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation 
       code_postal: lead.code_postal ?? "",
       departement: lead.departement ?? "",
     });
+    setPendingPlu(null);
     setError(null);
     setEditing(false);
   }, [lead]);
+
+  function handlePluResult(data: ParcelleData) {
+    setPendingPlu({
+      plu_adresse: data.address_label ?? null,
+      plu_zone: data.zone_urba ?? null,
+      plu_libelong: data.libelong ?? null,
+      plu_typezone: data.typezone ?? null,
+      plu_typedoc: data.typedoc ?? null,
+      plu_etat_doc: data.etat_doc ?? null,
+      plu_datappro: data.datappro ?? null,
+      plu_prescriptions: data.prescriptions ?? null,
+      plu_servitudes: data.servitudes ?? null,
+      plu_lon: data.lon ?? null,
+      plu_lat: data.lat ?? null,
+      parcelle_idu: data.parcelle ?? null,
+    });
+
+    // Auto-remplir l'adresse de recherche si vide ou si on veut l'écraser
+    if (data.address_label && !form.adresse_recherche) {
+      setForm((prev) => ({ ...prev, adresse_recherche: data.address_label! }));
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -42,12 +84,13 @@ export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation 
       const res = await fetch(`/api/admin/leads/${lead.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, ...(pendingPlu ?? {}) }),
       });
       if (!res.ok) {
         const body = (await res.json()) as { error?: string };
         throw new Error(body.error ?? "Erreur serveur");
       }
+      setPendingPlu(null);
       setEditing(false);
       router.refresh();
     } catch (e) {
@@ -75,7 +118,7 @@ export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation 
         {!editing ? (
           <button
             onClick={() => setEditing(true)}
-            className="rounded-lg px-3 py-1 text-xs text-white/40 hover:bg-white/5 hover:text-white transition-colors"
+            className="rounded-lg px-3 py-1 text-xs text-white/40 transition-colors hover:bg-white/5 hover:text-white"
           >
             Modifier
           </button>
@@ -83,7 +126,7 @@ export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation 
           <div className="flex gap-2">
             <button
               onClick={handleCancel}
-              className="rounded-lg px-3 py-1 text-xs text-white/40 hover:bg-white/5 hover:text-white transition-colors"
+              className="rounded-lg px-3 py-1 text-xs text-white/40 transition-colors hover:bg-white/5 hover:text-white"
             >
               Annuler
             </button>
@@ -134,6 +177,19 @@ export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation 
             <label className={labelCls}>Département</label>
             <input className={inputCls} value={form.departement} onChange={set("departement")} />
           </div>
+
+          {/* Analyseur PLU — appelle /api/admin/plu, résultat inclus au PATCH */}
+          <AdminPluAnalyser
+            initialAddress={form.adresse_recherche}
+            onResult={handlePluResult}
+          />
+
+          {pendingPlu && (
+            <p className="text-[11px] text-[#7469F4]/80">
+              ✓ Données PLU prêtes — cliquez sur Enregistrer pour les sauvegarder avec les champs ci-dessus.
+            </p>
+          )}
+
           {error && <p className="text-xs text-red-400">{error}</p>}
         </div>
       )}
