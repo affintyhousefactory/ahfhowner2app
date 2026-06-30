@@ -34,7 +34,7 @@ type LeadAnon = {
 type Document = { nom: string; signedUrl: string | null; taille_ko: number | null; created_at: string };
 
 type DossierDetail = {
-  dossier: { id: string; statut: string; pack_label: string | null; remuneration_mandataire_ht: number | null; notes: string | null; created_at: string; accepted_at: string | null };
+  dossier: { id: string; statut: string; pack_label: string | null; remuneration_mandataire_ht: number | null; notes: string | null; created_at: string; accepted_at: string | null; suspension_raison: string | null };
   lead: LeadAnon | null;
   documents: Document[];
   niveau: 1 | 2;
@@ -121,6 +121,19 @@ export default function DossierPage({ params }: { params: Promise<{ id: string }
           {dossier.accepted_at ? ` · Accepté le ${new Date(dossier.accepted_at).toLocaleDateString("fr-FR")}` : ""}
         </p>
       </div>
+
+      {/* Banner suspension */}
+      {dossier.statut === "suspendu" && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+          <p className="font-semibold text-red-700">Ce dossier a été suspendu</p>
+          {dossier.suspension_raison && (
+            <p className="mt-1 text-sm text-red-600">Raison : {dossier.suspension_raison}</p>
+          )}
+          <p className="mt-2 text-xs text-red-400">
+            Ce lead a été réattribué. Contactez l'équipe si vous avez des questions.
+          </p>
+        </div>
+      )}
 
       {/* Niveau 1 — Infos anonymisées */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6">
@@ -276,9 +289,10 @@ function StatutBadge({ statut }: { statut: string }) {
     accepté:  "bg-blue-100 text-blue-700",
     en_cours: "bg-orange-100 text-orange-700",
     finalisé: "bg-green-100 text-green-700",
+    suspendu: "bg-red-100 text-red-600",
   };
   const labels: Record<string, string> = {
-    proposé: "Nouveau", accepté: "Accepté", en_cours: "En cours", finalisé: "Finalisé",
+    proposé: "Nouveau", accepté: "Accepté", en_cours: "En cours", finalisé: "Finalisé", suspendu: "Suspendu",
   };
   return (
     <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${map[statut] ?? "bg-gray-100 text-gray-500"}`}>

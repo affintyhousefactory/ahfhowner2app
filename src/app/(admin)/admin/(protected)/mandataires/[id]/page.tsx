@@ -21,9 +21,10 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
 
   if (!m) notFound();
 
-  const finalisés = (dossiers ?? []).filter((d) => d.statut === "finalisé");
-  const caGenere   = finalisés.reduce((s, d) => s + (d.pack_prix_ttc ?? 0), 0);
-  const remuDues   = finalisés.reduce((s, d) => s + (d.remuneration_mandataire_ht ?? 0), 0);
+  const finalisés       = (dossiers ?? []).filter((d) => d.statut === "finalisé");
+  const caGenere        = finalisés.reduce((s, d) => s + (d.pack_prix_ttc ?? 0), 0);
+  const remuDues        = finalisés.reduce((s, d) => s + (d.remuneration_mandataire_ht ?? 0), 0);
+  const activeDossiers  = (dossiers ?? []).filter((d) => ["proposé", "accepté"].includes(d.statut)).length;
 
   const RAYONS: Record<string, string> = {
     "20km": "20 km", "50km": "50 km", "80km": "80 km",
@@ -124,6 +125,8 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
             <MandataireActions
               mandataireId={m.id}
               currentStatut={m.statut as "invite" | "en_attente" | "actif" | "suspendu"}
+              activeDossiers={activeDossiers}
+              suspensionRaison={m.suspension_raison ?? null}
             />
           </div>
         </div>

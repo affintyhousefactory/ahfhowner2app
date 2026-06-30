@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { data: dossier } = await supabase
     .from("dossiers")
-    .select("id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht, notes, created_at, accepted_at, lead_id")
+    .select("id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht, notes, created_at, accepted_at, lead_id, suspension_raison")
     .eq("id", id)
     .eq("mandataire_id", mandataire.id)
     .single();

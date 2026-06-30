@@ -21,6 +21,7 @@ const STATUT_DOSSIER: Record<string, { label: string; cls: string }> = {
   accepté:  { label: "Accepté",  cls: "bg-blue-500/20 text-blue-400"   },
   en_cours: { label: "En cours", cls: "bg-[#e07b28]/20 text-[#e07b28]" },
   finalisé: { label: "Finalisé", cls: "bg-[#2d6b27]/30 text-green-400" },
+  suspendu: { label: "Suspendu", cls: "bg-red-500/20 text-red-400"      },
 };
 
 export default function MandataireDossiers({ dossiers, mandataireId }: { dossiers: Dossier[]; mandataireId: string }) {
