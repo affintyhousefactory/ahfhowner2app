@@ -75,7 +75,7 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
       if (!containerRef.current || placeElementRef.current) return;
       const element = new window.google.maps.places.PlaceAutocompleteElement({
         includedRegionCodes:  ["fr"],
-        includedPrimaryTypes: ["address"],
+        includedPrimaryTypes: ["street_address", "route"],
       });
       containerRef.current.appendChild(element);
       placeElementRef.current = element;
