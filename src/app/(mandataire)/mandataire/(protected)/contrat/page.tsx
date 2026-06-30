@@ -6,9 +6,22 @@ import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 import { ContratCanvas, type ContratData } from "@/shared/components/mandataire/ContratCanvas";
 import { generateContratPdf } from "@/shared/lib/contrat-pdf";
 
+type MandatairePrefill = {
+  prenom?: string;
+  nom?: string;
+  email?: string;
+  tel?: string;
+  siret?: string;
+  forme_juridique?: string;
+  adresse?: string;
+  reseau_carte_t?: string;
+  carte_t_numero?: string;
+};
+
 export default function ContratPage() {
   const router = useRouter();
   const [mandataireId, setMandataireId] = useState<string | null>(null);
+  const [prefill, setPrefill] = useState<MandatairePrefill>({});
   const [alreadySigned, setAlreadySigned] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -23,7 +36,7 @@ export default function ContratPage() {
 
       const { data } = await supabase
         .from("mandataires")
-        .select("id, contrat_signe_at")
+        .select("id, contrat_signe_at, prenom, nom, email, tel, siret, forme_juridique, adresse, reseau_carte_t, carte_t_numero")
         .eq("user_id", session.user.id)
         .single();
 
@@ -31,6 +44,17 @@ export default function ContratPage() {
         setAlreadySigned(true);
       } else if (data?.id) {
         setMandataireId(data.id);
+        setPrefill({
+          prenom:         data.prenom         ?? undefined,
+          nom:            data.nom            ?? undefined,
+          email:          data.email          ?? session.user.email ?? undefined,
+          tel:            data.tel            ?? undefined,
+          siret:          data.siret          ?? undefined,
+          forme_juridique: data.forme_juridique ?? undefined,
+          adresse:        data.adresse        ?? undefined,
+          reseau_carte_t: data.reseau_carte_t ?? undefined,
+          carte_t_numero: data.carte_t_numero ?? undefined,
+        });
       }
       setLoading(false);
     };
@@ -69,14 +93,30 @@ export default function ContratPage() {
     const { error: dbError } = await supabase
       .from("mandataires")
       .update({
-        contrat_signe_at: now.toISOString(),
-        contrat_data: contratData,
-        contrat_url: contratUrl,
-        reseau_carte_t: contratData.reseau_carte_t || null,
-        carte_t_numero: contratData.carte_t_numero || null,
-        siret: contratData.siret,
-        forme_juridique: contratData.forme_juridique,
-        adresse: contratData.adresse,
+        contrat_signe_at:    now.toISOString(),
+        contrat_data:        contratData,
+        contrat_url:         contratUrl,
+        // Identité
+        tel:                 contratData.tel || null,
+        // Entreprise & Carte T
+        reseau_carte_t:      contratData.reseau_carte_t || null,
+        carte_t_numero:      contratData.carte_t_numero || null,
+        siret:               contratData.siret || null,
+        forme_juridique:     contratData.forme_juridique || null,
+        adresse:             contratData.adresse || null,
+        // Statut professionnel
+        statut_professionnel: contratData.statut_professionnel || null,
+        reseau_type:          contratData.reseau_type || null,
+        // Adresse principale + géoloc
+        adresse_principale:  contratData.adresse_principale || null,
+        cp_principal:        contratData.cp_principal || null,
+        ville_principale:    contratData.ville_principale || null,
+        lat:                 contratData.lat ?? null,
+        lon:                 contratData.lon ?? null,
+        // Profil d'intervention
+        rayon_intervention:  contratData.rayon_intervention || null,
+        delai_rappel:        contratData.delai_rappel || null,
+        specialites:         contratData.specialites.length > 0 ? contratData.specialites : null,
       })
       .eq("id", mandataireId);
 
@@ -135,6 +175,7 @@ export default function ContratPage() {
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
         <ContratCanvas
           onComplete={handleComplete}
+          prefill={prefill}
           className={saving ? "pointer-events-none opacity-60" : ""}
         />
         {error && (
