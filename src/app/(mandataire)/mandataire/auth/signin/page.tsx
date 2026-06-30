@@ -37,6 +37,19 @@ export default function SigninPage() {
       return;
     }
 
+    // Lier user_id au mandataire si pas encore fait (premier login après invitation)
+    const { data: m } = await supabase
+      .from("mandataires")
+      .select("id, user_id")
+      .eq("email", data.user.email)
+      .maybeSingle();
+    if (m && !m.user_id) {
+      await supabase
+        .from("mandataires")
+        .update({ user_id: data.user.id })
+        .eq("id", m.id);
+    }
+
     router.push("/mandataire/dashboard");
   };
 
