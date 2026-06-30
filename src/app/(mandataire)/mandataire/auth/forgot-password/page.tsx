@@ -120,7 +120,7 @@ export default function ForgotPasswordPage() {
                   />
                 </div>
 
-                <div className="w-full overflow-hidden rounded-lg">
+                <div className="w-full">
                   <Turnstile
                     ref={turnstileRef}
                     siteKey={SITE_KEY}

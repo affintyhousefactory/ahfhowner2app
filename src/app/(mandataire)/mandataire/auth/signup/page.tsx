@@ -213,7 +213,7 @@ export default function SignupPage() {
                   />
                 </div>
 
-                <div className="w-full overflow-hidden rounded-lg">
+                <div className="w-full">
                   <Turnstile
                     ref={turnstileRef}
                     siteKey={SITE_KEY}

@@ -133,7 +133,7 @@ export default function SigninPage() {
               />
             </div>
 
-            <div className="w-full overflow-hidden rounded-lg">
+            <div className="w-full">
               <Turnstile
                 ref={turnstileRef}
                 siteKey={SITE_KEY}

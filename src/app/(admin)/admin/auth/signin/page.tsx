@@ -66,7 +66,7 @@ export default function AdminSignin() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#1a1a18]">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#252521] p-8">
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#252521] p-8">
         <div className="mb-8 text-center">
           <span className="inline-block rounded-full bg-[#7469F4]/20 px-3 py-1 text-xs font-medium tracking-widest text-[#7469F4] uppercase">
             Admin
@@ -92,7 +92,7 @@ export default function AdminSignin() {
             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-[#7469F4]"
           />
 
-          <div className="w-full overflow-hidden rounded-lg">
+          <div className="w-full">
             <Turnstile
               ref={turnstileRef}
               siteKey={SITE_KEY}
