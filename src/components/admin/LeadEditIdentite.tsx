@@ -6,6 +6,7 @@ import { loadGooglePlacesScript } from "@/shared/lib/google-places";
 
 interface LeadIdentite {
   id: string;
+  lead_number?: number | null;
   prenom: string | null;
   nom: string | null;
   email: string | null;
@@ -20,7 +21,17 @@ interface LeadIdentite {
   adresse_postale_client: string | null;
   cp_client: string | null;
   ville_client: string | null;
+  delai_projet: string | null;
+  description_projet: string | null;
 }
+
+const DELAIS_PROJET = [
+  "Moins de 6 mois",
+  "6 à 12 mois",
+  "12 à 24 mois",
+  "Plus de 24 mois",
+  "Non défini",
+];
 
 const STATUTS = [
   "nouveau", "contacte", "devis_envoye", "signe", "annule",
@@ -50,6 +61,8 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
     adresse_postale_client: lead.adresse_postale_client ?? "",
     cp_client: lead.cp_client ?? "",
     ville_client: lead.ville_client ?? "",
+    delai_projet: lead.delai_projet ?? "",
+    description_projet: lead.description_projet ?? "",
   });
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY ?? "";
@@ -106,6 +119,8 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
       adresse_postale_client: lead.adresse_postale_client ?? "",
       cp_client: lead.cp_client ?? "",
       ville_client: lead.ville_client ?? "",
+      delai_projet: lead.delai_projet ?? "",
+      description_projet: lead.description_projet ?? "",
     });
     setError(null);
     setEditing(false);
@@ -150,9 +165,14 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
     return (
       <>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
-            Identité &amp; projet
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              Identité &amp; projet
+            </h2>
+            {lead.lead_number && (
+              <span className="font-mono text-[10px] text-[#7469F4]/70">#{lead.lead_number}</span>
+            )}
+          </div>
           <button
             onClick={() => setEditing(true)}
             className="rounded-lg px-3 py-1 text-xs text-white/40 hover:bg-white/5 hover:text-white transition-colors"
@@ -169,6 +189,8 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
             ["Total estimé", lead.total_estime ? `${Number(lead.total_estime).toLocaleString("fr-FR")} €` : null],
             ["Source", lead.source],
             ["Statut", lead.statut],
+            ["Délai projet", lead.delai_projet],
+            ["Description", lead.description_projet],
           ] as [string, string | null][]).map(([label, value]) =>
             value ? (
               <div key={label} className="flex justify-between">
@@ -309,6 +331,23 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
               <label className={labelCls}>Total estimé (€)</label>
               <input className={inputCls} type="number" value={form.total_estime} onChange={set("total_estime")} />
             </div>
+          </div>
+        </div>
+
+        {/* Vue mandataire (anonymisée) */}
+        <div className="pt-1 border-t border-white/5">
+          <p className="text-xs text-white/30 mb-2 uppercase tracking-wider">Vue mandataire (anonymisée)</p>
+          <div className="mb-2">
+            <label className={labelCls}>Description du projet (vue mandataire)</label>
+            <input className={inputCls} value={form.description_projet}
+              onChange={set("description_projet")} placeholder="Ex: Studio indépendant dans jardin" />
+          </div>
+          <div>
+            <label className={labelCls}>Délai envisagé</label>
+            <select className={inputCls} value={form.delai_projet} onChange={set("delai_projet")}>
+              <option value="">—</option>
+              {DELAIS_PROJET.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
           </div>
         </div>
 

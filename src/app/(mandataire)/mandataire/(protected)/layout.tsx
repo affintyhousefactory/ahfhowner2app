@@ -66,7 +66,7 @@ export default function ProtectedLayout({
 
 const NAV_LINKS = [
   { href: "/mandataire/dashboard", label: "Dashboard" },
-  { href: "/mandataire/documents", label: "Documents" },
+  { href: "/mandataire/dossiers",  label: "Dossiers"  },
 ];
 
 function MandataireNav() {

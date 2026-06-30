@@ -16,6 +16,8 @@ const ALLOWED_FIELDS = [
   "plu_typedoc", "plu_etat_doc", "plu_datappro",
   "plu_prescriptions", "plu_servitudes",
   "plu_lon", "plu_lat", "parcelle_idu",
+  // Vue anonymisée mandataire
+  "delai_projet", "description_projet",
 ] as const;
 
 type AllowedField = (typeof ALLOWED_FIELDS)[number];

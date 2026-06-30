@@ -2,6 +2,7 @@ import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { notFound } from "next/navigation";
 import MandataireActions from "@/components/admin/MandataireActions";
 import MandataireEditContact from "@/components/admin/MandataireEditContact";
+import MandataireDossiers from "@/components/admin/MandataireDossiers";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,11 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
 
   const [{ data: m }, { data: dossiers }] = await Promise.all([
     supabase.from("mandataires").select("*").eq("id", id).single(),
-    supabase.from("dossiers").select("*, leads(prenom, nom)").eq("mandataire_id", id).order("created_at", { ascending: false }),
+    supabase
+      .from("dossiers")
+      .select("id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht, created_at, accepted_at, email_sent_at, leads(id, prenom, nom, lead_number)")
+      .eq("mandataire_id", id)
+      .order("created_at", { ascending: false }),
   ]);
 
   if (!m) notFound();
@@ -38,20 +43,15 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
       {/* Header */}
       <div className="mb-6">
         <a href="/admin/mandataires" className="text-sm text-white/30 hover:text-white">← Mandataires</a>
-        <div className="mt-2 flex items-center gap-4">
+        <div className="mt-2 flex items-center gap-3 flex-wrap">
           <h1 className="text-xl font-semibold text-white">{m.prenom} {m.nom}</h1>
           <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-            m.statut === "actif"       ? "bg-[#2d6b27]/30 text-green-400"   :
-            m.statut === "en_attente"  ? "bg-[#e07b28]/20 text-[#e07b28]"  :
+            m.statut === "actif"      ? "bg-[#2d6b27]/30 text-green-400"  :
+            m.statut === "en_attente" ? "bg-[#e07b28]/20 text-[#e07b28]" :
             "bg-white/10 text-white/30"
           }`}>
             {m.statut}
           </span>
-          {m.contrat_signe_at && (
-            <span className="rounded-full bg-[#7469F4]/10 px-2.5 py-1 text-xs text-[#7469F4]">
-              Contrat signé le {new Date(m.contrat_signe_at).toLocaleDateString("fr-FR")}
-            </span>
-          )}
         </div>
         <p className="text-sm text-white/40">{m.email}{m.tel ? ` · ${m.tel}` : ""}</p>
       </div>
@@ -75,25 +75,17 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Contact & Profil — éditable */}
         <MandataireEditContact m={{
-          id:                   m.id,
-          prenom:               m.prenom,
-          nom:                  m.nom,
-          email:                m.email,
-          tel:                  m.tel,
-          statut_professionnel: m.statut_professionnel,
-          reseau_type:          m.reseau_type,
-          adresse_principale:   m.adresse_principale,
-          cp_principal:         m.cp_principal,
-          ville_principale:     m.ville_principale,
-          rayon_intervention:   m.rayon_intervention,
-          delai_rappel:         m.delai_rappel,
-          specialites:          m.specialites,
+          id: m.id, prenom: m.prenom, nom: m.nom, email: m.email, tel: m.tel,
+          statut_professionnel: m.statut_professionnel, reseau_type: m.reseau_type,
+          adresse_principale: m.adresse_principale, cp_principal: m.cp_principal,
+          ville_principale: m.ville_principale, rayon_intervention: m.rayon_intervention,
+          delai_rappel: m.delai_rappel, specialites: m.specialites,
         }} />
 
-        {/* Entreprise & Contrat — lecture seule */}
+        {/* Contrat — lecture seule */}
         <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
           <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
-            Entreprise &amp; Contrat
+            Contrat &amp; Entreprise
           </h2>
           <dl className="space-y-2 text-sm">
             {([
@@ -106,20 +98,28 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
               value ? (
                 <div key={label} className="flex justify-between gap-4">
                   <dt className="shrink-0 text-white/40">{label}</dt>
-                  <dd className="text-right text-white">{value}</dd>
+                  <dd className="text-right text-white text-xs">{value}</dd>
                 </div>
               ) : null,
+            )}
+            {m.contrat_signe_at && (
+              <div className="flex justify-between gap-4">
+                <dt className="shrink-0 text-white/40">Signé le</dt>
+                <dd className="text-green-400 text-xs">{new Date(m.contrat_signe_at).toLocaleDateString("fr-FR")}</dd>
+              </div>
             )}
           </dl>
 
           {m.contrat_url && (
             <a href={m.contrat_url} target="_blank" rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 text-xs text-[#7469F4] hover:underline">
+              className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-[#7469F4]/30 px-4 py-2 text-xs font-medium text-[#7469F4] hover:bg-[#7469F4]/10 transition-colors">
               Télécharger le contrat signé ↗
             </a>
           )}
+          {!m.contrat_signe_at && (
+            <p className="mt-3 text-xs text-white/20">Contrat non encore signé</p>
+          )}
 
-          {/* Actions statut */}
           <div className="mt-6 border-t border-white/5 pt-4">
             <MandataireActions
               mandataireId={m.id}
@@ -137,11 +137,11 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
             <dl className="space-y-2 text-sm">
               {m.adresse_principale && (
                 <div className="flex justify-between gap-4">
-                  <dt className="shrink-0 text-white/40">Adresse principale</dt>
-                  <dd className="text-right text-white">
+                  <dt className="shrink-0 text-white/40">Adresse</dt>
+                  <dd className="text-right text-white text-xs">
                     {m.adresse_principale}
                     {(m.cp_principal || m.ville_principale) && (
-                      <span className="block text-xs text-white/40">
+                      <span className="block text-white/40">
                         {[m.cp_principal, m.ville_principale].filter(Boolean).join(" ")}
                       </span>
                     )}
@@ -163,15 +163,15 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
               {(m.specialites ?? []).length > 0 && (
                 <div className="flex justify-between gap-4">
                   <dt className="shrink-0 text-white/40">Spécialités</dt>
-                  <dd className="text-right text-white/70">
+                  <dd className="text-right text-white/70 text-xs">
                     {(m.specialites as string[]).map((s) => SPECS[s] ?? s).join(", ")}
                   </dd>
                 </div>
               )}
               {m.lat && m.lon && (
                 <div className="flex justify-between gap-4">
-                  <dt className="shrink-0 text-white/40">Géolocalisation</dt>
-                  <dd className="font-mono text-xs text-white/40">
+                  <dt className="shrink-0 text-white/40">Géoloc</dt>
+                  <dd className="font-mono text-xs text-white/30">
                     {Number(m.lat).toFixed(4)}, {Number(m.lon).toFixed(4)}
                   </dd>
                 </div>
@@ -185,22 +185,11 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
           <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
             Dossiers ({(dossiers ?? []).length})
           </h2>
-          {(dossiers ?? []).length === 0 ? (
-            <p className="text-sm text-white/20">Aucun dossier affecté</p>
-          ) : (
-            <div className="space-y-2">
-              {(dossiers ?? []).map((d) => (
-                <div key={d.id} className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5 text-sm">
-                  <span className="text-white/70">
-                    {(d.leads as { prenom: string; nom: string } | null)?.prenom}{" "}
-                    {(d.leads as { prenom: string; nom: string } | null)?.nom}
-                  </span>
-                  <span className="text-xs text-white/30">{d.statut}</span>
-                  <span className="text-xs text-[#7469F4]">{d.pack_prix_ttc?.toLocaleString("fr-FR")} €</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <MandataireDossiers
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            dossiers={(dossiers ?? []) as any}
+            mandataireId={id}
+          />
         </div>
       </div>
     </div>
