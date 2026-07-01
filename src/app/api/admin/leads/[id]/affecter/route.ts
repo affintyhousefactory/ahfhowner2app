@@ -23,9 +23,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .eq("id", id);
   if (leadErr) return NextResponse.json({ error: leadErr.message }, { status: 500 });
 
-  // 2. Upsert du dossier (crée ou remet à "proposé" si déjà existant)
+  // 2. Upsert du dossier — un seul dossier par lead (UNIQUE lead_id)
   const now = new Date().toISOString();
-  await supabase.from("dossiers").upsert(
+  const { error: dossierErr } = await supabase.from("dossiers").upsert(
     {
       lead_id:        id,
       mandataire_id,
@@ -34,8 +34,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       email_sent_at:  now,
       created_at:     now,
     },
-    { onConflict: "lead_id,mandataire_id", ignoreDuplicates: false },
+    { onConflict: "lead_id", ignoreDuplicates: false },
   );
+  if (dossierErr) console.error("[affecter] dossier upsert error:", dossierErr.message);
 
   // 3. Email mandataire — fire-and-forget
   const templateId = parseInt(process.env.BREVO_TEMPLATE_AFFECTATION ?? "0");
