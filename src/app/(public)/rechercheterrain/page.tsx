@@ -11,54 +11,29 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-const ECUEILS = [
+const PHASES = [
   {
-    poste: "Étude géotechnique G2",
-    responsable: "Client",
-    detail: null,
-    estimation: "dès 2 400 €",
+    label: "Phase 1 — Étude",
+    postes: [
+      { poste: "Étude géotechnique G2",        pilote: "AHF",      estimation: "dès 2 400 €" },
+      { poste: "Micro-pieux (fourniture + pose)", pilote: "AHF",   estimation: "selon étude" },
+    ],
   },
   {
-    poste: "Micro-pieux (fourniture + pose)",
-    responsable: "Client",
-    detail: null,
-    estimation: "selon étude",
+    label: "Phase 2 — Viabilisation",
+    postes: [
+      { poste: "Raccordement eau potable",              pilote: "AHF", estimation: "selon commune" },
+      { poste: "Raccordement électricité (ENEDIS)",     pilote: "AHF", estimation: "selon distance" },
+      { poste: "Assainissement non collectif (micro-station)", pilote: "AHF", estimation: "dès 9 000 €" },
+      { poste: "Terrassement et accès grue",            pilote: "AHF", estimation: "sur étude" },
+    ],
   },
   {
-    poste: "Raccordement eau potable",
-    responsable: "Client",
-    detail: null,
-    estimation: "selon commune",
-  },
-  {
-    poste: "Raccordement électricité (ENEDIS)",
-    responsable: "Client",
-    detail: null,
-    estimation: "selon distance",
-  },
-  {
-    poste: "Assainissement non collectif (micro-station)",
-    responsable: "Client",
-    detail: null,
-    estimation: "dès 9 000 €",
-  },
-  {
-    poste: "Terrassement et accès grue",
-    responsable: "Client",
-    detail: null,
-    estimation: "sur étude",
-  },
-  {
-    poste: "Permis de construire / DP",
-    responsable: "Client",
-    detail: "accompagnement AHF",
-    estimation: "honoraires archi + taxe commune",
-  },
-  {
-    poste: "Assurance dommages-ouvrage",
-    responsable: "Client",
-    detail: "obligatoire",
-    estimation: "selon assureur",
+    label: "Phase 3 — Autorisations",
+    postes: [
+      { poste: "Permis de construire / DP",    pilote: "AHF", estimation: "honoraires archi + taxe" },
+      { poste: "Assurance dommages-ouvrage",   pilote: "Vous", estimation: "selon assureur" },
+    ],
   },
 ];
 
@@ -213,7 +188,7 @@ export default function RechercheTerrainPage() {
         </div>
       </section>
 
-      {/* ── Écueils terrain ── */}
+      {/* ── Coordination terrain ── */}
       <section className="bg-canvas py-20 md:py-28">
         <div className="container-page">
           <Reveal>
@@ -222,64 +197,131 @@ export default function RechercheTerrainPage() {
                 Avant d'acheter
               </span>
               <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-                Travaux réservés au client
+                3 phases · pilotées par AHF
               </span>
             </div>
           </Reveal>
 
           <Reveal delay={0.05}>
             <h2 className="editorial mt-10 text-pretty text-[2rem] leading-[1.05] text-ink md:text-[3rem]">
-              Votre terrain peut‑il accueillir un Arko&nbsp;?
+              Votre terrain, coordonné de bout en bout.
             </h2>
-            <p className="mt-6 text-[1.1rem] leading-relaxed text-muted md:text-[1.25rem]">
-              Certains postes sont systématiquement à la charge du client, indépendamment de la construction.
-              Les identifier avant l'achat évite les mauvaises surprises&nbsp;— c'est précisément ce que
-              qualifie notre dossier terrain.
+            <p className="mt-6 max-w-2xl text-[1.05rem] leading-relaxed text-muted">
+              Géotechnique, raccordements, autorisations&nbsp;— AHF pilote chaque étape et organise les prestataires.
+              Vous signez et financez&nbsp;; nous coordonnons, relançons, livrons.
             </p>
           </Reveal>
 
           <Reveal delay={0.1}>
-            <div className="mt-12 overflow-hidden rounded-2xl border border-line">
-              {/* En-tête */}
-              <div className="grid grid-cols-[1fr_auto_auto] gap-x-6 border-b border-line bg-surface px-6 py-3 sm:grid-cols-[1fr_160px_200px]">
-                <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted">Poste</span>
-                <span className="hidden font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted sm:block">Responsable</span>
-                <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted text-right">Estimation indicative</span>
-              </div>
-
-              {/* Lignes */}
-              {ECUEILS.map((row, i) => (
-                <div
-                  key={row.poste}
-                  className={`grid grid-cols-[1fr_auto] gap-x-6 px-6 py-4 sm:grid-cols-[1fr_160px_200px] ${
-                    i < ECUEILS.length - 1 ? "border-b border-line" : ""
-                  }`}
-                >
-                  <div className="flex min-w-0 flex-col justify-center gap-0.5">
-                    <span className="text-sm font-medium leading-snug text-ink">{row.poste}</span>
-                    {row.detail && (
-                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-accent">
-                        {row.detail}
-                      </span>
-                    )}
+            <div className="mt-12 space-y-4">
+              {PHASES.map((phase, pi) => (
+                <div key={phase.label} className="overflow-hidden rounded-2xl border border-line">
+                  {/* Phase header */}
+                  <div className="flex items-center gap-3 border-b border-line bg-surface px-6 py-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/15 font-mono text-[0.6rem] font-semibold text-accent">
+                      {pi + 1}
+                    </span>
+                    <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink/70">
+                      {phase.label.replace(/^Phase \d — /, "")}
+                    </span>
+                    <div className="ml-auto hidden grid-cols-[120px_80px_180px] gap-x-6 sm:grid">
+                      <span className="font-mono text-[0.6rem] uppercase tracking-[0.14em] text-muted">Qui pilote</span>
+                      <span className="font-mono text-[0.6rem] uppercase tracking-[0.14em] text-muted">Qui paie</span>
+                      <span className="text-right font-mono text-[0.6rem] uppercase tracking-[0.14em] text-muted">Estimation</span>
+                    </div>
                   </div>
-                  <span className="hidden items-center font-mono text-[0.75rem] text-muted sm:flex">
-                    {row.responsable}
-                  </span>
-                  <span className="flex items-center justify-end font-mono text-[0.8rem] font-medium text-ink">
-                    {row.estimation}
-                  </span>
+
+                  {/* Lignes */}
+                  {phase.postes.map((row, i) => (
+                    <div
+                      key={row.poste}
+                      className={`grid grid-cols-[1fr_auto] items-center gap-x-4 px-6 py-4 sm:grid-cols-[1fr_120px_80px_180px] ${
+                        i < phase.postes.length - 1 ? "border-b border-line" : ""
+                      }`}
+                    >
+                      <span className="text-sm font-medium leading-snug text-ink">{row.poste}</span>
+                      {/* Qui pilote */}
+                      <span className={`hidden items-center sm:flex ${
+                        row.pilote === "AHF"
+                          ? "font-semibold text-accent"
+                          : "text-muted"
+                      } font-mono text-[0.75rem]`}>
+                        {row.pilote === "AHF" && (
+                          <span className="mr-1.5 text-accent">✓</span>
+                        )}
+                        {row.pilote}
+                      </span>
+                      {/* Qui paie */}
+                      <span className="hidden font-mono text-[0.75rem] text-muted sm:block">
+                        Vous
+                      </span>
+                      {/* Estimation */}
+                      <span className="flex items-center justify-end font-mono text-[0.8rem] font-medium text-ink">
+                        {row.estimation}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
           </Reveal>
 
-          <Reveal delay={0.14}>
-            <p className="mt-6 rounded-xl border border-accent/20 bg-accent/[0.04] px-5 py-4 text-sm leading-relaxed text-muted">
-              <span className="font-medium text-ink">Notre dossier terrain anticipe ces postes&nbsp;:</span>{" "}
-              géotechnique, raccordements, assainissement et accès sont qualifiés par notre partenaire avant
-              que vous n'engagiez la moindre dépense.
-            </p>
+          {/* Pack Coordination Terrain */}
+          <Reveal delay={0.16}>
+            <div className="mt-10 overflow-hidden rounded-2xl border border-accent/25 bg-accent/[0.03]">
+              <div className="grid gap-0 md:grid-cols-[1fr_auto]">
+                <div className="p-7 md:p-8">
+                  <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent">
+                    Pack Coordination Terrain
+                  </span>
+                  <h3 className="editorial mt-3 text-[1.6rem] leading-[1.05] text-ink md:text-[2rem]">
+                    AHF pilote. Vous décidez.
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted">
+                    Un interlocuteur unique pour les 8 postes ci-dessus&nbsp;: commandes, relances,
+                    coordination des bureaux d'études, dépôt de permis et suivi SPANC.
+                    Vous validez chaque étape&nbsp;; AHF exécute.
+                  </p>
+                  <ul className="mt-4 space-y-1.5 text-sm text-muted">
+                    {[
+                      "Coordination géotechnique & micropieux",
+                      "Suivi raccordements eau, élec, assainissement",
+                      "Dépôt permis de construire ou déclaration préalable",
+                      "Calendrier et reporting mensuel",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-2">
+                        <span className="mt-0.5 shrink-0 text-accent">✓</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="flex flex-col items-stretch justify-between border-t border-accent/15 p-7 md:min-w-[240px] md:border-t-0 md:border-l md:p-8">
+                  <div>
+                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted">
+                      Inclus avec
+                    </p>
+                    <p className="mt-1.5 text-[1.5rem] font-semibold leading-none text-ink">
+                      Pack Terrain
+                    </p>
+                    <p className="mt-1 font-mono text-sm text-accent">dès 4 900 € TTC</p>
+                    <p className="mt-4 text-xs leading-relaxed text-muted">
+                      Démarrage sous 48 h après réservation.
+                      Durée estimée&nbsp;: 3 mois.
+                    </p>
+                  </div>
+                  <a
+                    href="/configurer"
+                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  >
+                    Inclure dans ma réservation
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+                      <path d="M1 7h12M8 3l5 4-5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
           </Reveal>
         </div>
       </section>
