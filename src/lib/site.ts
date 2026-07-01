@@ -201,8 +201,6 @@ export const FAQ = [
 // Navigation principale par routes (multi-pages — ADR-021).
 // « Produits » est rendu à part (méga-menu Tesla) via PRODUCT_LIST.
 export const NAV = [
-  { label: "Configurer", href: "/configurer" },
-  { label: "Votre terrain", href: "/terrain" },
   { label: "Contact", href: "/contact" },
 ] as const;
 

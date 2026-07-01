@@ -101,12 +101,6 @@ export function Nav() {
               <span className="absolute -bottom-1 left-0 h-px w-0 bg-accent transition-all duration-300 group-hover:w-full" />
             </Link>
           ))}
-          <Link
-            href="/mandataire"
-            className="rounded-full bg-orange-400 px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-orange-500"
-          >
-            Accès Mandataire
-          </Link>
         </div>
 
         <div className="flex items-center gap-4">
@@ -267,14 +261,6 @@ export function Nav() {
               {n.label}
             </Link>
           ))}
-
-          <Link
-            href="/mandataire"
-            onClick={() => setOpen(false)}
-            className="mt-4 flex w-full items-center justify-center rounded-full bg-orange-400 px-4 py-3 text-base font-bold text-white"
-          >
-            Accès Mandataire
-          </Link>
 
           <div className="mt-4 flex items-center justify-between">
             <span className="font-mono text-xs text-muted">

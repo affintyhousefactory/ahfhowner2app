@@ -60,6 +60,18 @@ export function Footer() {
                 {n.label}
               </Link>
             ))}
+            <Link
+              href="/rechercheterrain"
+              className="text-sm text-canvas/65 transition-colors hover:text-canvas"
+            >
+              Recherche terrain
+            </Link>
+            <Link
+              href="/mandataire"
+              className="text-sm font-semibold text-orange-400 transition-colors hover:text-orange-300"
+            >
+              Accès Mandataire
+            </Link>
           </nav>
 
           <nav className="flex flex-col gap-2.5">
