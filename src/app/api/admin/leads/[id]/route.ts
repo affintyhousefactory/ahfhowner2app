@@ -18,6 +18,8 @@ const ALLOWED_FIELDS = [
   "plu_lon", "plu_lat", "parcelle_idu",
   // Vue anonymisée mandataire
   "delai_projet", "description_projet",
+  // Suivi commercial (indépendant du statut d'affectation)
+  "statut_commercial",
 ] as const;
 
 type AllowedField = (typeof ALLOWED_FIELDS)[number];
