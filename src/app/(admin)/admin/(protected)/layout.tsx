@@ -7,10 +7,11 @@ import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 import { cn } from "@/shared/lib/cn";
 
 const NAV = [
-  { href: "/admin", label: "Dashboard", icon: "⬛" },
-  { href: "/admin/leads", label: "Leads", icon: "👤" },
-  { href: "/admin/mandataires", label: "Mandataires", icon: "🏠" },
-  { href: "/admin/affectations", label: "Affectations", icon: "🔗" },
+  { href: "/admin",             label: "Dashboard" },
+  { href: "/admin/leads",       label: "Leads" },
+  { href: "/admin/mandataires", label: "Mandataires" },
+  { href: "/admin/affectations",label: "Affectations" },
+  { href: "/admin/ged",         label: "GED Dossiers" },
 ];
 
 export default function AdminProtectedLayout({ children }: { children: React.ReactNode }) {

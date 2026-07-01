@@ -15,7 +15,7 @@ const STATUT_COLORS: Record<string, string> = {
 export default async function LeadsPage() {
   const { data: leads } = await getSupabaseAdmin()
     .from("leads")
-    .select("id, prenom, nom, email, statut, pack_terrain, produit, commune, created_at, mandataire_id")
+    .select("id, lead_number, prenom, nom, email, statut, pack_terrain, produit, commune, created_at, mandataires(prenom, nom)")
     .order("created_at", { ascending: false });
 
   return (
@@ -34,10 +34,11 @@ export default async function LeadsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-left text-xs text-white/30">
-              <th className="px-4 py-3 font-normal">Nom</th>
+              <th className="px-4 py-3 font-normal">Dossier</th>
               <th className="px-4 py-3 font-normal">Email</th>
               <th className="px-4 py-3 font-normal">Pack / Modèle</th>
               <th className="px-4 py-3 font-normal">Commune</th>
+              <th className="px-4 py-3 font-normal">Mandataire</th>
               <th className="px-4 py-3 font-normal">Statut</th>
               <th className="px-4 py-3 font-normal">Date</th>
               <th className="px-4 py-3 font-normal"></th>
@@ -46,10 +47,22 @@ export default async function LeadsPage() {
           <tbody className="divide-y divide-white/5">
             {(leads ?? []).map((l) => (
               <tr key={l.id} className="hover:bg-white/5">
-                <td className="px-4 py-3 text-white">{l.prenom} {l.nom}</td>
+                <td className="px-4 py-3">
+                  {l.lead_number && (
+                    <span className="mr-2 font-mono text-[11px] text-white/30">#{l.lead_number}</span>
+                  )}
+                  <span className="text-white">{l.prenom} {l.nom}</span>
+                </td>
                 <td className="px-4 py-3 text-white/50">{l.email}</td>
                 <td className="px-4 py-3 text-white/50">{l.pack_terrain ?? l.produit ?? "—"}</td>
                 <td className="px-4 py-3 text-white/50">{l.commune ?? "—"}</td>
+                <td className="px-4 py-3 text-white/40 text-xs">
+                  {(() => {
+                    const raw = l.mandataires as unknown as { prenom: string; nom: string } | { prenom: string; nom: string }[] | null;
+                    const m = Array.isArray(raw) ? raw[0] ?? null : raw;
+                    return m ? `${m.prenom} ${m.nom}` : "—";
+                  })()}
+                </td>
                 <td className="px-4 py-3">
                   <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUT_COLORS[l.statut ?? "nouveau"] ?? ""}`}>
                     {l.statut ?? "nouveau"}
@@ -67,7 +80,7 @@ export default async function LeadsPage() {
             ))}
             {(leads ?? []).length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-white/20">
+                <td colSpan={8} className="px-4 py-12 text-center text-sm text-white/20">
                   Aucun lead pour l&apos;instant
                 </td>
               </tr>
