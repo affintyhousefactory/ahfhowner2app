@@ -21,8 +21,9 @@ export async function GET(req: NextRequest) {
       id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht,
       created_at, accepted_at,
       leads (
-        lead_number, commune, description_projet, produit,
-        terrain_mode, pack_terrain, total_estime, delai_projet, statut
+        id, lead_number, commune, description_projet, produit,
+        terrain_mode, pack_terrain, total_estime, delai_projet, statut,
+        lead_documents(id)
       )
     `)
     .eq("mandataire_id", mandataire.id)

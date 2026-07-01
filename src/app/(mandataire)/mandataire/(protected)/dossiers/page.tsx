@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 
 type LeadAnon = {
+  id: string;
   lead_number: number | null;
   commune: string | null;
   description_projet: string | null;
@@ -14,6 +15,7 @@ type LeadAnon = {
   total_estime: number | null;
   delai_projet: string | null;
   statut: string | null;
+  lead_documents: { id: string }[] | null;
 };
 
 type Dossier = {
@@ -108,9 +110,16 @@ export default function DossiersPage() {
                       {l?.commune ?? "Zone confidentielle"}
                     </p>
                   </div>
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${badge.cls}`}>
-                    {badge.label}
-                  </span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${badge.cls}`}>
+                      {badge.label}
+                    </span>
+                    {(l?.lead_documents?.length ?? 0) > 0 && (
+                      <span className="rounded-full bg-[#7469F4]/10 px-2 py-0.5 text-[11px] font-semibold text-[#7469F4]">
+                        {l!.lead_documents!.length} doc{l!.lead_documents!.length > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <dl className="mt-3 space-y-1.5 text-sm">

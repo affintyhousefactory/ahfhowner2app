@@ -12,16 +12,9 @@ interface Document {
   mandataires?: { prenom: string; nom: string } | null;
 }
 
-interface Mandataire {
-  id: string;
-  prenom: string;
-  nom: string;
-}
-
 interface LeadDocumentsProps {
   leadId: string;
   currentMandataireId: string | null;
-  mandataires: Mandataire[];
 }
 
 function fileIcon(mime: string | null) {
@@ -33,11 +26,10 @@ function fileIcon(mime: string | null) {
   return "📄";
 }
 
-export default function LeadDocuments({ leadId, currentMandataireId, mandataires }: LeadDocumentsProps) {
+export default function LeadDocuments({ leadId, currentMandataireId }: LeadDocumentsProps) {
   const [docs, setDocs] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [selectedMandataireId, setSelectedMandataireId] = useState(currentMandataireId ?? "");
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -61,7 +53,7 @@ export default function LeadDocuments({ leadId, currentMandataireId, mandataires
 
     const form = new FormData();
     form.append("file", file);
-    if (selectedMandataireId) form.append("mandataire_id", selectedMandataireId);
+    if (currentMandataireId) form.append("mandataire_id", currentMandataireId);
 
     try {
       const res = await fetch(`/api/admin/leads/${leadId}/documents`, {
@@ -102,30 +94,10 @@ export default function LeadDocuments({ leadId, currentMandataireId, mandataires
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
-          Dossiers associés
-        </h2>
-      </div>
-
       {/* Upload */}
       <div className="mb-4 rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-3">
         <p className="mb-2 text-xs text-white/30 uppercase tracking-wider">Ajouter un document</p>
         <div className="flex flex-col gap-2">
-          {mandataires.length > 0 && (
-            <select
-              value={selectedMandataireId}
-              onChange={(e) => setSelectedMandataireId(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#7469F4]"
-            >
-              <option value="">— Affecter à un mandataire (optionnel) —</option>
-              {mandataires.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.prenom} {m.nom}
-                </option>
-              ))}
-            </select>
-          )}
           <div className="flex items-center gap-2">
             <input
               ref={fileRef}

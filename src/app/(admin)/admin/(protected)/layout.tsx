@@ -7,10 +7,11 @@ import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 import { cn } from "@/shared/lib/cn";
 
 const NAV = [
-  { href: "/admin", label: "Dashboard", icon: "⬛" },
-  { href: "/admin/leads", label: "Leads", icon: "👤" },
-  { href: "/admin/mandataires", label: "Mandataires", icon: "🏠" },
-  { href: "/admin/affectations", label: "Affectations", icon: "🔗" },
+  { href: "/admin",              label: "Dashboard" },
+  { href: "/admin/leads",        label: "Leads" },
+  { href: "/admin/affectations", label: "En attente", sub: true },
+  { href: "/admin/ged",          label: "GED Dossiers", sub: true },
+  { href: "/admin/mandataires",  label: "Mandataires" },
 ];
 
 export default function AdminProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -63,19 +64,27 @@ export default function AdminProtectedLayout({ children }: { children: React.Rea
         </div>
 
         <nav className="flex-1 space-y-0.5 p-3">
-          {NAV.map(({ href, label }) => {
+          {NAV.map(({ href, label, sub }) => {
             const active = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
             return (
               <Link
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
+                  "flex items-center gap-2 rounded-lg py-1.5 text-sm transition-colors",
+                  sub ? "ml-4 px-2 text-[13px]" : "px-3",
                   active
-                    ? "bg-[#7469F4]/15 text-[#7469F4]"
-                    : "text-white/50 hover:bg-white/5 hover:text-white",
+                    ? sub
+                      ? "text-[#7469F4]"
+                      : "bg-[#7469F4]/15 text-[#7469F4]"
+                    : sub
+                      ? "text-white/35 hover:text-white/70"
+                      : "text-white/50 hover:bg-white/5 hover:text-white",
                 )}
               >
+                {sub && (
+                  <span className="h-px w-2.5 shrink-0 bg-current opacity-30" />
+                )}
                 {label}
               </Link>
             );

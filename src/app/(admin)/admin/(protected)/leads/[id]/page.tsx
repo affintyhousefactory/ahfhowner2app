@@ -5,6 +5,8 @@ import LeadMapClient from "@/components/admin/LeadMapClient";
 import LeadEditIdentite from "@/components/admin/LeadEditIdentite";
 import LeadEditLocalisation from "@/components/admin/LeadEditLocalisation";
 import LeadDocuments from "@/components/admin/LeadDocuments";
+import LeadConfigurateur from "@/components/admin/LeadConfigurateur";
+import LeadStatutCommercial from "@/components/admin/LeadStatutCommercial";
 
 export const dynamic = "force-dynamic";
 
@@ -23,14 +25,21 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
     ? (mandataires?.find((m) => m.id === lead.mandataire_id) ?? null)
     : null;
 
+  const identifier = `#${lead.lead_number ?? "—"} — ${lead.prenom} ${lead.nom}`;
+
   return (
     <div className="p-8">
+      {/* Header */}
       <div className="mb-6">
         <a href="/admin/leads" className="text-sm text-white/30 hover:text-white">← Leads</a>
-        <h1 className="mt-2 text-xl font-semibold text-white">
-          {lead.prenom} {lead.nom}
-        </h1>
-        <p className="text-sm text-white/40">{lead.email} · {lead.tel}</p>
+        <div className="mt-2 flex items-center gap-3 flex-wrap">
+          <h1 className="text-xl font-semibold text-white">{identifier}</h1>
+          <LeadStatutCommercial
+            leadId={id}
+            current={(lead.statut_commercial as string | null) as Parameters<typeof LeadStatutCommercial>[0]["current"]}
+          />
+        </div>
+        <p className="mt-1 text-sm text-white/40">{lead.email} · {lead.tel}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -43,7 +52,6 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
         <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
           <LeadEditLocalisation lead={lead} />
 
-          {/* Carte parcelle PLU */}
           {lead.plu_lat && lead.plu_lon && (
             <LeadMapClient
               lon={Number(lead.plu_lon)}
@@ -52,7 +60,6 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
             />
           )}
 
-          {/* Données PLU */}
           {lead.plu_adresse && (
             <>
               <h2 className="mt-6 mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">
@@ -79,7 +86,25 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
           )}
         </div>
 
-        {/* Zone 3 — Affectation mandataire */}
+        {/* Zone 3 — Configuration Arko (lecture seule, données configurateur) */}
+        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
+            Configuration Arko
+          </h2>
+          <LeadConfigurateur
+            produit={lead.produit ?? null}
+            surface={lead.surface ?? null}
+            house_total={lead.house_total ?? null}
+            delivery={lead.delivery ?? null}
+            grand_total={lead.grand_total ?? null}
+            terrain_mode={lead.terrain_mode ?? null}
+            pack_terrain={lead.pack_terrain ?? null}
+            config_json={(lead.config_json as { bardage?: string; facade?: string; bar?: string; chambre?: string; interieur?: string; terrasseM2?: number } | null) ?? null}
+            options_labels={(lead.options_labels as string[] | null) ?? null}
+          />
+        </div>
+
+        {/* Zone 4 — Affectation mandataire */}
         <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
           <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
             Affectation mandataire
@@ -109,12 +134,19 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
           />
         </div>
 
-        {/* Zone 4 — Documents & Dossiers */}
-        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+        {/* Zone 5 — Dossier client (pleine largeur) */}
+        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6 lg:col-span-2">
+          <div className="mb-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              Dossier client
+            </h2>
+            <p className="mt-1 text-xs text-white/25">
+              Documents techniques, pré-contractuels et commerciaux à partager avec le mandataire affecté.
+            </p>
+          </div>
           <LeadDocuments
             leadId={id}
             currentMandataireId={lead.mandataire_id ?? null}
-            mandataires={mandataires ?? []}
           />
         </div>
       </div>
