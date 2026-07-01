@@ -13,18 +13,11 @@ export default async function GedDossierPage({ params }: Props) {
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 
-  const [{ data: lead }, { data: mandataires }] = await Promise.all([
-    supabase
-      .from("leads")
-      .select("id, lead_number, prenom, nom, commune, statut, mandataire_id")
-      .eq("id", id)
-      .single(),
-    supabase
-      .from("mandataires")
-      .select("id, prenom, nom")
-      .eq("statut", "validé")
-      .order("nom"),
-  ]);
+  const { data: lead } = await supabase
+    .from("leads")
+    .select("id, lead_number, prenom, nom, commune, statut, mandataire_id")
+    .eq("id", id)
+    .single();
 
   if (!lead) notFound();
 
@@ -53,7 +46,6 @@ export default async function GedDossierPage({ params }: Props) {
         <LeadDocuments
           leadId={lead.id}
           currentMandataireId={lead.mandataire_id ?? null}
-          mandataires={mandataires ?? []}
         />
       </div>
     </div>

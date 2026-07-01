@@ -134,12 +134,19 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
           />
         </div>
 
-        {/* Zone 5 — Documents & Dossiers (pleine largeur) */}
+        {/* Zone 5 — Dossier client (pleine largeur) */}
         <div className="rounded-2xl border border-white/10 bg-[#252521] p-6 lg:col-span-2">
+          <div className="mb-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              Dossier client
+            </h2>
+            <p className="mt-1 text-xs text-white/25">
+              Documents techniques, pré-contractuels et commerciaux à partager avec le mandataire affecté.
+            </p>
+          </div>
           <LeadDocuments
             leadId={id}
             currentMandataireId={lead.mandataire_id ?? null}
-            mandataires={mandataires ?? []}
           />
         </div>
       </div>
