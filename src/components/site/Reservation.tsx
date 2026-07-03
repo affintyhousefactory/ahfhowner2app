@@ -36,7 +36,7 @@ export function Reservation() {
   const [pluConsent, setPluConsent] = useState(false);
   const [optIn, setOptIn] = useState(false);
 
-  const isPack = c.terrainMode === "pack" && !!c.packTerrain;
+  const isPack = c.terrainMode === "pack";
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,34 +53,23 @@ export function Reservation() {
     setSending(true);
     try {
       if (isPack) {
-        // Flux pack terrain → /api/recherche-terrain
-        let villesArr: string[] | undefined;
-        let zonesArr: string[] | undefined;
-        let departementStr: string | undefined;
+        // Flux recherche terrain → /api/recherche-terrain
+        let communes: { nom: string; cp: string }[] = [];
         try {
-          const raw = sessionStorage.getItem("pack_terrain_zones");
-          if (raw) {
-            const d = JSON.parse(raw) as { pack: string; villes: string; zones: string; departement: string };
-            if (d.pack === c.packTerrain) {
-              if (d.villes) villesArr = d.villes.split(",").map((s) => s.trim()).filter(Boolean);
-              if (d.zones) zonesArr = d.zones.split(",").map((s) => s.trim()).filter(Boolean);
-              if (d.departement) departementStr = d.departement.trim();
-            }
-          }
+          const raw = sessionStorage.getItem("pack_terrain_communes");
+          if (raw) communes = (JSON.parse(raw) as { nom: string; cp: string; placeId: string }[]).map(({ nom, cp }) => ({ nom, cp }));
         } catch {}
         await fetch("/api/recherche-terrain", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            nom: `${String(fd.get("prenom") ?? "").trim()} ${String(fd.get("nom") ?? "").trim()}`.trim(),
+            prenom: String(fd.get("prenom") ?? "").trim(),
+            nom: String(fd.get("nom") ?? "").trim(),
             telephone: String(fd.get("tel") ?? ""),
             email: String(fd.get("email") ?? ""),
             modele: c.active.name,
-            pack: c.packTerrain,
+            communes,
             source: "configurateur" as const,
-            villes: villesArr,
-            zones: zonesArr,
-            departement: departementStr,
             accepte_cgv: true,
             optIn,
           }),

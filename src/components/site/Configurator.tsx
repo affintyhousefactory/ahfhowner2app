@@ -400,9 +400,14 @@ function Devis() {
         )}
 
         {c.terrainMode === "pack" && (
-          <div className="mt-3">
-            <CommunesPicker />
-          </div>
+          <>
+            <p className="mt-2 font-mono text-[0.63rem] leading-relaxed text-muted">
+              L'expert Mandataire Affinity vous re-contacte sous 48h. Terrain sur communes recherchées (Jusqu'à 5).
+            </p>
+            <div className="mt-3">
+              <CommunesPicker />
+            </div>
+          </>
         )}
       </div>
 
@@ -505,43 +510,43 @@ function Devis() {
   );
 }
 
-interface Commune { nom: string; placeId: string }
+interface Commune { nom: string; cp: string; placeId: string }
 
 function CommunesPicker() {
   const [communes, setCommunes] = useState<Commune[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const elementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const acRef = useRef<google.maps.places.Autocomplete | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY ?? "";
 
   useEffect(() => {
-    if (!apiKey) return;
+    if (!apiKey || !inputRef.current || acRef.current) return;
     loadGooglePlacesScript(apiKey).then(() => {
-      if (!containerRef.current || elementRef.current) return;
-      const el = new window.google.maps.places.PlaceAutocompleteElement({
-        includedRegionCodes: ["fr"],
-        includedPrimaryTypes: ["locality", "administrative_area_level_3"],
+      if (!inputRef.current || acRef.current) return;
+      const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ["(cities)"],
+        componentRestrictions: { country: "fr" },
+        fields: ["place_id", "name", "address_components"],
       });
-      el.style.width = "100%";
-      containerRef.current.appendChild(el);
-      elementRef.current = el;
-
-      el.addEventListener("gmp-placeselect", (e: Event) => {
-        const place = (e as CustomEvent<{ place: google.maps.places.Place }>).detail.place;
-        const nom = place.displayName ?? "";
-        const placeId = place.id ?? "";
-        if (!nom || !placeId) return;
+      acRef.current = ac;
+      ac.addListener("place_changed", () => {
+        const place = ac.getPlace();
+        if (!place.place_id || !place.name) return;
+        const cpComp = place.address_components?.find((c) =>
+          c.types.includes("postal_code")
+        );
+        const cp = cpComp?.long_name ?? "";
         setCommunes((prev) => {
-          if (prev.length >= 5 || prev.some((c) => c.placeId === placeId)) return prev;
-          return [...prev, { nom, placeId }];
+          if (prev.length >= 5 || prev.some((c) => c.placeId === place.place_id!)) return prev;
+          return [...prev, { nom: place.name!, cp, placeId: place.place_id! }];
         });
-        (el as unknown as HTMLInputElement).value = "";
+        if (inputRef.current) inputRef.current.value = "";
       });
     });
   }, [apiKey]);
 
   useEffect(() => {
     try {
-      sessionStorage.setItem("pack_terrain_communes", JSON.stringify(communes.map((c) => c.nom)));
+      sessionStorage.setItem("pack_terrain_communes", JSON.stringify(communes));
     } catch {}
   }, [communes]);
 
@@ -550,20 +555,19 @@ function CommunesPicker() {
 
   return (
     <div className="space-y-2">
-      <p className="font-mono text-[0.63rem] text-muted">
-        Communes souhaitées (jusqu'à 5)
-      </p>
+      <p className="font-mono text-[0.63rem] text-muted">Communes souhaitées (jusqu'à 5)</p>
       {communes.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {communes.map((c) => (
             <span
               key={c.placeId}
-              className="flex items-center gap-1 rounded-full border border-accent/25 bg-accent/5 px-2.5 py-0.5 text-xs text-ink"
+              className="flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/5 px-2.5 py-0.5 text-xs text-ink"
             >
-              {c.nom}
+              {c.nom}{c.cp ? ` (${c.cp})` : ""}
               <button
+                type="button"
                 onClick={() => remove(c.placeId)}
-                className="ml-0.5 text-muted hover:text-red-500"
+                className="leading-none text-muted transition-colors hover:text-red-500"
                 aria-label={`Supprimer ${c.nom}`}
               >
                 ×
@@ -572,8 +576,15 @@ function CommunesPicker() {
           ))}
         </div>
       )}
-      {communes.length < 5 && (
-        <div ref={containerRef} className="[&_input]:w-full [&_input]:rounded-lg [&_input]:border [&_input]:border-line [&_input]:bg-surface [&_input]:px-3 [&_input]:py-2 [&_input]:text-sm [&_input]:outline-none focus-within:[&_input]:border-accent" />
+      {communes.length < 5 ? (
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Saisir une commune..."
+          className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none transition-colors focus:border-accent placeholder:text-muted/50"
+        />
+      ) : (
+        <p className="font-mono text-[0.63rem] text-accent">5 communes — maximum atteint.</p>
       )}
     </div>
   );
