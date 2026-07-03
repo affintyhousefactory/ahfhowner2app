@@ -16,6 +16,9 @@ const DEPOSIT_EUR = Number(
   process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR ?? 5000,
 );
 
+// Pool commun de 12 exemplaires — Arko One + Arko Max confondus, numérotage 1→12 partagé.
+export const SERIE_TOTAL = 12;
+
 export const BRAND = {
   maker: "HOWNER",
   model: "ARKO",
@@ -23,8 +26,8 @@ export const BRAND = {
   subline:
     "Deux modèles d'architecte, livrés prêts à vivre. Fabriqués au Pays-Basque.",
   series: "Série 01",
-  total: 12, // ⚠ compat héritée = total Arko Max ; voir PRODUCTS pour le par-produit
-  reserved: 4, // jauge live (placeholder Phase 1, Supabase Realtime en Phase 4)
+  total: 12, // pool commun = SERIE_TOTAL (One + Max confondus)
+  reserved: 3, // placeholder Phase 1 — Supabase Realtime Phase 4 (ADR-009)
   deposit: DEPOSIT_EUR,
   area: "40 m²", // compat héritée (= Arko Max) — préférer PRODUCTS[key].area
   footprint: "4 × 11 m", // compat héritée (= Arko Max)
@@ -110,7 +113,7 @@ export const PRODUCTS = {
     tagline: "20 m² d'architecte, l'essentiel juste.",
     area: "20 m²",
     footprint: "à confirmer", // TODO ARKO ONE : dimensions réelles du 20 m²
-    total: 12,
+    total: 12, // SERIE_TOTAL — pool partagé One + Max
     reserved: 2, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
     series: "Série 01",
     pricing: ONE_PRICING,
@@ -129,7 +132,7 @@ export const PRODUCTS = {
     tagline: "40 m² d'architecte, livrés prêts à vivre.",
     area: BRAND.area,
     footprint: BRAND.footprint,
-    total: 5, // repositionnement : Arko Max = 5 exemplaires (ADR-022)
+    total: 12, // SERIE_TOTAL — pool partagé One + Max
     reserved: 1, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
     series: BRAND.series,
     pricing: PRICING,

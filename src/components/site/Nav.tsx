@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { NAV, BRAND, PRODUCT_LIST } from "@/lib/site";
+import { NAV, BRAND, PRODUCT_LIST, SERIE_TOTAL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/shared/lib/cn";
 
@@ -107,11 +107,11 @@ export function Nav() {
           {/* Compteur cumulé 12 + 5 exemplaires */}
           <Link
             href="/configurer"
-            aria-label={`${PRODUCT_LIST.map((p) => `${p.name} ${p.total} exemplaires`).join(", ")}`}
+            aria-label={`Série limitée à ${SERIE_TOTAL} exemplaires au total — Arko One + Arko Max`}
             className="hidden items-center gap-1.5 font-mono text-xs text-muted transition-colors hover:text-ink sm:flex"
           >
             <span className="h-2 w-2 rounded-full bg-accent" />
-            {PRODUCT_LIST.map((p) => p.total).join(" + ")}
+            {SERIE_TOTAL}
             <span className="text-muted/70">exemplaires</span>
           </Link>
           <Button
@@ -264,7 +264,7 @@ export function Nav() {
 
           <div className="mt-4 flex items-center justify-between">
             <span className="font-mono text-xs text-muted">
-              {PRODUCT_LIST.map((p) => p.total).join(" + ")} exemplaires
+              {SERIE_TOTAL} exemplaires
             </span>
             <Button
               href="/configurer"

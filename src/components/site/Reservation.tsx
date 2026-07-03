@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BRAND, CONFIG, TRANSPORT } from "@/lib/site";
+import { BRAND, CONFIG, SERIE_TOTAL, TRANSPORT } from "@/lib/site";
 import { Gauge } from "@/components/ui/Gauge";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
@@ -27,7 +27,7 @@ export function Reservation() {
   const c = useConfig();
   const { name } = c.active;
   const reserved = c.activeReserved;
-  const total = c.active.total;
+  const total = SERIE_TOTAL;
   const soldOut = reserved >= total;
   const [slot, setSlot] = useState<number | null>(null);
   const [sent, setSent] = useState(false);
@@ -209,9 +209,9 @@ export function Reservation() {
 
                 {isPack && (
                   <div className="mb-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
-                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-accent">Pack Terrain Affinity</p>
+                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-accent">Recherche terrain — mandataire Affinity</p>
                     <p className="mt-1 text-sm text-muted">
-                      Notre Mandataire Affinity recherche le terrain pour vous. Laissez vos coordonnées — on vous recontacte sous 24 h.
+                      Notre expert immobilier recherche un terrain dans vos communes souhaitées. Laissez vos coordonnées — on vous recontacte sous 48 h.
                     </p>
                   </div>
                 )}
@@ -265,10 +265,6 @@ export function Reservation() {
                           {BRAND.deposit.toLocaleString("fr-FR")} €
                         </span>
                         {" "}· Acompte de réservation Arko — remboursable, sans engagement de construction
-                      </li>
-                      <li>
-                        <span className="font-semibold text-ink">1 500 €</span>
-                        {" "}· Acompte Pack Recherche Terrain (optionnel — réservé aux acquéreurs d'un module Arko)
                       </li>
                     </ul>
                     <p className="mt-2">
