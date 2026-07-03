@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { RechercheTerrainForm } from "@/components/site/RechercheTerrainForm";
 import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
@@ -296,15 +295,12 @@ export default function RechercheTerrainPage() {
                     ))}
                   </ul>
                 </div>
-                <div className="flex flex-col items-stretch justify-between border-t border-accent/15 p-7 md:min-w-[240px] md:border-t-0 md:border-l md:p-8">
+                <div className="flex flex-col items-stretch justify-between border-t border-accent/15 p-7 md:min-w-[260px] md:border-t-0 md:border-l md:p-8">
                   <div>
-                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted">
-                      Inclus avec
+                    <p className="text-sm leading-relaxed text-muted">
+                      Sélectionnez juste la zone de recherche souhaitée dans notre configurateur.
+                      Notre expert Immobilier vous accompagne.
                     </p>
-                    <p className="mt-1.5 text-[1.5rem] font-semibold leading-none text-ink">
-                      Pack Terrain
-                    </p>
-                    <p className="mt-1 font-mono text-sm text-accent">dès 4 900 € TTC</p>
                     <p className="mt-4 text-xs leading-relaxed text-muted">
                       Démarrage sous 48 h après réservation.
                       Durée estimée&nbsp;: 3 mois.
@@ -321,36 +317,6 @@ export default function RechercheTerrainPage() {
                   </a>
                 </div>
               </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ── Formulaire ── */}
-      <section className="bg-surface pt-12 pb-20 md:pt-14 md:pb-28">
-        <div className="container-page">
-          <Reveal>
-            <div className="rule flex items-baseline justify-between pt-5">
-              <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-                Votre demande
-              </span>
-              <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-                À partir de 4 900 € TTC
-              </span>
-            </div>
-          </Reveal>
-          <Reveal delay={0.05}>
-            <h2 className="editorial mt-10 text-pretty text-[2rem] leading-[1.05] text-ink md:text-[3rem]">
-              Choisissez Votre Pack Terrain.
-            </h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted">
-              Sélectionnez l'échelle de recherche adaptée à votre projet. Un conseiller AHF vous contacte sous 48 h ouvrées pour confirmer la mission et organiser le démarrage.
-            </p>
-          </Reveal>
-
-          <Reveal delay={0.08}>
-            <div className="mt-12">
-              <RechercheTerrainForm />
             </div>
           </Reveal>
         </div>
