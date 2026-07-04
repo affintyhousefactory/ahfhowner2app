@@ -12,9 +12,12 @@ type MandataireProfile = {
   contrat_signe_at: string | null;
 };
 
+type FicheStatut = "disponible" | "compromis" | "retire";
+
 export default function MandataireDashboard() {
   const [profile, setProfile] = useState<MandataireProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [nbTerrainsActifs, setNbTerrainsActifs] = useState(0);
 
   useEffect(() => {
     const supabase = getSupabaseBrowser();
@@ -32,6 +35,21 @@ export default function MandataireDashboard() {
         .single();
 
       setProfile(data);
+
+      // Charger le nombre de terrains actifs
+      try {
+        const res = await fetch("/api/mandataire/terrains", {
+          headers: { authorization: `Bearer ${session.access_token}` },
+        });
+        if (res.ok) {
+          const fiches: { statut: FicheStatut }[] = await res.json();
+          const actifs = fiches.filter((f) => f.statut === "disponible" || f.statut === "compromis");
+          setNbTerrainsActifs(actifs.length);
+        }
+      } catch {
+        // non bloquant
+      }
+
       setLoading(false);
     };
 
@@ -77,8 +95,8 @@ export default function MandataireDashboard() {
         <div className="rounded-xl border border-[#7469F4]/30 bg-[#7469F4]/5 p-5">
           <p className="font-semibold text-[#7469F4]">Contrat à signer</p>
           <p className="mt-1 text-sm text-gray-600">
-            Pour commencer à recevoir des dossiers, veuillez signer votre contrat-cadre de
-            sous-traitance AHF.
+            Pour activer votre accès et commencer à recevoir des prospects qualifiés, veuillez signer votre contrat-cadre de
+            partenariat AHF.
           </p>
           <Link
             href="/mandataire/contrat"
@@ -96,41 +114,53 @@ export default function MandataireDashboard() {
         <KpiCard label="CA généré" value="0 €" sublabel="Rémunérations versées" />
       </div>
 
-      {/* Grille de rémunération */}
+      {/* Card Mes Terrains */}
       <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="font-semibold text-gray-900">Grille de rémunération</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          100 % success fee — aucun frais fixe. Rémunération déclenchée après acte notarié +
-          encaissement AHF.
-        </p>
-        <div className="mt-4 overflow-hidden rounded-xl border border-gray-100">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-mono text-[0.65rem] uppercase tracking-[0.12em] text-gray-400">Pack</th>
-                <th className="px-4 py-3 text-right font-mono text-[0.65rem] uppercase tracking-[0.12em] text-gray-400">Prix client TTC</th>
-                <th className="px-4 py-3 text-right font-mono text-[0.65rem] uppercase tracking-[0.12em] text-[#7469F4]/70">Votre rémunération HT</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {[
-                { pack: "Essentiel", prix: "4 900 €", remun: "3 600 €" },
-                { pack: "Étendu", prix: "7 300 €", remun: "5 500 €" },
-                { pack: "Département", prix: "11 200 €", remun: "8 400 €" },
-              ].map((row) => (
-                <tr key={row.pack} className="bg-white hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-900">{row.pack}</td>
-                  <td className="px-4 py-3 text-right text-gray-500">{row.prix}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-[#7469F4]">{row.remun}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="font-semibold text-gray-900">Mes Terrains</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Référencez vos terrains compatibles Arko pour recevoir des prospects qualifiés.
+            </p>
+          </div>
+          <Link
+            href="/mandataire/terrains"
+            className="flex-shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:border-gray-300 hover:text-gray-900 transition-colors"
+          >
+            Voir tout →
+          </Link>
         </div>
-        <p className="mt-3 text-xs text-gray-400">
-          Acompte 1 500 € retenu par AHF non reversé · Facturation mandataire sous 15j acte · Règlement
-          sous 30j réception facture
-        </p>
+
+        <div className="mt-4">
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span className="text-gray-600">Fiches actives</span>
+            <span className={`font-semibold ${nbTerrainsActifs >= 10 ? "text-green-600" : nbTerrainsActifs >= 8 ? "text-orange-500" : "text-red-500"}`}>
+              {nbTerrainsActifs} / 10
+            </span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+            <div
+              className={`h-full rounded-full transition-all ${nbTerrainsActifs >= 10 ? "bg-green-500" : nbTerrainsActifs >= 8 ? "bg-orange-400" : "bg-[#7469F4]"}`}
+              style={{ width: `${Math.min(100, (nbTerrainsActifs / 10) * 100)}%` }}
+            />
+          </div>
+          <p className="mt-2 text-xs text-gray-400">
+            {nbTerrainsActifs >= 10
+              ? "✅ Objectif atteint — exclusivité territoriale active"
+              : nbTerrainsActifs >= 8
+              ? "⚠️ Proche de l'objectif — encore quelques fiches à publier"
+              : "Publiez au moins 10 fiches terrain pour activer votre exclusivité territoriale"}
+          </p>
+        </div>
+
+        {nbTerrainsActifs === 0 && (
+          <Link
+            href="/mandataire/terrains/nouveau"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#7469F4] hover:underline"
+          >
+            Publier ma première fiche →
+          </Link>
+        )}
       </div>
     </div>
   );
