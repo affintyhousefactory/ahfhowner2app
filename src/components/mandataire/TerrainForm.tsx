@@ -484,21 +484,21 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
         {analyzeInfo && <p className="mt-2 text-xs text-green-700">{analyzeInfo}</p>}
       </section>
 
-      {/* Localisation — commune/secteur extractibles (repliables), référence interne toujours visible */}
+      {/* Localisation — commune/secteur extractibles (repliables) ; référence interne toujours visible sur la même ligne */}
       <CollapsibleCard
         title="Localisation"
         collapsed={collapsedSections.has("localisation")}
         onToggle={() => toggleSection("localisation")}
         summary={form.commune ? `${form.commune}${form.secteur ? " — " + form.secteur : ""}` : "Commune non renseignée"}
         alwaysVisible={
-          <div>
+          <div className="sm:w-64">
             <label className="mb-1 block text-sm font-medium text-gray-700">Référence interne</label>
             <input
               type="text"
               value={form.reference_interne}
               onChange={(e) => set("reference_interne", e.target.value)}
               placeholder="Ex : T-2024-001"
-              className="w-full max-w-xs rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
             />
           </div>
         }
@@ -656,7 +656,8 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
         </section>
       </div>
 
-      {/* Section 6 — Compatibilité ARKO */}
+      {/* Compatibilité ARKO + Photos : cards compactes regroupées côte à côte */}
+      <div className="grid gap-6 sm:grid-cols-2">
       <section className="rounded-xl border border-gray-200 bg-white p-5">
         <h2 className="mb-4 font-semibold text-gray-900">Compatibilité ARKO</h2>
         <div className="space-y-4">
@@ -764,6 +765,7 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
           </div>
         )}
       </section>
+      </div>
 
       {/* Section 8 — Disponibilité & Réserves */}
       <section className="rounded-xl border border-gray-200 bg-white p-5">
