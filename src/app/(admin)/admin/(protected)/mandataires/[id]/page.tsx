@@ -10,11 +10,16 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 
-  const [{ data: m }, { data: dossiers }] = await Promise.all([
+  const [{ data: m }, { data: dossiers }, { data: terrains }] = await Promise.all([
     supabase.from("mandataires").select("*").eq("id", id).single(),
     supabase
       .from("dossiers")
       .select("id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht, created_at, accepted_at, email_sent_at, leads(id, prenom, nom, lead_number)")
+      .eq("mandataire_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("fiches_terrain")
+      .select("id, commune, statut, statut_admin, created_at")
       .eq("mandataire_id", id)
       .order("created_at", { ascending: false }),
   ]);
@@ -193,6 +198,53 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
             dossiers={(dossiers ?? []) as any}
             mandataireId={id}
           />
+        </div>
+
+        {/* Fiches Terrain */}
+        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6 lg:col-span-2">
+          {(() => {
+            const t = terrains ?? [];
+            const publiees = t.filter((f) => f.statut_admin === "publie").length;
+            const STATUT_ADMIN_COLORS: Record<string, string> = {
+              en_attente: "bg-amber-500/20 text-amber-400",
+              valide:     "bg-[#7469F4]/20 text-[#7469F4]",
+              refuse:     "bg-red-500/20 text-red-400",
+              publie:     "bg-green-500/20 text-green-400",
+            };
+            const STATUT_ADMIN_LABELS: Record<string, string> = {
+              en_attente: "En attente", valide: "Validé", refuse: "Refusé", publie: "Publié",
+            };
+            return (
+              <>
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                    Fiches Terrain ({t.length} — {publiees} publiées)
+                  </h2>
+                  <p className="text-xs text-amber-400/80">Obligation : ≥ 10 fiches actives</p>
+                </div>
+                {t.length === 0 ? (
+                  <p className="text-xs text-white/20">Aucune fiche terrain déposée.</p>
+                ) : (
+                  <div className="divide-y divide-white/5">
+                    {t.map((f) => (
+                      <div key={f.id} className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-white">{f.commune}</span>
+                          <span className="text-xs text-white/30">{f.statut}</span>
+                          <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${STATUT_ADMIN_COLORS[f.statut_admin] ?? "text-white/30"}`}>
+                            {STATUT_ADMIN_LABELS[f.statut_admin] ?? f.statut_admin}
+                          </span>
+                        </div>
+                        <a href={`/admin/terrains/${f.id}`} className="text-xs text-[#7469F4] hover:underline">
+                          Voir →
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>

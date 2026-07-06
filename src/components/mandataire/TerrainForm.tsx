@@ -20,6 +20,8 @@ export type FicheTerrain = {
   compatibilite_arko: "precompatible" | "a_confirmer" | "non_compatible" | null;
   modele_arko: "one" | "max" | "both" | null;
   statut: "disponible" | "compromis" | "retire";
+  statut_admin?: "en_attente" | "valide" | "refuse" | "publie";
+  admin_commentaire?: string | null;
   date_derniere_verif: string | null;
   reserves: string[];
   notes: string | null;
@@ -114,7 +116,7 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
     setError("");
     setSaving(true);
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       ...form,
       prix: form.prix ? parseInt(form.prix, 10) : null,
       surface: form.surface ? parseInt(form.surface, 10) : null,
@@ -125,6 +127,11 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
       modele_arko: form.modele_arko || null,
       zonage: form.zonage || null,
     };
+
+    // Re-soumettre si la fiche avait été refusée
+    if (isEdit && initialData?.statut_admin === "refuse") {
+      payload.statut_admin = "en_attente";
+    }
 
     const url = isEdit
       ? `/api/mandataire/terrains/${ficheId}`
@@ -204,8 +211,37 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
     }
   };
 
+  // Bandeau statut admin
+  const statutAdmin = initialData?.statut_admin;
+  const adminBandeau = statutAdmin && (
+    <div className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
+      statutAdmin === "en_attente" ? "border-blue-200 bg-blue-50 text-blue-700" :
+      statutAdmin === "valide"     ? "border-green-200 bg-green-50 text-green-700" :
+      statutAdmin === "refuse"     ? "border-red-200 bg-red-50 text-red-700" :
+      statutAdmin === "publie"     ? "border-green-300 bg-green-100 text-green-800" :
+      "border-gray-200 bg-gray-50 text-gray-700"
+    }`}>
+      {statutAdmin === "en_attente" && (
+        <p>Votre fiche est en cours de vérification par AHF.</p>
+      )}
+      {statutAdmin === "valide" && (
+        <p>Fiche validée par AHF — en attente de publication.</p>
+      )}
+      {statutAdmin === "refuse" && (
+        <>
+          <p className="font-medium">Fiche refusée.{initialData.admin_commentaire ? ` Motif : ${initialData.admin_commentaire}` : ""}</p>
+          <p className="mt-1 text-xs">Corrigez les informations et sauvegardez pour soumettre à nouveau.</p>
+        </>
+      )}
+      {statutAdmin === "publie" && (
+        <p>Fiche publiée sur le site.</p>
+      )}
+    </div>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {adminBandeau}
       {/* Section 1 — Localisation */}
       <section className="rounded-xl border border-gray-200 bg-white p-5">
         <h2 className="mb-4 font-semibold text-gray-900">Localisation</h2>

@@ -204,7 +204,8 @@ export const FAQ = [
 // Navigation principale par routes (multi-pages — ADR-021).
 // « Produits » est rendu à part (méga-menu Tesla) via PRODUCT_LIST.
 export const NAV = [
-  { label: "Contact", href: "/contact" },
+  { label: "Terrains", href: "/terrains" },
+  { label: "Contact",  href: "/contact" },
 ] as const;
 
 // Liens « Informations » (footer + légal). Contenu réel CGV/etc. bloqué ADR-015.
