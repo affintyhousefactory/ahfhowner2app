@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
@@ -68,18 +68,30 @@ const NAV_LINKS = [
   { href: "/mandataire/dashboard", label: "Dashboard" },
   { href: "/mandataire/dossiers",  label: "Dossiers"  },
   { href: "/mandataire/terrains",  label: "Mes Terrains" },
-  { href: "/mandataire/profil",    label: "Mon Profil" },
 ];
 
 function MandataireNav() {
   const router = useRouter();
   const pathname = usePathname();
   const supabase = getSupabaseBrowser();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/mandataire");
   };
+
+  // Ferme le menu si clic en dehors
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   return (
     <header className="border-b border-gray-200 bg-white shadow-sm">
@@ -108,12 +120,65 @@ function MandataireNav() {
             ))}
           </nav>
         </div>
-        <button
-          onClick={handleSignOut}
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:border-gray-300 hover:text-gray-900 transition-colors"
-        >
-          Déconnexion
-        </button>
+
+        {/* Engrenage + dropdown */}
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="Paramètres du compte"
+            aria-expanded={menuOpen}
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+              menuOpen
+                ? "border-[#7469F4]/40 bg-[#7469F4]/10 text-[#7469F4]"
+                : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700",
+            )}
+          >
+            {/* Icône engrenage */}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
+                stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"
+              />
+              <path
+                d="M13.3 6.3l-.8-.5a5.2 5.2 0 0 0 0-1.6l.8-.5a.7.7 0 0 0 .2-.9l-.8-1.4a.7.7 0 0 0-.9-.2l-.8.5a5.1 5.1 0 0 0-1.4-.8V.7A.7.7 0 0 0 8.9 0H7.1a.7.7 0 0 0-.7.7v.9a5.1 5.1 0 0 0-1.4.8l-.8-.5a.7.7 0 0 0-.9.2L2.5 3.5a.7.7 0 0 0 .2.9l.8.5a5.2 5.2 0 0 0 0 1.6l-.8.5a.7.7 0 0 0-.2.9l.8 1.4a.7.7 0 0 0 .9.2l.8-.5c.4.3.9.6 1.4.8v.9c0 .4.3.7.7.7h1.8c.4 0 .7-.3.7-.7v-.9a5.1 5.1 0 0 0 1.4-.8l.8.5a.7.7 0 0 0 .9-.2l.8-1.4a.7.7 0 0 0-.2-.9Z"
+                stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 top-full mt-1.5 w-44 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+              <Link
+                href="/mandataire/profil"
+                onClick={() => setMenuOpen(false)}
+                className={cn(
+                  "flex items-center gap-2.5 px-3.5 py-2 text-sm transition-colors",
+                  pathname === "/mandataire/profil"
+                    ? "font-medium text-[#7469F4]"
+                    : "text-gray-700 hover:bg-gray-50",
+                )}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.3"/>
+                  <path d="M1.5 12.5c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+                Mon Profil
+              </Link>
+              <div className="mx-3 my-1 h-px bg-gray-100" />
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M5 7h7M9 4.5L11.5 7 9 9.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 2H2.5A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12H7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+                Déconnexion
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
