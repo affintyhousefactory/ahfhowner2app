@@ -15,6 +15,12 @@ const MODELE_LABELS: Record<string, string> = {
   both: "One + Max",
 };
 
+const STATUT_BADGES: Record<string, { label: string; color: string }> = {
+  vendu:     { label: "Vendu",          color: "bg-red-100 text-red-700" },
+  compromis: { label: "Sous compromis", color: "bg-orange-100 text-orange-700" },
+  retire:    { label: "Retiré",         color: "bg-gray-100 text-gray-500" },
+};
+
 export default function TerrainsGrid({ terrains }: { terrains: TerrainPublic[] }) {
   const [selected, setSelected] = useState<TerrainPublic | null>(null);
 
@@ -33,6 +39,9 @@ export default function TerrainsGrid({ terrains }: { terrains: TerrainPublic[] }
           const mainPhoto = terrain.photos?.[0];
           const compat = terrain.compatibilite_arko ? COMPAT_LABELS[terrain.compatibilite_arko] : null;
           const desc = terrain.description_publique;
+          const statutBadge = terrain.afficher_statut_mandataire && terrain.statut && terrain.statut !== "disponible"
+            ? STATUT_BADGES[terrain.statut] ?? null
+            : null;
           const truncated = desc && desc.length > 120 ? `${desc.slice(0, 120)}…` : desc;
 
           return (
@@ -54,6 +63,11 @@ export default function TerrainsGrid({ terrains }: { terrains: TerrainPublic[] }
                 )}
                 {/* Badges overlay */}
                 <div className="absolute left-3 top-3 flex gap-1.5 flex-wrap">
+                  {statutBadge && (
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold backdrop-blur-sm ${statutBadge.color}`}>
+                      {statutBadge.label}
+                    </span>
+                  )}
                   {compat && (
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium backdrop-blur-sm ${compat.color}`}>
                       {compat.label}

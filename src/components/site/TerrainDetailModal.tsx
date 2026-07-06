@@ -15,6 +15,8 @@ export type TerrainPublic = {
   photos: { url: string; nom: string }[] | null;
   description_publique: string | null;
   publie_at: string | null;
+  statut?: string;
+  afficher_statut_mandataire?: boolean;
 };
 
 const COMPAT_LABELS: Record<string, { label: string; color: string }> = {
@@ -52,6 +54,15 @@ export default function TerrainDetailModal({ terrain, onClose }: TerrainDetailMo
   const mainPhoto = terrain.photos?.[0];
   const compat = terrain.compatibilite_arko ? COMPAT_LABELS[terrain.compatibilite_arko] : null;
 
+  const STATUT_BADGES: Record<string, { label: string; color: string }> = {
+    vendu:    { label: "Vendu",          color: "bg-red-100 text-red-700" },
+    compromis: { label: "Sous compromis", color: "bg-orange-100 text-orange-700" },
+    retire:   { label: "Retiré",         color: "bg-gray-100 text-gray-500" },
+  };
+  const statutBadge = terrain.afficher_statut_mandataire && terrain.statut && terrain.statut !== "disponible"
+    ? STATUT_BADGES[terrain.statut] ?? null
+    : null;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
@@ -87,6 +98,11 @@ export default function TerrainDetailModal({ terrain, onClose }: TerrainDetailMo
         <div className="p-6">
           {/* Badges */}
           <div className="mb-3 flex flex-wrap gap-2">
+            {statutBadge && (
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statutBadge.color}`}>
+                {statutBadge.label}
+              </span>
+            )}
             {compat && (
               <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${compat.color}`}>
                 {compat.label}

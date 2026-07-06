@@ -7,12 +7,18 @@ import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 import { type FicheTerrain } from "@/components/mandataire/TerrainForm";
 
 function StatutBadge({ statut }: { statut: FicheTerrain["statut"] }) {
-  const map = {
+  const map: Record<FicheTerrain["statut"], string> = {
     disponible: "bg-green-100 text-green-700",
     compromis: "bg-yellow-100 text-yellow-700",
     retire: "bg-gray-100 text-gray-500",
+    vendu: "bg-red-100 text-red-700",
   };
-  const labels = { disponible: "Disponible", compromis: "Compromis", retire: "Retiré" };
+  const labels: Record<FicheTerrain["statut"], string> = {
+    disponible: "Disponible",
+    compromis: "Compromis",
+    retire: "Retiré",
+    vendu: "Vendu",
+  };
   return (
     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${map[statut]}`}>
       {labels[statut]}

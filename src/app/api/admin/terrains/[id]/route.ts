@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 
 async function checkAdmin(req: NextRequest) {
@@ -26,6 +27,7 @@ export async function PATCH(
   if ("admin_commentaire" in body) update.admin_commentaire = body.admin_commentaire;
   if ("description_publique" in body) update.description_publique = body.description_publique;
   if ("titre" in body) update.titre = body.titre;
+  if ("afficher_statut_mandataire" in body) update.afficher_statut_mandataire = body.afficher_statut_mandataire;
 
   // Auto-set publie_at when publishing
   if (body.statut_admin === "publie") {
@@ -40,5 +42,11 @@ export async function PATCH(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Invalide le cache ISR si statut_admin change
+  if ("statut_admin" in body) {
+    revalidatePath("/terrains");
+  }
+
   return NextResponse.json(data);
 }

@@ -19,7 +19,7 @@ export type FicheTerrain = {
   assainissement: string | null;
   compatibilite_arko: "precompatible" | "a_confirmer" | "non_compatible" | null;
   modele_arko: "one" | "max" | "both" | null;
-  statut: "disponible" | "compromis" | "retire";
+  statut: "disponible" | "compromis" | "retire" | "vendu";
   statut_admin?: "en_attente" | "valide" | "refuse" | "publie";
   admin_commentaire?: string | null;
   date_derniere_verif: string | null;
@@ -76,6 +76,7 @@ const STATUT_OPTIONS = [
   { value: "disponible", label: "Disponible" },
   { value: "compromis", label: "Compromis" },
   { value: "retire", label: "Retiré" },
+  { value: "vendu", label: "Vendu" },
 ] as const;
 
 export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: TerrainFormProps) {

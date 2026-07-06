@@ -50,6 +50,7 @@ type FicheTerrainFull = {
   description_publique: string | null;
   titre: string | null;
   publie_at: string | null;
+  afficher_statut_mandataire: boolean | null;
   photos: { url: string; nom: string }[];
   notes: string | null;
   reserves: string[];
@@ -226,6 +227,7 @@ export default async function TerrainFicheAdmin({ params }: { params: Promise<{ 
             currentTitre={f.titre}
             currentDescriptionPublique={f.description_publique}
             currentAdminCommentaire={f.admin_commentaire}
+            currentAfficherStatutMandataire={f.afficher_statut_mandataire ?? false}
           />
         </div>
       </div>

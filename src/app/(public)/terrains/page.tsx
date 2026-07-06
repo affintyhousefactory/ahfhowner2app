@@ -12,7 +12,7 @@ export const metadata = {
 export default async function TerrainsPubliquePage() {
   const { data } = await getSupabaseAdmin()
     .from("fiches_terrain")
-    .select("id, titre, commune, secteur, prix, surface, zonage, compatibilite_arko, modele_arko, photos, description_publique, publie_at")
+    .select("id, titre, commune, secteur, prix, surface, zonage, compatibilite_arko, modele_arko, photos, description_publique, publie_at, statut, afficher_statut_mandataire")
     .eq("statut_admin", "publie")
     .order("publie_at", { ascending: false });
 

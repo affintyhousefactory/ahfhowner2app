@@ -68,6 +68,7 @@ const NAV_LINKS = [
   { href: "/mandataire/dashboard", label: "Dashboard" },
   { href: "/mandataire/dossiers",  label: "Dossiers"  },
   { href: "/mandataire/terrains",  label: "Mes Terrains" },
+  { href: "/mandataire/profil",    label: "Mon Profil" },
 ];
 
 function MandataireNav() {

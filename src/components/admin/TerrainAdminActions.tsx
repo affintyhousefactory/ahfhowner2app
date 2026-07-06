@@ -10,6 +10,7 @@ interface TerrainAdminActionsProps {
   currentTitre: string | null;
   currentDescriptionPublique: string | null;
   currentAdminCommentaire: string | null;
+  currentAfficherStatutMandataire: boolean;
 }
 
 export default function TerrainAdminActions({
@@ -18,11 +19,13 @@ export default function TerrainAdminActions({
   currentTitre,
   currentDescriptionPublique,
   currentAdminCommentaire,
+  currentAfficherStatutMandataire,
 }: TerrainAdminActionsProps) {
   const router = useRouter();
   const [titre, setTitre] = useState(currentTitre ?? "");
   const [description_publique, setDescriptionPublique] = useState(currentDescriptionPublique ?? "");
   const [admin_commentaire, setAdminCommentaire] = useState(currentAdminCommentaire ?? "");
+  const [afficher_statut_mandataire, setAfficherStatutMandataire] = useState(currentAfficherStatutMandataire);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -89,6 +92,7 @@ export default function TerrainAdminActions({
         admin_commentaire: admin_commentaire || null,
         description_publique: description_publique || null,
         titre: titre || null,
+        afficher_statut_mandataire,
       }),
     });
 
@@ -154,6 +158,21 @@ export default function TerrainAdminActions({
         </p>
       )}
 
+      {currentStatutAdmin === "publie" && (
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="afficher_statut_mandataire"
+            checked={afficher_statut_mandataire}
+            onChange={(e) => setAfficherStatutMandataire(e.target.checked)}
+            className="accent-[#7469F4]"
+          />
+          <label htmlFor="afficher_statut_mandataire" className="text-sm text-white/60 cursor-pointer">
+            Rendre visible le statut actuel du terrain (ex : Vendu)
+          </label>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2 pt-2">
         <button
           type="button"
@@ -192,6 +211,21 @@ export default function TerrainAdminActions({
             className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
           >
             Publier sur le site
+          </button>
+        )}
+
+        {currentStatutAdmin === "publie" && (
+          <button
+            type="button"
+            onClick={async () => {
+              const ok = window.confirm("Retirer ce terrain du site public ?");
+              if (!ok) return;
+              await handleAction("valide");
+            }}
+            disabled={loading}
+            className="rounded-xl border border-amber-500/30 px-4 py-2 text-sm text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 transition-colors"
+          >
+            Dépublier
           </button>
         )}
       </div>
