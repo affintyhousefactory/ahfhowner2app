@@ -17,10 +17,25 @@ const STATUT_ADMIN_LABELS: Record<string, string> = {
   publie:     "Publié",
 };
 
+const STATUT_MANDAT_COLORS: Record<string, string> = {
+  disponible: "bg-green-500/20 text-green-400",
+  compromis:  "bg-yellow-500/20 text-yellow-400",
+  retire:     "bg-white/10 text-white/40",
+  vendu:      "bg-red-500/20 text-red-400",
+};
+
+const STATUT_MANDAT_LABELS: Record<string, string> = {
+  disponible: "Disponible",
+  compromis:  "Compromis",
+  retire:     "Retiré",
+  vendu:      "Vendu",
+};
+
 type FicheWithMandataire = {
   id: string;
   commune: string;
   statut_admin: string;
+  statut: string;
   photos: { url: string; nom: string }[] | null;
   created_at: string;
   mandataires: { id: string; prenom: string; nom: string; email: string } | null;
@@ -36,7 +51,7 @@ export default async function TerrainsAdminPage({
 
   let query = supabase
     .from("fiches_terrain")
-    .select("id, commune, secteur, statut_admin, photos, created_at, mandataires(id, prenom, nom, email)")
+    .select("id, commune, secteur, statut_admin, statut, photos, created_at, mandataires(id, prenom, nom, email)")
     .order("created_at", { ascending: false });
 
   if (statut) query = query.eq("statut_admin", statut);
@@ -116,6 +131,7 @@ export default async function TerrainsAdminPage({
               <th className="px-4 py-3 font-normal">Commune</th>
               <th className="px-4 py-3 font-normal">Mandataire</th>
               <th className="px-4 py-3 font-normal">Statut admin</th>
+              <th className="px-4 py-3 font-normal">Statut mandat</th>
               <th className="px-4 py-3 font-normal">Photos</th>
               <th className="px-4 py-3 font-normal">Déposé le</th>
               <th className="px-4 py-3 font-normal"></th>
@@ -135,6 +151,11 @@ export default async function TerrainsAdminPage({
                     {STATUT_ADMIN_LABELS[f.statut_admin] ?? f.statut_admin}
                   </span>
                 </td>
+                <td className="px-4 py-3">
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUT_MANDAT_COLORS[f.statut] ?? "text-white/30"}`}>
+                    {STATUT_MANDAT_LABELS[f.statut] ?? f.statut}
+                  </span>
+                </td>
                 <td className="px-4 py-3 text-white/40 text-xs">
                   {(f.photos ?? []).length}
                 </td>
@@ -150,7 +171,7 @@ export default async function TerrainsAdminPage({
             ))}
             {(fiches ?? []).length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-sm text-white/20">
+                <td colSpan={7} className="px-4 py-12 text-center text-sm text-white/20">
                   Aucune fiche terrain
                 </td>
               </tr>

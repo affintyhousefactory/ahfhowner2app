@@ -26,6 +26,46 @@ const USAGES = [
   { icon: "🌿", label: "Extension de valeur sur une parcelle" },
 ];
 
+const ETAPES = [
+  {
+    n: "01",
+    icon: "📝",
+    label: "Créez votre compte",
+    desc: "Profil professionnel, carte pro / RSAC, assurance RC — validé par nos équipes en 48h.",
+  },
+  {
+    n: "02",
+    icon: "📍",
+    label: "Déclarez vos zones",
+    desc: "Indiquez votre périmètre d'intervention. C'est la base de toute affectation de leads.",
+  },
+  {
+    n: "03",
+    icon: "🏞️",
+    label: "Référencez vos terrains",
+    desc: "Publiez vos biens compatibles ARKO — présélection selon le Cahier des Charges Technique.",
+  },
+  {
+    n: "04",
+    icon: "📨",
+    label: "Recevez des leads qualifiés",
+    desc: "Chaque Lead correspond à un Prospect au projet défini. Vous accusez réception sous 48h.",
+  },
+  {
+    n: "05",
+    icon: "🏆",
+    label: "Activez votre exclusivité",
+    desc: "10 terrains publiés en 90 jours, 8 maintenus actifs : la zone devient la vôtre.",
+  },
+] as const;
+
+const BENEFICES = [
+  { value: "0 €", label: "Frais fixe", sub: "Aucun coût d'adhésion ni d'abonnement" },
+  { value: "100 %", label: "Success fee", sub: "Rémunéré uniquement sur dossier finalisé" },
+  { value: "48 h", label: "Réactivité garantie", sub: "Délai d'accusé de réception d'un Lead" },
+  { value: "1 zone", label: "Exclusivité territoriale", sub: "Réservée aux mandataires actifs" },
+] as const;
+
 export default function MandataireLandingPage() {
   return (
     <div className="min-h-screen bg-[#f4f4f0]">
@@ -177,6 +217,78 @@ export default function MandataireLandingPage() {
         </div>
       </section>
 
+      {/* Comment ça marche — parcours + bénéfices */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="mb-12 text-center">
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.15em] text-[#7469F4]/70">
+              Comment ça marche
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-gray-900">
+              De la création de compte à l&apos;exclusivité territoriale
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-gray-500">
+              Un parcours simple, encadré par les CGU du Portail Mandataires,
+              pour transformer votre activité en réseau de prospects qualifiés.
+            </p>
+          </div>
+
+          {/* Stepper */}
+          <div className="relative grid gap-6 sm:grid-cols-5">
+            <div
+              aria-hidden="true"
+              className="absolute left-0 right-0 top-6 hidden h-px bg-gray-200 sm:block"
+            />
+            {ETAPES.map((e) => (
+              <div key={e.n} className="relative flex flex-col items-center text-center">
+                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#7469F4]/20 bg-white text-lg shadow-sm">
+                  {e.icon}
+                </div>
+                <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-[#7469F4]/60">
+                  Étape {e.n}
+                </p>
+                <h3 className="mt-1 text-sm font-semibold text-gray-900">{e.label}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-gray-500">{e.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Bénéfices chiffrés */}
+          <div className="mt-14 grid gap-4 sm:grid-cols-4">
+            {BENEFICES.map((b) => (
+              <div
+                key={b.label}
+                className="rounded-2xl border border-gray-100 bg-[#f4f4f0] p-5 text-center"
+              >
+                <p className="text-2xl font-bold text-[#7469F4]">{b.value}</p>
+                <p className="mt-1 text-sm font-semibold text-gray-900">{b.label}</p>
+                <p className="mt-1 text-xs leading-relaxed text-gray-500">{b.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Progression vers l'exclusivité */}
+          <div className="mt-8 rounded-2xl border border-[#7469F4]/15 bg-[#7469F4]/5 p-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-gray-800">
+                Objectif exclusivité territoriale
+              </p>
+              <p className="font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[#7469F4]">
+                10 terrains publiés / 90 jours
+              </p>
+            </div>
+            <div className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-white">
+              <div className="h-full w-[80%] rounded-l-full bg-[#7469F4]" />
+              <div className="h-full w-[20%] bg-[#7469F4]/25" />
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Seuil de maintien après attribution : 8 terrains actifs en continu — les mandataires
+              qui publient tôt sécurisent leur zone en premier.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Bottom CTA */}
       <section className="bg-[#7469F4] py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
@@ -207,6 +319,18 @@ export default function MandataireLandingPage() {
       <footer className="border-t border-gray-200 bg-[#f4f4f0] py-6 text-center text-sm text-gray-400">
         <Link href="/" className="hover:text-gray-600 transition-colors">
           ← Retour au site HOWNER
+        </Link>
+        <span className="mx-3">·</span>
+        <Link href="/cgu-mandataire" className="hover:text-gray-600 transition-colors">
+          CGU Mandataires
+        </Link>
+        <span className="mx-3">·</span>
+        <Link href="/confidentialite" className="hover:text-gray-600 transition-colors">
+          Politique de confidentialité
+        </Link>
+        <span className="mx-3">·</span>
+        <Link href="/mentions-legales" className="hover:text-gray-600 transition-colors">
+          Mentions légales
         </Link>
         <span className="mx-3">·</span>
         <span>© {new Date().getFullYear()} Affinity House Factory</span>

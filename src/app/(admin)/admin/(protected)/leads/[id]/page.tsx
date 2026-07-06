@@ -14,15 +14,26 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 
-  const [{ data: lead }, { data: mandataires }] = await Promise.all([
+  const [{ data: lead }, { data: mandatairesActifs }, { data: fichesActives }] = await Promise.all([
     supabase.from("leads").select("*").eq("id", id).single(),
     supabase.from("mandataires").select("id, prenom, nom, zone_activite").eq("statut", "actif"),
+    supabase.from("fiches_terrain").select("mandataire_id, statut").in("statut", ["disponible", "compromis"]),
   ]);
 
   if (!lead) notFound();
 
+  // Exclusivité territoriale (ADR-026/CGU) : ≥10 fiches terrain actives publiées
+  const nbActivesParMandataire = new Map<string, number>();
+  for (const f of fichesActives ?? []) {
+    nbActivesParMandataire.set(f.mandataire_id, (nbActivesParMandataire.get(f.mandataire_id) ?? 0) + 1);
+  }
+  const mandataires = (mandatairesActifs ?? []).map((m) => ({
+    ...m,
+    exclusif: (nbActivesParMandataire.get(m.id) ?? 0) >= 10,
+  }));
+
   const mandataireActuel = lead.mandataire_id
-    ? (mandataires?.find((m) => m.id === lead.mandataire_id) ?? null)
+    ? (mandataires.find((m) => m.id === lead.mandataire_id) ?? null)
     : null;
 
   const identifier = `#${lead.lead_number ?? "—"} — ${lead.prenom} ${lead.nom}`;
@@ -129,7 +140,7 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
           <AssignMandataire
             leadId={id}
             currentMandataireId={lead.mandataire_id ?? null}
-            mandataires={mandataires ?? []}
+            mandataires={mandataires}
             leadCommune={lead.commune ?? null}
           />
         </div>

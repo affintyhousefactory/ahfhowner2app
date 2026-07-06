@@ -112,9 +112,19 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
 
   const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
+  const requiresNotes = form.statut !== "disponible" || parseReserves(form.reserves).length > 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (requiresNotes && !form.notes.trim()) {
+      setError(
+        "Notes obligatoires dès que le statut n'est pas \"Disponible\" ou qu'une réserve est renseignée."
+      );
+      return;
+    }
+
     setSaving(true);
 
     const payload: Record<string, unknown> = {
@@ -545,14 +555,27 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-gray-700">Notes</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              🔒 Notes internes <span className="font-normal text-gray-400">— réservé Admin, jamais affiché sur le site public</span>
+              {requiresNotes && <span className="text-red-500"> *</span>}
+            </label>
             <textarea
               rows={4}
+              required={requiresNotes}
               value={form.notes}
               onChange={(e) => set("notes", e.target.value)}
               placeholder="Description générale, atouts du terrain, contexte..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none ${
+                requiresNotes && !form.notes.trim()
+                  ? "border-red-300 focus:border-red-400"
+                  : "border-gray-200 focus:border-[#7469F4]"
+              }`}
             />
+            {requiresNotes && (
+              <p className="mt-1 text-xs text-amber-600">
+                Un statut différent de "Disponible" ou une réserve renseignée nécessite une note explicative pour AHF.
+              </p>
+            )}
           </div>
         </div>
       </section>
