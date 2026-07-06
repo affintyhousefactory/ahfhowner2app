@@ -12,6 +12,7 @@ const NAV = [
   { href: "/admin/affectations", label: "En attente", sub: true },
   { href: "/admin/ged",          label: "GED Dossiers", sub: true },
   { href: "/admin/mandataires",  label: "Mandataires" },
+  { href: "/admin/terrains",     label: "Terrains" },
 ];
 
 export default function AdminProtectedLayout({ children }: { children: React.ReactNode }) {

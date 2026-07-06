@@ -168,7 +168,7 @@ export default function ContratPage() {
         </p>
         <h1 className="mt-1 text-2xl font-semibold text-gray-900">Signer votre contrat</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Complétez et signez votre contrat-cadre de sous-traitance AHF pour activer votre compte.
+          Complétez et signez votre contrat-cadre de partenariat AHF pour activer votre accès et commencer à recevoir des prospects qualifiés.
         </p>
       </div>
 

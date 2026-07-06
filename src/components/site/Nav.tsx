@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { NAV, BRAND, PRODUCT_LIST } from "@/lib/site";
+import { NAV, BRAND, PRODUCT_LIST, SERIE_TOTAL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/shared/lib/cn";
 
@@ -101,23 +101,17 @@ export function Nav() {
               <span className="absolute -bottom-1 left-0 h-px w-0 bg-accent transition-all duration-300 group-hover:w-full" />
             </Link>
           ))}
-          <Link
-            href="/mandataire"
-            className="rounded-full bg-orange-400 px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-orange-500"
-          >
-            Accès Mandataire
-          </Link>
         </div>
 
         <div className="flex items-center gap-4">
           {/* Compteur cumulé 12 + 5 exemplaires */}
           <Link
             href="/configurer"
-            aria-label={`${PRODUCT_LIST.map((p) => `${p.name} ${p.total} exemplaires`).join(", ")}`}
+            aria-label={`Série limitée à ${SERIE_TOTAL} exemplaires au total — Arko One + Arko Max`}
             className="hidden items-center gap-1.5 font-mono text-xs text-muted transition-colors hover:text-ink sm:flex"
           >
             <span className="h-2 w-2 rounded-full bg-accent" />
-            {PRODUCT_LIST.map((p) => p.total).join(" + ")}
+            {SERIE_TOTAL}
             <span className="text-muted/70">exemplaires</span>
           </Link>
           <Button
@@ -268,17 +262,9 @@ export function Nav() {
             </Link>
           ))}
 
-          <Link
-            href="/mandataire"
-            onClick={() => setOpen(false)}
-            className="mt-4 flex w-full items-center justify-center rounded-full bg-orange-400 px-4 py-3 text-base font-bold text-white"
-          >
-            Accès Mandataire
-          </Link>
-
           <div className="mt-4 flex items-center justify-between">
             <span className="font-mono text-xs text-muted">
-              {PRODUCT_LIST.map((p) => p.total).join(" + ")} exemplaires
+              {SERIE_TOTAL} exemplaires
             </span>
             <Button
               href="/configurer"

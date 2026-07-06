@@ -1,22 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CONFIG, PRODUCT_LIST } from "@/lib/site";
+import { loadGooglePlacesScript } from "@/shared/lib/google-places";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/shared/lib/cn";
 import { useConfig, eur } from "./config-store";
 import { CountdownBanner } from "./CountdownBanner";
 import { ParcelleAnalyse } from "@/shared/components/plu/ParcelleAnalyse";
-
-const PACK_TERRAIN = [
-  { id: "essentiel", label: "Essentiel", prix: "4 900 € TTC" },
-  { id: "etendu", label: "Étendu", prix: "7 300 € TTC" },
-  { id: "departement", label: "Département", prix: "11 200 € TTC" },
-] as const;
 
 type View = "exterieur" | "cuisine" | "chambre" | "interieur";
 
@@ -311,9 +306,7 @@ function Devis() {
   const searchParams = useSearchParams();
   const selectedPacks = p.options.filter((o) => c.options.includes(o.id));
 
-  const initPack = searchParams.get("pack") as "essentiel" | "etendu" | "departement" | null;
   const initParcelle = searchParams.get("parcelle") ?? "";
-  const packObj = PACK_TERRAIN.find((pt) => pt.id === c.packTerrain);
   const [cgv, setCgv] = useState(false);
   const [cgvError, setCgvError] = useState(false);
   const [acceptCgv, setAcceptCgv] = useState(false);
@@ -321,10 +314,6 @@ function Devis() {
 
   // Initialiser depuis les query params au premier rendu
   useState(() => {
-    if (initPack) {
-      c.setTerrainMode("pack");
-      c.setPackTerrain(initPack);
-    }
     if (initParcelle) {
       c.setTerrainMode("have");
     }
@@ -400,7 +389,7 @@ function Devis() {
                 : "border-line text-muted hover:border-ink/30 hover:text-ink",
             )}
           >
-            Pack Terrain Affinity
+            Je cherche un terrain
           </button>
         </div>
 
@@ -412,34 +401,12 @@ function Devis() {
 
         {c.terrainMode === "pack" && (
           <>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {PACK_TERRAIN.map((pt) => (
-                <button
-                  key={pt.id}
-                  onClick={() => c.setPackTerrain(pt.id)}
-                  className={cn(
-                    "flex flex-col rounded-xl border px-3 py-2 text-left text-xs transition-all",
-                    c.packTerrain === pt.id
-                      ? "border-accent bg-accent/5"
-                      : "border-line text-muted hover:border-ink/30",
-                  )}
-                >
-                  <span className={cn("font-mono text-[0.6rem] uppercase tracking-wider", c.packTerrain === pt.id ? "text-accent" : "text-muted/60")}>
-                    {pt.label}
-                  </span>
-                  <span className="mt-0.5 font-semibold text-ink">{pt.prix}</span>
-                </button>
-              ))}
-            </div>
             <p className="mt-2 font-mono text-[0.63rem] leading-relaxed text-muted">
-              Livraison auto-calculée si la recherche est fructueuse.{" "}
-              <a href="/rechercheterrain" className="text-accent underline underline-offset-2">
-                En savoir plus sur les packs terrain →
-              </a>
+              L'expert Mandataire Affinity vous re-contacte sous 48h. Terrain sur communes recherchées (Jusqu'à 5).
             </p>
-            {c.packTerrain && (
-              <PackTerrainContactForm pack={c.packTerrain as PackId} />
-            )}
+            <div className="mt-3">
+              <CommunesPicker />
+            </div>
           </>
         )}
       </div>
@@ -450,12 +417,6 @@ function Devis() {
           <span className="text-sm text-canvas/70">Votre Arko</span>
           <span className="font-mono">{eur(c.houseTotal)} TTC</span>
         </div>
-        {c.terrainMode === "pack" && packObj && (
-          <div className="mt-1 flex items-baseline justify-between">
-            <span className="text-sm text-canvas/70">Pack Terrain {packObj.label}</span>
-            <span className="font-mono">{packObj.prix}</span>
-          </div>
-        )}
         {c.terrainMode === "have" && c.delivery != null && (
           <>
             <div className="mt-1 flex items-baseline justify-between">
@@ -549,72 +510,81 @@ function Devis() {
   );
 }
 
-type PackId = "essentiel" | "etendu" | "departement";
+interface Commune { nom: string; cp: string; placeId: string }
 
-const PACK_LABELS: Record<PackId, string> = {
-  essentiel: "1 à 5 villes ciblées",
-  etendu: "Zone de recherche (intercommunalité, bassin de vie…)",
-  departement: "Département complet",
-};
+function CommunesPicker() {
+  const [communes, setCommunes] = useState<Commune[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const acRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY ?? "";
 
-function PackTerrainContactForm({ pack }: { pack: PackId }) {
-  const [villes, setVilles] = useState("");
-  const [zones, setZones] = useState("");
-  const [departement, setDepartement] = useState("");
+  useEffect(() => {
+    if (!apiKey || !inputRef.current || acRef.current) return;
+    loadGooglePlacesScript(apiKey).then(() => {
+      if (!inputRef.current || acRef.current) return;
+      const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ["(cities)"],
+        componentRestrictions: { country: "fr" },
+        fields: ["place_id", "name", "address_components"],
+      });
+      acRef.current = ac;
+      ac.addListener("place_changed", () => {
+        const place = ac.getPlace();
+        if (!place.place_id || !place.name) return;
+        const cpComp = place.address_components?.find((c) =>
+          c.types.includes("postal_code")
+        );
+        const cp = cpComp?.long_name ?? "";
+        setCommunes((prev) => {
+          if (prev.length >= 5 || prev.some((c) => c.placeId === place.place_id!)) return prev;
+          return [...prev, { nom: place.name!, cp, placeId: place.place_id! }];
+        });
+        if (inputRef.current) inputRef.current.value = "";
+      });
+    });
+  }, [apiKey]);
 
-  // Expose les zones au formulaire de réservation via sessionStorage
   useEffect(() => {
     try {
-      sessionStorage.setItem("pack_terrain_zones", JSON.stringify({ pack, villes, zones, departement }));
+      sessionStorage.setItem("pack_terrain_communes", JSON.stringify(communes));
     } catch {}
-  }, [pack, villes, zones, departement]);
+  }, [communes]);
 
-  const inputCls =
-    "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent placeholder:text-muted/50";
+  const remove = (placeId: string) =>
+    setCommunes((prev) => prev.filter((c) => c.placeId !== placeId));
 
   return (
-    <div className="mt-4 space-y-2.5">
-      {pack === "essentiel" && (
-        <div>
-          <p className="mb-1 font-mono text-[0.63rem] text-muted">
-            {PACK_LABELS.essentiel} — séparées par une virgule
-          </p>
-          <textarea
-            rows={2}
-            value={villes}
-            onChange={(e) => setVilles(e.target.value)}
-            placeholder="Ex : Lyon, Bordeaux, Nantes, Rennes, Montpellier"
-            className={cn(inputCls, "resize-none")}
-          />
+    <div className="space-y-2">
+      <p className="font-mono text-[0.63rem] text-muted">Communes souhaitées (jusqu'à 5)</p>
+      {communes.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {communes.map((c) => (
+            <span
+              key={c.placeId}
+              className="flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/5 px-2.5 py-0.5 text-xs text-ink"
+            >
+              {c.nom}{c.cp ? ` (${c.cp})` : ""}
+              <button
+                type="button"
+                onClick={() => remove(c.placeId)}
+                className="leading-none text-muted transition-colors hover:text-red-500"
+                aria-label={`Supprimer ${c.nom}`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
         </div>
       )}
-      {pack === "etendu" && (
-        <div>
-          <p className="mb-1 font-mono text-[0.63rem] text-muted">
-            {PACK_LABELS.etendu}
-          </p>
-          <textarea
-            rows={2}
-            value={zones}
-            onChange={(e) => setZones(e.target.value)}
-            placeholder="Ex : Bretagne, Auvergne-Rhône-Alpes, Grand Est"
-            className={cn(inputCls, "resize-none")}
-          />
-        </div>
-      )}
-      {pack === "departement" && (
-        <div>
-          <p className="mb-1 font-mono text-[0.63rem] text-muted">
-            {PACK_LABELS.departement}
-          </p>
-          <input
-            type="text"
-            value={departement}
-            onChange={(e) => setDepartement(e.target.value)}
-            placeholder="Ex : 69 — Rhône, 33 — Gironde, 44 — Loire-Atlantique"
-            className={inputCls}
-          />
-        </div>
+      {communes.length < 5 ? (
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Saisir une commune..."
+          className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none transition-colors focus:border-accent placeholder:text-muted/50"
+        />
+      ) : (
+        <p className="font-mono text-[0.63rem] text-accent">5 communes — maximum atteint.</p>
       )}
     </div>
   );

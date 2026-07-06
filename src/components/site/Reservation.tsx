@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BRAND, CONFIG, TRANSPORT } from "@/lib/site";
+import { BRAND, CONFIG, SERIE_TOTAL, TRANSPORT } from "@/lib/site";
 import { Gauge } from "@/components/ui/Gauge";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
@@ -27,7 +27,7 @@ export function Reservation() {
   const c = useConfig();
   const { name } = c.active;
   const reserved = c.activeReserved;
-  const total = c.active.total;
+  const total = SERIE_TOTAL;
   const soldOut = reserved >= total;
   const [slot, setSlot] = useState<number | null>(null);
   const [sent, setSent] = useState(false);
@@ -36,7 +36,7 @@ export function Reservation() {
   const [pluConsent, setPluConsent] = useState(false);
   const [optIn, setOptIn] = useState(false);
 
-  const isPack = c.terrainMode === "pack" && !!c.packTerrain;
+  const isPack = c.terrainMode === "pack";
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,34 +53,23 @@ export function Reservation() {
     setSending(true);
     try {
       if (isPack) {
-        // Flux pack terrain → /api/recherche-terrain
-        let villesArr: string[] | undefined;
-        let zonesArr: string[] | undefined;
-        let departementStr: string | undefined;
+        // Flux recherche terrain → /api/recherche-terrain
+        let communes: { nom: string; cp: string }[] = [];
         try {
-          const raw = sessionStorage.getItem("pack_terrain_zones");
-          if (raw) {
-            const d = JSON.parse(raw) as { pack: string; villes: string; zones: string; departement: string };
-            if (d.pack === c.packTerrain) {
-              if (d.villes) villesArr = d.villes.split(",").map((s) => s.trim()).filter(Boolean);
-              if (d.zones) zonesArr = d.zones.split(",").map((s) => s.trim()).filter(Boolean);
-              if (d.departement) departementStr = d.departement.trim();
-            }
-          }
+          const raw = sessionStorage.getItem("pack_terrain_communes");
+          if (raw) communes = (JSON.parse(raw) as { nom: string; cp: string; placeId: string }[]).map(({ nom, cp }) => ({ nom, cp }));
         } catch {}
         await fetch("/api/recherche-terrain", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            nom: `${String(fd.get("prenom") ?? "").trim()} ${String(fd.get("nom") ?? "").trim()}`.trim(),
+            prenom: String(fd.get("prenom") ?? "").trim(),
+            nom: String(fd.get("nom") ?? "").trim(),
             telephone: String(fd.get("tel") ?? ""),
             email: String(fd.get("email") ?? ""),
             modele: c.active.name,
-            pack: c.packTerrain,
+            communes,
             source: "configurateur" as const,
-            villes: villesArr,
-            zones: zonesArr,
-            departement: departementStr,
             accepte_cgv: true,
             optIn,
           }),
@@ -220,9 +209,9 @@ export function Reservation() {
 
                 {isPack && (
                   <div className="mb-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
-                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-accent">Pack Terrain Affinity</p>
+                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-accent">Recherche terrain — mandataire Affinity</p>
                     <p className="mt-1 text-sm text-muted">
-                      Notre Mandataire Affinity recherche le terrain pour vous. Laissez vos coordonnées — on vous recontacte sous 24 h.
+                      Notre expert immobilier recherche un terrain dans vos communes souhaitées. Laissez vos coordonnées — on vous recontacte sous 48 h.
                     </p>
                   </div>
                 )}
@@ -276,10 +265,6 @@ export function Reservation() {
                           {BRAND.deposit.toLocaleString("fr-FR")} €
                         </span>
                         {" "}· Acompte de réservation Arko — remboursable, sans engagement de construction
-                      </li>
-                      <li>
-                        <span className="font-semibold text-ink">1 500 €</span>
-                        {" "}· Acompte Pack Recherche Terrain (optionnel — réservé aux acquéreurs d'un module Arko)
                       </li>
                     </ul>
                     <p className="mt-2">
