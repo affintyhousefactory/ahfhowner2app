@@ -209,6 +209,18 @@ export default function MandataireLandingPage() {
           ← Retour au site HOWNER
         </Link>
         <span className="mx-3">·</span>
+        <Link href="/cgu-mandataire" className="hover:text-gray-600 transition-colors">
+          CGU Mandataires
+        </Link>
+        <span className="mx-3">·</span>
+        <Link href="/confidentialite" className="hover:text-gray-600 transition-colors">
+          Politique de confidentialité
+        </Link>
+        <span className="mx-3">·</span>
+        <Link href="/mentions-legales" className="hover:text-gray-600 transition-colors">
+          Mentions légales
+        </Link>
+        <span className="mx-3">·</span>
         <span>© {new Date().getFullYear()} Affinity House Factory</span>
       </footer>
     </div>

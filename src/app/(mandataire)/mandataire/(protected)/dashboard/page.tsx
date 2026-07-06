@@ -14,10 +14,19 @@ type MandataireProfile = {
 
 type FicheStatut = "disponible" | "compromis" | "retire";
 
+type Dossier = {
+  id: string;
+  statut: string;
+  remuneration_mandataire_ht: number | null;
+};
+
 export default function MandataireDashboard() {
   const [profile, setProfile] = useState<MandataireProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [nbTerrainsActifs, setNbTerrainsActifs] = useState(0);
+  const [dossiersActifs, setDossiersActifs] = useState(0);
+  const [dossiersFinalises, setDossiersFinalises] = useState(0);
+  const [caGenere, setCaGenere] = useState(0);
 
   useEffect(() => {
     const supabase = getSupabaseBrowser();
@@ -45,6 +54,23 @@ export default function MandataireDashboard() {
           const fiches: { statut: FicheStatut }[] = await res.json();
           const actifs = fiches.filter((f) => f.statut === "disponible" || f.statut === "compromis");
           setNbTerrainsActifs(actifs.length);
+        }
+      } catch {
+        // non bloquant
+      }
+
+      // Charger les dossiers (KPIs actifs / finalisés / CA)
+      try {
+        const res = await fetch("/api/mandataire/dossiers", {
+          headers: { authorization: `Bearer ${session.access_token}` },
+        });
+        if (res.ok) {
+          const dossiers: Dossier[] = await res.json();
+          const actifs = dossiers.filter((d) => ["proposé", "accepté", "en_cours"].includes(d.statut));
+          const finalises = dossiers.filter((d) => d.statut === "finalisé");
+          setDossiersActifs(actifs.length);
+          setDossiersFinalises(finalises.length);
+          setCaGenere(finalises.reduce((s, d) => s + (d.remuneration_mandataire_ht ?? 0), 0));
         }
       } catch {
         // non bloquant
@@ -109,9 +135,9 @@ export default function MandataireDashboard() {
 
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <KpiCard label="Dossiers actifs" value="0" sublabel="En cours de traitement" />
-        <KpiCard label="Dossiers finalisés" value="0" sublabel="Acte notarié signé" />
-        <KpiCard label="CA généré" value="0 €" sublabel="Rémunérations versées" />
+        <KpiCard label="Dossiers actifs" value={String(dossiersActifs)} sublabel="En cours de traitement" />
+        <KpiCard label="Dossiers finalisés" value={String(dossiersFinalises)} sublabel="Acte notarié signé" />
+        <KpiCard label="CA généré" value={`${caGenere.toLocaleString("fr-FR")} €`} sublabel="Rémunérations versées" />
       </div>
 
       {/* Card Mes Terrains */}
