@@ -81,6 +81,80 @@ const STATUT_OPTIONS = [
   { value: "vendu", label: "Vendu" },
 ] as const;
 
+function isFilled(value: string | undefined): boolean {
+  return !!value?.trim();
+}
+
+function excerpt(text: string, max = 70): string {
+  const trimmed = text.trim();
+  return trimmed.length > max ? `${trimmed.slice(0, max)}…` : trimmed;
+}
+
+/**
+ * Card repliable : affiche un résumé compact quand tous ses champs ont été
+ * remplis (via l'analyse d'annonce ou manuellement), sinon le contenu complet.
+ * Défini hors du composant parent pour ne jamais remonter les inputs enfants.
+ */
+function CollapsibleCard({
+  title,
+  collapsed,
+  onToggle,
+  summary,
+  children,
+  alwaysVisible,
+}: {
+  title: string;
+  collapsed: boolean;
+  onToggle: () => void;
+  summary: string;
+  children: React.ReactNode;
+  /** Contenu affiché quel que soit l'état (ex : champ jamais extrait, comme une référence interne). */
+  alwaysVisible?: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border border-gray-200 bg-white p-5">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-semibold text-gray-900">{title}</h2>
+        {collapsed && (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="shrink-0 text-xs font-medium text-[#7469F4] hover:underline"
+          >
+            Modifier
+          </button>
+        )}
+      </div>
+      {collapsed ? (
+        <p className="mt-2 flex items-start gap-1.5 text-sm text-gray-600">
+          <span className="mt-0.5 shrink-0 text-green-600">✓</span>
+          <span>{summary}</span>
+        </p>
+      ) : (
+        <div className="mt-4">{children}</div>
+      )}
+      {alwaysVisible && <div className={collapsed ? "mt-3" : "mt-4"}>{alwaysVisible}</div>}
+    </section>
+  );
+}
+
+function InfoTooltip({ text }: { text: string }) {
+  return (
+    <span className="group relative inline-flex">
+      <button
+        type="button"
+        aria-label="En savoir plus"
+        className="flex h-4 w-4 items-center justify-center rounded-full border border-gray-300 text-[10px] font-medium text-gray-500 hover:border-[#7469F4] hover:text-[#7469F4]"
+      >
+        i
+      </button>
+      <span className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-64 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs leading-relaxed text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+        {text}
+      </span>
+    </span>
+  );
+}
+
 export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: TerrainFormProps) {
   const isEdit = !!ficheId;
 
@@ -117,6 +191,15 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
   const [analyzeError, setAnalyzeError] = useState("");
   const [analyzeInfo, setAnalyzeInfo] = useState("");
   const [pendingImportImages, setPendingImportImages] = useState<string[]>([]);
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+
+  const toggleSection = (id: string) =>
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -248,26 +331,36 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
       assainissement: "assainissement",
     };
 
+    // Calculé à partir de `form` (valeur courante au moment du clic) plutôt que via le
+    // callback fonctionnel de setForm, dont l'exécution n'est pas garantie synchrone :
+    // on a besoin du résultat immédiatement pour le message et le calcul des replis.
     let filledCount = 0;
     const stillEmpty: string[] = [];
+    const next = { ...form };
 
-    setForm((f) => {
-      const next = { ...f };
-      for (const [apiKey, formKey] of Object.entries(fieldMap)) {
-        const value = fields[apiKey];
-        const isEmpty = !(next as Record<string, string>)[formKey]?.toString().trim();
-        if (value != null && isEmpty) {
-          (next as Record<string, string>)[formKey] = String(value);
-          filledCount++;
-        } else if (isEmpty) {
-          stillEmpty.push(formKey);
-        }
+    for (const [apiKey, formKey] of Object.entries(fieldMap)) {
+      const value = fields[apiKey];
+      const isEmpty = !(next as Record<string, string>)[formKey]?.toString().trim();
+      if (value != null && isEmpty) {
+        (next as Record<string, string>)[formKey] = String(value);
+        filledCount++;
+      } else if (isEmpty) {
+        stillEmpty.push(formKey);
       }
-      if (fields.description_libre && !next.notes.trim()) {
-        next.notes = String(fields.description_libre);
-      }
-      return next;
-    });
+    }
+    if (fields.description_libre && !next.notes.trim()) {
+      next.notes = String(fields.description_libre);
+    }
+
+    setForm(next);
+
+    const newCollapsed = new Set<string>();
+    // Secteur est optionnel : ne doit pas empêcher le repli de Localisation.
+    if (isFilled(next.commune)) newCollapsed.add("localisation");
+    if (isFilled(next.prix) && isFilled(next.surface)) newCollapsed.add("prix_surface");
+    if (isFilled(next.zonage) && isFilled(next.urbanisme_detail)) newCollapsed.add("urbanisme");
+    if (isFilled(next.reseaux) && isFilled(next.assainissement)) newCollapsed.add("reseaux");
+    setCollapsedSections(newCollapsed);
 
     setPendingImportImages(images ?? []);
 
@@ -364,9 +457,12 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
     <form onSubmit={handleSubmit} className="space-y-6">
       {adminBandeau}
 
-      {/* Section 0 — Import depuis une annonce existante */}
+      {/* Import depuis une annonce existante */}
       <section className="rounded-xl border border-gray-200 bg-white p-5">
-        <h2 className="mb-4 font-semibold text-gray-900">Importer depuis une annonce existante</h2>
+        <div className="mb-4 flex items-center gap-1.5">
+          <h2 className="font-semibold text-gray-900">Importer depuis une annonce existante</h2>
+          <InfoTooltip text="Collez le lien de votre annonce déjà publiée sur une autre plateforme (iad, SeLoger...) : les informations disponibles seront extraites automatiquement pour pré-remplir cette fiche, et les photos de l'annonce seront importées dans Howner après l'enregistrement." />
+        </div>
         <div className="flex gap-2">
           <input
             type="url"
@@ -388,9 +484,25 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
         {analyzeInfo && <p className="mt-2 text-xs text-green-700">{analyzeInfo}</p>}
       </section>
 
-      {/* Section 1 — Localisation */}
-      <section className="rounded-xl border border-gray-200 bg-white p-5">
-        <h2 className="mb-4 font-semibold text-gray-900">Localisation</h2>
+      {/* Localisation — commune/secteur extractibles (repliables), référence interne toujours visible */}
+      <CollapsibleCard
+        title="Localisation"
+        collapsed={collapsedSections.has("localisation")}
+        onToggle={() => toggleSection("localisation")}
+        summary={form.commune ? `${form.commune}${form.secteur ? " — " + form.secteur : ""}` : "Commune non renseignée"}
+        alwaysVisible={
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Référence interne</label>
+            <input
+              type="text"
+              value={form.reference_interne}
+              onChange={(e) => set("reference_interne", e.target.value)}
+              placeholder="Ex : T-2024-001"
+              className="w-full max-w-xs rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+            />
+          </div>
+        }
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -415,133 +527,134 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
             />
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Référence interne</label>
-            <input
-              type="text"
-              value={form.reference_interne}
-              onChange={(e) => set("reference_interne", e.target.value)}
-              placeholder="Ex : T-2024-001"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            />
-          </div>
         </div>
-      </section>
+      </CollapsibleCard>
 
-      {/* Section 2 — Prix & Surface */}
-      <section className="rounded-xl border border-gray-200 bg-white p-5">
-        <h2 className="mb-4 font-semibold text-gray-900">Prix & Surface</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Prix (€)</label>
-            <input
-              type="number"
-              min="0"
-              value={form.prix}
-              onChange={(e) => set("prix", e.target.value)}
-              placeholder="Ex : 85000"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            />
+      {/* Champs extractibles depuis une annonce : regroupés en grille, repliés une fois complétés */}
+      <div className="grid gap-6 sm:grid-cols-2">
+        <CollapsibleCard
+          title="Prix & Surface"
+          collapsed={collapsedSections.has("prix_surface")}
+          onToggle={() => toggleSection("prix_surface")}
+          summary={`${form.prix ? `${form.prix} €` : "Prix non renseigné"} · ${form.surface ? `${form.surface} m²` : "Surface non renseignée"}`}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Prix (€)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.prix}
+                onChange={(e) => set("prix", e.target.value)}
+                placeholder="Ex : 85000"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Surface (m²)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.surface}
+                onChange={(e) => set("surface", e.target.value)}
+                placeholder="Ex : 600"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              />
+            </div>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Surface (m²)</label>
-            <input
-              type="number"
-              min="0"
-              value={form.surface}
-              onChange={(e) => set("surface", e.target.value)}
-              placeholder="Ex : 600"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            />
-          </div>
-        </div>
-      </section>
+        </CollapsibleCard>
 
-      {/* Section 3 — Urbanisme */}
-      <section className="rounded-xl border border-gray-200 bg-white p-5">
-        <h2 className="mb-4 font-semibold text-gray-900">Urbanisme</h2>
-        <div className="grid gap-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Zonage</label>
-            <select
-              value={form.zonage}
-              onChange={(e) => set("zonage", e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            >
-              <option value="">— Sélectionner —</option>
-              {ZONAGE_OPTIONS.map((z) => (
-                <option key={z.value} value={z.value}>{z.label}</option>
-              ))}
-            </select>
+        <CollapsibleCard
+          title="Urbanisme"
+          collapsed={collapsedSections.has("urbanisme")}
+          onToggle={() => toggleSection("urbanisme")}
+          summary={`${ZONAGE_OPTIONS.find((z) => z.value === form.zonage)?.label ?? "Zonage non renseigné"}${form.urbanisme_detail ? " — " + excerpt(form.urbanisme_detail) : ""}`}
+        >
+          <div className="grid gap-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Zonage</label>
+              <select
+                value={form.zonage}
+                onChange={(e) => set("zonage", e.target.value)}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              >
+                <option value="">— Sélectionner —</option>
+                {ZONAGE_OPTIONS.map((z) => (
+                  <option key={z.value} value={z.value}>{z.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Détail urbanisme</label>
+              <textarea
+                rows={3}
+                value={form.urbanisme_detail}
+                onChange={(e) => set("urbanisme_detail", e.target.value)}
+                placeholder="Règles PLU, CES, hauteur max, reculs..."
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              />
+            </div>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Détail urbanisme</label>
-            <textarea
-              rows={3}
-              value={form.urbanisme_detail}
-              onChange={(e) => set("urbanisme_detail", e.target.value)}
-              placeholder="Règles PLU, CES, hauteur max, reculs..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            />
-          </div>
-        </div>
-      </section>
+        </CollapsibleCard>
 
-      {/* Section 4 — Accès & Terrain */}
-      <section className="rounded-xl border border-gray-200 bg-white p-5">
-        <h2 className="mb-4 font-semibold text-gray-900">Accès & Terrain</h2>
-        <div className="grid gap-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Accès grue</label>
-            <textarea
-              rows={2}
-              value={form.acces_grue}
-              onChange={(e) => set("acces_grue", e.target.value)}
-              placeholder="Largeur voie d'accès, portique, contraintes..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            />
+        <CollapsibleCard
+          title="Réseaux"
+          collapsed={collapsedSections.has("reseaux")}
+          onToggle={() => toggleSection("reseaux")}
+          summary={excerpt([form.reseaux, form.assainissement].filter(Boolean).join(" — ") || "Non renseigné", 100)}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Réseaux (eau, électricité…)</label>
+              <textarea
+                rows={3}
+                value={form.reseaux}
+                onChange={(e) => set("reseaux", e.target.value)}
+                placeholder="Eau potable en limite, EDF en façade..."
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Assainissement</label>
+              <textarea
+                rows={3}
+                value={form.assainissement}
+                onChange={(e) => set("assainissement", e.target.value)}
+                placeholder="Tout-à-l'égout, fosse septique, étude à prévoir..."
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              />
+            </div>
           </div>
-          <div className="sm:w-48">
-            <label className="mb-1 block text-sm font-medium text-gray-700">Pente (%)</label>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              value={form.pente_pct}
-              onChange={(e) => set("pente_pct", e.target.value)}
-              placeholder="Ex : 12"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            />
-          </div>
-        </div>
-      </section>
+        </CollapsibleCard>
 
-      {/* Section 5 — Réseaux */}
-      <section className="rounded-xl border border-gray-200 bg-white p-5">
-        <h2 className="mb-4 font-semibold text-gray-900">Réseaux</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Réseaux (eau, électricité…)</label>
-            <textarea
-              rows={3}
-              value={form.reseaux}
-              onChange={(e) => set("reseaux", e.target.value)}
-              placeholder="Eau potable en limite, EDF en façade..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            />
+        <section className="rounded-xl border border-gray-200 bg-white p-5">
+          <h2 className="mb-4 font-semibold text-gray-900">Accès & Terrain</h2>
+          <div className="grid gap-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Accès grue</label>
+              <textarea
+                rows={2}
+                value={form.acces_grue}
+                onChange={(e) => set("acces_grue", e.target.value)}
+                placeholder="Largeur voie d'accès, portique, contraintes..."
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              />
+            </div>
+            <div className="sm:w-48">
+              <label className="mb-1 block text-sm font-medium text-gray-700">Pente (%)</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={form.pente_pct}
+                onChange={(e) => set("pente_pct", e.target.value)}
+                placeholder="Ex : 12"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              />
+            </div>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Assainissement</label>
-            <textarea
-              rows={3}
-              value={form.assainissement}
-              onChange={(e) => set("assainissement", e.target.value)}
-              placeholder="Tout-à-l'égout, fosse septique, étude à prévoir..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
-            />
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Section 6 — Compatibilité ARKO */}
       <section className="rounded-xl border border-gray-200 bg-white p-5">
