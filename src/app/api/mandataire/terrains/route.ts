@@ -58,6 +58,8 @@ export async function POST(req: NextRequest) {
     reserves,
     notes,
     photos,
+    source_url,
+    source_reference,
   } = body;
 
   if (!commune) return NextResponse.json({ error: "commune est requis" }, { status: 400 });
@@ -93,6 +95,8 @@ export async function POST(req: NextRequest) {
       reserves: reserves ?? [],
       notes,
       photos: photos ?? [],
+      source_url: source_url ?? null,
+      source_reference: source_reference ?? null,
     })
     .select()
     .single();

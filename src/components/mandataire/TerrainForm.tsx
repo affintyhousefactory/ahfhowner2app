@@ -26,6 +26,8 @@ export type FicheTerrain = {
   reserves: string[];
   notes: string | null;
   photos: { url: string; nom: string }[];
+  source_url?: string | null;
+  source_reference?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -110,6 +112,12 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [sourceUrl, setSourceUrl] = useState(initialData?.source_url ?? "");
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState("");
+  const [analyzeInfo, setAnalyzeInfo] = useState("");
+  const [pendingImportImages, setPendingImportImages] = useState<string[]>([]);
+
   const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   const requiresNotes = form.statut !== "disponible" || parseReserves(form.reserves).length > 0;
@@ -137,6 +145,7 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
       compatibilite_arko: form.compatibilite_arko || null,
       modele_arko: form.modele_arko || null,
       zonage: form.zonage || null,
+      source_url: sourceUrl || null,
     };
 
     // Re-soumettre si la fiche avait été refusée
@@ -158,14 +167,115 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
     });
 
     const data = await res.json();
-    setSaving(false);
 
     if (!res.ok) {
+      setSaving(false);
       setError(data.error ?? "Erreur lors de l'enregistrement");
       return;
     }
 
-    onSaved(data as FicheTerrain);
+    const savedFiche = data as FicheTerrain;
+
+    if (pendingImportImages.length > 0) {
+      const importedPhotos: { url: string; nom: string }[] = [];
+      let failedCount = 0;
+
+      for (const imageUrl of pendingImportImages) {
+        const r = await fetch(`/api/mandataire/terrains/${savedFiche.id}/photos/import-url`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${mandataireToken}`,
+          },
+          body: JSON.stringify({ imageUrl }),
+        });
+        if (r.ok) {
+          importedPhotos.push(await r.json());
+        } else {
+          failedCount++;
+        }
+      }
+
+      setPendingImportImages([]);
+      if (importedPhotos.length > 0) {
+        savedFiche.photos = [...(savedFiche.photos ?? []), ...importedPhotos];
+        setPhotos(savedFiche.photos);
+      }
+      if (failedCount > 0) {
+        setError(`${failedCount} photo(s) n'ont pas pu être importées automatiquement.`);
+      }
+    }
+
+    setSaving(false);
+    onSaved(savedFiche);
+  };
+
+  const handleAnalyze = async () => {
+    setAnalyzing(true);
+    setAnalyzeError("");
+    setAnalyzeInfo("");
+
+    const res = await fetch("/api/mandataire/terrains/scrape-annonce", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${mandataireToken}`,
+      },
+      body: JSON.stringify({ url: sourceUrl }),
+    });
+    const data = await res.json();
+    setAnalyzing(false);
+
+    if (!res.ok) {
+      setAnalyzeError(data.error ?? "Erreur lors de l'analyse de la page");
+      return;
+    }
+
+    const { fields, images, warnings } = data as {
+      fields: Record<string, unknown>;
+      images: string[];
+      warnings: string[];
+    };
+
+    const fieldMap: Record<string, string> = {
+      commune: "commune",
+      secteur: "secteur",
+      prix: "prix",
+      surface: "surface",
+      zonage: "zonage",
+      urbanisme_detail: "urbanisme_detail",
+      reseaux: "reseaux",
+      assainissement: "assainissement",
+    };
+
+    let filledCount = 0;
+    const stillEmpty: string[] = [];
+
+    setForm((f) => {
+      const next = { ...f };
+      for (const [apiKey, formKey] of Object.entries(fieldMap)) {
+        const value = fields[apiKey];
+        const isEmpty = !(next as Record<string, string>)[formKey]?.toString().trim();
+        if (value != null && isEmpty) {
+          (next as Record<string, string>)[formKey] = String(value);
+          filledCount++;
+        } else if (isEmpty) {
+          stillEmpty.push(formKey);
+        }
+      }
+      if (fields.description_libre && !next.notes.trim()) {
+        next.notes = String(fields.description_libre);
+      }
+      return next;
+    });
+
+    setPendingImportImages(images ?? []);
+
+    const msgParts = [`${filledCount} champ(s) pré-rempli(s) depuis l'annonce.`];
+    if (stillEmpty.length) msgParts.push(`À compléter manuellement : ${stillEmpty.join(", ")}.`);
+    if (images?.length) msgParts.push(`${images.length} photo(s) détectée(s), seront importées après l'enregistrement.`);
+    if (warnings?.length) msgParts.push(...warnings);
+    setAnalyzeInfo(msgParts.join(" "));
   };
 
   const handleFileUpload = async (files: FileList | null) => {
@@ -253,6 +363,31 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {adminBandeau}
+
+      {/* Section 0 — Import depuis une annonce existante */}
+      <section className="rounded-xl border border-gray-200 bg-white p-5">
+        <h2 className="mb-4 font-semibold text-gray-900">Importer depuis une annonce existante</h2>
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={sourceUrl}
+            onChange={(e) => setSourceUrl(e.target.value)}
+            placeholder="https://www.iadfrance.fr/annonce/..."
+            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={handleAnalyze}
+            disabled={analyzing || !sourceUrl.trim()}
+            className="rounded-lg border border-dashed border-[#7469F4] px-4 py-2 text-sm font-medium text-[#7469F4] hover:bg-[#7469F4]/5 disabled:opacity-50"
+          >
+            {analyzing ? "Analyse en cours…" : "Analyser la page"}
+          </button>
+        </div>
+        {analyzeError && <p className="mt-2 text-xs text-red-600">{analyzeError}</p>}
+        {analyzeInfo && <p className="mt-2 text-xs text-green-700">{analyzeInfo}</p>}
+      </section>
+
       {/* Section 1 — Localisation */}
       <section className="rounded-xl border border-gray-200 bg-white p-5">
         <h2 className="mb-4 font-semibold text-gray-900">Localisation</h2>

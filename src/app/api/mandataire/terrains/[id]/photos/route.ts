@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { uploadFichePhoto, appendFichePhoto, type FichePhoto } from "@/shared/lib/terrain-photos";
 
 async function getMandataireAndFiche(req: NextRequest, ficheId: string) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "") ?? "";
@@ -39,38 +40,27 @@ export async function POST(
   const file = formData.get("file") as File | null;
   if (!file) return NextResponse.json({ error: "Aucun fichier reçu" }, { status: 400 });
 
-  const timestamp = Date.now();
-  const safeName = file.name.replace(/[^a-z0-9.\-_]/gi, "_");
-  const uploadPath = `terrains/${mandataire.id}/${id}/${timestamp}-${safeName}`;
-
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
 
-  const { error: uploadErr } = await supabase.storage
-    .from("mandataires-documents")
-    .upload(uploadPath, buffer, { contentType: file.type, upsert: false });
+  try {
+    const photo = await uploadFichePhoto({
+      supabase,
+      mandataireId: mandataire.id,
+      ficheId: id,
+      fileName: file.name,
+      contentType: file.type,
+      buffer,
+    });
 
-  if (uploadErr) return NextResponse.json({ error: uploadErr.message }, { status: 500 });
+    const currentPhotos: FichePhoto[] = Array.isArray(fiche.photos) ? fiche.photos : [];
+    await appendFichePhoto({ supabase, ficheId: id, currentPhotos, photo });
 
-  const { data: urlData } = supabase.storage
-    .from("mandataires-documents")
-    .getPublicUrl(uploadPath);
-
-  const url = urlData?.publicUrl ?? "";
-  const nom = file.name;
-
-  // Ajouter l'URL dans photos JSONB
-  const currentPhotos: { url: string; nom: string }[] = Array.isArray(fiche.photos) ? fiche.photos : [];
-  const updatedPhotos = [...currentPhotos, { url, nom }];
-
-  const { error: dbErr } = await supabase
-    .from("fiches_terrain")
-    .update({ photos: updatedPhotos, updated_at: new Date().toISOString() })
-    .eq("id", id);
-
-  if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 });
-
-  return NextResponse.json({ url, nom }, { status: 201 });
+    return NextResponse.json(photo, { status: 201 });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Erreur upload photo";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 export async function DELETE(

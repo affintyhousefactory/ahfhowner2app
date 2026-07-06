@@ -57,6 +57,8 @@ export async function PATCH(
     reserves,
     notes,
     photos,
+    source_url,
+    source_reference,
   } = body;
 
   const finalStatut: string = statut !== undefined ? statut : fiche.statut;
@@ -88,6 +90,8 @@ export async function PATCH(
   if (reserves !== undefined) updates.reserves = reserves;
   if (notes !== undefined) updates.notes = notes;
   if (photos !== undefined) updates.photos = photos;
+  if (source_url !== undefined) updates.source_url = source_url;
+  if (source_reference !== undefined) updates.source_reference = source_reference;
 
   const { data, error: dbErr } = await supabase
     .from("fiches_terrain")
