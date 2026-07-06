@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import TerrainDetailModal, { type TerrainPublic } from "./TerrainDetailModal";
 
 const COMPAT_LABELS: Record<string, { label: string; color: string }> = {
@@ -21,8 +21,61 @@ const STATUT_BADGES: Record<string, { label: string; color: string }> = {
   retire:    { label: "Retiré",         color: "bg-gray-100 text-gray-500" },
 };
 
+const STATUT_FILTER_OPTIONS = [
+  { value: "",           label: "Tous les statuts" },
+  { value: "disponible", label: "Disponible" },
+  { value: "compromis",  label: "Sous compromis" },
+  { value: "vendu",      label: "Vendu" },
+  { value: "retire",     label: "Retiré" },
+] as const;
+
+function effectiveStatut(t: TerrainPublic): string {
+  return t.afficher_statut_mandataire && t.statut && t.statut !== "disponible"
+    ? t.statut
+    : "disponible";
+}
+
 export default function TerrainsGrid({ terrains }: { terrains: TerrainPublic[] }) {
   const [selected, setSelected] = useState<TerrainPublic | null>(null);
+  const [filtreStatut, setFiltreStatut] = useState("");
+  const [filtreCommune, setFiltreCommune] = useState("");
+  const [filtrePrixMin, setFiltrePrixMin] = useState("");
+  const [filtrePrixMax, setFiltrePrixMax] = useState("");
+  const [tri, setTri] = useState<"recent" | "ancien">("recent");
+
+  const communes = useMemo(
+    () => Array.from(new Set(terrains.map((t) => t.commune))).sort((a, b) => a.localeCompare(b)),
+    [terrains],
+  );
+
+  const filtered = useMemo(() => {
+    const prixMin = filtrePrixMin ? Number(filtrePrixMin) : null;
+    const prixMax = filtrePrixMax ? Number(filtrePrixMax) : null;
+
+    const list = terrains.filter((t) => {
+      if (filtreStatut && effectiveStatut(t) !== filtreStatut) return false;
+      if (filtreCommune && t.commune !== filtreCommune) return false;
+      if (prixMin !== null && (t.prix ?? 0) < prixMin) return false;
+      if (prixMax !== null && (t.prix ?? Infinity) > prixMax) return false;
+      return true;
+    });
+
+    return list.sort((a, b) => {
+      const da = a.publie_at ? new Date(a.publie_at).getTime() : 0;
+      const db = b.publie_at ? new Date(b.publie_at).getTime() : 0;
+      return tri === "recent" ? db - da : da - db;
+    });
+  }, [terrains, filtreStatut, filtreCommune, filtrePrixMin, filtrePrixMax, tri]);
+
+  const resetFiltres = () => {
+    setFiltreStatut("");
+    setFiltreCommune("");
+    setFiltrePrixMin("");
+    setFiltrePrixMax("");
+    setTri("recent");
+  };
+
+  const filtresActifs = !!(filtreStatut || filtreCommune || filtrePrixMin || filtrePrixMax || tri !== "recent");
 
   if (terrains.length === 0) {
     return (
@@ -34,8 +87,94 @@ export default function TerrainsGrid({ terrains }: { terrains: TerrainPublic[] }
 
   return (
     <>
+      {/* Filtres */}
+      <div className="mb-8 flex flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-4">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Statut</label>
+          <select
+            value={filtreStatut}
+            onChange={(e) => setFiltreStatut(e.target.value)}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+          >
+            {STATUT_FILTER_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Commune</label>
+          <select
+            value={filtreCommune}
+            onChange={(e) => setFiltreCommune(e.target.value)}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+          >
+            <option value="">Toutes les communes</option>
+            {communes.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Prix min (€)</label>
+          <input
+            type="number"
+            min="0"
+            value={filtrePrixMin}
+            onChange={(e) => setFiltrePrixMin(e.target.value)}
+            placeholder="0"
+            className="w-28 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Prix max (€)</label>
+          <input
+            type="number"
+            min="0"
+            value={filtrePrixMax}
+            onChange={(e) => setFiltrePrixMax(e.target.value)}
+            placeholder="Illimité"
+            className="w-28 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Date de publication</label>
+          <select
+            value={tri}
+            onChange={(e) => setTri(e.target.value as "recent" | "ancien")}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+          >
+            <option value="recent">Plus récents</option>
+            <option value="ancien">Plus anciens</option>
+          </select>
+        </div>
+
+        {filtresActifs && (
+          <button
+            type="button"
+            onClick={resetFiltres}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:border-gray-300 hover:text-gray-700 transition-colors"
+          >
+            Réinitialiser
+          </button>
+        )}
+
+        <p className="ml-auto text-sm text-gray-400">
+          {filtered.length} terrain{filtered.length > 1 ? "s" : ""}
+        </p>
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="py-20 text-center">
+          <p className="text-lg text-gray-500">Aucun terrain ne correspond à ces critères.</p>
+        </div>
+      )}
+
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {terrains.map((terrain) => {
+        {filtered.map((terrain) => {
           const mainPhoto = terrain.photos?.[0];
           const compat = terrain.compatibilite_arko ? COMPAT_LABELS[terrain.compatibilite_arko] : null;
           const desc = terrain.description_publique;

@@ -8,6 +8,7 @@ interface Mandataire {
   prenom: string;
   nom: string;
   zone_activite: string[] | null;
+  exclusif?: boolean;
 }
 
 interface AssignMandataireProps {
@@ -24,12 +25,21 @@ export default function AssignMandataire({ leadId, currentMandataireId, mandatai
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Trier : mandataires avec zones matchant la commune en premier
+  // Trier : zone matchant le lieu PLU de la parcelle en premier, puis mandataire exclusif en premier
+  const zoneMatch = (m: Mandataire) =>
+    !!leadCommune && !!m.zone_activite?.some(
+      (z) => leadCommune.toLowerCase().includes(z.toLowerCase()) || z.toLowerCase().includes(leadCommune.toLowerCase())
+    );
+
   const sorted = [...mandataires].sort((a, b) => {
-    const aMatch = leadCommune && a.zone_activite?.some((z) => leadCommune.toLowerCase().includes(z.toLowerCase()) || z.toLowerCase().includes(leadCommune.toLowerCase()));
-    const bMatch = leadCommune && b.zone_activite?.some((z) => leadCommune.toLowerCase().includes(z.toLowerCase()) || z.toLowerCase().includes(leadCommune.toLowerCase()));
-    if (aMatch && !bMatch) return -1;
-    if (!aMatch && bMatch) return 1;
+    const aMatch = zoneMatch(a);
+    const bMatch = zoneMatch(b);
+    if (aMatch !== bMatch) return aMatch ? -1 : 1;
+
+    const aExcl = !!a.exclusif;
+    const bExcl = !!b.exclusif;
+    if (aExcl !== bExcl) return aExcl ? -1 : 1;
+
     return 0;
   });
 
@@ -66,9 +76,13 @@ export default function AssignMandataire({ leadId, currentMandataireId, mandatai
         <option value="">— Choisir un mandataire —</option>
         {sorted.map((m) => {
           const zones = m.zone_activite?.slice(0, 2).join(", ");
+          const tags = [
+            zoneMatch(m) ? "zone ✓" : null,
+            m.exclusif ? "exclusif" : null,
+          ].filter(Boolean).join(" · ");
           return (
             <option key={m.id} value={m.id}>
-              {m.prenom} {m.nom}{zones ? ` · ${zones}` : ""}
+              {m.prenom} {m.nom}{zones ? ` · ${zones}` : ""}{tags ? ` — ${tags}` : ""}
             </option>
           );
         })}

@@ -18,7 +18,7 @@ async function getMandataireAndFiche(req: NextRequest, ficheId: string) {
   // Vérifier que la fiche appartient au mandataire
   const { data: fiche } = await supabase
     .from("fiches_terrain")
-    .select("id, mandataire_id")
+    .select("id, mandataire_id, statut, reserves, notes")
     .eq("id", ficheId)
     .eq("mandataire_id", mandataire.id)
     .single();
@@ -58,6 +58,16 @@ export async function PATCH(
     notes,
     photos,
   } = body;
+
+  const finalStatut: string = statut !== undefined ? statut : fiche.statut;
+  const finalReserves: string[] = reserves !== undefined ? reserves : (fiche.reserves ?? []);
+  const finalNotes: string | null = notes !== undefined ? notes : fiche.notes;
+  if ((finalStatut !== "disponible" || finalReserves.length > 0) && !finalNotes?.trim()) {
+    return NextResponse.json(
+      { error: "Notes obligatoires dès que le statut n'est pas \"disponible\" ou qu'une réserve est renseignée." },
+      { status: 400 }
+    );
+  }
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (reference_interne !== undefined) updates.reference_interne = reference_interne;

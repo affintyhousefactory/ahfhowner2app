@@ -57,10 +57,31 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f4f0]">
+    <div className="flex min-h-screen flex-col bg-[#f4f4f0]">
       <MandataireNav />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+      <MandataireFooter />
     </div>
+  );
+}
+
+function MandataireFooter() {
+  return (
+    <footer className="border-t border-gray-200 bg-white py-6 text-center text-sm text-gray-400">
+      <Link href="/cgu-mandataire" className="hover:text-gray-600 transition-colors">
+        CGU Mandataires
+      </Link>
+      <span className="mx-3">·</span>
+      <Link href="/confidentialite" className="hover:text-gray-600 transition-colors">
+        Politique de confidentialité
+      </Link>
+      <span className="mx-3">·</span>
+      <Link href="/mentions-legales" className="hover:text-gray-600 transition-colors">
+        Mentions légales
+      </Link>
+      <span className="mx-3">·</span>
+      <span>© {new Date().getFullYear()} Affinity House Factory</span>
+    </footer>
   );
 }
 
