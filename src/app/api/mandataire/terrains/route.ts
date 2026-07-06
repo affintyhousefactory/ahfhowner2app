@@ -62,6 +62,15 @@ export async function POST(req: NextRequest) {
 
   if (!commune) return NextResponse.json({ error: "commune est requis" }, { status: 400 });
 
+  const finalStatut = statut ?? "disponible";
+  const finalReserves: string[] = reserves ?? [];
+  if ((finalStatut !== "disponible" || finalReserves.length > 0) && !notes?.trim()) {
+    return NextResponse.json(
+      { error: "Notes obligatoires dès que le statut n'est pas \"disponible\" ou qu'une réserve est renseignée." },
+      { status: 400 }
+    );
+  }
+
   const { data, error: dbErr } = await supabase
     .from("fiches_terrain")
     .insert({
