@@ -10,11 +10,13 @@ import {
 } from "react";
 import {
   PRODUCTS,
+  SERIE_TOTAL,
   getProduct,
   type ProductKey,
   type Product,
 } from "@/lib/site";
 
+// Pool commun — les deux clés retournent le même compteur partagé (SERIE_TOTAL = 12)
 type ReservedMap = Record<ProductKey, number>;
 
 type Ctx = {
@@ -47,7 +49,7 @@ type Ctx = {
   houseTotal: number;
   delivery: number | null;
   grandTotal: number;
-  // réservations (Phase 1 démo, sessionStorage — Supabase Realtime en Phase 4, ADR-009)
+  // réservations — pool partagé 12 ex. (Phase 1 démo, sessionStorage — Supabase Phase 4, ADR-009)
   reservedByProduct: ReservedMap;
   remainingByProduct: ReservedMap;
   activeReserved: number;
@@ -59,10 +61,8 @@ const ConfigContext = createContext<Ctx | null>(null);
 
 const STORAGE_KEY = "arko-reserved";
 
-const initialReserved: ReservedMap = {
-  one: PRODUCTS.one.reserved,
-  max: PRODUCTS.max.reserved,
-};
+// Valeur initiale démo Phase 1 — sera remplacée par Supabase Realtime (ADR-009)
+const DEMO_RESERVED = PRODUCTS.one.reserved + PRODUCTS.max.reserved; // = 3
 
 export function ConfigProvider({
   children,
@@ -82,18 +82,17 @@ export function ConfigProvider({
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
   const [terrainMode, setTerrainMode] = useState<"have" | "pack" | null>(null);
   const [packTerrain, setPackTerrain] = useState<string | null>(null);
-  const [reservedByProduct, setReservedByProduct] =
-    useState<ReservedMap>(initialReserved);
+  const [totalReserved, setTotalReserved] = useState<number>(DEMO_RESERVED);
 
   // Hydratation sessionStorage côté client (SSR-safe)
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY);
       if (!raw) return;
-      const parsed = JSON.parse(raw) as Partial<ReservedMap>;
-      const one = clamp(parsed.one ?? initialReserved.one, 0, PRODUCTS.one.total);
-      const max = clamp(parsed.max ?? initialReserved.max, 0, PRODUCTS.max.total);
-      setReservedByProduct({ one, max });
+      // Support ancien format { one, max } et nouveau format { total }
+      const parsed = JSON.parse(raw) as { total?: number; one?: number; max?: number };
+      const n = parsed.total ?? ((parsed.one ?? 0) + (parsed.max ?? 0));
+      setTotalReserved(clamp(n, 0, SERIE_TOTAL));
     } catch {
       /* noop */
     }
@@ -104,12 +103,11 @@ export function ConfigProvider({
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
 
-  const incrementReserved = useCallback((k: ProductKey) => {
-    setReservedByProduct((prev) => {
-      const total = PRODUCTS[k].total;
-      const next = { ...prev, [k]: Math.min(prev[k] + 1, total) };
+  const incrementReserved = useCallback((_k: ProductKey) => {
+    setTotalReserved((prev) => {
+      const next = Math.min(prev + 1, SERIE_TOTAL);
       try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ total: next }));
       } catch {
         /* noop */
       }
@@ -131,12 +129,12 @@ export function ConfigProvider({
         ? Math.round(p.delivery.grutage + distanceKm * p.delivery.perKm)
         : null;
     const grandTotal = houseTotal + (delivery ?? 0);
-    const remainingByProduct: ReservedMap = {
-      one: Math.max(0, PRODUCTS.one.total - reservedByProduct.one),
-      max: Math.max(0, PRODUCTS.max.total - reservedByProduct.max),
-    };
-    const activeReserved = reservedByProduct[product];
-    const activeRemaining = remainingByProduct[product];
+    // Pool commun : les deux clés retournent le même compteur partagé
+    const reservedByProduct: ReservedMap = { one: totalReserved, max: totalReserved };
+    const remaining = Math.max(0, SERIE_TOTAL - totalReserved);
+    const remainingByProduct: ReservedMap = { one: remaining, max: remaining };
+    const activeReserved = totalReserved;
+    const activeRemaining = remaining;
     return {
       product, setProduct, active,
       cladding, setCladding, facade, setFacade, bar, setBar,
@@ -150,7 +148,7 @@ export function ConfigProvider({
     };
   }, [
     product, cladding, facade, bar, bedroom, interior, terrasseM2,
-    options, distanceKm, terrainMode, packTerrain, reservedByProduct, incrementReserved,
+    options, distanceKm, terrainMode, packTerrain, totalReserved, incrementReserved,
   ]);
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;

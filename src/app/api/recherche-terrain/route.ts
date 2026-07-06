@@ -1,116 +1,94 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendBrevoTemplate, addBrevoContactDOI } from "@/shared/lib/email";
+import { getSupabaseAdmin } from "@/shared/lib/supabase";
 
-type PackId = "essentiel" | "etendu" | "departement";
-
-const PACK_LABELS: Record<PackId, string> = {
-  essentiel: "Pack Essentiel — communes ciblées",
-  etendu: "Pack Étendu — zones élargies",
-  departement: "Pack Département",
-};
+type Commune = { nom: string; cp: string };
 
 type Payload = {
+  prenom: string;
   nom: string;
   telephone: string;
   email: string;
   modele?: string | null;
-  pack: PackId;
+  communes?: Commune[];
   source?: "rechercheterrain" | "configurateur" | null;
-  // essentiel
-  villes?: string[];
-  // etendu
-  zones?: string[];
-  // departement
-  departement?: string;
-  taif_zone?: string | null;
-  budget?: string | null;
   accepte_cgv: boolean;
   optIn?: boolean;
 };
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as Payload;
+  const { prenom, nom, telephone, email, modele, communes, source, accepte_cgv, optIn } = body;
 
-  const { nom, telephone, email, modele, pack, source, villes, zones, departement, taif_zone, accepte_cgv, optIn } = body;
-
-  if (!nom || !telephone || !email || !pack || !accepte_cgv) {
+  if (!nom || !telephone || !email || !accepte_cgv) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
   }
 
-  if (pack === "essentiel" && !villes?.length) {
-    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
-  }
-  if (pack === "etendu" && !zones?.length) {
-    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
-  }
-  if (pack === "departement" && !departement) {
-    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
-  }
+  const communesJson = communes?.length ? communes : null;
+  const communesLabel = communes?.map((c) => `${c.nom}${c.cp ? ` (${c.cp})` : ""}`).join(", ") ?? "";
 
+  // ── Supabase — recherche_terrain table ──────────────────────────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseAnon) {
-    console.warn("[recherche-terrain] Supabase non configuré — lead non persisté.");
-    return NextResponse.json({ success: true, persisted: false });
+  if (supabaseUrl && supabaseAnon) {
+    const res = await fetch(`${supabaseUrl}/rest/v1/recherche_terrain`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: supabaseAnon,
+        Authorization: `Bearer ${supabaseAnon}`,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        nom: `${prenom} ${nom}`.trim(),
+        telephone,
+        email,
+        modele: modele ?? null,
+        source: source ?? "configurateur",
+        zones: { communes: communesJson },
+        accepte_cgv,
+      }),
+    });
+    if (!res.ok) console.error("[recherche-terrain] recherche_terrain error:", await res.text());
   }
 
-  // zones JSONB stocke l'ensemble des données géographiques (pack + détail)
-  const zonesJson = {
-    pack,
-    villes: villes ?? null,
-    regions: zones ?? null,
-    departement: departement ?? null,
-  };
-
-  const res = await fetch(`${supabaseUrl}/rest/v1/recherche_terrain`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: supabaseAnon,
-      Authorization: `Bearer ${supabaseAnon}`,
-      Prefer: "return=minimal",
-    },
-    body: JSON.stringify({
-      nom,
-      telephone,
-      email,
-      modele: modele ?? null,
-      source: source ?? "rechercheterrain",
-      zones: zonesJson,
-      accepte_cgv,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("[recherche-terrain] Supabase error:", err);
-    return NextResponse.json({ error: "db_error" }, { status: 500 });
+  // ── Supabase — leads table (pour visibilité admin) ──────────────────
+  try {
+    await getSupabaseAdmin().from("leads").insert({
+      prenom: prenom ?? "",
+      nom: nom ?? "",
+      email: email ?? "",
+      tel: telephone ?? null,
+      produit: modele ?? null,
+      terrain_mode: "pack",
+      config_json: { communes: communesJson },
+      options_labels: [],
+    });
+  } catch (err) {
+    console.error("[recherche-terrain] leads insert error:", err);
   }
 
-  // Envoi email Brevo (fire-and-forget — n'impacte pas la réponse HTTP)
+  // ── Email Brevo ─────────────────────────────────────────────────────
   const templateId = parseInt(process.env.BREVO_TEMPLATE_RECAP ?? "0");
   const toAhf = process.env.BREVO_TO_AHF ?? "";
-  const zonesFlat = villes ?? zones ?? (departement ? [departement] : null);
 
   sendBrevoTemplate({
     templateId,
     to: [
-      { email, name: nom },
+      { email, name: `${prenom} ${nom}`.trim() },
       ...(toAhf ? [{ email: toAhf, name: "Affinity House Factory" }] : []),
     ],
     params: {
-      // Identité
-      PRENOM: "",
-      NOM: nom,
+      PRENOM: prenom ?? "",
+      NOM: nom ?? "",
       EMAIL: email,
       TEL: telephone ?? "",
-      // Configuration (conditionnel sur MODELE)
       MODELE: modele ?? "",
-      // Terrain (conditionnel sur PACK_LABEL)
-      PACK_LABEL: PACK_LABELS[pack] ?? pack,
-      ZONES: zonesFlat?.join(", ") ?? "",
-      BUDGET: body.budget ?? "",
+      TERRAIN: "Recherche terrain — mandataire Affinity",
+      ZONES: communesLabel,
+      PACK_LABEL: "Recherche terrain — communes sélectionnées",
+      BUDGET: "",
     },
   }).catch((err) => console.error("[recherche-terrain] Brevo error:", err));
 
@@ -120,12 +98,12 @@ export async function POST(req: NextRequest) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
     addBrevoContactDOI(
       email,
-      { NOM: nom, SMS: telephone ?? undefined },
+      { PRENOM: prenom, NOM: nom, SMS: telephone ?? undefined },
       parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8"),
       doiTemplateId,
       `${siteUrl}/confirmation-inscription`,
     ).catch((err) => console.error("[recherche-terrain] Brevo DOI error:", err));
   }
 
-  return NextResponse.json({ success: true, persisted: true });
+  return NextResponse.json({ success: true });
 }
