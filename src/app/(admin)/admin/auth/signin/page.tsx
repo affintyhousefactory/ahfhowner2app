@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 
@@ -112,6 +113,12 @@ export default function AdminSignin() {
             {loading ? "Connexion…" : "Se connecter"}
           </button>
         </form>
+
+        <p className="mt-6 text-center text-sm text-white/40">
+          <Link href="/admin/auth/forgot-password" className="hover:text-white/70 transition-colors">
+            Mot de passe oublié ?
+          </Link>
+        </p>
       </div>
     </div>
   );
