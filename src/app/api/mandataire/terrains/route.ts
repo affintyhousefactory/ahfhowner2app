@@ -60,6 +60,11 @@ export async function POST(req: NextRequest) {
     photos,
     source_url,
     source_reference,
+    contact_nom,
+    contact_prenom,
+    contact_telephone,
+    contact_role,
+    contact_role_detail,
   } = body;
 
   if (!commune) return NextResponse.json({ error: "commune est requis" }, { status: 400 });
@@ -97,6 +102,11 @@ export async function POST(req: NextRequest) {
       photos: photos ?? [],
       source_url: source_url ?? null,
       source_reference: source_reference ?? null,
+      contact_nom: contact_nom ?? null,
+      contact_prenom: contact_prenom ?? null,
+      contact_telephone: contact_telephone ?? null,
+      contact_role: contact_role ?? null,
+      contact_role_detail: contact_role_detail ?? null,
     })
     .select()
     .single();

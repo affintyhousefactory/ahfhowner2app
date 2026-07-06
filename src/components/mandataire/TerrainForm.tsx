@@ -28,6 +28,11 @@ export type FicheTerrain = {
   photos: { url: string; nom: string }[];
   source_url?: string | null;
   source_reference?: string | null;
+  contact_nom?: string | null;
+  contact_prenom?: string | null;
+  contact_telephone?: string | null;
+  contact_role?: "proprietaire" | "notaire" | "agence_partenaire" | "autre_mandataire" | "autre" | null;
+  contact_role_detail?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -79,6 +84,14 @@ const STATUT_OPTIONS = [
   { value: "compromis", label: "Compromis" },
   { value: "retire", label: "Retiré" },
   { value: "vendu", label: "Vendu" },
+] as const;
+
+const CONTACT_ROLE_OPTIONS = [
+  { value: "proprietaire", label: "Propriétaire" },
+  { value: "notaire", label: "Notaire" },
+  { value: "agence_partenaire", label: "Agence partenaire" },
+  { value: "autre_mandataire", label: "Autre mandataire" },
+  { value: "autre", label: "Autre" },
 ] as const;
 
 function isFilled(value: string | undefined): boolean {
@@ -176,6 +189,11 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
     date_derniere_verif: initialData?.date_derniere_verif ?? todayISODate(),
     reserves: formatReserves(initialData?.reserves ?? []),
     notes: initialData?.notes ?? "",
+    contact_nom: initialData?.contact_nom ?? "",
+    contact_prenom: initialData?.contact_prenom ?? "",
+    contact_telephone: initialData?.contact_telephone ?? "",
+    contact_role: initialData?.contact_role ?? "",
+    contact_role_detail: initialData?.contact_role_detail ?? "",
   });
 
   const [photos, setPhotos] = useState<{ url: string; nom: string }[]>(
@@ -229,6 +247,7 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
       modele_arko: form.modele_arko || null,
       zonage: form.zonage || null,
       source_url: sourceUrl || null,
+      contact_role: form.contact_role || null,
     };
 
     // Re-soumettre si la fiche avait été refusée
@@ -766,6 +785,70 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
         )}
       </section>
       </div>
+
+      {/* Point de contact pour ce bien — référent externe (propriétaire, notaire, agence partenaire...) */}
+      <section className="rounded-xl border border-[#7469F4]/30 bg-[#7469F4]/5 p-5">
+        <h2 className="mb-4 font-semibold text-gray-900">📞 Point de contact pour ce bien</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-gray-800">Nom</label>
+            <input
+              type="text"
+              value={form.contact_nom}
+              onChange={(e) => set("contact_nom", e.target.value)}
+              placeholder="Ex : Dupont"
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium focus:border-[#7469F4] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-gray-800">Prénom</label>
+            <input
+              type="text"
+              value={form.contact_prenom}
+              onChange={(e) => set("contact_prenom", e.target.value)}
+              placeholder="Ex : Jean"
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium focus:border-[#7469F4] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-gray-800">Tél.</label>
+            <input
+              type="tel"
+              value={form.contact_telephone}
+              onChange={(e) => set("contact_telephone", e.target.value)}
+              placeholder="Ex : 06 12 34 56 78"
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium focus:border-[#7469F4] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-gray-800">Rôle ou agence partenaire</label>
+            <select
+              value={form.contact_role}
+              onChange={(e) => set("contact_role", e.target.value)}
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+            >
+              <option value="">— Sélectionner —</option>
+              {CONTACT_ROLE_OPTIONS.map((r) => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
+            </select>
+          </div>
+          {form.contact_role && form.contact_role !== "proprietaire" && (
+            <div className="sm:col-span-2 lg:col-span-4">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                {form.contact_role === "notaire" ? "Étude notariale" : "Nom de l'agence / structure"}
+              </label>
+              <input
+                type="text"
+                value={form.contact_role_detail}
+                onChange={(e) => set("contact_role_detail", e.target.value)}
+                placeholder="Ex : Agence Dupont Immobilier"
+                className="w-full max-w-md rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+              />
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Section 8 — Disponibilité & Réserves */}
       <section className="rounded-xl border border-gray-200 bg-white p-5">

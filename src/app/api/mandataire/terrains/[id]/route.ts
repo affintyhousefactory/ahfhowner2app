@@ -59,6 +59,11 @@ export async function PATCH(
     photos,
     source_url,
     source_reference,
+    contact_nom,
+    contact_prenom,
+    contact_telephone,
+    contact_role,
+    contact_role_detail,
   } = body;
 
   const finalStatut: string = statut !== undefined ? statut : fiche.statut;
@@ -92,6 +97,11 @@ export async function PATCH(
   if (photos !== undefined) updates.photos = photos;
   if (source_url !== undefined) updates.source_url = source_url;
   if (source_reference !== undefined) updates.source_reference = source_reference;
+  if (contact_nom !== undefined) updates.contact_nom = contact_nom;
+  if (contact_prenom !== undefined) updates.contact_prenom = contact_prenom;
+  if (contact_telephone !== undefined) updates.contact_telephone = contact_telephone;
+  if (contact_role !== undefined) updates.contact_role = contact_role;
+  if (contact_role_detail !== undefined) updates.contact_role_detail = contact_role_detail;
 
   const { data, error: dbErr } = await supabase
     .from("fiches_terrain")
