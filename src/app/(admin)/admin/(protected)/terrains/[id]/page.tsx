@@ -30,6 +30,14 @@ const MODELE_LABELS: Record<string, string> = {
   both: "One + Max",
 };
 
+const CONTACT_ROLE_LABELS: Record<string, string> = {
+  proprietaire: "Propriétaire",
+  notaire: "Notaire",
+  agence_partenaire: "Agence partenaire",
+  autre_mandataire: "Mandataire indépendant",
+  autre: "Contact",
+};
+
 type FicheTerrainFull = {
   id: string;
   commune: string;
@@ -56,6 +64,11 @@ type FicheTerrainFull = {
   reserves: string[];
   created_at: string;
   updated_at: string;
+  contact_nom: string | null;
+  contact_prenom: string | null;
+  contact_telephone: string | null;
+  contact_role: string | null;
+  contact_role_detail: string | null;
   mandataires: { id: string; prenom: string; nom: string; email: string } | null;
 };
 
@@ -170,6 +183,30 @@ export default async function TerrainFicheAdmin({ params }: { params: Promise<{ 
             )}
           </dl>
         </div>
+
+        {/* Point de contact */}
+        {(f.contact_nom || f.contact_telephone) && (
+          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
+              Point de contact
+            </h2>
+            <dl className="space-y-2 text-sm">
+              {([
+                ["Nom",     [f.contact_prenom, f.contact_nom].filter(Boolean).join(" ") || null],
+                ["Téléphone", f.contact_telephone],
+                ["Rôle",    f.contact_role ? (CONTACT_ROLE_LABELS[f.contact_role] ?? f.contact_role) : null],
+                ["Agence / structure", f.contact_role_detail],
+              ] as [string, string | null][]).map(([label, value]) =>
+                value ? (
+                  <div key={label} className="flex justify-between gap-4">
+                    <dt className="shrink-0 text-white/40">{label}</dt>
+                    <dd className="text-right text-white text-xs">{value}</dd>
+                  </div>
+                ) : null,
+              )}
+            </dl>
+          </div>
+        )}
 
         {/* Notes & Réserves */}
         {(f.notes || (f.reserves ?? []).length > 0) && (
