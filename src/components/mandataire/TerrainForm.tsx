@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 
 export type FicheTerrain = {
@@ -96,6 +96,13 @@ const CONTACT_ROLE_OPTIONS = [
 
 function isFilled(value: string | undefined): boolean {
   return !!value?.trim();
+}
+
+function analyzeStatusMessage(elapsed: number): string {
+  if (elapsed < 4) return "Récupération de la page…";
+  if (elapsed < 12) return "Lecture du contenu de l'annonce…";
+  if (elapsed < 25) return "Analyse par l'intelligence artificielle…";
+  return "Ça prend plus de temps que prévu (page volumineuse ou site lent) — merci de patienter…";
 }
 
 function excerpt(text: string, max = 70): string {
@@ -208,8 +215,16 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState("");
   const [analyzeInfo, setAnalyzeInfo] = useState("");
+  const [analyzeElapsed, setAnalyzeElapsed] = useState(0);
   const [pendingImportImages, setPendingImportImages] = useState<string[]>([]);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const analyzeAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!analyzing) return;
+    const interval = setInterval(() => setAnalyzeElapsed((s) => s + 1), 1000);
+    return () => clearInterval(interval);
+  }, [analyzing]);
 
   const toggleSection = (id: string) =>
     setCollapsedSections((prev) => {
@@ -332,78 +347,97 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
     setAnalyzing(true);
     setAnalyzeError("");
     setAnalyzeInfo("");
+    setAnalyzeElapsed(0);
 
-    const res = await fetch("/api/mandataire/terrains/scrape-annonce", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `Bearer ${mandataireToken}`,
-      },
-      body: JSON.stringify({ url: sourceUrl }),
-    });
-    const data = await res.json();
-    setAnalyzing(false);
+    const controller = new AbortController();
+    analyzeAbortRef.current = controller;
 
-    if (!res.ok) {
-      setAnalyzeError(data.error ?? "Erreur lors de l'analyse de la page");
-      return;
-    }
+    try {
+      const res = await fetch("/api/mandataire/terrains/scrape-annonce", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${mandataireToken}`,
+        },
+        body: JSON.stringify({ url: sourceUrl }),
+        signal: controller.signal,
+      });
+      const data = await res.json();
 
-    const { fields, images, warnings } = data as {
-      fields: Record<string, unknown>;
-      images: string[];
-      warnings: string[];
-    };
-
-    const fieldMap: Record<string, string> = {
-      commune: "commune",
-      secteur: "secteur",
-      prix: "prix",
-      surface: "surface",
-      zonage: "zonage",
-      urbanisme_detail: "urbanisme_detail",
-      reseaux: "reseaux",
-      assainissement: "assainissement",
-    };
-
-    // Calculé à partir de `form` (valeur courante au moment du clic) plutôt que via le
-    // callback fonctionnel de setForm, dont l'exécution n'est pas garantie synchrone :
-    // on a besoin du résultat immédiatement pour le message et le calcul des replis.
-    let filledCount = 0;
-    const stillEmpty: string[] = [];
-    const next = { ...form };
-
-    for (const [apiKey, formKey] of Object.entries(fieldMap)) {
-      const value = fields[apiKey];
-      const isEmpty = !(next as Record<string, string>)[formKey]?.toString().trim();
-      if (value != null && isEmpty) {
-        (next as Record<string, string>)[formKey] = String(value);
-        filledCount++;
-      } else if (isEmpty) {
-        stillEmpty.push(formKey);
+      if (!res.ok) {
+        setAnalyzeError(data.error ?? "Erreur lors de l'analyse de la page");
+        return;
       }
+
+      const { fields, images, warnings } = data as {
+        fields: Record<string, unknown>;
+        images: string[];
+        warnings: string[];
+      };
+
+      const fieldMap: Record<string, string> = {
+        commune: "commune",
+        secteur: "secteur",
+        prix: "prix",
+        surface: "surface",
+        zonage: "zonage",
+        urbanisme_detail: "urbanisme_detail",
+        reseaux: "reseaux",
+        assainissement: "assainissement",
+      };
+
+      // Calculé à partir de `form` (valeur courante au moment du clic) plutôt que via le
+      // callback fonctionnel de setForm, dont l'exécution n'est pas garantie synchrone :
+      // on a besoin du résultat immédiatement pour le message et le calcul des replis.
+      let filledCount = 0;
+      const stillEmpty: string[] = [];
+      const next = { ...form };
+
+      for (const [apiKey, formKey] of Object.entries(fieldMap)) {
+        const value = fields[apiKey];
+        const isEmpty = !(next as Record<string, string>)[formKey]?.toString().trim();
+        if (value != null && isEmpty) {
+          (next as Record<string, string>)[formKey] = String(value);
+          filledCount++;
+        } else if (isEmpty) {
+          stillEmpty.push(formKey);
+        }
+      }
+      if (fields.description_libre && !next.notes.trim()) {
+        next.notes = String(fields.description_libre);
+      }
+
+      setForm(next);
+
+      const newCollapsed = new Set<string>();
+      // Secteur est optionnel : ne doit pas empêcher le repli de Localisation.
+      if (isFilled(next.commune)) newCollapsed.add("localisation");
+      if (isFilled(next.prix) && isFilled(next.surface)) newCollapsed.add("prix_surface");
+      if (isFilled(next.zonage) && isFilled(next.urbanisme_detail)) newCollapsed.add("urbanisme");
+      if (isFilled(next.reseaux) && isFilled(next.assainissement)) newCollapsed.add("reseaux");
+      setCollapsedSections(newCollapsed);
+
+      setPendingImportImages(images ?? []);
+
+      const msgParts = [`${filledCount} champ(s) pré-rempli(s) depuis l'annonce.`];
+      if (stillEmpty.length) msgParts.push(`À compléter manuellement : ${stillEmpty.join(", ")}.`);
+      if (images?.length) msgParts.push(`${images.length} photo(s) détectée(s), seront importées après l'enregistrement.`);
+      if (warnings?.length) msgParts.push(...warnings);
+      setAnalyzeInfo(msgParts.join(" "));
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        setAnalyzeInfo("Analyse annulée.");
+      } else {
+        setAnalyzeError("Erreur réseau lors de l'analyse de la page.");
+      }
+    } finally {
+      setAnalyzing(false);
+      analyzeAbortRef.current = null;
     }
-    if (fields.description_libre && !next.notes.trim()) {
-      next.notes = String(fields.description_libre);
-    }
+  };
 
-    setForm(next);
-
-    const newCollapsed = new Set<string>();
-    // Secteur est optionnel : ne doit pas empêcher le repli de Localisation.
-    if (isFilled(next.commune)) newCollapsed.add("localisation");
-    if (isFilled(next.prix) && isFilled(next.surface)) newCollapsed.add("prix_surface");
-    if (isFilled(next.zonage) && isFilled(next.urbanisme_detail)) newCollapsed.add("urbanisme");
-    if (isFilled(next.reseaux) && isFilled(next.assainissement)) newCollapsed.add("reseaux");
-    setCollapsedSections(newCollapsed);
-
-    setPendingImportImages(images ?? []);
-
-    const msgParts = [`${filledCount} champ(s) pré-rempli(s) depuis l'annonce.`];
-    if (stillEmpty.length) msgParts.push(`À compléter manuellement : ${stillEmpty.join(", ")}.`);
-    if (images?.length) msgParts.push(`${images.length} photo(s) détectée(s), seront importées après l'enregistrement.`);
-    if (warnings?.length) msgParts.push(...warnings);
-    setAnalyzeInfo(msgParts.join(" "));
+  const handleCancelAnalyze = () => {
+    analyzeAbortRef.current?.abort();
   };
 
   const handleFileUpload = async (files: FileList | null) => {
@@ -504,20 +538,50 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             value={sourceUrl}
             onChange={(e) => setSourceUrl(e.target.value)}
             placeholder="https://www.iadfrance.fr/annonce/..."
-            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+            disabled={analyzing}
+            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
           />
-          <button
-            type="button"
-            onClick={handleAnalyze}
-            disabled={analyzing || !sourceUrl.trim()}
-            className="rounded-lg border border-dashed border-[#7469F4] px-4 py-2 text-sm font-medium text-[#7469F4] hover:bg-[#7469F4]/5 disabled:opacity-50"
-          >
-            {analyzing ? "Analyse en cours…" : "Analyser la page"}
-          </button>
+          {!analyzing && (
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={!sourceUrl.trim()}
+              className="shrink-0 rounded-lg border border-dashed border-[#7469F4] px-4 py-2 text-sm font-medium text-[#7469F4] hover:bg-[#7469F4]/5 disabled:opacity-50"
+            >
+              Analyser la page
+            </button>
+          )}
         </div>
+
+        {analyzing && (
+          <div className="mt-3 flex items-center gap-3 rounded-lg border border-[#7469F4]/20 bg-white px-3 py-2.5">
+            <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#7469F4] border-t-transparent" />
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-xs font-medium text-gray-700">
+                {analyzeStatusMessage(analyzeElapsed)}
+              </p>
+              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-gray-100">
+                <div className="h-full w-full animate-pulse rounded-full bg-[#7469F4]/50" />
+              </div>
+            </div>
+            <span className="shrink-0 font-mono text-xs text-gray-400">{analyzeElapsed}s</span>
+            <button
+              type="button"
+              onClick={handleCancelAnalyze}
+              className="shrink-0 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Arrêter
+            </button>
+          </div>
+        )}
+
         {analyzeError && <p className="mt-2 text-xs text-red-600">{analyzeError}</p>}
         {analyzeInfo && <p className="mt-2 text-xs text-green-700">{analyzeInfo}</p>}
       </section>
+
+      {/* Gèle tous les champs le temps que l'analyse d'annonce les remplisse, pour éviter
+          les conflits d'édition entre l'utilisateur et le pré-remplissage automatique. */}
+      <fieldset disabled={analyzing} className="space-y-6 border-0 p-0 m-0 min-w-0">
 
       {/* Localisation — commune/secteur extractibles (repliables) ; référence interne toujours visible sur la même ligne */}
       <CollapsibleCard
@@ -945,6 +1009,8 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
         </div>
       </section>
 
+      </fieldset>
+
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -954,7 +1020,7 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || analyzing}
           className="rounded-xl bg-[#7469F4] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#5a54d4] disabled:opacity-50 transition-colors"
         >
           {saving ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer la fiche"}
