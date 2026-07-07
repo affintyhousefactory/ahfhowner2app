@@ -148,23 +148,29 @@ export async function extractFieldsFromText(input: {
     .filter(Boolean)
     .join("\n\n");
 
-  const msg = await client.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 1024,
-    tools: [EXTRACTION_TOOL],
-    tool_choice: { type: "tool", name: "extraire_fiche_terrain" },
-    messages: [
-      {
-        role: "user",
-        content:
-          "Voici le contenu d'une annonce de vente de terrain constructible publiée sur une plateforme immobilière. " +
-          "Extrais les informations demandées. N'invente aucune donnée absente du texte : mets null si l'information n'est pas présente. " +
-          "Porte une attention particulière à toute mention d'une personne de contact (agent, mandataire, propriétaire) " +
-          "avec son nom et/ou son téléphone dans le texte, et à toute référence explicite de l'annonce (ex: 'Réf :').\n\n" +
-          contextBlock,
-      },
-    ],
-  });
+  const msg = await client.messages.create(
+    {
+      model: "claude-haiku-4-5",
+      max_tokens: 1024,
+      tools: [EXTRACTION_TOOL],
+      tool_choice: { type: "tool", name: "extraire_fiche_terrain" },
+      messages: [
+        {
+          role: "user",
+          content:
+            "Voici le contenu d'une annonce de vente de terrain constructible publiée sur une plateforme immobilière. " +
+            "Extrais les informations demandées. N'invente aucune donnée absente du texte : mets null si l'information n'est pas présente. " +
+            "Porte une attention particulière à toute mention d'une personne de contact (agent, mandataire, propriétaire) " +
+            "avec son nom et/ou son téléphone dans le texte, et à toute référence explicite de l'annonce (ex: 'Réf :').\n\n" +
+            contextBlock,
+        },
+      ],
+    },
+    // Timeout court + un seul retry : on préfère échouer proprement dans le budget de la
+    // route (maxDuration) plutôt que laisser le SDK retenter avec backoff jusqu'à faire
+    // tuer toute la fonction par la plateforme sans message d'erreur exploitable.
+    { timeout: 35_000, maxRetries: 1 },
+  );
 
   const toolUse = msg.content.find((b) => b.type === "tool_use");
   if (!toolUse || toolUse.type !== "tool_use") {
