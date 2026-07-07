@@ -18,12 +18,18 @@ type Payload = {
   optIn?: boolean;
 };
 
+const EMAIL_PATTERN = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as Payload;
-  const { prenom, nom, email, tel, produit, message, captchaToken, optIn } = body;
+  const { prenom, nom, tel, produit, message, captchaToken, optIn } = body;
+  const email = body.email?.trim();
 
-  if (!prenom || !nom || !email || !message) {
+  if (!prenom?.trim() || !nom?.trim() || !email || !message?.trim()) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+  }
+  if (!EMAIL_PATTERN.test(email)) {
+    return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
 
   // Vérification Turnstile (obligatoire en production)
