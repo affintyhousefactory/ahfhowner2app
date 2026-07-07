@@ -44,8 +44,12 @@ export async function uploadFichePhoto(params: {
   // Passer un Buffer/Uint8Array brut à storage-js corrompt le contenu binaire en environnement
   // Vercel (constaté : bytes valides juste avant l'appel, fichier corrompu une fois stocké —
   // diagnostiqué via logs de production). Envelopper dans un Blob force le SDK à passer par
-  // FormData, un chemin de transport plus robuste pour du binaire.
-  const blob = new Blob([buffer], { type: contentType });
+  // FormData, un chemin de transport plus robuste pour du binaire. Copie vers un ArrayBuffer
+  // concret (plutôt que buffer.buffer, typé ArrayBufferLike et donc incompatible avec
+  // BlobPart si SharedArrayBuffer) pour satisfaire strictement le typage.
+  const arrayBuffer = new ArrayBuffer(buffer.byteLength);
+  new Uint8Array(arrayBuffer).set(buffer);
+  const blob = new Blob([arrayBuffer], { type: contentType });
 
   const { error: uploadErr } = await supabase.storage
     .from("mandataires-documents")
