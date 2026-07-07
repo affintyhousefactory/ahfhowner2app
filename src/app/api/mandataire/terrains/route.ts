@@ -60,9 +60,27 @@ export async function POST(req: NextRequest) {
     photos,
     source_url,
     source_reference,
+    contact_nom,
+    contact_prenom,
+    contact_telephone,
+    contact_role,
+    contact_role_detail,
   } = body;
 
   if (!commune) return NextResponse.json({ error: "commune est requis" }, { status: 400 });
+
+  if (!contact_nom?.trim() || !contact_prenom?.trim() || !contact_telephone?.trim() || !contact_role) {
+    return NextResponse.json(
+      { error: "Le point de contact pour ce bien (nom, prénom, téléphone, rôle) est obligatoire." },
+      { status: 400 },
+    );
+  }
+  if (contact_role !== "proprietaire" && !contact_role_detail?.trim()) {
+    return NextResponse.json(
+      { error: "Merci de préciser l'agence/structure du point de contact." },
+      { status: 400 },
+    );
+  }
 
   const finalStatut = statut ?? "disponible";
   const finalReserves: string[] = reserves ?? [];
@@ -97,6 +115,11 @@ export async function POST(req: NextRequest) {
       photos: photos ?? [],
       source_url: source_url ?? null,
       source_reference: source_reference ?? null,
+      contact_nom: contact_nom ?? null,
+      contact_prenom: contact_prenom ?? null,
+      contact_telephone: contact_telephone ?? null,
+      contact_role: contact_role ?? null,
+      contact_role_detail: contact_role_detail ?? null,
     })
     .select()
     .single();

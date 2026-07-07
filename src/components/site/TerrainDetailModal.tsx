@@ -18,6 +18,19 @@ export type TerrainPublic = {
   publie_at: string | null;
   statut?: string;
   afficher_statut_mandataire?: boolean;
+  contact_nom?: string | null;
+  contact_prenom?: string | null;
+  contact_telephone?: string | null;
+  contact_role?: string | null;
+  contact_role_detail?: string | null;
+};
+
+const CONTACT_ROLE_LABELS: Record<string, string> = {
+  proprietaire: "Propriétaire",
+  notaire: "Notaire",
+  agence_partenaire: "Agence partenaire",
+  autre_mandataire: "Autre mandataire",
+  autre: "Contact",
 };
 
 const COMPAT_LABELS: Record<string, { label: string; color: string }> = {
@@ -196,6 +209,36 @@ export default function TerrainDetailModal({ terrain, onClose }: TerrainDetailMo
 
             {terrain.description_publique && (
               <p className="text-sm leading-relaxed text-gray-700">{terrain.description_publique}</p>
+            )}
+
+            {(terrain.contact_nom || terrain.contact_telephone) && (
+              <div className="mt-5 flex items-center justify-between gap-4 rounded-xl border border-[#7469F4]/20 bg-[#7469F4]/5 px-4 py-3">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#7469F4]/70">
+                    Point de contact
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold text-gray-900">
+                    {[terrain.contact_prenom, terrain.contact_nom].filter(Boolean).join(" ") || "Contact"}
+                    {terrain.contact_role && (
+                      <span className="ml-1.5 font-normal text-gray-500">
+                        — {CONTACT_ROLE_LABELS[terrain.contact_role] ?? terrain.contact_role}
+                        {terrain.contact_role_detail && ` (${terrain.contact_role_detail})`}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                {terrain.contact_telephone && (
+                  <a
+                    href={`tel:${terrain.contact_telephone.replace(/\s+/g, "")}`}
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-[#7469F4] px-3 py-2 text-sm font-semibold text-white hover:bg-[#5a54d4] transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1L6.6 10.8z" fill="currentColor"/>
+                    </svg>
+                    {terrain.contact_telephone}
+                  </a>
+                )}
+              </div>
             )}
           </div>
 
