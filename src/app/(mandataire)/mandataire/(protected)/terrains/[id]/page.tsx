@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 import { TerrainForm, type FicheTerrain } from "@/components/mandataire/TerrainForm";
@@ -9,13 +9,16 @@ import { TerrainForm, type FicheTerrain } from "@/components/mandataire/TerrainF
 export default function TerrainDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const ficheId = params.id as string;
 
   const [token, setToken] = useState("");
   const [fiche, setFiche] = useState<FicheTerrain | null>(null);
   const [loading, setLoading] = useState(true);
   const [retiring, setRetiring] = useState(false);
-  const [error, setError] = useState("");
+  // Message d'avertissement transmis depuis la création (ex : échec d'import auto de photos),
+  // lu une seule fois à l'initialisation pour éviter un setState dans un effect.
+  const [error, setError] = useState(() => searchParams.get("photoWarning") ?? "");
 
   useEffect(() => {
     const supabase = getSupabaseBrowser();
@@ -36,6 +39,13 @@ export default function TerrainDetailPage() {
     };
     load();
   }, [ficheId]);
+
+  useEffect(() => {
+    if (searchParams.get("photoWarning")) {
+      router.replace(`/mandataire/terrains/${ficheId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRetire = async () => {
     if (!confirm("Retirer cette fiche ? Elle ne sera plus visible mais conservée.")) return;
@@ -118,7 +128,10 @@ export default function TerrainDetailPage() {
         initialData={fiche}
         ficheId={ficheId}
         mandataireToken={token}
-        onSaved={(updated) => setFiche(updated)}
+        onSaved={(updated, warning) => {
+          setFiche(updated);
+          setError(warning ?? "");
+        }}
       />
     </div>
   );

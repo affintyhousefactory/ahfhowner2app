@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { PRODUCT_LIST } from "@/lib/site";
@@ -15,6 +16,15 @@ const SITE_KEY_VALUE = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? SITE_KEY;
 const CAPTCHA_REQUIRED = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !TEST_KEYS.includes(SITE_KEY_VALUE);
 
 export function ContactForm() {
+  const searchParams = useSearchParams();
+  const numeroAnnonce = searchParams.get("numero");
+  const refAnnonce = searchParams.get("ref");
+  const defaultMessage = numeroAnnonce
+    ? `Je suis intéressé également par l'annonce de terrain n° ${numeroAnnonce}` +
+      (refAnnonce ? ` (réf. ${refAnnonce})` : "") +
+      ".\n\n"
+    : "";
+
   const [sent, setSent] = useState(false);
   const [submitError, setSubmitError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -153,6 +163,7 @@ export function ContactForm() {
         name="message"
         required
         rows={5}
+        defaultValue={defaultMessage}
         placeholder="Votre message *"
         className="mt-3 w-full rounded-2xl border border-line bg-surface px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-muted/60 focus:border-accent"
       />

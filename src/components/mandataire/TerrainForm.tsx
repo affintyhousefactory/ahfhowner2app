@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 
 export type FicheTerrain = {
@@ -41,7 +41,7 @@ interface TerrainFormProps {
   initialData?: Partial<FicheTerrain>;
   ficheId?: string;
   mandataireToken: string;
-  onSaved: (fiche: FicheTerrain) => void;
+  onSaved: (fiche: FicheTerrain, warning?: string) => void;
 }
 
 function todayISODate() {
@@ -62,7 +62,6 @@ function formatReserves(arr: string[]): string {
 const COMPATIBILITE_OPTIONS = [
   { value: "precompatible", label: "Précompatible", emoji: "✅", color: "text-green-700 bg-green-50 border-green-200" },
   { value: "a_confirmer", label: "À confirmer", emoji: "⚠️", color: "text-yellow-700 bg-yellow-50 border-yellow-200" },
-  { value: "non_compatible", label: "Non compatible", emoji: "❌", color: "text-red-700 bg-red-50 border-red-200" },
 ] as const;
 
 const MODELE_OPTIONS = [
@@ -90,12 +89,19 @@ const CONTACT_ROLE_OPTIONS = [
   { value: "proprietaire", label: "Propriétaire" },
   { value: "notaire", label: "Notaire" },
   { value: "agence_partenaire", label: "Agence partenaire" },
-  { value: "autre_mandataire", label: "Autre mandataire" },
+  { value: "autre_mandataire", label: "Mandataire indépendant" },
   { value: "autre", label: "Autre" },
 ] as const;
 
 function isFilled(value: string | undefined): boolean {
   return !!value?.trim();
+}
+
+function analyzeStatusMessage(elapsed: number): string {
+  if (elapsed < 4) return "Récupération de la page…";
+  if (elapsed < 12) return "Lecture du contenu de l'annonce…";
+  if (elapsed < 25) return "Analyse par l'intelligence artificielle…";
+  return "Ça prend plus de temps que prévu (page volumineuse ou site lent) — merci de patienter…";
 }
 
 function excerpt(text: string, max = 70): string {
@@ -208,8 +214,18 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState("");
   const [analyzeInfo, setAnalyzeInfo] = useState("");
+  const [analyzeSuccess, setAnalyzeSuccess] = useState(true);
+  const [analyzeElapsed, setAnalyzeElapsed] = useState(0);
   const [pendingImportImages, setPendingImportImages] = useState<string[]>([]);
+  const [photoImportProgress, setPhotoImportProgress] = useState<{ done: number; total: number } | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const analyzeAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!analyzing) return;
+    const interval = setInterval(() => setAnalyzeElapsed((s) => s + 1), 1000);
+    return () => clearInterval(interval);
+  }, [analyzing]);
 
   const toggleSection = (id: string) =>
     setCollapsedSections((prev) => {
@@ -247,6 +263,36 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
 
     if (requiresContactRoleDetail && !form.contact_role_detail.trim()) {
       setError("Merci de préciser l'agence/structure du point de contact.");
+      return;
+    }
+
+    if (!form.compatibilite_arko) {
+      setError("La compatibilité ARKO est obligatoire.");
+      return;
+    }
+
+    if (!form.reseaux.trim() && !form.assainissement.trim()) {
+      setError("Au moins un champ de Réseaux (réseaux ou assainissement) doit être renseigné.");
+      return;
+    }
+
+    if (!form.acces_grue.trim() && !form.pente_pct.trim()) {
+      setError("Au moins un champ d'Accès & Terrain (accès grue ou pente) doit être renseigné.");
+      return;
+    }
+
+    if (!form.prix.trim() && !form.surface.trim()) {
+      setError("Au moins un champ de Prix & Surface (prix ou surface) doit être renseigné.");
+      return;
+    }
+
+    if (!form.zonage && !form.urbanisme_detail.trim()) {
+      setError("Au moins un champ d'Urbanisme (zonage ou détail urbanisme) doit être renseigné.");
+      return;
+    }
+
+    if (parseReserves(form.reserves).length === 0 && !form.notes.trim()) {
+      setError("Au moins un champ de Disponibilité & Réserves (réserves ou notes internes) doit être renseigné.");
       return;
     }
 
@@ -293,8 +339,12 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
     }
 
     const savedFiche = data as FicheTerrain;
+    let importWarning: string | undefined;
 
     if (pendingImportImages.length > 0) {
+      const total = pendingImportImages.length;
+      setPhotoImportProgress({ done: 0, total });
+
       const importedPhotos: { url: string; nom: string }[] = [];
       let failedCount = 0;
 
@@ -305,105 +355,149 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             "Content-Type": "application/json",
             authorization: `Bearer ${mandataireToken}`,
           },
-          body: JSON.stringify({ imageUrl }),
+          body: JSON.stringify({ imageUrl, sourceUrl }),
         });
         if (r.ok) {
           importedPhotos.push(await r.json());
         } else {
           failedCount++;
         }
+        setPhotoImportProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
       }
 
       setPendingImportImages([]);
+      setPhotoImportProgress(null);
       if (importedPhotos.length > 0) {
         savedFiche.photos = [...(savedFiche.photos ?? []), ...importedPhotos];
         setPhotos(savedFiche.photos);
       }
       if (failedCount > 0) {
-        setError(`${failedCount} photo(s) n'ont pas pu être importées automatiquement.`);
+        importWarning =
+          `${failedCount} photo(s) sur ${total} n'ont pas pu être importées automatiquement ` +
+          "(image indisponible ou format non supporté par le site source). " +
+          "Vous pouvez les ajouter manuellement depuis la section Photos ci-dessous.";
       }
     }
 
     setSaving(false);
-    onSaved(savedFiche);
+    onSaved(savedFiche, importWarning);
   };
 
   const handleAnalyze = async () => {
     setAnalyzing(true);
     setAnalyzeError("");
     setAnalyzeInfo("");
+    setAnalyzeElapsed(0);
 
-    const res = await fetch("/api/mandataire/terrains/scrape-annonce", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `Bearer ${mandataireToken}`,
-      },
-      body: JSON.stringify({ url: sourceUrl }),
-    });
-    const data = await res.json();
-    setAnalyzing(false);
+    const controller = new AbortController();
+    analyzeAbortRef.current = controller;
 
-    if (!res.ok) {
-      setAnalyzeError(data.error ?? "Erreur lors de l'analyse de la page");
-      return;
-    }
+    try {
+      const res = await fetch("/api/mandataire/terrains/scrape-annonce", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${mandataireToken}`,
+        },
+        body: JSON.stringify({ url: sourceUrl }),
+        signal: controller.signal,
+      });
+      const data = await res.json();
 
-    const { fields, images, warnings } = data as {
-      fields: Record<string, unknown>;
-      images: string[];
-      warnings: string[];
-    };
-
-    const fieldMap: Record<string, string> = {
-      commune: "commune",
-      secteur: "secteur",
-      prix: "prix",
-      surface: "surface",
-      zonage: "zonage",
-      urbanisme_detail: "urbanisme_detail",
-      reseaux: "reseaux",
-      assainissement: "assainissement",
-    };
-
-    // Calculé à partir de `form` (valeur courante au moment du clic) plutôt que via le
-    // callback fonctionnel de setForm, dont l'exécution n'est pas garantie synchrone :
-    // on a besoin du résultat immédiatement pour le message et le calcul des replis.
-    let filledCount = 0;
-    const stillEmpty: string[] = [];
-    const next = { ...form };
-
-    for (const [apiKey, formKey] of Object.entries(fieldMap)) {
-      const value = fields[apiKey];
-      const isEmpty = !(next as Record<string, string>)[formKey]?.toString().trim();
-      if (value != null && isEmpty) {
-        (next as Record<string, string>)[formKey] = String(value);
-        filledCount++;
-      } else if (isEmpty) {
-        stillEmpty.push(formKey);
+      if (!res.ok) {
+        setAnalyzeError(data.error ?? "Erreur lors de l'analyse de la page");
+        return;
       }
+
+      const { fields, images, warnings } = data as {
+        fields: Record<string, unknown>;
+        images: string[];
+        warnings: string[];
+      };
+
+      const fieldMap: Record<string, string> = {
+        commune: "commune",
+        secteur: "secteur",
+        prix: "prix",
+        surface: "surface",
+        zonage: "zonage",
+        urbanisme_detail: "urbanisme_detail",
+        reseaux: "reseaux",
+        assainissement: "assainissement",
+        contact_nom: "contact_nom",
+        contact_prenom: "contact_prenom",
+        contact_telephone: "contact_telephone",
+        contact_role: "contact_role",
+      };
+
+      // Calculé à partir de `form` (valeur courante au moment du clic) plutôt que via le
+      // callback fonctionnel de setForm, dont l'exécution n'est pas garantie synchrone :
+      // on a besoin du résultat immédiatement pour le message et le calcul des replis.
+      let filledCount = 0;
+      const stillEmpty: string[] = [];
+      const next = { ...form };
+
+      for (const [apiKey, formKey] of Object.entries(fieldMap)) {
+        const value = fields[apiKey];
+        const isEmpty = !(next as Record<string, string>)[formKey]?.toString().trim();
+        if (value != null && isEmpty) {
+          (next as Record<string, string>)[formKey] = String(value);
+          filledCount++;
+        } else if (isEmpty) {
+          stillEmpty.push(formKey);
+        }
+      }
+      if (fields.description_libre && !next.notes.trim()) {
+        next.notes = String(fields.description_libre);
+      }
+      // La référence de l'annonce (littéraux "Réf :"/"Référence :" détectés par l'IA)
+      // alimente la Référence interne du mandataire, jamais extraite autrement.
+      if (fields.source_reference && !next.reference_interne.trim()) {
+        next.reference_interne = String(fields.source_reference);
+        filledCount++;
+      } else if (!next.reference_interne.trim()) {
+        stillEmpty.push("reference_interne");
+      }
+
+      setForm(next);
+
+      const newCollapsed = new Set<string>();
+      // Secteur est optionnel : ne doit pas empêcher le repli de Localisation.
+      if (isFilled(next.commune)) newCollapsed.add("localisation");
+      if (isFilled(next.prix) && isFilled(next.surface)) newCollapsed.add("prix_surface");
+      if (isFilled(next.zonage) && isFilled(next.urbanisme_detail)) newCollapsed.add("urbanisme");
+      if (isFilled(next.reseaux) && isFilled(next.assainissement)) newCollapsed.add("reseaux");
+      setCollapsedSections(newCollapsed);
+
+      setPendingImportImages(images ?? []);
+
+      const success = filledCount > 0 || (images?.length ?? 0) > 0;
+      setAnalyzeSuccess(success);
+
+      const msgParts = [
+        success
+          ? `${filledCount} champ(s) pré-rempli(s) depuis l'annonce.`
+          : "Aucune information exploitable n'a pu être extraite de cette page.",
+      ];
+      if (stillEmpty.length) msgParts.push(`À compléter manuellement : ${stillEmpty.join(", ")}.`);
+      if (images?.length) msgParts.push(`${images.length} photo(s) détectée(s), seront importées après l'enregistrement.`);
+      if (warnings?.length) msgParts.push(...warnings);
+      setAnalyzeInfo(msgParts.join(" "));
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        setAnalyzeSuccess(false);
+        setAnalyzeInfo("Analyse annulée.");
+      } else {
+        setAnalyzeError("Erreur réseau lors de l'analyse de la page.");
+      }
+    } finally {
+      setAnalyzing(false);
+      analyzeAbortRef.current = null;
     }
-    if (fields.description_libre && !next.notes.trim()) {
-      next.notes = String(fields.description_libre);
-    }
+  };
 
-    setForm(next);
-
-    const newCollapsed = new Set<string>();
-    // Secteur est optionnel : ne doit pas empêcher le repli de Localisation.
-    if (isFilled(next.commune)) newCollapsed.add("localisation");
-    if (isFilled(next.prix) && isFilled(next.surface)) newCollapsed.add("prix_surface");
-    if (isFilled(next.zonage) && isFilled(next.urbanisme_detail)) newCollapsed.add("urbanisme");
-    if (isFilled(next.reseaux) && isFilled(next.assainissement)) newCollapsed.add("reseaux");
-    setCollapsedSections(newCollapsed);
-
-    setPendingImportImages(images ?? []);
-
-    const msgParts = [`${filledCount} champ(s) pré-rempli(s) depuis l'annonce.`];
-    if (stillEmpty.length) msgParts.push(`À compléter manuellement : ${stillEmpty.join(", ")}.`);
-    if (images?.length) msgParts.push(`${images.length} photo(s) détectée(s), seront importées après l'enregistrement.`);
-    if (warnings?.length) msgParts.push(...warnings);
-    setAnalyzeInfo(msgParts.join(" "));
+  const handleCancelAnalyze = () => {
+    analyzeAbortRef.current?.abort();
   };
 
   const handleFileUpload = async (files: FileList | null) => {
@@ -504,20 +598,64 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             value={sourceUrl}
             onChange={(e) => setSourceUrl(e.target.value)}
             placeholder="https://www.iadfrance.fr/annonce/..."
-            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
+            disabled={analyzing}
+            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
           />
-          <button
-            type="button"
-            onClick={handleAnalyze}
-            disabled={analyzing || !sourceUrl.trim()}
-            className="rounded-lg border border-dashed border-[#7469F4] px-4 py-2 text-sm font-medium text-[#7469F4] hover:bg-[#7469F4]/5 disabled:opacity-50"
-          >
-            {analyzing ? "Analyse en cours…" : "Analyser la page"}
-          </button>
+          {!analyzing && (
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={!sourceUrl.trim()}
+              className="shrink-0 rounded-lg border border-dashed border-[#7469F4] px-4 py-2 text-sm font-medium text-[#7469F4] hover:bg-[#7469F4]/5 disabled:opacity-50"
+            >
+              Analyser la page
+            </button>
+          )}
         </div>
-        {analyzeError && <p className="mt-2 text-xs text-red-600">{analyzeError}</p>}
-        {analyzeInfo && <p className="mt-2 text-xs text-green-700">{analyzeInfo}</p>}
+
+        {analyzing && (
+          <div className="mt-3 flex items-center gap-3 rounded-lg border border-[#7469F4]/20 bg-white px-3 py-2.5">
+            <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#7469F4] border-t-transparent" />
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-xs font-medium text-gray-700">
+                {analyzeStatusMessage(analyzeElapsed)}
+              </p>
+              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-gray-100">
+                <div className="h-full w-full animate-pulse rounded-full bg-[#7469F4]/50" />
+              </div>
+            </div>
+            <span className="shrink-0 font-mono text-xs text-gray-400">{analyzeElapsed}s</span>
+            <button
+              type="button"
+              onClick={handleCancelAnalyze}
+              className="shrink-0 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Arrêter
+            </button>
+          </div>
+        )}
+
+        {analyzeError && (
+          <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {analyzeError}
+          </div>
+        )}
+        {analyzeInfo && (
+          <div
+            className={`mt-3 rounded-lg border px-4 py-3 text-sm font-medium leading-relaxed ${
+              analyzeSuccess
+                ? "border-green-200 bg-green-50 text-green-700"
+                : "border-red-200 bg-red-50 text-red-700"
+            }`}
+          >
+            {analyzeInfo}
+          </div>
+        )}
       </section>
+
+      {/* Gèle tous les champs le temps que l'analyse d'annonce les remplisse, pour éviter
+          les conflits d'édition entre l'utilisateur et le pré-remplissage automatique. */}
+      <fieldset disabled={analyzing} className="space-y-6 border-0 p-0 m-0 min-w-0">
 
       {/* Localisation — commune/secteur extractibles (repliables) ; référence interne toujours visible sur la même ligne */}
       <CollapsibleCard
@@ -715,7 +853,9 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             </div>
           </div>
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">Compatibilité estimée</p>
+            <p className="mb-2 text-sm font-medium text-gray-700">
+              Compatibilité estimée <span className="text-red-500">*</span>
+            </p>
             <div className="flex flex-wrap gap-3">
               {COMPATIBILITE_OPTIONS.map((opt) => (
                 <label
@@ -945,19 +1085,36 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
         </div>
       </section>
 
+      </fieldset>
+
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
+      {photoImportProgress && (
+        <div className="flex items-center gap-3 rounded-xl border border-[#7469F4]/20 bg-[#7469F4]/5 px-4 py-3">
+          <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#7469F4] border-t-transparent" />
+          <p className="flex-1 text-sm font-medium text-gray-700">
+            Import des photos de l&apos;annonce… ({photoImportProgress.done}/{photoImportProgress.total})
+          </p>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || analyzing}
           className="rounded-xl bg-[#7469F4] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#5a54d4] disabled:opacity-50 transition-colors"
         >
-          {saving ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer la fiche"}
+          {saving && photoImportProgress
+            ? "Import des photos…"
+            : saving
+              ? "Enregistrement…"
+              : isEdit
+                ? "Mettre à jour"
+                : "Créer la fiche"}
         </button>
       </div>
     </form>
