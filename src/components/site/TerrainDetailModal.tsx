@@ -29,7 +29,7 @@ const CONTACT_ROLE_LABELS: Record<string, string> = {
   proprietaire: "Propriétaire",
   notaire: "Notaire",
   agence_partenaire: "Agence partenaire",
-  autre_mandataire: "Autre mandataire",
+  autre_mandataire: "Mandataire indépendant",
   autre: "Contact",
 };
 

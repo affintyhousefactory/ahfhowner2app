@@ -90,7 +90,7 @@ const CONTACT_ROLE_OPTIONS = [
   { value: "proprietaire", label: "Propriétaire" },
   { value: "notaire", label: "Notaire" },
   { value: "agence_partenaire", label: "Agence partenaire" },
-  { value: "autre_mandataire", label: "Autre mandataire" },
+  { value: "autre_mandataire", label: "Mandataire indépendant" },
   { value: "autre", label: "Autre" },
 ] as const;
 
@@ -215,6 +215,7 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState("");
   const [analyzeInfo, setAnalyzeInfo] = useState("");
+  const [analyzeSuccess, setAnalyzeSuccess] = useState(true);
   const [analyzeElapsed, setAnalyzeElapsed] = useState(0);
   const [pendingImportImages, setPendingImportImages] = useState<string[]>([]);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
@@ -384,6 +385,10 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
         urbanisme_detail: "urbanisme_detail",
         reseaux: "reseaux",
         assainissement: "assainissement",
+        contact_nom: "contact_nom",
+        contact_prenom: "contact_prenom",
+        contact_telephone: "contact_telephone",
+        contact_role: "contact_role",
       };
 
       // Calculé à partir de `form` (valeur courante au moment du clic) plutôt que via le
@@ -406,6 +411,14 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
       if (fields.description_libre && !next.notes.trim()) {
         next.notes = String(fields.description_libre);
       }
+      // La référence de l'annonce (littéraux "Réf :"/"Référence :" détectés par l'IA)
+      // alimente la Référence interne du mandataire, jamais extraite autrement.
+      if (fields.source_reference && !next.reference_interne.trim()) {
+        next.reference_interne = String(fields.source_reference);
+        filledCount++;
+      } else if (!next.reference_interne.trim()) {
+        stillEmpty.push("reference_interne");
+      }
 
       setForm(next);
 
@@ -419,13 +432,21 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
 
       setPendingImportImages(images ?? []);
 
-      const msgParts = [`${filledCount} champ(s) pré-rempli(s) depuis l'annonce.`];
+      const success = filledCount > 0 || (images?.length ?? 0) > 0;
+      setAnalyzeSuccess(success);
+
+      const msgParts = [
+        success
+          ? `${filledCount} champ(s) pré-rempli(s) depuis l'annonce.`
+          : "Aucune information exploitable n'a pu être extraite de cette page.",
+      ];
       if (stillEmpty.length) msgParts.push(`À compléter manuellement : ${stillEmpty.join(", ")}.`);
       if (images?.length) msgParts.push(`${images.length} photo(s) détectée(s), seront importées après l'enregistrement.`);
       if (warnings?.length) msgParts.push(...warnings);
       setAnalyzeInfo(msgParts.join(" "));
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") {
+        setAnalyzeSuccess(false);
         setAnalyzeInfo("Analyse annulée.");
       } else {
         setAnalyzeError("Erreur réseau lors de l'analyse de la page.");
@@ -575,8 +596,22 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
           </div>
         )}
 
-        {analyzeError && <p className="mt-2 text-xs text-red-600">{analyzeError}</p>}
-        {analyzeInfo && <p className="mt-2 text-xs text-green-700">{analyzeInfo}</p>}
+        {analyzeError && (
+          <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {analyzeError}
+          </div>
+        )}
+        {analyzeInfo && (
+          <div
+            className={`mt-3 rounded-lg border px-4 py-3 text-sm font-medium leading-relaxed ${
+              analyzeSuccess
+                ? "border-green-200 bg-green-50 text-green-700"
+                : "border-red-200 bg-red-50 text-red-700"
+            }`}
+          >
+            {analyzeInfo}
+          </div>
+        )}
       </section>
 
       {/* Gèle tous les champs le temps que l'analyse d'annonce les remplisse, pour éviter
