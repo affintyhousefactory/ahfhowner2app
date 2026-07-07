@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBrevoTemplate, addBrevoContactDOI } from "@/shared/lib/email";
+import { sendBrevoTemplate, addBrevoContact, addBrevoContactDOI } from "@/shared/lib/email";
 
 const PRODUIT_LABELS: Record<string, string> = {
   one: "Arko One (20 m²)",
@@ -95,8 +95,9 @@ export async function POST(req: NextRequest) {
     },
   }).catch((err) => console.error("[contact] Brevo error:", err));
 
-  // Opt-in newsletter prospects (DOI — list 8)
   if (optIn) {
+    // Opt-in newsletter prospects (DOI — list 8) : le contact est créé/confirmé par ce
+    // flux, pas besoin d'un addBrevoContact séparé qui court-circuiterait la confirmation.
     const doiTemplateId = parseInt(process.env.BREVO_DOI_TEMPLATE_ID ?? "0");
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
     await addBrevoContactDOI(
@@ -106,6 +107,15 @@ export async function POST(req: NextRequest) {
       doiTemplateId,
       `${siteUrl}/confirmation-inscription`,
     ).catch((err) => console.error("[contact] Brevo DOI error:", err));
+  } else {
+    // Pas d'opt-in : le contact existe quand même dans le CRM (traçabilité de la demande)
+    // mais explicitement blocklisté, sans ajout à la liste prospects.
+    await addBrevoContact(
+      email,
+      { PRENOM: prenom, NOM: nom, SMS: tel ?? undefined },
+      [],
+      { emailBlacklisted: true },
+    ).catch((err) => console.error("[contact] Brevo contact error:", err));
   }
 
   return NextResponse.json({ success: true });
