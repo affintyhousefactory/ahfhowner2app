@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import TerrainDetailModal, { type TerrainPublic } from "./TerrainDetailModal";
+import TerrainDetailModal, { numeroAnnonce, type TerrainPublic } from "./TerrainDetailModal";
 
 const COMPAT_LABELS: Record<string, { label: string; color: string }> = {
   precompatible:  { label: "Précompatible",  color: "bg-green-100 text-green-700" },
@@ -222,6 +222,9 @@ export default function TerrainsGrid({ terrains }: { terrains: TerrainPublic[] }
 
               {/* Content */}
               <div className="flex flex-1 flex-col p-5">
+                <p className="mb-1 font-mono text-[10px] uppercase tracking-wide text-gray-400">
+                  Annonce n° {numeroAnnonce(terrain.id)}
+                </p>
                 <h3 className="mb-1 font-semibold text-gray-900 leading-snug">
                   {terrain.titre ?? terrain.commune}
                 </h3>

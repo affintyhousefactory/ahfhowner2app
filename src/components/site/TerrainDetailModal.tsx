@@ -51,6 +51,12 @@ const STATUT_BADGES: Record<string, { label: string; color: string }> = {
   retire:   { label: "Retiré",         color: "bg-gray-100 text-gray-500" },
 };
 
+// Numéro d'annonce public, dérivé de l'id (pas de colonne dédiée) : stable et unique en
+// pratique à cette échelle, sert de repère pour l'équipe côté formulaire de contact.
+export function numeroAnnonce(id: string): string {
+  return id.slice(0, 8).toUpperCase();
+}
+
 interface TerrainDetailModalProps {
   terrain: TerrainPublic;
   onClose: () => void;
@@ -185,6 +191,9 @@ export default function TerrainDetailModal({ terrain, onClose }: TerrainDetailMo
               )}
             </div>
 
+            <p className="mb-1 font-mono text-[11px] uppercase tracking-wide text-gray-400">
+              Annonce n° {numeroAnnonce(terrain.id)}
+            </p>
             <h2 className="mb-1 text-xl font-semibold text-gray-900">
               {terrain.titre ?? terrain.commune}
             </h2>
@@ -252,7 +261,7 @@ export default function TerrainDetailModal({ terrain, onClose }: TerrainDetailMo
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href={`/contact?sujet=terrain&ref=${encodeURIComponent(terrain.titre ?? terrain.commune)}`}
+                href={`/contact?numero=${encodeURIComponent(numeroAnnonce(terrain.id))}&ref=${encodeURIComponent(terrain.titre ?? terrain.commune)}`}
                 onClick={onClose}
                 className="inline-flex items-center gap-2 rounded-xl bg-[#7469F4] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#5a54d4] transition-colors"
               >
