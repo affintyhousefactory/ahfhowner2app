@@ -181,10 +181,13 @@ export function extractPageContent(html: string, baseUrl: string): ExtractedPage
   const title = $("title").first().text().trim();
   const metaDescription = $('meta[name="description"]').attr("content")?.trim() ?? "";
 
-  // Retirer nav/header/footer/aside AVANT de collecter les images : ces zones contiennent
-  // presque toujours du contenu hors annonce (biens similaires en pied de page, logos,
-  // widgets de navigation) plutôt que la galerie principale du bien.
-  $("script, style, nav, header, footer, aside, noscript, iframe, svg").remove();
+  // Retirer nav/footer/aside AVANT de collecter les images : ces zones contiennent presque
+  // toujours du contenu hors annonce (biens similaires en pied de page, widgets de
+  // navigation) plutôt que la galerie principale du bien. On NE retire PAS <header> : sur
+  // plusieurs sites d'annonces (ex: iad), la galerie photo principale est placée dans un
+  // <header> sémantique (titre + prix + photos groupés) — la retirer supprimait la galerie
+  // elle-même. Les logos/icônes de site restent filtrés via IMAGE_EXCLUDE_PATTERN.
+  $("script, style, nav, footer, aside, noscript, iframe, svg").remove();
 
   const rawImageUrls: string[] = [];
   $("img").each((_, el) => {
