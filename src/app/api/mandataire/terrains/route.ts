@@ -69,6 +69,19 @@ export async function POST(req: NextRequest) {
 
   if (!commune) return NextResponse.json({ error: "commune est requis" }, { status: 400 });
 
+  if (!contact_nom?.trim() || !contact_prenom?.trim() || !contact_telephone?.trim() || !contact_role) {
+    return NextResponse.json(
+      { error: "Le point de contact pour ce bien (nom, prénom, téléphone, rôle) est obligatoire." },
+      { status: 400 },
+    );
+  }
+  if (contact_role !== "proprietaire" && !contact_role_detail?.trim()) {
+    return NextResponse.json(
+      { error: "Merci de préciser l'agence/structure du point de contact." },
+      { status: 400 },
+    );
+  }
+
   const finalStatut = statut ?? "disponible";
   const finalReserves: string[] = reserves ?? [];
   if ((finalStatut !== "disponible" || finalReserves.length > 0) && !notes?.trim()) {

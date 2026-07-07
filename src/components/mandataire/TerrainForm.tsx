@@ -222,6 +222,7 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
   const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   const requiresNotes = form.statut !== "disponible" || parseReserves(form.reserves).length > 0;
+  const requiresContactRoleDetail = !!form.contact_role && form.contact_role !== "proprietaire";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,6 +232,21 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
       setError(
         "Notes obligatoires dès que le statut n'est pas \"Disponible\" ou qu'une réserve est renseignée."
       );
+      return;
+    }
+
+    if (
+      !form.contact_nom.trim() ||
+      !form.contact_prenom.trim() ||
+      !form.contact_telephone.trim() ||
+      !form.contact_role
+    ) {
+      setError("Le point de contact pour ce bien (nom, prénom, téléphone, rôle) est obligatoire.");
+      return;
+    }
+
+    if (requiresContactRoleDetail && !form.contact_role_detail.trim()) {
+      setError("Merci de préciser l'agence/structure du point de contact.");
       return;
     }
 
@@ -788,12 +804,17 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
 
       {/* Point de contact pour ce bien — référent externe (propriétaire, notaire, agence partenaire...) */}
       <section className="rounded-xl border border-[#7469F4]/30 bg-[#7469F4]/5 p-5">
-        <h2 className="mb-4 font-semibold text-gray-900">📞 Point de contact pour ce bien</h2>
+        <h2 className="mb-4 font-semibold text-gray-900">
+          📞 Point de contact pour ce bien <span className="text-red-500">*</span>
+        </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-800">Nom</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-800">
+              Nom <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
+              required
               value={form.contact_nom}
               onChange={(e) => set("contact_nom", e.target.value)}
               placeholder="Ex : Dupont"
@@ -801,9 +822,12 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-800">Prénom</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-800">
+              Prénom <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
+              required
               value={form.contact_prenom}
               onChange={(e) => set("contact_prenom", e.target.value)}
               placeholder="Ex : Jean"
@@ -811,9 +835,12 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-800">Tél.</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-800">
+              Tél. <span className="text-red-500">*</span>
+            </label>
             <input
               type="tel"
+              required
               value={form.contact_telephone}
               onChange={(e) => set("contact_telephone", e.target.value)}
               placeholder="Ex : 06 12 34 56 78"
@@ -821,8 +848,11 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-800">Rôle ou agence partenaire</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-800">
+              Rôle ou agence partenaire <span className="text-red-500">*</span>
+            </label>
             <select
+              required
               value={form.contact_role}
               onChange={(e) => set("contact_role", e.target.value)}
               className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#7469F4] focus:outline-none"
@@ -833,13 +863,15 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
               ))}
             </select>
           </div>
-          {form.contact_role && form.contact_role !== "proprietaire" && (
+          {requiresContactRoleDetail && (
             <div className="sm:col-span-2 lg:col-span-4">
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                {form.contact_role === "notaire" ? "Étude notariale" : "Nom de l'agence / structure"}
+                {form.contact_role === "notaire" ? "Étude notariale" : "Nom de l'agence / structure"}{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
+                required
                 value={form.contact_role_detail}
                 onChange={(e) => set("contact_role_detail", e.target.value)}
                 placeholder="Ex : Agence Dupont Immobilier"

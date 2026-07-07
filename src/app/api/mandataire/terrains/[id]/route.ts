@@ -18,7 +18,7 @@ async function getMandataireAndFiche(req: NextRequest, ficheId: string) {
   // Vérifier que la fiche appartient au mandataire
   const { data: fiche } = await supabase
     .from("fiches_terrain")
-    .select("id, mandataire_id, statut, reserves, notes")
+    .select("id, mandataire_id, statut, reserves, notes, contact_nom, contact_prenom, contact_telephone, contact_role, contact_role_detail")
     .eq("id", ficheId)
     .eq("mandataire_id", mandataire.id)
     .single();
@@ -73,6 +73,25 @@ export async function PATCH(
     return NextResponse.json(
       { error: "Notes obligatoires dès que le statut n'est pas \"disponible\" ou qu'une réserve est renseignée." },
       { status: 400 }
+    );
+  }
+
+  const finalContactNom: string | null = contact_nom !== undefined ? contact_nom : fiche.contact_nom;
+  const finalContactPrenom: string | null = contact_prenom !== undefined ? contact_prenom : fiche.contact_prenom;
+  const finalContactTelephone: string | null = contact_telephone !== undefined ? contact_telephone : fiche.contact_telephone;
+  const finalContactRole: string | null = contact_role !== undefined ? contact_role : fiche.contact_role;
+  const finalContactRoleDetail: string | null = contact_role_detail !== undefined ? contact_role_detail : fiche.contact_role_detail;
+
+  if (!finalContactNom?.trim() || !finalContactPrenom?.trim() || !finalContactTelephone?.trim() || !finalContactRole) {
+    return NextResponse.json(
+      { error: "Le point de contact pour ce bien (nom, prénom, téléphone, rôle) est obligatoire." },
+      { status: 400 },
+    );
+  }
+  if (finalContactRole !== "proprietaire" && !finalContactRoleDetail?.trim()) {
+    return NextResponse.json(
+      { error: "Merci de préciser l'agence/structure du point de contact." },
+      { status: 400 },
     );
   }
 
