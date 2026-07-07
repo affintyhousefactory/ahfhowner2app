@@ -82,11 +82,48 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (!compatibilite_arko) {
+    return NextResponse.json(
+      { error: "La compatibilité ARKO est obligatoire." },
+      { status: 400 },
+    );
+  }
+  if (!reseaux?.trim() && !assainissement?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Réseaux (réseaux ou assainissement) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+  if (!acces_grue?.trim() && !pente_pct) {
+    return NextResponse.json(
+      { error: "Au moins un champ d'Accès & Terrain (accès grue ou pente) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+  if (!prix && !surface) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Prix & Surface (prix ou surface) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+  if (!zonage && !urbanisme_detail?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ d'Urbanisme (zonage ou détail urbanisme) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
   const finalStatut = statut ?? "disponible";
   const finalReserves: string[] = reserves ?? [];
   if ((finalStatut !== "disponible" || finalReserves.length > 0) && !notes?.trim()) {
     return NextResponse.json(
       { error: "Notes obligatoires dès que le statut n'est pas \"disponible\" ou qu'une réserve est renseignée." },
+      { status: 400 }
+    );
+  }
+  if (finalReserves.length === 0 && !notes?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Disponibilité & Réserves (réserves ou notes internes) doit être renseigné." },
       { status: 400 }
     );
   }

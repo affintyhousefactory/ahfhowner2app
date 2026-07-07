@@ -18,7 +18,7 @@ async function getMandataireAndFiche(req: NextRequest, ficheId: string) {
   // Vérifier que la fiche appartient au mandataire
   const { data: fiche } = await supabase
     .from("fiches_terrain")
-    .select("id, mandataire_id, statut, reserves, notes, contact_nom, contact_prenom, contact_telephone, contact_role, contact_role_detail")
+    .select("id, mandataire_id, statut, reserves, notes, contact_nom, contact_prenom, contact_telephone, contact_role, contact_role_detail, compatibilite_arko, reseaux, assainissement, acces_grue, pente_pct, prix, surface, zonage, urbanisme_detail")
     .eq("id", ficheId)
     .eq("mandataire_id", mandataire.id)
     .single();
@@ -91,6 +91,58 @@ export async function PATCH(
   if (finalContactRole !== "proprietaire" && !finalContactRoleDetail?.trim()) {
     return NextResponse.json(
       { error: "Merci de préciser l'agence/structure du point de contact." },
+      { status: 400 },
+    );
+  }
+
+  const finalCompatibiliteArko: string | null =
+    compatibilite_arko !== undefined ? compatibilite_arko : fiche.compatibilite_arko;
+  if (!finalCompatibiliteArko) {
+    return NextResponse.json(
+      { error: "La compatibilité ARKO est obligatoire." },
+      { status: 400 },
+    );
+  }
+
+  const finalReseaux: string | null = reseaux !== undefined ? reseaux : fiche.reseaux;
+  const finalAssainissement: string | null = assainissement !== undefined ? assainissement : fiche.assainissement;
+  if (!finalReseaux?.trim() && !finalAssainissement?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Réseaux (réseaux ou assainissement) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
+  const finalAccesGrue: string | null = acces_grue !== undefined ? acces_grue : fiche.acces_grue;
+  const finalPentePct: number | null = pente_pct !== undefined ? pente_pct : fiche.pente_pct;
+  if (!finalAccesGrue?.trim() && !finalPentePct) {
+    return NextResponse.json(
+      { error: "Au moins un champ d'Accès & Terrain (accès grue ou pente) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
+  const finalPrix: number | null = prix !== undefined ? prix : fiche.prix;
+  const finalSurface: number | null = surface !== undefined ? surface : fiche.surface;
+  if (!finalPrix && !finalSurface) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Prix & Surface (prix ou surface) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
+  const finalZonage: string | null = zonage !== undefined ? zonage : fiche.zonage;
+  const finalUrbanismeDetail: string | null = urbanisme_detail !== undefined ? urbanisme_detail : fiche.urbanisme_detail;
+  if (!finalZonage && !finalUrbanismeDetail?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ d'Urbanisme (zonage ou détail urbanisme) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
+  if (finalReserves.length === 0 && !finalNotes?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Disponibilité & Réserves (réserves ou notes internes) doit être renseigné." },
       { status: 400 },
     );
   }

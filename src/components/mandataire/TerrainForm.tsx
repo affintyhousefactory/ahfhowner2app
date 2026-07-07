@@ -62,7 +62,6 @@ function formatReserves(arr: string[]): string {
 const COMPATIBILITE_OPTIONS = [
   { value: "precompatible", label: "Précompatible", emoji: "✅", color: "text-green-700 bg-green-50 border-green-200" },
   { value: "a_confirmer", label: "À confirmer", emoji: "⚠️", color: "text-yellow-700 bg-yellow-50 border-yellow-200" },
-  { value: "non_compatible", label: "Non compatible", emoji: "❌", color: "text-red-700 bg-red-50 border-red-200" },
 ] as const;
 
 const MODELE_OPTIONS = [
@@ -264,6 +263,36 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
 
     if (requiresContactRoleDetail && !form.contact_role_detail.trim()) {
       setError("Merci de préciser l'agence/structure du point de contact.");
+      return;
+    }
+
+    if (!form.compatibilite_arko) {
+      setError("La compatibilité ARKO est obligatoire.");
+      return;
+    }
+
+    if (!form.reseaux.trim() && !form.assainissement.trim()) {
+      setError("Au moins un champ de Réseaux (réseaux ou assainissement) doit être renseigné.");
+      return;
+    }
+
+    if (!form.acces_grue.trim() && !form.pente_pct.trim()) {
+      setError("Au moins un champ d'Accès & Terrain (accès grue ou pente) doit être renseigné.");
+      return;
+    }
+
+    if (!form.prix.trim() && !form.surface.trim()) {
+      setError("Au moins un champ de Prix & Surface (prix ou surface) doit être renseigné.");
+      return;
+    }
+
+    if (!form.zonage && !form.urbanisme_detail.trim()) {
+      setError("Au moins un champ d'Urbanisme (zonage ou détail urbanisme) doit être renseigné.");
+      return;
+    }
+
+    if (parseReserves(form.reserves).length === 0 && !form.notes.trim()) {
+      setError("Au moins un champ de Disponibilité & Réserves (réserves ou notes internes) doit être renseigné.");
       return;
     }
 
@@ -824,7 +853,9 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             </div>
           </div>
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">Compatibilité estimée</p>
+            <p className="mb-2 text-sm font-medium text-gray-700">
+              Compatibilité estimée <span className="text-red-500">*</span>
+            </p>
             <div className="flex flex-wrap gap-3">
               {COMPATIBILITE_OPTIONS.map((opt) => (
                 <label
