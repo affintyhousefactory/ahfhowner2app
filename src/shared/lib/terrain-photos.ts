@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import sharp from "sharp";
 
 export interface FichePhoto {
   url: string;
@@ -6,6 +7,10 @@ export interface FichePhoto {
 }
 
 const ALLOWED_CONTENT_TYPES = new Set(["image/png", "image/jpeg", "image/jpg"]);
+// Formats fréquemment servis par les CDN de sites d'annonces (ex: iad sert ses photos en
+// webp) mais non acceptés par le bucket de storage — on les convertit plutôt que de les
+// rejeter, sinon aucune photo n'est jamais importable depuis ces sites.
+const CONVERTIBLE_CONTENT_TYPES = new Set(["image/webp", "image/avif", "image/gif"]);
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // aligné sur file_size_limit du bucket mandataires-documents
 
 export async function uploadFichePhoto(params: {
@@ -16,7 +21,14 @@ export async function uploadFichePhoto(params: {
   contentType: string;
   buffer: Uint8Array;
 }): Promise<FichePhoto> {
-  const { supabase, mandataireId, ficheId, fileName, contentType, buffer } = params;
+  const { supabase, mandataireId, ficheId } = params;
+  let { fileName, contentType, buffer } = params;
+
+  if (CONVERTIBLE_CONTENT_TYPES.has(contentType)) {
+    buffer = await sharp(buffer).jpeg({ quality: 85 }).toBuffer();
+    contentType = "image/jpeg";
+    fileName = fileName.replace(/\.\w+$/, ".jpg");
+  }
 
   if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
     throw new Error(`Format d'image non supporté (${contentType}) : seuls PNG/JPEG sont acceptés`);

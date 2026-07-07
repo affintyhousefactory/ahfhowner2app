@@ -155,9 +155,10 @@ export interface ExtractedPage {
 const IMAGE_EXCLUDE_PATTERN =
   /logo|icon|favicon|sprite|placeholder|profile-picture|avatar|broadcast|plan-?localisation|static-?map|maps\.google|carte|similaire|autres?-?annonces?|autres?-?biens?|recommand|suggest/i;
 
-// Formats non supportés par l'upload de fiche (uploadFichePhoto n'accepte que
-// png/jpeg/jpg) : on les exclut ici plutôt que de proposer un import voué à échouer.
-const UNSUPPORTED_IMAGE_EXTENSION = /\.(webp|avif|gif|svg)$/i;
+// .svg n'est jamais une vraie photo (icônes/décorations) — webp/avif/gif sont en revanche
+// des formats de photo légitimes (ex: iad sert sa galerie en webp) : uploadFichePhoto les
+// convertit désormais en JPEG à l'import, donc on ne les exclut plus ici.
+const UNSUPPORTED_IMAGE_EXTENSION = /\.svg$/i;
 
 // Une annonce présente rarement plus de 6-8 photos dans sa galerie principale ; au-delà,
 // on récupère presque toujours du contenu hors-sujet (biens similaires, plans, pied de page).
