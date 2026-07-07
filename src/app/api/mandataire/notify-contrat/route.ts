@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
       PRENOM: m.prenom,
       NOM: m.nom,
       STATUT_MANDATAIRE: "en_attente",
+      HOWNER_GROUP: "Mandataire",
     },
     [parseInt(process.env.BREVO_LIST_MANDATAIRES ?? "7")],
   ).catch((err) => errors.push(`brevo_contact: ${err}`));
