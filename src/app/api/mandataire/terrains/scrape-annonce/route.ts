@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { fetchAnnoncePage, extractPageContent, ScrapeError } from "@/shared/lib/scrape-annonce";
 import { extractFieldsFromText } from "@/shared/lib/anthropic";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 async function requireMandataire(req: NextRequest) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "") ?? "";
@@ -26,14 +26,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "url requis" }, { status: 400 });
   }
 
+  const t0 = Date.now();
   let html: string;
   let finalUrl: string;
   try {
     ({ html, finalUrl } = await fetchAnnoncePage(url));
   } catch (e) {
+    console.error(`[scrape-annonce] fetchAnnoncePage a échoué après ${Date.now() - t0}ms:`, e);
     if (e instanceof ScrapeError) return NextResponse.json({ error: e.message }, { status: e.status });
     return NextResponse.json({ error: "Échec de récupération de la page" }, { status: 502 });
   }
+  console.log(`[scrape-annonce] fetchAnnoncePage OK en ${Date.now() - t0}ms`);
 
   const extracted = extractPageContent(html, finalUrl);
   if (!extracted.cleanedText || extracted.cleanedText.length < 50) {
@@ -43,13 +46,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const t1 = Date.now();
   let fields;
   try {
     fields = await extractFieldsFromText(extracted);
   } catch (e) {
-    console.error("[scrape-annonce] extractFieldsFromText a échoué:", e);
+    console.error(`[scrape-annonce] extractFieldsFromText a échoué après ${Date.now() - t1}ms:`, e);
     return NextResponse.json({ error: "Échec de l'analyse du contenu par l'IA" }, { status: 502 });
   }
+  console.log(`[scrape-annonce] extractFieldsFromText OK en ${Date.now() - t1}ms (total ${Date.now() - t0}ms)`);
 
   const warnings: string[] = [];
   if (fields.prix != null && (fields.prix < 0 || fields.prix > 10_000_000)) {
