@@ -32,45 +32,44 @@ const EXTRACTION_TOOL: Anthropic.Tool = {
     type: "object",
     properties: {
       commune: {
-        type: ["string", "null"],
+        anyOf: [{ type: "string" }, { type: "null" }],
         description: "Nom de la commune où se situe le terrain, sans code postal.",
       },
       secteur: {
-        type: ["string", "null"],
+        anyOf: [{ type: "string" }, { type: "null" }],
         description: "Quartier / lieu-dit / secteur précis si mentionné, sinon null.",
       },
       prix: {
-        type: ["number", "null"],
+        anyOf: [{ type: "number" }, { type: "null" }],
         description: "Prix de vente en euros, nombre entier sans espaces ni symbole.",
       },
       surface: {
-        type: ["number", "null"],
+        anyOf: [{ type: "number" }, { type: "null" }],
         description: "Surface du terrain en m², nombre entier.",
       },
       zonage: {
-        type: ["string", "null"],
-        enum: ["U", "AU", "A", "N", "autre", null],
+        anyOf: [{ type: "string", enum: ["U", "AU", "A", "N", "autre"] }, { type: "null" }],
         description:
           "Zonage PLU si mentionné explicitement (U, AU, A, N), sinon 'autre' si mentionné vaguement, sinon null.",
       },
       urbanisme_detail: {
-        type: ["string", "null"],
+        anyOf: [{ type: "string" }, { type: "null" }],
         description: "Règles d'urbanisme mentionnées : emprise au sol, hauteur max, reculs, CES, etc.",
       },
       reseaux: {
-        type: ["string", "null"],
+        anyOf: [{ type: "string" }, { type: "null" }],
         description: "Réseaux disponibles mentionnés : eau, électricité, gaz, télécom.",
       },
       assainissement: {
-        type: ["string", "null"],
+        anyOf: [{ type: "string" }, { type: "null" }],
         description: "Type d'assainissement mentionné : tout-à-l'égout, fosse septique, étude à prévoir.",
       },
       description_libre: {
-        type: ["string", "null"],
+        anyOf: [{ type: "string" }, { type: "null" }],
         description: "Résumé factuel court (2-3 phrases) des points clés non capturés par les autres champs.",
       },
       source_reference: {
-        type: ["string", "null"],
+        anyOf: [{ type: "string" }, { type: "null" }],
         description: "Référence/numéro d'annonce affiché sur la page, si présent.",
       },
     },
