@@ -60,6 +60,7 @@ export async function addBrevoContact(
   email: string,
   attrs: Record<string, string | null | undefined>,
   listIds: number[],
+  options?: { emailBlacklisted?: boolean },
 ): Promise<void> {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
@@ -69,7 +70,13 @@ export async function addBrevoContact(
   const res = await fetch(BREVO_CONTACTS_API, {
     method: "POST",
     headers: { "Content-Type": "application/json", "api-key": apiKey },
-    body: JSON.stringify({ email, attributes: normalizeAttrs(attrs), listIds, updateEnabled: true }),
+    body: JSON.stringify({
+      email,
+      attributes: normalizeAttrs(attrs),
+      listIds,
+      updateEnabled: true,
+      ...(options?.emailBlacklisted !== undefined ? { emailBlacklisted: options.emailBlacklisted } : {}),
+    }),
   });
   if (!res.ok && res.status !== 204) {
     console.warn(`[email] addBrevoContact ${res.status}:`, await res.text());
