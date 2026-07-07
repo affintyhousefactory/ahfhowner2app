@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
   let fields;
   try {
     fields = await extractFieldsFromText(extracted);
-  } catch {
+  } catch (e) {
+    console.error("[scrape-annonce] extractFieldsFromText a échoué:", e);
     return NextResponse.json({ error: "Échec de l'analyse du contenu par l'IA" }, { status: 502 });
   }
 
