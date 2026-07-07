@@ -25,9 +25,17 @@ export async function uploadFichePhoto(params: {
   let { fileName, contentType, buffer } = params;
 
   if (CONVERTIBLE_CONTENT_TYPES.has(contentType)) {
+    console.log(
+      `[terrain-photos] avant conversion : ${buffer.byteLength} octets, ` +
+        `magic=${Buffer.from(buffer.slice(0, 12)).toString("hex")}`,
+    );
     buffer = await sharp(buffer).jpeg({ quality: 85 }).toBuffer();
     contentType = "image/jpeg";
     fileName = fileName.replace(/\.\w+$/, ".jpg");
+    console.log(
+      `[terrain-photos] après conversion : ${buffer.byteLength} octets, ` +
+        `magic=${Buffer.from(buffer.slice(0, 12)).toString("hex")}`,
+    );
   }
 
   if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
