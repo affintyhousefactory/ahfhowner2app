@@ -25,17 +25,9 @@ export async function uploadFichePhoto(params: {
   let { fileName, contentType, buffer } = params;
 
   if (CONVERTIBLE_CONTENT_TYPES.has(contentType)) {
-    console.log(
-      `[terrain-photos] avant conversion : ${buffer.byteLength} octets, ` +
-        `magic=${Buffer.from(buffer.slice(0, 12)).toString("hex")}`,
-    );
     buffer = await sharp(buffer).jpeg({ quality: 85 }).toBuffer();
     contentType = "image/jpeg";
     fileName = fileName.replace(/\.\w+$/, ".jpg");
-    console.log(
-      `[terrain-photos] après conversion : ${buffer.byteLength} octets, ` +
-        `magic=${Buffer.from(buffer.slice(0, 12)).toString("hex")}`,
-    );
   }
 
   if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
@@ -49,9 +41,15 @@ export async function uploadFichePhoto(params: {
   const safeName = fileName.replace(/[^a-z0-9.\-_]/gi, "_");
   const uploadPath = `terrains/${mandataireId}/${ficheId}/${timestamp}-${safeName}`;
 
+  // Passer un Buffer/Uint8Array brut à storage-js corrompt le contenu binaire en environnement
+  // Vercel (constaté : bytes valides juste avant l'appel, fichier corrompu une fois stocké —
+  // diagnostiqué via logs de production). Envelopper dans un Blob force le SDK à passer par
+  // FormData, un chemin de transport plus robuste pour du binaire.
+  const blob = new Blob([buffer], { type: contentType });
+
   const { error: uploadErr } = await supabase.storage
     .from("mandataires-documents")
-    .upload(uploadPath, buffer, { contentType, upsert: false });
+    .upload(uploadPath, blob, { contentType, upsert: false });
   if (uploadErr) throw new Error(uploadErr.message);
 
   const { data: urlData } = supabase.storage.from("mandataires-documents").getPublicUrl(uploadPath);
