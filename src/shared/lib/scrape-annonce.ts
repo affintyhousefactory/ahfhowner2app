@@ -153,7 +153,15 @@ export interface ExtractedPage {
 }
 
 const IMAGE_EXCLUDE_PATTERN =
-  /logo|icon|favicon|sprite|placeholder|profile-picture|avatar|broadcast/i;
+  /logo|icon|favicon|sprite|placeholder|profile-picture|avatar|broadcast|plan-?localisation|static-?map|maps\.google|carte|similaire|autres?-?annonces?|autres?-?biens?|recommand|suggest/i;
+
+// Formats non supportés par l'upload de fiche (uploadFichePhoto n'accepte que
+// png/jpeg/jpg) : on les exclut ici plutôt que de proposer un import voué à échouer.
+const UNSUPPORTED_IMAGE_EXTENSION = /\.(webp|avif|gif|svg)$/i;
+
+// Une annonce présente rarement plus de 6-8 photos dans sa galerie principale ; au-delà,
+// on récupère presque toujours du contenu hors-sujet (biens similaires, plans, pied de page).
+const MAX_IMAGES = 8;
 
 export function extractPageContent(html: string, baseUrl: string): ExtractedPage {
   const $ = cheerio.load(html);
@@ -172,21 +180,20 @@ export function extractPageContent(html: string, baseUrl: string): ExtractedPage
   const title = $("title").first().text().trim();
   const metaDescription = $('meta[name="description"]').attr("content")?.trim() ?? "";
 
-  const rawImageUrls = new Set<string>();
+  // Retirer nav/header/footer/aside AVANT de collecter les images : ces zones contiennent
+  // presque toujours du contenu hors annonce (biens similaires en pied de page, logos,
+  // widgets de navigation) plutôt que la galerie principale du bien.
+  $("script, style, nav, header, footer, aside, noscript, iframe, svg").remove();
+
+  const rawImageUrls: string[] = [];
   $("img").each((_, el) => {
     const src = $(el).attr("src") || $(el).attr("data-src");
-    if (src) rawImageUrls.add(src);
+    if (src) rawImageUrls.push(src);
   });
-  $('meta[property="og:image"]').each((_, el) => {
-    const c = $(el).attr("content");
-    if (c) rawImageUrls.add(c);
-  });
-
-  $("script, style, nav, header, footer, noscript, iframe, svg").remove();
 
   const cleanedText = $("body").text().replace(/\s+/g, " ").trim().slice(0, 15_000);
 
-  const resolvedUrls = Array.from(rawImageUrls)
+  const resolvedUrls = rawImageUrls
     .map((src) => {
       try {
         return new URL(src, baseUrl);
@@ -195,10 +202,13 @@ export function extractPageContent(html: string, baseUrl: string): ExtractedPage
       }
     })
     .filter((u): u is URL => !!u)
-    .filter((u) => !IMAGE_EXCLUDE_PATTERN.test(u.toString()));
+    .filter((u) => !IMAGE_EXCLUDE_PATTERN.test(u.toString()))
+    .filter((u) => !UNSUPPORTED_IMAGE_EXTENSION.test(u.pathname));
 
-  // Déduplication par chemin (en ignorant les query params de format/résolution)
-  // pour éviter de proposer plusieurs fois la même photo en tailles différentes.
+  // Déduplication par chemin (en ignorant les query params de format/résolution) pour
+  // éviter de proposer plusieurs fois la même photo en tailles différentes. L'ordre du DOM
+  // est conservé (donc les images du haut de l'annonce, en général la galerie principale,
+  // sont prioritaires) et on plafonne à MAX_IMAGES pour ne garder que celles-ci.
   const seenPaths = new Set<string>();
   const images: string[] = [];
   for (const u of resolvedUrls) {
@@ -206,7 +216,7 @@ export function extractPageContent(html: string, baseUrl: string): ExtractedPage
     if (seenPaths.has(key)) continue;
     seenPaths.add(key);
     images.push(u.toString());
-    if (images.length >= 20) break;
+    if (images.length >= MAX_IMAGES) break;
   }
 
   return { title, metaDescription, jsonLd, cleanedText, images };
