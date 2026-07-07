@@ -41,7 +41,7 @@ interface TerrainFormProps {
   initialData?: Partial<FicheTerrain>;
   ficheId?: string;
   mandataireToken: string;
-  onSaved: (fiche: FicheTerrain) => void;
+  onSaved: (fiche: FicheTerrain, warning?: string) => void;
 }
 
 function todayISODate() {
@@ -218,6 +218,7 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
   const [analyzeSuccess, setAnalyzeSuccess] = useState(true);
   const [analyzeElapsed, setAnalyzeElapsed] = useState(0);
   const [pendingImportImages, setPendingImportImages] = useState<string[]>([]);
+  const [photoImportProgress, setPhotoImportProgress] = useState<{ done: number; total: number } | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const analyzeAbortRef = useRef<AbortController | null>(null);
 
@@ -309,8 +310,12 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
     }
 
     const savedFiche = data as FicheTerrain;
+    let importWarning: string | undefined;
 
     if (pendingImportImages.length > 0) {
+      const total = pendingImportImages.length;
+      setPhotoImportProgress({ done: 0, total });
+
       const importedPhotos: { url: string; nom: string }[] = [];
       let failedCount = 0;
 
@@ -321,27 +326,32 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             "Content-Type": "application/json",
             authorization: `Bearer ${mandataireToken}`,
           },
-          body: JSON.stringify({ imageUrl }),
+          body: JSON.stringify({ imageUrl, sourceUrl }),
         });
         if (r.ok) {
           importedPhotos.push(await r.json());
         } else {
           failedCount++;
         }
+        setPhotoImportProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
       }
 
       setPendingImportImages([]);
+      setPhotoImportProgress(null);
       if (importedPhotos.length > 0) {
         savedFiche.photos = [...(savedFiche.photos ?? []), ...importedPhotos];
         setPhotos(savedFiche.photos);
       }
       if (failedCount > 0) {
-        setError(`${failedCount} photo(s) n'ont pas pu être importées automatiquement.`);
+        importWarning =
+          `${failedCount} photo(s) sur ${total} n'ont pas pu être importées automatiquement ` +
+          "(image indisponible ou format non supporté par le site source). " +
+          "Vous pouvez les ajouter manuellement depuis la section Photos ci-dessous.";
       }
     }
 
     setSaving(false);
-    onSaved(savedFiche);
+    onSaved(savedFiche, importWarning);
   };
 
   const handleAnalyze = async () => {
@@ -1052,13 +1062,28 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
         </div>
       )}
 
+      {photoImportProgress && (
+        <div className="flex items-center gap-3 rounded-xl border border-[#7469F4]/20 bg-[#7469F4]/5 px-4 py-3">
+          <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#7469F4] border-t-transparent" />
+          <p className="flex-1 text-sm font-medium text-gray-700">
+            Import des photos de l&apos;annonce… ({photoImportProgress.done}/{photoImportProgress.total})
+          </p>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <button
           type="submit"
           disabled={saving || analyzing}
           className="rounded-xl bg-[#7469F4] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#5a54d4] disabled:opacity-50 transition-colors"
         >
-          {saving ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer la fiche"}
+          {saving && photoImportProgress
+            ? "Import des photos…"
+            : saving
+              ? "Enregistrement…"
+              : isEdit
+                ? "Mettre à jour"
+                : "Créer la fiche"}
         </button>
       </div>
     </form>

@@ -78,7 +78,10 @@ async function readBoundedBody(res: Response): Promise<Uint8Array> {
   return Buffer.concat(chunks.map((c) => Buffer.from(c)));
 }
 
-async function fetchWithSsrfGuard(rawUrl: string): Promise<{ res: Response; finalUrl: string }> {
+async function fetchWithSsrfGuard(
+  rawUrl: string,
+  options?: { referer?: string },
+): Promise<{ res: Response; finalUrl: string }> {
   let url: URL;
   try {
     url = new URL(rawUrl);
@@ -98,7 +101,10 @@ async function fetchWithSsrfGuard(rawUrl: string): Promise<{ res: Response; fina
       res = await fetch(currentUrl.toString(), {
         redirect: "manual",
         signal: controller.signal,
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; HownerBot/1.0)" },
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; HownerBot/1.0)",
+          ...(options?.referer ? { Referer: options.referer } : {}),
+        },
       });
     } catch {
       throw new ScrapeError("Échec de connexion à la page (timeout ou refus)", 504);
@@ -130,8 +136,9 @@ export async function fetchAnnoncePage(rawUrl: string): Promise<{ html: string; 
 
 export async function fetchBinaryResource(
   rawUrl: string,
+  options?: { referer?: string },
 ): Promise<{ buffer: Uint8Array; contentType: string }> {
-  const { res } = await fetchWithSsrfGuard(rawUrl);
+  const { res } = await fetchWithSsrfGuard(rawUrl, options);
   const contentType = res.headers.get("content-type")?.split(";")[0]?.trim() ?? "application/octet-stream";
   const buffer = await readBoundedBody(res);
   return { buffer, contentType };

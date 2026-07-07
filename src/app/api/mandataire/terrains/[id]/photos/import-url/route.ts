@@ -44,8 +44,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { error, status, supabase, mandataire, fiche } = await getMandataireAndFiche(req, id);
   if (error || !supabase || !mandataire || !fiche) return NextResponse.json({ error }, { status });
 
-  const body = await req.json().catch(() => ({ imageUrl: undefined }));
-  const { imageUrl } = body as { imageUrl?: string };
+  const body = await req.json().catch(() => ({ imageUrl: undefined, sourceUrl: undefined }));
+  const { imageUrl, sourceUrl } = body as { imageUrl?: string; sourceUrl?: string };
   if (!imageUrl || typeof imageUrl !== "string") {
     return NextResponse.json({ error: "imageUrl requis" }, { status: 400 });
   }
@@ -53,8 +53,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let buffer: Uint8Array;
   let contentType: string;
   try {
-    ({ buffer, contentType } = await fetchBinaryResource(imageUrl));
+    // Certains CDN d'images (protection anti-hotlink) exigent un Referer correspondant
+    // au site d'origine pour servir l'image — on renvoie l'URL de l'annonce source.
+    ({ buffer, contentType } = await fetchBinaryResource(imageUrl, { referer: sourceUrl }));
   } catch (e) {
+    console.error(`[photos/import-url] fetchBinaryResource a échoué pour ${imageUrl}:`, e);
     if (e instanceof ScrapeError) return NextResponse.json({ error: e.message }, { status: e.status });
     return NextResponse.json({ error: "Impossible de récupérer l'image" }, { status: 502 });
   }
@@ -77,6 +80,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json(photo, { status: 201 });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Erreur import photo";
+    console.error(`[photos/import-url] upload a échoué pour ${imageUrl} (content-type: ${contentType}):`, message);
     return NextResponse.json({ error: message }, { status: 415 });
   }
 }

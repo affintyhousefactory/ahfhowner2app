@@ -19,8 +19,9 @@ export default function NouveauTerrainPage() {
     });
   }, []);
 
-  const handleSaved = (fiche: FicheTerrain) => {
-    router.push(`/mandataire/terrains/${fiche.id}`);
+  const handleSaved = (fiche: FicheTerrain, warning?: string) => {
+    const query = warning ? `?photoWarning=${encodeURIComponent(warning)}` : "";
+    router.push(`/mandataire/terrains/${fiche.id}${query}`);
   };
 
   if (loading) {
