@@ -45,6 +45,36 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* react-phone-number-input — aligné sur le style des autres champs du formulaire contact */
+.contact-phone-input.PhoneInput {
+  border: 1px solid var(--color-line);
+  border-radius: 9999px;
+  background: var(--color-surface);
+  padding: 0.875rem 1.25rem;
+  transition: border-color 0.2s;
+}
+.contact-phone-input.PhoneInput--focus {
+  border-color: var(--color-accent);
+}
+.contact-phone-input .PhoneInputInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  min-width: 0;
+}
+.contact-phone-input .PhoneInputInput::placeholder {
+  color: var(--color-muted);
+  opacity: 0.6;
+}
+.contact-phone-input .PhoneInputCountry {
+  margin-right: 0.6rem;
+}
+.contact-phone-input .PhoneInputCountrySelect {
+  cursor: pointer;
+}
+
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
