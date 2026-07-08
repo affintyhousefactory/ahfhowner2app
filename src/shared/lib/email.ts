@@ -2,6 +2,26 @@ const BREVO_API = "https://api.brevo.com/v3/smtp/email";
 const BREVO_CONTACTS_API = "https://api.brevo.com/v3/contacts";
 const BREVO_DOI_API = "https://api.brevo.com/v3/contacts/doubleOptinConfirmation";
 
+// Brevo exige un attribut SMS au format international (ex: +33612345678) — un numéro
+// français saisi au format national (ex: "06 12 34 56 78") est rejeté tel quel (400
+// Invalid phone number). On ne normalise que le cas français courant ; les formats déjà
+// internationaux ou inconnus sont laissés tels quels pour que Brevo valide/rejette lui-même.
+function normalizePhoneFr(tel: string | null | undefined): string | undefined {
+  if (!tel) return undefined;
+  const digits = tel.replace(/[\s.\-()]/g, "");
+  if (digits.startsWith("+")) return digits;
+  if (digits.startsWith("0") && digits.length === 10) return `+33${digits.slice(1)}`;
+  if (digits.startsWith("33") && digits.length === 11) return `+${digits}`;
+  return digits;
+}
+
+function normalizeAttrs(
+  attrs: Record<string, string | null | undefined>,
+): Record<string, string | null | undefined> {
+  if (!("SMS" in attrs)) return attrs;
+  return { ...attrs, SMS: normalizePhoneFr(attrs.SMS) };
+}
+
 export async function sendBrevoTemplate({
   templateId,
   to,
@@ -40,6 +60,7 @@ export async function addBrevoContact(
   email: string,
   attrs: Record<string, string | null | undefined>,
   listIds: number[],
+  options?: { emailBlacklisted?: boolean },
 ): Promise<void> {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
@@ -49,7 +70,13 @@ export async function addBrevoContact(
   const res = await fetch(BREVO_CONTACTS_API, {
     method: "POST",
     headers: { "Content-Type": "application/json", "api-key": apiKey },
-    body: JSON.stringify({ email, attributes: attrs, listIds, updateEnabled: true }),
+    body: JSON.stringify({
+      email,
+      attributes: normalizeAttrs(attrs),
+      listIds,
+      updateEnabled: true,
+      ...(options?.emailBlacklisted !== undefined ? { emailBlacklisted: options.emailBlacklisted } : {}),
+    }),
   });
   if (!res.ok && res.status !== 204) {
     console.warn(`[email] addBrevoContact ${res.status}:`, await res.text());
@@ -73,7 +100,7 @@ export async function addBrevoContactDOI(
     headers: { "Content-Type": "application/json", "api-key": apiKey },
     body: JSON.stringify({
       email,
-      attributes: attrs,
+      attributes: normalizeAttrs(attrs),
       includeListIds: [listId],
       templateId,
       redirectionUrl,

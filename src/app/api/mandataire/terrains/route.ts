@@ -58,15 +58,72 @@ export async function POST(req: NextRequest) {
     reserves,
     notes,
     photos,
+    source_url,
+    source_reference,
+    contact_nom,
+    contact_prenom,
+    contact_telephone,
+    contact_role,
+    contact_role_detail,
   } = body;
 
   if (!commune) return NextResponse.json({ error: "commune est requis" }, { status: 400 });
+
+  if (!contact_nom?.trim() || !contact_prenom?.trim() || !contact_telephone?.trim() || !contact_role) {
+    return NextResponse.json(
+      { error: "Le point de contact pour ce bien (nom, prénom, téléphone, rôle) est obligatoire." },
+      { status: 400 },
+    );
+  }
+  if (contact_role !== "proprietaire" && !contact_role_detail?.trim()) {
+    return NextResponse.json(
+      { error: "Merci de préciser l'agence/structure du point de contact." },
+      { status: 400 },
+    );
+  }
+
+  if (!compatibilite_arko) {
+    return NextResponse.json(
+      { error: "La compatibilité ARKO est obligatoire." },
+      { status: 400 },
+    );
+  }
+  if (!reseaux?.trim() && !assainissement?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Réseaux (réseaux ou assainissement) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+  if (!acces_grue?.trim() && !pente_pct) {
+    return NextResponse.json(
+      { error: "Au moins un champ d'Accès & Terrain (accès grue ou pente) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+  if (!prix && !surface) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Prix & Surface (prix ou surface) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+  if (!zonage && !urbanisme_detail?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ d'Urbanisme (zonage ou détail urbanisme) doit être renseigné." },
+      { status: 400 },
+    );
+  }
 
   const finalStatut = statut ?? "disponible";
   const finalReserves: string[] = reserves ?? [];
   if ((finalStatut !== "disponible" || finalReserves.length > 0) && !notes?.trim()) {
     return NextResponse.json(
       { error: "Notes obligatoires dès que le statut n'est pas \"disponible\" ou qu'une réserve est renseignée." },
+      { status: 400 }
+    );
+  }
+  if (finalReserves.length === 0 && !notes?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Disponibilité & Réserves (réserves ou notes internes) doit être renseigné." },
       { status: 400 }
     );
   }
@@ -93,6 +150,13 @@ export async function POST(req: NextRequest) {
       reserves: reserves ?? [],
       notes,
       photos: photos ?? [],
+      source_url: source_url ?? null,
+      source_reference: source_reference ?? null,
+      contact_nom: contact_nom ?? null,
+      contact_prenom: contact_prenom ?? null,
+      contact_telephone: contact_telephone ?? null,
+      contact_role: contact_role ?? null,
+      contact_role_detail: contact_role_detail ?? null,
     })
     .select()
     .single();

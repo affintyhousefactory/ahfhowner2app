@@ -18,7 +18,7 @@ async function getMandataireAndFiche(req: NextRequest, ficheId: string) {
   // Vérifier que la fiche appartient au mandataire
   const { data: fiche } = await supabase
     .from("fiches_terrain")
-    .select("id, mandataire_id, statut, reserves, notes")
+    .select("id, mandataire_id, statut, reserves, notes, contact_nom, contact_prenom, contact_telephone, contact_role, contact_role_detail, compatibilite_arko, reseaux, assainissement, acces_grue, pente_pct, prix, surface, zonage, urbanisme_detail")
     .eq("id", ficheId)
     .eq("mandataire_id", mandataire.id)
     .single();
@@ -57,6 +57,13 @@ export async function PATCH(
     reserves,
     notes,
     photos,
+    source_url,
+    source_reference,
+    contact_nom,
+    contact_prenom,
+    contact_telephone,
+    contact_role,
+    contact_role_detail,
   } = body;
 
   const finalStatut: string = statut !== undefined ? statut : fiche.statut;
@@ -66,6 +73,77 @@ export async function PATCH(
     return NextResponse.json(
       { error: "Notes obligatoires dès que le statut n'est pas \"disponible\" ou qu'une réserve est renseignée." },
       { status: 400 }
+    );
+  }
+
+  const finalContactNom: string | null = contact_nom !== undefined ? contact_nom : fiche.contact_nom;
+  const finalContactPrenom: string | null = contact_prenom !== undefined ? contact_prenom : fiche.contact_prenom;
+  const finalContactTelephone: string | null = contact_telephone !== undefined ? contact_telephone : fiche.contact_telephone;
+  const finalContactRole: string | null = contact_role !== undefined ? contact_role : fiche.contact_role;
+  const finalContactRoleDetail: string | null = contact_role_detail !== undefined ? contact_role_detail : fiche.contact_role_detail;
+
+  if (!finalContactNom?.trim() || !finalContactPrenom?.trim() || !finalContactTelephone?.trim() || !finalContactRole) {
+    return NextResponse.json(
+      { error: "Le point de contact pour ce bien (nom, prénom, téléphone, rôle) est obligatoire." },
+      { status: 400 },
+    );
+  }
+  if (finalContactRole !== "proprietaire" && !finalContactRoleDetail?.trim()) {
+    return NextResponse.json(
+      { error: "Merci de préciser l'agence/structure du point de contact." },
+      { status: 400 },
+    );
+  }
+
+  const finalCompatibiliteArko: string | null =
+    compatibilite_arko !== undefined ? compatibilite_arko : fiche.compatibilite_arko;
+  if (!finalCompatibiliteArko) {
+    return NextResponse.json(
+      { error: "La compatibilité ARKO est obligatoire." },
+      { status: 400 },
+    );
+  }
+
+  const finalReseaux: string | null = reseaux !== undefined ? reseaux : fiche.reseaux;
+  const finalAssainissement: string | null = assainissement !== undefined ? assainissement : fiche.assainissement;
+  if (!finalReseaux?.trim() && !finalAssainissement?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Réseaux (réseaux ou assainissement) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
+  const finalAccesGrue: string | null = acces_grue !== undefined ? acces_grue : fiche.acces_grue;
+  const finalPentePct: number | null = pente_pct !== undefined ? pente_pct : fiche.pente_pct;
+  if (!finalAccesGrue?.trim() && !finalPentePct) {
+    return NextResponse.json(
+      { error: "Au moins un champ d'Accès & Terrain (accès grue ou pente) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
+  const finalPrix: number | null = prix !== undefined ? prix : fiche.prix;
+  const finalSurface: number | null = surface !== undefined ? surface : fiche.surface;
+  if (!finalPrix && !finalSurface) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Prix & Surface (prix ou surface) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
+  const finalZonage: string | null = zonage !== undefined ? zonage : fiche.zonage;
+  const finalUrbanismeDetail: string | null = urbanisme_detail !== undefined ? urbanisme_detail : fiche.urbanisme_detail;
+  if (!finalZonage && !finalUrbanismeDetail?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ d'Urbanisme (zonage ou détail urbanisme) doit être renseigné." },
+      { status: 400 },
+    );
+  }
+
+  if (finalReserves.length === 0 && !finalNotes?.trim()) {
+    return NextResponse.json(
+      { error: "Au moins un champ de Disponibilité & Réserves (réserves ou notes internes) doit être renseigné." },
+      { status: 400 },
     );
   }
 
@@ -88,6 +166,13 @@ export async function PATCH(
   if (reserves !== undefined) updates.reserves = reserves;
   if (notes !== undefined) updates.notes = notes;
   if (photos !== undefined) updates.photos = photos;
+  if (source_url !== undefined) updates.source_url = source_url;
+  if (source_reference !== undefined) updates.source_reference = source_reference;
+  if (contact_nom !== undefined) updates.contact_nom = contact_nom;
+  if (contact_prenom !== undefined) updates.contact_prenom = contact_prenom;
+  if (contact_telephone !== undefined) updates.contact_telephone = contact_telephone;
+  if (contact_role !== undefined) updates.contact_role = contact_role;
+  if (contact_role_detail !== undefined) updates.contact_role_detail = contact_role_detail;
 
   const { data, error: dbErr } = await supabase
     .from("fiches_terrain")

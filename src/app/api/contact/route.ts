@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBrevoTemplate, addBrevoContactDOI } from "@/shared/lib/email";
+import { sendBrevoTemplate, addBrevoContact, addBrevoContactDOI } from "@/shared/lib/email";
 
 const PRODUIT_LABELS: Record<string, string> = {
   one: "Arko One (20 m²)",
@@ -18,12 +18,18 @@ type Payload = {
   optIn?: boolean;
 };
 
+const EMAIL_PATTERN = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as Payload;
-  const { prenom, nom, email, tel, produit, message, captchaToken, optIn } = body;
+  const { prenom, nom, tel, produit, message, captchaToken, optIn } = body;
+  const email = body.email?.trim();
 
-  if (!prenom || !nom || !email || !message) {
+  if (!prenom?.trim() || !nom?.trim() || !email || !message?.trim()) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+  }
+  if (!EMAIL_PATTERN.test(email)) {
+    return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
 
   // Vérification Turnstile (obligatoire en production)
@@ -89,8 +95,9 @@ export async function POST(req: NextRequest) {
     },
   }).catch((err) => console.error("[contact] Brevo error:", err));
 
-  // Opt-in newsletter prospects (DOI — list 8)
   if (optIn) {
+    // Opt-in newsletter prospects (DOI — list 8) : le contact est créé/confirmé par ce
+    // flux, pas besoin d'un addBrevoContact séparé qui court-circuiterait la confirmation.
     const doiTemplateId = parseInt(process.env.BREVO_DOI_TEMPLATE_ID ?? "0");
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
     await addBrevoContactDOI(
@@ -100,6 +107,15 @@ export async function POST(req: NextRequest) {
       doiTemplateId,
       `${siteUrl}/confirmation-inscription`,
     ).catch((err) => console.error("[contact] Brevo DOI error:", err));
+  } else {
+    // Pas d'opt-in : le contact existe quand même dans le CRM (traçabilité de la demande)
+    // mais explicitement blocklisté, sans ajout à la liste prospects.
+    await addBrevoContact(
+      email,
+      { PRENOM: prenom, NOM: nom, SMS: tel ?? undefined },
+      [],
+      { emailBlacklisted: true },
+    ).catch((err) => console.error("[contact] Brevo contact error:", err));
   }
 
   return NextResponse.json({ success: true });

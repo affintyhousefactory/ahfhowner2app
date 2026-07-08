@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { addBrevoContact } from "@/shared/lib/email";
 import type { ContratData } from "@/shared/components/mandataire/ContratCanvas";
 
 export async function POST(req: NextRequest) {
@@ -61,6 +62,19 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
+
+  // Contact CRM Brevo (liste mandataires, base contractuelle — pas de DOI, non bloquant)
+  addBrevoContact(
+    contrat.email,
+    {
+      PRENOM: contrat.signature_prenom,
+      NOM: contrat.nom_raison_sociale,
+      SMS: contrat.tel,
+      STATUT_MANDATAIRE: "en_attente",
+      HOWNER_GROUP: "Mandataire",
+    },
+    [parseInt(process.env.BREVO_LIST_MANDATAIRES ?? "7")],
+  ).catch((err) => console.error("[mandataire/register] Brevo contact error:", err));
 
   return NextResponse.json({ success: true, userId });
 }

@@ -19,8 +19,9 @@ export default function NouveauTerrainPage() {
     });
   }, []);
 
-  const handleSaved = (fiche: FicheTerrain) => {
-    router.push(`/mandataire/terrains/${fiche.id}`);
+  const handleSaved = (fiche: FicheTerrain, warning?: string) => {
+    const query = warning ? `?photoWarning=${encodeURIComponent(warning)}` : "";
+    router.push(`/mandataire/terrains/${fiche.id}${query}`);
   };
 
   if (loading) {
@@ -32,7 +33,7 @@ export default function NouveauTerrainPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-center gap-3">
         <Link
           href="/mandataire/terrains"

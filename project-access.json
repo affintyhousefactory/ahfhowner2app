@@ -11,7 +11,11 @@
     "dbName": "ahfhownerdb",
     "mode": "read-write",
     "allowedTables": ["leads", "contacts", "recherche_terrain"],
-    "note": "ADR-007 partiel valide (table leads). Stripe/Realtime/waitlist = ADR-008/009/010."
+    "note": "ADR-007 partiel valide (table leads). Stripe/Realtime/waitlist = ADR-008/009/010. Note : en pratique l'usage courant du projet couvre tout le schema fiches_terrain/mandataires/dossiers, cette liste est obsolete et sert d'indication historique seulement.",
+    "environments": {
+      "production": { "supabaseProjectRef": "msrjocrcewvqkcehruny", "dbName": "ahfhownerdb" },
+      "preview": { "supabaseProjectRef": "ixozlavseaykxmjtkkrk", "dbName": "ahfhownerdb-preprod", "note": "Base Preview Vercel (NEXT_PUBLIC_SUPABASE_URL scope Preview). Meme organisation Supabase que prod. Declaree le 2026-07-07 suite a un ecart de migrations decouvert en test." }
+    }
   },
   "gmail": {
     "allowedSendAs": [],

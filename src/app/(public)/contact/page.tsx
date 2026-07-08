@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ContactForm } from "@/components/site/ContactForm";
 
 export const metadata: Metadata = {
@@ -31,7 +32,9 @@ export default function ContactPage() {
               réservation ? Notre architecte intégrée vous répond.
             </p>
           </div>
-          <ContactForm />
+          <Suspense fallback={<div className="rounded-2xl border border-line bg-canvas p-6 md:p-8" />}>
+            <ContactForm />
+          </Suspense>
         </div>
       </section>
     </main>
