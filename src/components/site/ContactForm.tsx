@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import { PRODUCT_LIST } from "@/lib/site";
 import { Arrow } from "@/components/ui/Button";
 
@@ -30,6 +32,7 @@ export function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [optIn, setOptIn] = useState(false);
+  const [tel, setTel] = useState<string | undefined>(undefined);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
   const pendingFormDataRef = useRef<FormData | null>(null);
 
@@ -44,7 +47,7 @@ export function ContactForm() {
         prenom: data.get("prenom"),
         nom: data.get("nom"),
         email: data.get("email"),
-        tel: data.get("tel") || null,
+        tel: tel || null,
         produit: data.get("produit") || null,
         message: data.get("message"),
         captchaToken: token,
@@ -139,7 +142,15 @@ export function ContactForm() {
           required
           pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
         />
-        <Field name="tel" type="tel" placeholder="Téléphone *" required />
+        <PhoneInput
+          international
+          defaultCountry="FR"
+          value={tel}
+          onChange={setTel}
+          placeholder="Téléphone *"
+          className="contact-phone-input"
+          numberInputProps={{ required: true }}
+        />
       </div>
 
       <select
