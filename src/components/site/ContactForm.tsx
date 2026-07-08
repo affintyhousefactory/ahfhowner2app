@@ -148,7 +148,7 @@ export function ContactForm() {
           value={tel}
           onChange={setTel}
           placeholder="Téléphone *"
-          className="contact-phone-input"
+          className="phone-input"
           numberInputProps={{ required: true }}
         />
       </div>
