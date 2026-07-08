@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBrevoTemplate, addBrevoContactDOI } from "@/shared/lib/email";
+import { sendBrevoTemplate, addBrevoContact } from "@/shared/lib/email";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 
 type Commune = { nom: string; cp: string };
@@ -92,18 +92,14 @@ export async function POST(req: NextRequest) {
     },
   }).catch((err) => console.error("[recherche-terrain] Brevo error:", err));
 
-  // Opt-in newsletter prospects (DOI — list 8)
-  if (optIn) {
-    const doiTemplateId = parseInt(process.env.BREVO_DOI_TEMPLATE_ID ?? "0");
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
-    addBrevoContactDOI(
-      email,
-      { PRENOM: prenom, NOM: nom, SMS: telephone ?? undefined },
-      parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8"),
-      doiTemplateId,
-      `${siteUrl}/confirmation-inscription`,
-    ).catch((err) => console.error("[recherche-terrain] Brevo DOI error:", err));
-  }
+  // Contact CRM Brevo : toujours créé (groupe Lead_Configurateur), inscription directe
+  // SUBSCRIBED (liste prospects) si opt-in coché, sinon créé blocklisté.
+  addBrevoContact(
+    email,
+    { PRENOM: prenom, NOM: nom, SMS: telephone ?? undefined, HOWNER_GROUP: "Lead_Configurateur" },
+    optIn ? [parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8")] : [],
+    { emailBlacklisted: !optIn },
+  ).catch((err) => console.error("[recherche-terrain] Brevo contact error:", err));
 
   return NextResponse.json({ success: true });
 }

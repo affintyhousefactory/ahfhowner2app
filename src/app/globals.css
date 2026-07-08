@@ -46,17 +46,24 @@ html {
 }
 
 /* react-phone-number-input — aligné sur le style des autres champs du formulaire contact */
-.contact-phone-input.PhoneInput {
+.phone-input.PhoneInput {
   border: 1px solid var(--color-line);
   border-radius: 9999px;
   background: var(--color-surface);
   padding: 0.875rem 1.25rem;
   transition: border-color 0.2s;
 }
-.contact-phone-input.PhoneInput--focus {
+.phone-input.PhoneInput--focus {
   border-color: var(--color-accent);
 }
-.contact-phone-input .PhoneInputInput {
+.phone-input.phone-input--error {
+  border-color: #f87171;
+}
+.phone-input.phone-input--error .PhoneInputInput::placeholder {
+  color: #f87171;
+  opacity: 0.8;
+}
+.phone-input .PhoneInputInput {
   border: none;
   outline: none;
   background: transparent;
@@ -64,14 +71,14 @@ html {
   color: var(--color-ink);
   min-width: 0;
 }
-.contact-phone-input .PhoneInputInput::placeholder {
+.phone-input .PhoneInputInput::placeholder {
   color: var(--color-muted);
   opacity: 0.6;
 }
-.contact-phone-input .PhoneInputCountry {
+.phone-input .PhoneInputCountry {
   margin-right: 0.6rem;
 }
-.contact-phone-input .PhoneInputCountrySelect {
+.phone-input .PhoneInputCountrySelect {
   cursor: pointer;
 }
 

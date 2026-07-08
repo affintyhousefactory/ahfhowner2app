@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import { BRAND, CONFIG, SERIE_TOTAL, TRANSPORT } from "@/lib/site";
 import { Gauge } from "@/components/ui/Gauge";
 import { Reveal } from "@/components/ui/Reveal";
@@ -35,6 +37,7 @@ export function Reservation() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
   const [pluConsent, setPluConsent] = useState(false);
   const [optIn, setOptIn] = useState(false);
+  const [tel, setTel] = useState<string | undefined>(undefined);
 
   const isPack = c.terrainMode === "pack";
 
@@ -46,7 +49,7 @@ export function Reservation() {
     if (!String(fd.get("prenom") ?? "").trim()) errs.prenom = true;
     if (!String(fd.get("nom") ?? "").trim()) errs.nom = true;
     if (!String(fd.get("email") ?? "").trim()) errs.email = true;
-    if (!String(fd.get("tel") ?? "").trim()) errs.tel = true;
+    if (!tel?.trim()) errs.tel = true;
     if (!isPack && !slot) errs.slot = true;
     if (Object.keys(errs).length > 0) { setFieldErrors(errs); return; }
     setFieldErrors({});
@@ -65,7 +68,7 @@ export function Reservation() {
           body: JSON.stringify({
             prenom: String(fd.get("prenom") ?? "").trim(),
             nom: String(fd.get("nom") ?? "").trim(),
-            telephone: String(fd.get("tel") ?? ""),
+            telephone: tel ?? "",
             email: String(fd.get("email") ?? ""),
             modele: c.active.name,
             communes,
@@ -98,7 +101,7 @@ export function Reservation() {
             prenom: fd.get("prenom"),
             nom: fd.get("nom"),
             email: fd.get("email"),
-            tel: fd.get("tel"),
+            tel: tel ?? null,
             slot,
             produit: c.active.name,
             surface: c.active.area,
@@ -222,7 +225,15 @@ export function Reservation() {
                     <Field name="nom" placeholder="Nom" error={fieldErrors.nom} />
                   </div>
                   <Field name="email" type="email" placeholder="Email" error={fieldErrors.email} />
-                  <Field name="tel" type="tel" placeholder="Téléphone" error={fieldErrors.tel} />
+                  <PhoneInput
+                    international
+                    defaultCountry="FR"
+                    value={tel}
+                    onChange={setTel}
+                    placeholder="Téléphone"
+                    className={cn("phone-input", fieldErrors.tel && "phone-input--error")}
+                    numberInputProps={{ required: true }}
+                  />
 
                   {!isPack && <PluConsentBlock pluConsent={pluConsent} onChange={setPluConsent} />}
 
