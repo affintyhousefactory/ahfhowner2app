@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import { cn } from "@/shared/lib/cn";
 import { loadGooglePlacesScript } from "@/shared/lib/google-places";
 
@@ -256,6 +258,7 @@ export function ContratCanvas({ onComplete, prefill, className }: Props) {
   const canProceed = (): boolean => {
     if (step === "fields") {
       return !!(
+        data.tel &&
         data.email &&
         data.statut_professionnel &&
         data.reseau_type &&
@@ -381,10 +384,16 @@ export function ContratCanvas({ onComplete, prefill, className }: Props) {
               <ReadonlyInput label="Prénom" value={data.prenom} />
               <ReadonlyInput label="Nom" value={data.nom} />
             </div>
-            <FieldRow label="Téléphone">
-              <input type="tel" value={data.tel}
-                onChange={(e) => set("tel", e.target.value)}
-                placeholder="06 XX XX XX XX" className={inputCls} />
+            <FieldRow label="Téléphone *">
+              <PhoneInput
+                international
+                defaultCountry="FR"
+                value={data.tel}
+                onChange={(v) => set("tel", v ?? "")}
+                placeholder="06 XX XX XX XX"
+                className="phone-input-mandataire"
+                numberInputProps={{ required: true }}
+              />
             </FieldRow>
             <FieldRow label="Email professionnel *">
               <input type="email" value={data.email}
