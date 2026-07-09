@@ -117,14 +117,15 @@ export default function MandataireLandingPage() {
               🚀 Mandataires Partenaires HOWNER
             </div>
             <h1 className="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl lg:text-5xl">
-              Donnez une nouvelle dimension
+              Mandataire immobilier !
               <br className="hidden sm:block" />
-              à vos opportunités immobilières
+              Déposez vos annonces de terrains susceptibles d&apos;accueillir nos maisons compactes Arko
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-500 lg:mx-0">
-              Un terrain à valoriser. Un jardin sous-exploité. Un client qui cherche à habiter, investir ou agrandir autrement.{" "}
+              Accompagnez nos clients qui cherchent à habiter, investir ou agrandir autrement.{" "}
               <span className="font-medium text-gray-800">
-                HOWNER vous aide à transformer ces opportunités en projets concrets.
+                Enregistrez-vous sur notre plateforme, importez vos annonces grâce à notre IA, et obtenez de HOWNER
+                l&apos;exclusivité territoriale pour mieux les servir.
               </span>
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
