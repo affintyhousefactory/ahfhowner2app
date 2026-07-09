@@ -4,7 +4,7 @@ import { LegalShell } from "@/components/site/LegalShell";
 export const metadata: Metadata = {
   title: "Conditions générales de vente | HOWNER",
   description:
-    "Conditions générales de vente HOWNER — réservation, acompte, garanties légales et processus de construction ARKO.",
+    "Conditions générales de vente HOWNER — réservation, versement initial, échéancier, garanties légales et parcours de fabrication, livraison et installation ARKO.",
   alternates: { canonical: "/cgv" },
   robots: { index: false, follow: true },
 };
@@ -15,930 +15,1202 @@ export default function CgvPage() {
       eyebrow="Légal"
       title="Conditions générales de vente"
       pending={false}
-      updated="21 juin 2026"
+      updated="9 juillet 2026"
     >
-      {/* 1 — Identification */}
-      <h2>1. Identification de l&apos;éditeur et du constructeur</h2>
+      {/* 1 */}
+      <h2>1. Identification de l&apos;éditeur et du fabricant-installateur</h2>
       <p>
-        <strong>HOWNER</strong> est une marque éditée par{" "}
-        <strong>Affinity House Factory</strong> (ci-après « AHF » ou « le
-        Constructeur »), société par actions simplifiée (SAS), immatriculée
-        sous le numéro SIRET 982&nbsp;581&nbsp;506&nbsp;00010, dont le siège
-        social est situé 28 Chemin de Sabalce OEV, 64100 Bayonne, France.
+        <strong>HOWNER</strong> est une marque exploitée par{" "}
+        <strong>Affinity House Factory</strong> (ci-après « AHF »), société par
+        actions simplifiée (SAS), immatriculée sous le numéro{" "}
+        <strong>SIRET 982&nbsp;581&nbsp;506&nbsp;00010</strong>, dont le siège
+        social est situé <strong>28 Chemin de Sabalce OEV, 64100 Bayonne, France</strong>.
       </p>
       <ul>
-        <li>
-          Site :{" "}
-          <a href="https://affinityhome.fr">https://affinityhome.fr</a>
-        </li>
+        <li>Site internet : <a href="https://affinityhome.fr">https://affinityhome.fr</a></li>
         <li>Contact commercial : contact@affinityhousefactory.com</li>
         <li>Directeur de la publication : Albert Puigbo</li>
         <li>Numéro de TVA intracommunautaire : FR[à compléter]</li>
+        <li>Médiateur de la consommation : [à compléter avant publication]</li>
+        <li>Assureur responsabilité civile professionnelle / décennale : [à compléter avant publication]</li>
       </ul>
+      <p>
+        Les présentes Conditions Générales de Vente (ci-après les « CGV »)
+        encadrent le parcours de réservation, de commande, de fabrication, de
+        livraison et d&apos;installation des maisons légères de gamme{" "}
+        <strong>ARKO</strong> proposées par AHF.
+      </p>
 
-      {/* 2 — Définitions */}
+      {/* 2 */}
       <h2>2. Définitions</h2>
       <table>
         <thead>
-          <tr>
-            <th>Terme</th>
-            <th>Définition</th>
-          </tr>
+          <tr><th>Terme</th><th>Définition</th></tr>
         </thead>
         <tbody>
+          <tr>
+            <td><strong>AHF</strong></td>
+            <td>Affinity House Factory, fabricant et installateur des maisons légères ARKO dans le périmètre expressément prévu au contrat.</td>
+          </tr>
+          <tr>
+            <td><strong>HOWNER</strong></td>
+            <td>Marque, portail ou espace digital exploité par AHF pour présenter les modèles ARKO, qualifier les projets, éditer des devis et accompagner le Client.</td>
+          </tr>
+          <tr>
+            <td><strong>Client</strong></td>
+            <td>Toute personne physique ou morale sollicitant AHF pour un projet de maison légère ARKO. Lorsque le Client agit à des fins non professionnelles, il est considéré comme consommateur au sens du Code de la consommation.</td>
+          </tr>
+          <tr>
+            <td><strong>Maître d&apos;ouvrage</strong></td>
+            <td>Personne pour le compte de laquelle le projet est réalisé et qui assume notamment la responsabilité du terrain, des autorisations administratives et des assurances qui lui incombent.</td>
+          </tr>
           <tr>
             <td><strong>Maison ARKO</strong></td>
-            <td>
-              Ouvrage de construction fabriqué en atelier, livré prêt à vivre,
-              décliné en deux modèles : Arko One (20 m²) et Arko Max (40 m²)
-            </td>
+            <td>Maison légère, fabriquée en atelier, livrée puis installée sur un terrain choisi par le Client, selon le modèle, les options et les caractéristiques techniques prévues au devis et au contrat.</td>
           </tr>
           <tr>
-            <td><strong>Client / Maître d&apos;ouvrage</strong></td>
-            <td>
-              Toute personne physique ou morale qui réserve ou commande une
-              Maison ARKO
-            </td>
+            <td><strong>Modèle ARKO</strong></td>
+            <td>Modèle standard ou variante proposée par AHF, notamment Arko One, Arko Max ou tout autre modèle figurant dans la proposition commerciale.</td>
           </tr>
           <tr>
-            <td><strong>Réservation</strong></td>
-            <td>
-              Acte par lequel le Client verse un acompte de 5&nbsp;000&nbsp;€
-              et réserve un numéro de série dans la Série 01
-            </td>
+            <td><strong>Devis</strong></td>
+            <td>Document commercial et technique présentant le modèle retenu, les options, le prix estimatif ou ferme selon son état de validation, les prestations incluses et exclues, et les conditions de validité.</td>
           </tr>
           <tr>
-            <td><strong>Pack Recherche Terrain</strong></td>
-            <td>
-              Prestation optionnelle et accessoire à la Réservation, permettant
-              au Client de bénéficier d&apos;une mission de recherche de
-              terrain constructible compatible avec la Maison ARKO réservée,
-              réalisée par un chasseur immobilier partenaire titulaire de la
-              carte T. Ne peut être souscrit qu&apos;en complément d&apos;une
-              Réservation active
-            </td>
+            <td><strong>Réservation commerciale</strong></td>
+            <td>Étape précontractuelle permettant au Client de confirmer son intérêt pour un projet ARKO par un versement initial de 5&nbsp;000&nbsp;€, remboursable avant signature du contrat de fabrication, livraison et installation.</td>
           </tr>
           <tr>
-            <td><strong>Chasseur partenaire</strong></td>
-            <td>
-              Mandataire immobilier indépendant, titulaire ou rattaché à une
-              carte professionnelle T, sous-traitant d&apos;AHF pour la
-              réalisation des missions Pack Recherche Terrain
-            </td>
+            <td><strong>Contrat de fabrication, livraison et installation</strong></td>
+            <td>Contrat définitif signé entre AHF et le Client, définissant les obligations des parties, le prix, le calendrier, le périmètre des prestations, les prérequis techniques et les conditions de livraison et d&apos;installation de la maison ARKO.</td>
           </tr>
           <tr>
-            <td><strong>CCMI</strong></td>
-            <td>
-              Contrat de Construction de Maison Individuelle — contrat définitif
-              signé après validation du projet
-            </td>
+            <td><strong>Notice technique contractuelle</strong></td>
+            <td>Annexe au contrat décrivant précisément les caractéristiques techniques de la maison ARKO, les matériaux, équipements, finitions, options et limites de prestation.</td>
           </tr>
           <tr>
-            <td><strong>Atelier</strong></td>
-            <td>
-              Site de fabrication d&apos;AHF, situé au Pays Basque, dans lequel
-              les Maisons ARKO sont intégralement montées et finies avant
-              livraison
-            </td>
+            <td><strong>Fiches techniques élémentaires</strong></td>
+            <td>Annexes détaillant les composants ou lots techniques : structure, isolation, menuiseries, électricité, plomberie, chauffage, ventilation, finitions, transport, installation, etc.</td>
           </tr>
           <tr>
-            <td><strong>Micro-pieux</strong></td>
-            <td>
-              Système de fondations légères sur pieux battus ou vissés, fourni
-              et mis en œuvre par le Client ou un prestataire de son choix, sur
-              lequel repose la Maison ARKO
-            </td>
+            <td><strong>Terrain</strong></td>
+            <td>Terrain choisi, réservé ou acquis par le Client, destiné à recevoir la maison ARKO. AHF n&apos;intervient pas dans l&apos;achat du terrain.</td>
           </tr>
           <tr>
-            <td><strong>Livraison / Pose</strong></td>
-            <td>
-              Phase d&apos;installation de la Maison ARKO sur les micro-pieux
-              du Client, réalisée en une journée
-            </td>
+            <td><strong>Prérequis terrain</strong></td>
+            <td>Ensemble des conditions nécessaires à la fabrication, livraison et installation : propriété ou droits suffisants, autorisation d&apos;urbanisme, accès chantier, fondations ou supports, étude de sol, raccordements préparatoires, etc.</td>
           </tr>
           <tr>
-            <td><strong>Architecte intégrée</strong></td>
-            <td>
-              Architecte salariée ou mandataire d&apos;AHF qui accompagne le
-              projet du Client de la réservation à la réception
-            </td>
+            <td><strong>Fondations / supports d&apos;accueil</strong></td>
+            <td>Ouvrages destinés à recevoir la maison ARKO : plots, longrines, micropieux, dalle, pieux vissés ou tout autre système validé techniquement. Sauf mention contraire, ces ouvrages sont à la charge du Client.</td>
           </tr>
           <tr>
-            <td><strong>Série 01</strong></td>
-            <td>
-              Première série limitée : 12 exemplaires Arko One + 5 exemplaires
-              Arko Max
-            </td>
+            <td><strong>Livraison</strong></td>
+            <td>Acheminement de la maison ARKO depuis l&apos;atelier ou le site de fabrication jusqu&apos;au terrain du Client.</td>
+          </tr>
+          <tr>
+            <td><strong>Installation / Pose</strong></td>
+            <td>Opération consistant à positionner et installer la maison ARKO sur les supports d&apos;accueil préalablement réalisés et réceptionnés.</td>
+          </tr>
+          <tr>
+            <td><strong>Réception</strong></td>
+            <td>Acte contradictoire par lequel le Client accepte la maison livrée et installée, avec ou sans réserves, et qui fait l&apos;objet d&apos;un procès-verbal de réception.</td>
+          </tr>
+          <tr>
+            <td><strong>Mandataire partenaire</strong></td>
+            <td>Professionnel indépendant susceptible d&apos;accompagner le Client dans la recherche d&apos;un terrain. Il agit sous sa propre responsabilité et n&apos;est pas partie au contrat de fabrication, livraison et installation conclu avec AHF.</td>
+          </tr>
+          <tr>
+            <td><strong>Conditions suspensives</strong></td>
+            <td>Conditions dont la réalisation est nécessaire pour permettre l&apos;exécution du contrat : obtention du financement, autorisation d&apos;urbanisme, terrain disponible, étude de sol favorable, accès chantier, supports réceptionnés, etc.</td>
           </tr>
         </tbody>
       </table>
 
-      {/* 3 — Objet */}
-      <h2>3. Objet — Nature juridique du contrat</h2>
-      <p>Les présentes CGV régissent :</p>
+      {/* 3 */}
+      <h2>3. Objet des CGV</h2>
+      <p>Les présentes CGV ont pour objet de définir les conditions dans lesquelles AHF propose :</p>
       <ol>
-        <li>
-          la <strong>Réservation</strong> d&apos;une Maison ARKO via le site{" "}
-          <a href="https://affinityhome.fr">https://affinityhome.fr</a> ;
-        </li>
-        <li>
-          le <strong>Pack Recherche Terrain</strong>, prestation optionnelle et
-          accessoire à la Réservation ;
-        </li>
-        <li>
-          la signature ultérieure du <strong>CCMI</strong> (Contrat de
-          Construction de Maison Individuelle) au sens de l&apos;article L.
-          231-1 du Code de la construction et de l&apos;habitation (CCH), qui
-          constitue le contrat principal et définitif.
-        </li>
+        <li>la présentation des modèles de maisons légères ARKO ;</li>
+        <li>l&apos;édition d&apos;un devis commercial et technique ;</li>
+        <li>la réservation commerciale d&apos;un projet ARKO ;</li>
+        <li>la signature ultérieure d&apos;un contrat de fabrication, livraison et installation ;</li>
+        <li>la fabrication en atelier de la maison ARKO ;</li>
+        <li>la livraison sur le terrain choisi par le Client ;</li>
+        <li>l&apos;installation sur site, sous réserve de la réunion des prérequis techniques, administratifs et financiers.</li>
       </ol>
       <p>
-        <strong>Avertissement légal</strong> : La Réservation ne constitue pas
-        un CCMI. Elle engage uniquement le versement de l&apos;acompte de{" "}
-        <strong>5&nbsp;000&nbsp;€, remboursable et sans engagement de
-        construction</strong>, et la mise en relation avec l&apos;Architecte
-        intégrée. Le CCMI, qui détermine le prix global et forfaitaire, les
-        délais de construction et l&apos;ensemble des garanties légales, sera
-        soumis à la signature du Client avant tout démarrage de fabrication.
+        Les présentes CGV ne régissent pas l&apos;achat du terrain, l&apos;acte
+        notarié, les frais de notaire, les relations entre le Client et un
+        mandataire immobilier, les taxes d&apos;urbanisme, les travaux réalisés
+        par des prestataires tiers du Client, ni les autorisations
+        administratives qui relèvent de la responsabilité du Client, sauf
+        mission spécifique expressément confiée à AHF.
       </p>
 
-      {/* 4 — Description des modèles */}
-      <h2>4. Description des modèles</h2>
-
-      <h3>4.1 Arko One</h3>
+      {/* 4 */}
+      <h2>4. Nature juridique de l&apos;intervention d&apos;AHF</h2>
+      <p>
+        AHF intervient dans le cadre d&apos;un{" "}
+        <strong>contrat de fabrication, livraison et installation d&apos;une maison légère ARKO</strong>{" "}
+        sur un terrain choisi par le Client.
+      </p>
+      <p>Le contrat définitif n&apos;a pas pour objet :</p>
       <ul>
-        <li>Surface : <strong>20 m²</strong> (+ terrasse selon option)</li>
-        <li>Série 01 : <strong>12 exemplaires numérotés</strong></li>
-        <li>
-          Prix de départ : à partir de <strong>59&nbsp;900&nbsp;€ TTC</strong>,
-          clé en main, prêt à vivre
-        </li>
-        <li>
-          Délai de fabrication en atelier : <strong>12 semaines</strong> à
-          compter de la levée des conditions suspensives du CCMI
-        </li>
-      </ul>
-
-      <h3>4.2 Arko Max</h3>
-      <ul>
-        <li>Surface : <strong>40 m²</strong> (+ terrasse selon option)</li>
-        <li>Série 01 : <strong>5 exemplaires numérotés</strong></li>
-        <li>
-          Prix de départ : à partir de <strong>89&nbsp;900&nbsp;€ TTC</strong>,
-          clé en main, prêt à vivre
-        </li>
-        <li>
-          Délai de fabrication en atelier : <strong>12 semaines</strong> à
-          compter de la levée des conditions suspensives du CCMI
-        </li>
-      </ul>
-
-      <h3>4.3 Ce qui est inclus (clé en main)</h3>
-      <p>
-        Chaque Maison ARKO est livrée avec : structure, isolation, menuiseries
-        extérieures, second œuvre intérieur, équipements sanitaires, cuisine
-        équipée, revêtements de sol et mur, électricité et plomberie
-        raccordables, terrasse bois sur pilotis (selon configuration). Les
-        prestations exactes sont détaillées dans la Notice Descriptive annexée
-        au CCMI.
-      </p>
-
-      <h3>4.4 Ce qui est exclu</h3>
-      <p>
-        Sauf mention contraire dans le CCMI : <strong>micro-pieux</strong>{" "}
-        (fourniture, étude géotechnique et pose à la charge du Client),
-        raccordements aux réseaux publics (eau, électricité, assainissement),
-        autorisations d&apos;urbanisme (accompagnement proposé par
-        l&apos;Architecte intégrée), transport au-delà du rayon contractuel
-        depuis le site de fabrication.
-      </p>
-      <p>
-        <strong>Autorisation d&apos;urbanisme selon surface</strong> :
-        l&apos;Arko One (20&nbsp;m²) requiert une{" "}
-        <strong>déclaration préalable de travaux</strong> ; l&apos;Arko Max
-        (40&nbsp;m²) requiert un <strong>permis de construire</strong> (art.
-        R.&nbsp;421-1 et s. du Code de l&apos;urbanisme). Dans les deux cas,
-        la fixation sur micro-pieux constitue une construction nouvelle soumise
-        à la réglementation applicable.
-      </p>
-
-      <h3>4.5 Visuels non contractuels</h3>
-      <p>
-        Les images, rendus et vidéos présents sur le site sont des
-        représentations d&apos;intention. Seuls les plans et la Notice
-        Descriptive annexés au CCMI ont valeur contractuelle.
-      </p>
-
-      {/* 5 — Spécificités de la fabrication en atelier */}
-      <h2>5. Spécificités de la fabrication en atelier</h2>
-
-      <h3>5.1 Mode constructif</h3>
-      <p>
-        Les Maisons ARKO sont fabriquées selon un procédé de{" "}
-        <strong>construction en atelier</strong> (off-site manufacturing) :
-        l&apos;intégralité du module est montée, équipée et finalisée dans
-        l&apos;<strong>Atelier AHF</strong> au Pays Basque, dans un
-        environnement contrôlé, avant transport et pose en une journée sur les
-        <strong> micro-pieux</strong> préalablement installés par le Client.
-      </p>
-      <p>
-        Ce procédé relève des modules 3D volumétriques tels que définis par la
-        filière (CSTB, DREAL), et fait appel à des procédés constructifs
-        pouvant être qualifiés de <strong>technique non courante</strong> au
-        sens des assureurs construction, conformément au corpus normatif en
-        vigueur (DTU 31.2, etc.).
-      </p>
-      <p>
-        Le recours à la fabrication en atelier dans le cadre du CCMI est
-        encadré par le <strong>décret du 6 février 2020</strong> (art.
-        R.&nbsp;231-7-1 CCH), qui adapte l&apos;échéancier de paiement et les
-        obligations d&apos;information à l&apos;état d&apos;avancement en
-        atelier.
-      </p>
-
-      <h3>5.2 Contrôle qualité en atelier</h3>
-      <p>
-        La fabrication est soumise à un autocontrôle continu : traçabilité des
-        assemblages, contrôle des tolérances, vérification de la conformité aux
-        normes applicables (sécurité incendie, acoustique, stabilité
-        structurelle). AHF s&apos;engage à fournir, sur demande du Client, les
-        registres de production liés à son numéro de série.
-      </p>
-
-      <h3>5.3 Avis Technique / ATEx</h3>
-      <p>
-        Pour les procédés constructifs non couverts par un DTU, AHF
-        s&apos;engage à disposer d&apos;un{" "}
-        <strong>
-          Avis Technique (AT) ou d&apos;une Appréciation Technique
-          d&apos;Expérimentation (ATEx)
-        </strong>{" "}
-        délivré(e) par le CSTB, préalablement à la mise en fabrication de la
-        Série 01. Ce document est communiqué au Client sur demande et est
-        annexé au CCMI.
-      </p>
-
-      <h3>5.4 RE2020</h3>
-      <p>
-        Les Maisons ARKO sont conçues pour répondre aux exigences de la{" "}
-        <strong>Réglementation Environnementale RE2020</strong> applicable aux
-        maisons individuelles neuves. L&apos;attestation de conformité est
-        remise au Client à la livraison.
-      </p>
-
-      {/* 6 — Processus de réservation */}
-      <h2>6. Processus de réservation et parcours client</h2>
-
-      <h3>Étape 1 — Configuration et réservation en ligne</h3>
-      <p>
-        Le Client configure son modèle sur le site — choix du modèle, numéro
-        de série, bardage, aménagements et options — et obtient un{" "}
-        <strong>devis indicatif en direct</strong>. Ce devis est fourni à titre
-        d&apos;estimation, sans valeur contractuelle (voir article 7.1).
-      </p>
-      <p>
-        Après son échange de 30 minutes avec l&apos;Architecte intégrée, le
-        Client reçoit un <strong>devis récapitulatif</strong> mentionnant :
-      </p>
-      <ul>
-        <li>
-          <strong>5&nbsp;000&nbsp;€ TTC</strong> · Acompte de Réservation
-          Maison ARKO — remboursable, sans engagement de construction
-        </li>
-        <li>
-          <strong>1&nbsp;500&nbsp;€ TTC</strong> · Acompte Pack Recherche
-          Terrain{" "}
-          <em>(optionnel — réservé aux acquéreurs d&apos;un module Arko)</em>
-        </li>
+        <li>la vente d&apos;un terrain ;</li>
+        <li>la vente d&apos;un ensemble « terrain + maison » ;</li>
+        <li>l&apos;acquisition foncière ;</li>
+        <li>la rédaction ou la signature d&apos;un acte notarié ;</li>
+        <li>la garantie de constructibilité du terrain indépendamment des autorisations administratives ;</li>
+        <li>la réalisation de prestations non expressément incluses dans le devis et le contrat.</li>
       </ul>
       <p>
-        Ces deux postes peuvent faire l&apos;objet d&apos;un{" "}
-        <strong>bon de commande unique</strong> pour un total de{" "}
-        <strong>6&nbsp;500&nbsp;€ TTC</strong> si le Client souscrit les deux.
-        Le Client peut ne souscrire que la Réservation (5&nbsp;000&nbsp;€)
-        s&apos;il dispose déjà d&apos;un terrain.
-      </p>
-      <p>
-        <strong>
-          L&apos;acompte de Réservation de 5&nbsp;000&nbsp;€ est intégralement
-          remboursable, sans condition et sans engagement de construction
-        </strong>
-        , selon les modalités de l&apos;article 9.
-      </p>
-      <p>
-        <strong>
-          Le Pack Recherche Terrain est une prestation accessoire et
-          conditionnée à la Réservation.
-        </strong>{" "}
-        Il ne peut être souscrit de manière indépendante. Sa résiliation ou
-        l&apos;annulation de la Réservation entraîne de plein droit sa
-        résiliation et le remboursement de l&apos;acompte Pack Recherche
-        Terrain versé.
+        Le Client reconnaît que le terrain destiné à recevoir la maison ARKO
+        est choisi, négocié, réservé ou acquis par lui, sous sa responsabilité.
       </p>
 
-      <h3>
-        Étape 2 — Entretien de 30 minutes avec l&apos;Architecte intégrée
-        (gratuit, sous 7 jours)
-      </h3>
+      <h3>4.1 Alerte de qualification juridique</h3>
       <p>
-        Dans les <strong>7 jours ouvrés</strong> suivant la Réservation,
-        l&apos;Architecte intégrée d&apos;AHF contacte le Client pour un
-        entretien de <strong>30 minutes</strong> (en visioconférence ou par
-        téléphone). Cet entretien permet de :
+        Selon la nature exacte du projet, le périmètre d&apos;intervention
+        d&apos;AHF, les prestations incluses, la fourniture éventuelle de
+        plans et l&apos;usage d&apos;habitation de la maison, certaines
+        opérations peuvent être susceptibles de relever d&apos;un régime légal
+        spécifique applicable aux travaux de construction de maison
+        individuelle.
       </p>
+      <p>
+        Dans une telle hypothèse, les règles légales impératives applicables
+        prévalent sur les présentes CGV. AHF se réserve le droit d&apos;adapter
+        le contrat, les garanties, les modalités de paiement et les documents
+        contractuels afin de respecter le régime juridique applicable au
+        projet.
+      </p>
+      <p>
+        Aucune stipulation des présentes CGV ne peut avoir pour objet ou pour
+        effet d&apos;écarter une disposition légale impérative applicable au
+        Client.
+      </p>
+
+      {/* 5 */}
+      <h2>5. Description des modèles ARKO</h2>
+      <p>
+        Les maisons ARKO sont des maisons légères fabriquées hors site, en
+        atelier, puis livrées et installées sur le terrain du Client.
+      </p>
+      <p>
+        Les modèles, surfaces, prix, finitions et options présentés sur le
+        site sont fournis à titre d&apos;information commerciale. Les
+        caractéristiques contractuelles sont celles figurant dans :
+      </p>
+      <ol>
+        <li>le devis accepté ;</li>
+        <li>le contrat de fabrication, livraison et installation ;</li>
+        <li>la notice technique contractuelle ;</li>
+        <li>les plans validés ;</li>
+        <li>les fiches techniques annexées.</li>
+      </ol>
+
+      <h3>5.1 Modèles présentés</h3>
+      <p>Les modèles disponibles peuvent notamment comprendre :</p>
       <ul>
-        <li>
-          valider la compatibilité du terrain (PLU, accessibilité, exposition) ;
-        </li>
-        <li>préciser les options retenues et les adaptations éventuelles ;</li>
-        <li>
-          identifier les prérequis techniques et administratifs : autorisation
-          d&apos;urbanisme requise (déclaration préalable pour l&apos;Arko One,
-          permis de construire pour l&apos;Arko Max), étude géotechnique,
-          dimensionnement des micro-pieux, raccordements.
-        </li>
+        <li><strong>Arko One</strong> : modèle compact d&apos;environ 20 m², selon configuration retenue ;</li>
+        <li><strong>Arko Max</strong> : modèle d&apos;environ 30 à 40 m², selon configuration retenue ;</li>
+        <li>tout autre modèle, variante ou déclinaison proposée par AHF.</li>
       </ul>
       <p>
-        À l&apos;issue de cet entretien, AHF remet au Client un{" "}
-        <strong>devis définitif</strong> incluant le prix global et forfaitaire,
-        les frais de livraison calculés depuis Bayonne, et les éléments de
-        terrain identifiés. Ce devis a une <strong>validité de 3 mois</strong>.
-      </p>
-      <p>
-        Si le Client décide de ne pas donner suite, l&apos;acompte de
-        Réservation lui est intégralement remboursé sur simple demande.
+        Les surfaces, équipements et prix affichés sur le site peuvent
+        évoluer. Seuls les documents contractuels signés engagent AHF.
       </p>
 
-      <h3>Étape 3 — Signature du CCMI</h3>
+      <h3>5.2 Ce qui peut être inclus</h3>
       <p>
-        Après acceptation du devis définitif, AHF soumet au Client le{" "}
-        <strong>CCMI</strong> comprenant : prix global forfaitaire, plans,
-        Notice Descriptive, planning de fabrication et conditions suspensives.{" "}
-        <strong>
-          Le Client dispose d&apos;un délai légal de 10 jours calendaires pour
-          se rétracter
-        </strong>{" "}
-        après première présentation du CCMI par lettre recommandée (art.
-        L.&nbsp;271-1 CCH), sans frais ni justification. L&apos;acompte de
-        Réservation s&apos;impute sur le premier appel de fonds.
+        Selon la proposition commerciale et le contrat signé, la maison ARKO
+        peut comprendre tout ou partie des éléments suivants :
+      </p>
+      <ul>
+        <li>structure et ossature ;</li>
+        <li>isolation ;</li>
+        <li>menuiseries extérieures ;</li>
+        <li>couverture et enveloppe ;</li>
+        <li>second œuvre intérieur ;</li>
+        <li>équipements sanitaires ;</li>
+        <li>équipements électriques ;</li>
+        <li>plomberie intérieure ;</li>
+        <li>système de ventilation ;</li>
+        <li>chauffage ou solution thermique prévue au devis ;</li>
+        <li>revêtements intérieurs ;</li>
+        <li>cuisine ou mobilier intégré si expressément prévu ;</li>
+        <li>livraison ;</li>
+        <li>installation sur supports d&apos;accueil conformes.</li>
+      </ul>
+      <p>
+        La liste précise des prestations incluses est définie dans le devis et
+        la notice technique contractuelle.
       </p>
 
-      <h3>Étape 4 — Fabrication en atelier (12 semaines)</h3>
+      <h3>5.3 Ce qui est exclu par défaut</h3>
+      <p>Sauf mention contraire expresse dans le devis ou le contrat, sont exclus :</p>
+      <ul>
+        <li>l&apos;achat du terrain ;</li>
+        <li>les frais de notaire ;</li>
+        <li>les frais d&apos;agence immobilière ou de mandataire ;</li>
+        <li>les taxes d&apos;urbanisme ;</li>
+        <li>les études de sol ;</li>
+        <li>les fondations, micropieux, plots, longrines, dalles ou supports d&apos;accueil ;</li>
+        <li>le terrassement ;</li>
+        <li>les voiries et réseaux divers ;</li>
+        <li>les raccordements aux réseaux publics ou privés ;</li>
+        <li>l&apos;assainissement individuel ou collectif ;</li>
+        <li>les autorisations d&apos;urbanisme ;</li>
+        <li>les frais d&apos;architecte ou de bureau d&apos;études non inclus ;</li>
+        <li>l&apos;assurance dommages-ouvrage du Client ;</li>
+        <li>les aménagements extérieurs ;</li>
+        <li>les clôtures, terrasses, plantations, stationnements, accès grue, accès chantier et ouvrages annexes ;</li>
+        <li>toute prestation non expressément mentionnée comme incluse.</li>
+      </ul>
+
+      {/* 6 */}
+      <h2>6. Visuels, simulateurs et configurateurs</h2>
       <p>
-        La fabrication débute à la levée des conditions suspensives (obtention
-        de l&apos;autorisation d&apos;urbanisme, financement confirmé,
-        micro-pieux réceptionnés). Le Client est informé par email de
-        l&apos;avancement à chaque étape clé.
+        Les images, rendus 3D, vidéos, schémas, simulations et configurations
+        présentés sur le site sont fournis à titre illustratif.
+      </p>
+      <p>
+        Ils ne constituent pas des documents contractuels, sauf lorsqu&apos;ils
+        sont expressément annexés au contrat signé et identifiés comme tels.
+      </p>
+      <p>
+        Le configurateur en ligne, lorsqu&apos;il est disponible, permet
+        d&apos;obtenir une estimation ou une préconfiguration du projet. Cette
+        estimation ne constitue pas une offre ferme ni un engagement définitif
+        d&apos;AHF tant qu&apos;un devis validé puis un contrat n&apos;ont pas
+        été signés.
       </p>
 
-      <h3>Étape 5 — Pose et livraison (1 journée)</h3>
+      {/* 7 */}
+      <h2>7. Parcours client</h2>
+
+      <h3>7.1 Étape 0 — Premier échange et proposition commerciale</h3>
       <p>
-        La Maison ARKO est transportée depuis l&apos;Atelier AHF au Pays
-        Basque et posée sur les <strong>micro-pieux</strong> préalablement
-        installés et réceptionnés par le Client. La réception est prononcée
-        contradictoirement, en présence du Client ou de son représentant.
+        Après un premier échange téléphonique ou par visioconférence, AHF
+        adresse au Client une proposition commerciale par email.
+      </p>
+      <p>Cette proposition peut comprendre :</p>
+      <ul>
+        <li>le modèle ARKO envisagé ;</li>
+        <li>les principales caractéristiques techniques ;</li>
+        <li>les options sélectionnées ;</li>
+        <li>les conditions prévisionnelles de fabrication, livraison et installation ;</li>
+        <li>les prestations incluses et exclues ;</li>
+        <li>un échéancier prévisionnel de paiement ;</li>
+        <li>les prérequis terrain connus à ce stade.</li>
+      </ul>
+
+      <h3>7.2 Étape 1 — Réservation commerciale du projet</h3>
+      <p>
+        Pour confirmer son intérêt et réserver son projet, le Client peut être
+        invité à verser un montant initial de <strong>5&nbsp;000&nbsp;€</strong>.
+      </p>
+      <p>
+        Ce versement est une <strong>réservation commerciale précontractuelle</strong>.
+        Il est intégralement remboursable tant que le contrat de fabrication,
+        livraison et installation n&apos;a pas été signé.
+      </p>
+      <p>
+        Le paiement peut être réalisé par virement bancaire ou par paiement
+        sécurisé en ligne, selon les modalités proposées par AHF.
       </p>
 
-      {/* 7 — Tarifs */}
-      <h2>7. Tarifs et échéancier de paiement</h2>
+      <h3>7.3 Étape 2 — Validation technique et contractuelle</h3>
+      <p>Avant signature du contrat définitif, AHF et le Client vérifient notamment :</p>
+      <ul>
+        <li>l&apos;identification du terrain ;</li>
+        <li>la situation du Client au regard du terrain : propriétaire, futur propriétaire, compromis, promesse ou autre droit permettant l&apos;installation ;</li>
+        <li>la nature de l&apos;autorisation d&apos;urbanisme requise ;</li>
+        <li>les contraintes d&apos;accès, de transport et d&apos;installation ;</li>
+        <li>les supports d&apos;accueil nécessaires ;</li>
+        <li>les raccordements à prévoir ;</li>
+        <li>les conditions de financement ;</li>
+        <li>les documents techniques à annexer au contrat.</li>
+      </ul>
 
-      <h3>7.1 Prix — devis indicatif et prix contractuel</h3>
+      <h3>7.4 Étape 3 — Signature du contrat de fabrication, livraison et installation</h3>
       <p>
-        Le devis généré par le configurateur en ligne est un{" "}
-        <strong>document indicatif, non contractuel</strong>, valable{" "}
-        <strong>3 mois</strong> à compter de la date de Réservation. Il ne
-        constitue ni une offre ferme ni un engagement d&apos;AHF sur le prix
-        final.
+        La signature du contrat définitif intervient après validation du
+        devis, des conditions techniques et des conditions suspensives.
+      </p>
+      <p>Le contrat précise notamment :</p>
+      <ul>
+        <li>le prix ;</li>
+        <li>le modèle retenu ;</li>
+        <li>les options ;</li>
+        <li>les prestations incluses ;</li>
+        <li>les prestations exclues ;</li>
+        <li>les conditions suspensives ;</li>
+        <li>l&apos;échéancier de paiement ;</li>
+        <li>les délais de fabrication, livraison et installation ;</li>
+        <li>les responsabilités respectives d&apos;AHF et du Client ;</li>
+        <li>les garanties et assurances applicables ;</li>
+        <li>les modalités de réception.</li>
+      </ul>
+
+      <h3>7.5 Étape 4 — Fabrication en atelier</h3>
+      <p>
+        La fabrication débute après signature du contrat, expiration ou purge
+        des éventuels délais de rétractation applicables, levée des conditions
+        prévues au contrat et paiement des sommes dues à l&apos;étape
+        correspondante.
       </p>
       <p>
-        Le <strong>prix global et forfaitaire, définitif et contractuel</strong>
-        , est celui figurant dans le CCMI signé. Il est établi après
-        l&apos;entretien avec l&apos;Architecte intégrée et tient compte des
-        spécificités du terrain et du projet.
-      </p>
-      <p>
-        AHF se réserve le droit de modifier ses tarifs affichés à tout moment,
-        sans effet sur le CCMI déjà signé.
+        Le Client est informé par email des étapes clés : lancement de
+        fabrication, avancement structurel, finitions, maison prête à livrer.
       </p>
 
-      <p><strong>Frais inclus dans le devis configurateur</strong></p>
+      <h3>7.6 Étape 5 — Livraison et installation</h3>
+      <p>La livraison et l&apos;installation interviennent lorsque :</p>
+      <ul>
+        <li>la maison ARKO est prête à livrer ;</li>
+        <li>le terrain est accessible ;</li>
+        <li>les supports d&apos;accueil sont réalisés et réceptionnés ;</li>
+        <li>les autorisations nécessaires ont été obtenues ;</li>
+        <li>les conditions de sécurité, de météo, de manutention et d&apos;accès permettent l&apos;intervention ;</li>
+        <li>les factures exigibles ont été réglées.</li>
+      </ul>
+      <p>
+        L&apos;installation est généralement réalisée en une journée, sous
+        réserve des conditions d&apos;accès, de météo, de préparation du
+        terrain et des contraintes propres au site.
+      </p>
+
+      <h3>7.7 Étape 6 — Réception</h3>
+      <p>
+        À l&apos;issue de l&apos;installation, un procès-verbal de réception
+        est établi contradictoirement entre AHF et le Client, avec ou sans
+        réserves.
+      </p>
+      <p>
+        La réception marque le point de départ des garanties légales
+        applicables aux prestations réalisées.
+      </p>
+
+      {/* 8 */}
+      <h2>8. Prix et devis</h2>
+
+      <h3>8.1 Prix affichés</h3>
+      <p>Les prix affichés sur le site sont indicatifs, sauf mention expresse contraire. Ils peuvent varier selon :</p>
+      <ul>
+        <li>le modèle choisi ;</li>
+        <li>les options ;</li>
+        <li>le niveau de finition ;</li>
+        <li>les contraintes de fabrication ;</li>
+        <li>les contraintes de transport ;</li>
+        <li>les contraintes d&apos;installation ;</li>
+        <li>la localisation du terrain ;</li>
+        <li>l&apos;évolution des coûts de matériaux, de transport ou de main-d&apos;œuvre ;</li>
+        <li>les contraintes techniques propres au terrain.</li>
+      </ul>
+
+      <h3>8.2 Devis</h3>
+      <p>Le devis précise :</p>
+      <ul>
+        <li>l&apos;identité d&apos;AHF ;</li>
+        <li>l&apos;identité du Client ;</li>
+        <li>la date d&apos;émission ;</li>
+        <li>la durée de validité ;</li>
+        <li>le modèle retenu ;</li>
+        <li>les options ;</li>
+        <li>les prestations incluses ;</li>
+        <li>les prestations exclues ;</li>
+        <li>le prix HT, la TVA applicable et le prix TTC ;</li>
+        <li>les frais de livraison ou leur méthode de calcul ;</li>
+        <li>les conditions de paiement ;</li>
+        <li>les conditions particulières éventuelles.</li>
+      </ul>
+      <p>
+        Le devis n&apos;a de valeur contractuelle qu&apos;après acceptation
+        par le Client et confirmation par AHF, sous réserve de la signature du
+        contrat définitif lorsque celui-ci est requis.
+      </p>
+
+      <h3>8.3 Frais propres au terrain</h3>
+      <p>
+        Les frais propres au terrain sont en principe à la charge du Client,
+        sauf stipulation contraire expresse. Ils peuvent notamment comprendre :
+      </p>
       <table>
-        <thead>
-          <tr>
-            <th>Poste</th>
-            <th>Détail</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Poste</th><th>Commentaire</th></tr></thead>
         <tbody>
-          <tr>
-            <td>Maison ARKO clé en main</td>
-            <td>Prix de base + options sélectionnées, TTC</td>
-          </tr>
-          <tr>
-            <td>Livraison &amp; pose</td>
-            <td>1&nbsp;440&nbsp;€ forfaitaire + 5,4&nbsp;€/km depuis Bayonne</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <p>
-        <strong>Frais de terrain — exclus du devis, à prévoir par le Client</strong>
-      </p>
-      <p>
-        Ces frais sont propres au terrain du Client et ne sont pas inclus dans
-        le prix de la Maison ARKO. Leur montant est variable selon la parcelle.
-      </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Poste</th>
-            <th>Ordre de grandeur indicatif</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Étude de sol G2 (géotechnique)</td>
-            <td>dès 2&nbsp;400&nbsp;€</td>
-          </tr>
-          <tr>
-            <td>Micro-pieux (fourniture + pose)</td>
-            <td>selon étude</td>
-          </tr>
-          <tr>
-            <td>Assainissement (micro-station)</td>
-            <td>dès 9&nbsp;000&nbsp;€</td>
-          </tr>
-          <tr>
-            <td>Raccordements, terrassement, accès grue</td>
-            <td>sur étude</td>
-          </tr>
-          <tr>
-            <td>Permis de construire / déclaration préalable</td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <td>Taxe d&apos;aménagement</td>
-            <td>selon commune</td>
-          </tr>
-          <tr>
-            <td>Assurance dommages-ouvrage (obligatoire)</td>
-            <td>selon assureur</td>
-          </tr>
+          <tr><td>Étude de sol</td><td>À prévoir selon nature du terrain et prescriptions techniques.</td></tr>
+          <tr><td>Fondations / supports</td><td>Plots, micropieux, dalle, longrines ou autre système validé.</td></tr>
+          <tr><td>Terrassement</td><td>Préparation du site, nivellement, accès.</td></tr>
+          <tr><td>Raccordements</td><td>Eau, électricité, assainissement, télécom, réseaux divers.</td></tr>
+          <tr><td>Assainissement</td><td>Assainissement collectif ou individuel selon situation.</td></tr>
+          <tr><td>Autorisations</td><td>Déclaration préalable, permis de construire ou autre autorisation.</td></tr>
+          <tr><td>Taxes</td><td>Taxe d&apos;aménagement, PFAC ou autres taxes éventuelles.</td></tr>
+          <tr><td>Accès chantier</td><td>Cheminement, grutage, stationnement, portance, dégagements.</td></tr>
+          <tr><td>Assurance dommages-ouvrage</td><td>À souscrire par le Client lorsque la réglementation l&apos;exige.</td></tr>
         </tbody>
       </table>
       <p>
-        Ces estimations sont fournies à titre indicatif. AHF ne saurait être
-        tenue responsable de l&apos;évolution de ces coûts entre la Réservation
-        et la signature du CCMI.
+        Les montants éventuellement indiqués par AHF pour ces postes sont
+        donnés à titre indicatif et ne constituent pas un engagement de prix,
+        sauf stipulation contraire expresse.
       </p>
 
-      <h3>
-        7.2 Échéancier adapté à la fabrication en atelier (décret du 6 février
-        2020 — art. R.&nbsp;231-7-1 CCH)
-      </h3>
+      {/* 9 */}
+      <h2>9. Échéancier de paiement</h2>
+      <p>Le paiement de la maison ARKO s&apos;effectue progressivement selon l&apos;avancement du projet.</p>
+
+      <h3>9.1 Versement initial de réservation</h3>
       <p>
-        En application du décret du 6 février 2020, l&apos;échéancier est
-        adapté à l&apos;avancement de la fabrication en atelier.
-        L&apos;étape « achèvement des fondations » du barème standard est
-        remplacée par une étape d&apos;<strong>achèvement en atelier</strong>,
-        constatée contradictoirement.
+        Après envoi de la proposition commerciale, un versement initial de{" "}
+        <strong>5&nbsp;000&nbsp;€</strong> peut être demandé au Client afin de
+        confirmer la réservation commerciale du projet.
       </p>
+      <p>
+        Ce versement est intégralement remboursable tant que le contrat de
+        fabrication, livraison et installation n&apos;a pas été signé.
+      </p>
+
+      <h3>9.2 Imputation du versement initial</h3>
+      <p>
+        Une fois le contrat signé, le versement initial de 5&nbsp;000&nbsp;€
+        est déduit du prix total de la maison ARKO et intégré à
+        l&apos;échéancier de paiement.
+      </p>
+
+      <h3>9.3 Factures d&apos;étape</h3>
+      <p>Sauf conditions particulières différentes, l&apos;échéancier peut être structuré comme suit :</p>
       <table>
-        <thead>
-          <tr>
-            <th>Étape</th>
-            <th>% du prix TTC</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Étape</th><th>Moment</th><th>Montant</th></tr></thead>
         <tbody>
           <tr>
-            <td>
-              Réservation (acompte remboursable, imputé au 1er appel de fonds)
-            </td>
-            <td>5&nbsp;000&nbsp;€</td>
+            <td>Réservation commerciale</td>
+            <td>Avant signature du contrat définitif</td>
+            <td>5&nbsp;000&nbsp;€, remboursables avant signature</td>
           </tr>
           <tr>
-            <td>Ouverture du chantier / lancement fabrication en atelier</td>
-            <td>10&nbsp;%</td>
+            <td>Lancement de fabrication</td>
+            <td>Après signature du contrat et levée des prérequis de lancement</td>
+            <td>40&nbsp;% du montant total TTC, déduction faite des 5&nbsp;000&nbsp;€ déjà versés</td>
           </tr>
           <tr>
-            <td>
-              Achèvement de la structure du module en atelier (hors d&apos;eau
-              hors d&apos;air)
-            </td>
-            <td>40&nbsp;%</td>
+            <td>Sortie d&apos;atelier</td>
+            <td>Maison fabriquée et prête à livrer</td>
+            <td>50&nbsp;% du montant total TTC</td>
           </tr>
           <tr>
-            <td>
-              Achèvement des finitions intérieures et équipements en atelier
-            </td>
-            <td>60&nbsp;%</td>
-          </tr>
-          <tr>
-            <td>
-              Module prêt à livrer — vérification contradictoire en atelier
-              possible
-            </td>
-            <td>80&nbsp;%</td>
-          </tr>
-          <tr>
-            <td>Réception sur site sans réserve</td>
-            <td>95&nbsp;%</td>
-          </tr>
-          <tr>
-            <td>Levée des réserves éventuelles</td>
-            <td>100&nbsp;%</td>
+            <td>Livraison, installation et réception</td>
+            <td>Livraison et installation sur site, procès-verbal de réception</td>
+            <td>10&nbsp;% du montant total TTC</td>
           </tr>
         </tbody>
       </table>
       <p>
-        Ces plafonds sont établis conformément à l&apos;encadrement légal du
-        CCMI. AHF ne peut exiger de sommes supérieures aux stades définis. Le
-        Client est informé de chaque étape clé par email avec justificatif
-        d&apos;avancement.
-      </p>
-      <p>
-        <strong>Note micro-pieux</strong> : la réalisation des micro-pieux par
-        le Client ou son prestataire ne déclenche aucun appel de fonds AHF.
-        Elle constitue une condition préalable à la Pose, vérifiée par
-        l&apos;Architecte intégrée avant toute intervention d&apos;AHF sur
-        site.
+        Cet échéancier peut être adapté dans le contrat selon la nature du
+        projet, le modèle retenu, le niveau de finition, le financement, les
+        conditions particulières ou toute règle légale impérative applicable.
       </p>
 
-      <h3>7.3 Paiement</h3>
+      <h3>9.4 Retard de paiement</h3>
       <p>
-        Le paiement de la Réservation s&apos;effectue par carte bancaire via un
-        prestataire sécurisé. Les appels de fonds suivants font l&apos;objet de
-        factures et sont réglés par virement bancaire.
+        Tout retard de paiement peut entraîner la suspension de la
+        fabrication, de la livraison ou de l&apos;installation, sans que cette
+        suspension puisse être imputée à AHF.
+      </p>
+      <p>
+        Les éventuels frais, retards, coûts de stockage, reports de transport
+        ou pertes liés à un retard de paiement pourront être facturés au
+        Client, dans les conditions prévues au contrat.
       </p>
 
-      {/* 8 — Conditions suspensives */}
-      <h2>8. Conditions suspensives</h2>
+      <h3>9.5 Paiement sécurisé</h3>
       <p>
-        Le CCMI est conditionné, sauf renonciation expresse du Client, à :
+        Les paiements peuvent être effectués par virement bancaire ou par
+        paiement sécurisé en ligne via un prestataire de paiement. AHF ne
+        conserve pas les données bancaires complètes du Client lorsque le
+        paiement est réalisé via un prestataire externe sécurisé.
       </p>
+
+      {/* 10 */}
+      <h2>10. Remboursement du versement de réservation</h2>
+
+      <h3>10.1 Remboursement avant signature du contrat</h3>
+      <p>
+        Le versement initial de <strong>5&nbsp;000&nbsp;€</strong> est
+        intégralement remboursable à la demande du Client, sans frais ni
+        justification, tant que le contrat de fabrication, livraison et
+        installation n&apos;a pas été signé.
+      </p>
+      <p>
+        La demande de remboursement doit être adressée par email à :
+        contact@affinityhousefactory.com
+      </p>
+      <p>Le Client doit préciser :</p>
       <ul>
-        <li>
-          l&apos;obtention de l&apos;
-          <strong>autorisation d&apos;urbanisme</strong> requise (déclaration
-          préalable pour l&apos;Arko One, permis de construire pour l&apos;Arko
-          Max) ;
-        </li>
-        <li>
-          l&apos;obtention du ou des{" "}
-          <strong>prêts de financement</strong> le cas échéant ;
-        </li>
-        <li>
-          la réalisation d&apos;une{" "}
-          <strong>étude géotechnique</strong> (de type G1 au minimum) attestant
-          de la compatibilité du sol avec le système de micro-pieux ;
-        </li>
-        <li>
-          la{" "}
-          <strong>
-            mise en œuvre et réception des micro-pieux
-          </strong>{" "}
-          conformes aux spécifications techniques communiquées par AHF,
-          préalablement à la Pose.
-        </li>
+        <li>son nom ;</li>
+        <li>ses coordonnées ;</li>
+        <li>la référence de réservation ;</li>
+        <li>le modèle ARKO concerné ;</li>
+        <li>le moyen de paiement utilisé.</li>
       </ul>
       <p>
-        En cas de non-réalisation d&apos;une condition suspensive dans le délai
-        contractuel, le CCMI est résolu de plein droit et l&apos;ensemble des
-        sommes versées, y compris l&apos;acompte de Réservation, sont
-        remboursées au Client sans pénalité.
+        Le remboursement intervient dans un délai raisonnable et, sauf
+        difficulté technique ou bancaire, dans un délai cible de{" "}
+        <strong>14 jours calendaires</strong> à compter de la confirmation de
+        la demande.
       </p>
 
-      {/* 9 — Remboursement */}
-      <h2>9. Remboursement des acomptes — engagements d&apos;AHF</h2>
-
-      <h3>9.1 Acompte de Réservation (5&nbsp;000&nbsp;€) — remboursable sans condition avant CCMI</h3>
+      <h3>10.2 Après signature du contrat</h3>
       <p>
-        La Réservation est un <strong>acte précontractuel sans engagement de
-        construction</strong>. L&apos;acompte de 5&nbsp;000&nbsp;€ est{" "}
-        <strong>intégralement remboursable</strong> à la demande du Client,
-        sans condition, sans frais et sans justification, à tout moment avant
-        la signature du CCMI.
+        Après signature du contrat de fabrication, livraison et installation,
+        le versement initial est imputé sur le prix total.
       </p>
       <p>
-        Le remboursement est effectué dans les{" "}
-        <strong>14 jours calendaires</strong> suivant la réception de la
-        demande, sur le moyen de paiement utilisé lors de la Réservation.
-      </p>
-      <p>
-        <strong>Demande de remboursement</strong> : par email à
-        contact@affinityhousefactory.com, en précisant le numéro de Réservation
-        et le numéro de série concerné. Le numéro de série est immédiatement
-        remis en disponibilité.
+        Les conditions d&apos;annulation, de résiliation, de remboursement ou
+        d&apos;indemnisation sont alors celles prévues au contrat, aux
+        présentes CGV et aux règles légales applicables.
       </p>
 
-      <h3>9.2 Acompte Pack Recherche Terrain (1&nbsp;500&nbsp;€) — conditions de remboursement</h3>
+      <h3>10.3 Conditions suspensives</h3>
       <p>
-        L&apos;acompte de 1&nbsp;500&nbsp;€ versé lors de la souscription du
-        Pack Recherche Terrain est remboursable dans les cas suivants :
+        Si le contrat prévoit des conditions suspensives et que l&apos;une
+        d&apos;elles ne se réalise pas dans le délai prévu, les conséquences
+        financières sont déterminées par le contrat.
       </p>
+      <p>
+        Sauf stipulation contraire conforme au droit applicable, les sommes
+        versées au titre d&apos;une opération devenue impossible du fait de la
+        non-réalisation d&apos;une condition suspensive sont restituées selon
+        les modalités prévues au contrat.
+      </p>
+
+      {/* 11 */}
+      <h2>11. Terrain, acquisition foncière et mandataires partenaires</h2>
+
+      <h3>11.1 Terrain choisi par le Client</h3>
+      <p>Le terrain destiné à recevoir la maison ARKO est choisi, réservé ou acquis par le Client.</p>
+      <p>Le Client est seul responsable :</p>
       <ul>
-        <li>
-          <strong>Annulation de la Réservation</strong> par le Client avant
-          CCMI : le Pack Recherche Terrain est résilié de plein droit et
-          l&apos;acompte de 1&nbsp;500&nbsp;€ est remboursé dans les 14 jours ;
-        </li>
-        <li>
-          <strong>Terrain non trouvé</strong> dans le délai contractuel de
-          3 mois (renouvelable par accord écrit) : remboursement intégral dans
-          les 14 jours suivant l&apos;expiration du délai ;
-        </li>
-        <li>
-          <strong>
-            AHF ne contacte pas le Client dans les 7 jours ouvrés
-          </strong>{" "}
-          suivant la souscription : remboursement de plein droit sans démarche
-          du Client.
-        </li>
-      </ul>
-      <p>
-        L&apos;acompte de 1&nbsp;500&nbsp;€ <strong>n&apos;est pas
-        remboursable</strong> si la mission a démarré (mandat de recherche
-        signé avec le Chasseur partenaire) et que le Client y renonce sans
-        motif légitime avant l&apos;expiration du délai contractuel.
-      </p>
-
-      <h3>9.3 Remboursement automatique de la Réservation (sans démarche nécessaire)</h3>
-      <p>
-        L&apos;acompte de Réservation de 5&nbsp;000&nbsp;€ est remboursé de
-        plein droit, sans démarche du Client, dans les cas suivants :
-      </p>
-      <ul>
-        <li>
-          <strong>AHF ne contacte pas le Client dans les 7 jours ouvrés</strong>{" "}
-          suivant la Réservation pour organiser l&apos;entretien avec
-          l&apos;Architecte intégrée ;
-        </li>
-        <li>
-          le <strong>devis définitif</strong> remis après l&apos;entretien
-          n&apos;est pas accepté par le Client dans le délai de validité de
-          3 mois ;
-        </li>
-        <li>
-          <strong>non-réalisation d&apos;une condition suspensive</strong> du
-          CCMI dans les délais contractuels ;
-        </li>
-        <li>
-          <strong>rétractation légale de 10 jours</strong> exercée après
-          signature du CCMI (art. L.&nbsp;271-1 CCH).
-        </li>
-      </ul>
-      <p>
-        Dans ces cas, le remboursement est effectué dans les{" "}
-        <strong>14 jours</strong> à compter du fait générateur, sans
-        qu&apos;AHF puisse opposer de retenue ni de pénalité.
-      </p>
-
-      <h3>9.4 Imputation des acomptes sur le CCMI</h3>
-      <p>Si le Client signe le CCMI :</p>
-      <ul>
-        <li>
-          L&apos;acompte de Réservation de{" "}
-          <strong>5&nbsp;000&nbsp;€</strong> s&apos;impute intégralement sur le
-          premier appel de fonds ;
-        </li>
-        <li>
-          L&apos;acompte Pack Recherche Terrain de{" "}
-          <strong>1&nbsp;500&nbsp;€</strong> s&apos;impute à hauteur de{" "}
-          <strong>50&nbsp;% (750&nbsp;€)</strong> sur le premier appel de fonds
-          si le terrain a été trouvé par le Chasseur partenaire.
-        </li>
+        <li>de l&apos;identification du terrain ;</li>
+        <li>de son acquisition éventuelle ;</li>
+        <li>de la vérification de ses droits à construire ;</li>
+        <li>de la vérification des servitudes ;</li>
+        <li>de la conformité administrative du terrain ;</li>
+        <li>de la transmission à AHF des informations nécessaires à l&apos;étude du projet.</li>
       </ul>
 
-      <h3>9.5 Résiliation après expiration du délai de rétractation du CCMI</h3>
+      <h3>11.2 Acquisition du terrain et acte notarié</h3>
       <p>
-        Une fois le délai légal de rétractation de 10 jours expiré et les
-        conditions suspensives levées, la résiliation du CCMI à
-        l&apos;initiative du Client peut entraîner des indemnités conformément
-        aux dispositions du CCMI et au droit commun.
+        L&apos;acquisition éventuelle du terrain relève exclusivement du
+        Client et donne lieu, le cas échéant, à la signature d&apos;un acte
+        notarié établi en bonne et due forme.
+      </p>
+      <p>
+        AHF n&apos;intervient pas dans l&apos;opération d&apos;achat du
+        terrain, ni dans les formalités juridiques, administratives ou
+        notariales qui y sont attachées.
+      </p>
+      <p>
+        AHF ne perçoit pas de prix de vente du terrain et n&apos;agit pas
+        comme vendeur, agent immobilier, notaire ou intermédiaire foncier,
+        sauf habilitation spécifique expressément prévue, ce qui n&apos;est
+        pas l&apos;objet des présentes CGV.
       </p>
 
-      {/* 10 — Garanties */}
-      <h2>10. Garanties légales applicables</h2>
+      <h3>11.3 Mandataires partenaires</h3>
       <p>
-        Conformément aux articles 1792 et suivants du Code civil et aux
-        dispositions du CCH, les garanties suivantes s&apos;appliquent à chaque
-        Maison ARKO :
+        Les mandataires ou partenaires susceptibles d&apos;accompagner le
+        Client dans sa recherche de terrain interviennent sous leur seule
+        responsabilité, dans le cadre de leur propre activité professionnelle.
       </p>
-
-      <h3>10.1 Garantie de parfait achèvement (1 an)</h3>
-      <p>
-        Couvre tous les désordres signalés lors de la réception ou dans
-        l&apos;année suivante. AHF prend en charge les réparations nécessaires.
-      </p>
-
-      <h3>10.2 Garantie biennale de bon fonctionnement (2 ans)</h3>
-      <p>
-        Couvre les éléments d&apos;équipement dissociables du gros œuvre
-        (volets, robinetterie, équipements électriques, etc.) pendant 2 ans à
-        compter de la réception.
-      </p>
-
-      <h3>10.3 Garantie décennale (10 ans)</h3>
-      <p>
-        AHF est tenue pendant <strong>10 ans</strong> à compter de la réception
-        des dommages compromettant la solidité de l&apos;ouvrage ou le rendant
-        impropre à sa destination, ainsi que des vices affectant les éléments
-        d&apos;équipement indissociables. Cette garantie est transférable aux
-        acquéreurs successifs en cas de revente.
-      </p>
-      <p>
-        <strong>
-          AHF justifie d&apos;une assurance de responsabilité décennale
-        </strong>{" "}
-        souscrite auprès de [nom de l&apos;assureur], police n°&nbsp;[à
-        compléter], dont l&apos;attestation est remise au Client au plus tard à
-        la signature du CCMI.
-      </p>
-
-      <h3>10.4 Garantie de livraison à prix et délais convenus (art. L.&nbsp;231-6 CCH)</h3>
-      <p>
-        AHF fournit, au démarrage du chantier, une garantie de livraison
-        délivrée par un établissement de crédit ou une société d&apos;assurance
-        agréée. Elle couvre le Client contre les risques d&apos;inexécution ou
-        de mauvaise exécution, et assure l&apos;achèvement de la construction
-        au prix et dans les délais contractuels, même en cas de défaillance
-        d&apos;AHF.
-      </p>
-      <p>
-        <strong>Obligation du Client</strong> : conformément à l&apos;article
-        L.&nbsp;242-1 du Code des assurances (loi Spinetta de 1978), le Client
-        (maître d&apos;ouvrage) a l&apos;obligation de souscrire une{" "}
-        <strong>assurance dommages-ouvrage</strong> avant l&apos;ouverture du
-        chantier. AHF peut accompagner le Client dans cette démarche mais ne
-        saurait se substituer à cette obligation légale.
-      </p>
-
-      {/* 11 — Responsabilité */}
-      <h2>11. Responsabilité d&apos;AHF</h2>
-
-      <h3>11.1 Étendue</h3>
-      <p>
-        AHF est responsable des dommages résultant directement de
-        l&apos;inexécution ou de la mauvaise exécution de ses obligations
-        contractuelles, dans les limites des garanties légales applicables à la
-        construction.
-      </p>
-
-      <h3>11.2 Exclusions</h3>
+      <p>Leur intervention est distincte de celle d&apos;AHF.</p>
       <p>AHF ne saurait être tenue responsable :</p>
       <ul>
-        <li>
-          des désordres liés à une utilisation non conforme de la Maison ARKO ;
-        </li>
-        <li>
-          des désordres résultant des <strong>micro-pieux</strong>, de
-          l&apos;étude géotechnique, des raccordements ou de tout autre travail
-          réalisé par le Client ou ses prestataires extérieurs à AHF ; en
-          particulier, tout désordre lié à un défaut de dimensionnement, de
-          pose ou de réception des micro-pieux relève de la responsabilité
-          exclusive du prestataire du Client ;
-        </li>
-        <li>
-          des dommages causés par un sinistre postérieur à la livraison non
-          couvert par les garanties légales (inondation, incendie, etc.) ;
-        </li>
-        <li>
-          des retards de livraison imputables à des cas de force majeure au
-          sens de l&apos;article 1218 du Code civil, à des retards dans
-          l&apos;obtention des autorisations administratives par le Client, ou
-          à un retard dans la mise en œuvre des micro-pieux.
-        </li>
+        <li>de la disponibilité réelle d&apos;un terrain ;</li>
+        <li>de son prix ;</li>
+        <li>de sa constructibilité définitive ;</li>
+        <li>de la régularité de la vente ;</li>
+        <li>des honoraires du mandataire ;</li>
+        <li>des informations transmises par un tiers ;</li>
+        <li>de l&apos;issue de la négociation foncière ;</li>
+        <li>de la signature ou non de l&apos;acte notarié.</li>
       </ul>
 
-      {/* 12 — Urbanisme et prérequis techniques */}
-      <h2>12. Urbanisme et prérequis techniques — Responsabilité du Client</h2>
+      {/* 12 */}
+      <h2>12. Urbanisme et autorisations administratives</h2>
 
-      <h3>12.1 Autorisations d&apos;urbanisme</h3>
+      <h3>12.1 Responsabilité du Client</h3>
       <p>
-        Le Client est seul responsable de l&apos;obtention des autorisations
-        d&apos;urbanisme requises. La fixation d&apos;une Maison ARKO sur
-        micro-pieux constitue une <strong>construction nouvelle</strong> au sens
-        de l&apos;article R.&nbsp;421-1 du Code de l&apos;urbanisme, soumise à :
+        Sauf mission spécifique expressément confiée à AHF, le Client est
+        responsable de l&apos;obtention des autorisations administratives
+        nécessaires à l&apos;installation de la maison ARKO.
+      </p>
+      <p>
+        Selon la surface, la localisation, l&apos;usage, le secteur
+        d&apos;implantation et les règles d&apos;urbanisme applicables, le
+        projet peut nécessiter notamment :
       </p>
       <ul>
-        <li>
-          <strong>Déclaration préalable de travaux</strong> pour l&apos;Arko
-          One (surface de plancher ≤ 20 m²) ;
-        </li>
-        <li>
-          <strong>Permis de construire</strong> pour l&apos;Arko Max (surface
-          de plancher ≥ 20 m²).
-        </li>
+        <li>une déclaration préalable ;</li>
+        <li>un permis de construire ;</li>
+        <li>une autorisation spécifique en secteur protégé ;</li>
+        <li>un accord relatif à l&apos;assainissement ;</li>
+        <li>une autorisation de voirie ;</li>
+        <li>toute autre autorisation requise par la réglementation applicable.</li>
+      </ul>
+
+      <h3>12.2 Assistance éventuelle d&apos;AHF</h3>
+      <p>
+        AHF peut assister le Client dans l&apos;identification des démarches à
+        prévoir ou dans la constitution de certains éléments techniques,
+        uniquement si cette mission est prévue au devis ou au contrat.
+      </p>
+      <p>Cette assistance ne constitue pas une garantie d&apos;obtention de l&apos;autorisation administrative.</p>
+      <p>
+        AHF ne peut être tenue responsable du refus, du retrait, du recours ou
+        du délai d&apos;instruction d&apos;une autorisation administrative,
+        sauf faute directement imputable à une prestation expressément confiée
+        à AHF.
+      </p>
+
+      <h3>12.3 Vérification de compatibilité</h3>
+      <p>
+        AHF peut vérifier la compatibilité technique apparente du terrain avec
+        une maison ARKO sur la base des informations transmises par le Client.
+      </p>
+      <p>Cette vérification ne remplace pas :</p>
+      <ul>
+        <li>une étude d&apos;urbanisme complète ;</li>
+        <li>une étude notariale ;</li>
+        <li>une étude géotechnique ;</li>
+        <li>une étude de structure ;</li>
+        <li>une analyse de servitudes ;</li>
+        <li>une vérification exhaustive des règles locales.</li>
+      </ul>
+
+      {/* 13 */}
+      <h2>13. Prérequis techniques du terrain</h2>
+      <p>Avant toute livraison et installation, le Client doit s&apos;assurer que le terrain est prêt à recevoir la maison ARKO.</p>
+      <p>Les prérequis peuvent notamment comprendre :</p>
+      <ul>
+        <li>terrain accessible aux véhicules de livraison et engins de manutention ;</li>
+        <li>portance suffisante des accès ;</li>
+        <li>absence d&apos;obstacle empêchant la livraison ou l&apos;installation ;</li>
+        <li>supports d&apos;accueil réalisés selon les prescriptions techniques ;</li>
+        <li>supports réceptionnés par le Client ou son prestataire ;</li>
+        <li>raccordements préparés ou en attente selon le périmètre prévu ;</li>
+        <li>autorisations administratives obtenues et purgées si nécessaire ;</li>
+        <li>conditions de sécurité réunies.</li>
       </ul>
       <p>
-        Ces seuils s&apos;appliquent en zone courante. Des règles spécifiques
-        peuvent s&apos;imposer en secteur protégé (abords de monuments
-        historiques, site classé, ZPPAUP, etc.). L&apos;outil de vérification
-        terrain disponible sur le site est fourni à titre indicatif et ne
-        constitue pas une étude de faisabilité juridique. AHF peut accompagner
-        le Client dans le dépôt des autorisations via l&apos;Architecte
-        intégrée, dans les conditions définies dans le CCMI.
+        AHF se réserve le droit de reporter la livraison ou l&apos;installation
+        si les prérequis ne sont pas réunis, sans que ce report puisse lui
+        être imputé.
+      </p>
+      <p>
+        Les frais supplémentaires résultant d&apos;un terrain non prêt, non
+        conforme, inaccessible ou insuffisamment préparé peuvent être facturés
+        au Client.
       </p>
 
-      <h3>12.2 Étude géotechnique et micro-pieux</h3>
+      {/* 14 */}
+      <h2>14. Étude de sol, fondations et supports d&apos;accueil</h2>
+      <p>Sauf mention contraire expresse, les études de sol, fondations et supports d&apos;accueil sont à la charge du Client.</p>
+      <p>Le Client doit faire réaliser les études et travaux nécessaires par des professionnels qualifiés et assurés.</p>
       <p>
-        La mise en œuvre des micro-pieux nécessite impérativement une{" "}
-        <strong>étude géotechnique préalable de type G1</strong> (mission
-        d&apos;étude de site) afin d&apos;attester de la capacité portante du
-        sol et de dimensionner correctement le système de fondation. Cette étude
-        est à la charge du Client.
+        AHF communique, lorsque cela est nécessaire, les charges, tolérances
+        et spécifications techniques utiles à la conception des supports
+        d&apos;accueil.
       </p>
+      <p>Le Client doit transmettre à AHF les justificatifs demandés, notamment :</p>
+      <ul>
+        <li>étude géotechnique ;</li>
+        <li>plans d&apos;exécution des supports ;</li>
+        <li>attestation de conformité ou procès-verbal de réception des supports ;</li>
+        <li>coordonnées et assurances des entreprises intervenantes ;</li>
+        <li>photographies ou contrôles demandés par AHF.</li>
+      </ul>
       <p>
-        AHF communique au Client les{" "}
-        <strong>spécifications techniques de référence</strong> (charges,
-        tolérances, entraxes) auxquelles les micro-pieux doivent répondre. Le
-        Client s&apos;assure que son prestataire respecte ces spécifications et
-        fournit à AHF une attestation de mise en œuvre avant la date de
-        livraison convenue.
-      </p>
-      <p>
-        AHF se réserve le droit de reporter ou de refuser la Pose si les
-        micro-pieux ne sont pas conformes aux spécifications techniques, sans
-        que cela ouvre droit à indemnité pour le Client.
-      </p>
-
-      {/* 13 — Propriété intellectuelle */}
-      <h2>13. Propriété intellectuelle</h2>
-      <p>
-        Les Maisons ARKO, leurs plans, leur design, leur identité visuelle et
-        le nom HOWNER sont la propriété exclusive d&apos;AHF et font
-        l&apos;objet d&apos;une protection au titre de la propriété
-        intellectuelle et/ou industrielle. Toute reproduction, même partielle,
-        est interdite sans autorisation préalable écrite.
+        AHF peut refuser ou reporter l&apos;installation si les supports
+        d&apos;accueil ne sont pas conformes aux prescriptions techniques ou
+        si les justificatifs nécessaires ne sont pas fournis.
       </p>
 
-      {/* 14 — Données personnelles */}
-      <h2>14. Protection des données personnelles</h2>
+      {/* 15 */}
+      <h2>15. Fabrication en atelier</h2>
       <p>
-        Le traitement des données personnelles des Clients est régi par la{" "}
-        <strong>Politique de Confidentialité</strong> disponible à{" "}
-        <a href="/confidentialite">affinityhome.fr/confidentialite</a>.
-        Conformément au RGPD et à la loi Informatique et Libertés, le Client
-        peut exercer ses droits à : contact@affinityhousefactory.com.
+        Les maisons ARKO sont fabriquées hors site, en atelier ou dans un
+        environnement de production contrôlé, selon les plans, options et
+        spécifications validés.
+      </p>
+      <p>AHF organise la fabrication selon son planning de production et informe le Client des étapes significatives.</p>
+      <p>Le Client reconnaît que toute modification demandée après validation du contrat peut entraîner :</p>
+      <ul>
+        <li>un surcoût ;</li>
+        <li>un délai supplémentaire ;</li>
+        <li>une impossibilité technique ;</li>
+        <li>la nécessité d&apos;un avenant.</li>
+      </ul>
+      <p>
+        AHF se réserve le droit de remplacer un matériau, équipement ou
+        composant par un équivalent de qualité comparable ou supérieure,
+        notamment en cas d&apos;indisponibilité fournisseur, sous réserve de ne
+        pas dégrader les caractéristiques essentielles de la maison ARKO.
       </p>
 
-      {/* 15 — Médiation */}
-      <h2>15. Médiation et règlement des litiges</h2>
+      {/* 16 */}
+      <h2>16. Délais</h2>
 
-      <h3>15.1 Réclamations</h3>
+      <h3>16.1 Délai de fabrication</h3>
       <p>
-        Toute réclamation est à adresser en priorité à
-        contact@affinityhousefactory.com ou par courrier recommandé au siège
-        d&apos;AHF : 28 Chemin de Sabalce OEV, 64100 Bayonne.
+        Le délai de fabrication en atelier est estimé à{" "}
+        <strong>12 semaines</strong> à compter de la levée des conditions
+        prévues au contrat.
+      </p>
+      <p>Ce délai ne commence notamment à courir qu&apos;après :</p>
+      <ul>
+        <li>signature du contrat ;</li>
+        <li>expiration ou purge du délai de rétractation applicable ;</li>
+        <li>obtention des autorisations nécessaires ;</li>
+        <li>confirmation du financement ;</li>
+        <li>validation technique définitive ;</li>
+        <li>paiement des factures exigibles ;</li>
+        <li>validation des prérequis de fabrication ;</li>
+        <li>transmission complète des pièces demandées.</li>
+      </ul>
+
+      <h3>16.2 Délai de livraison et d&apos;installation</h3>
+      <p>La livraison et l&apos;installation sont planifiées après confirmation de la sortie d&apos;atelier et vérification des prérequis terrain.</p>
+      <p>
+        L&apos;installation sur site est généralement réalisée en une journée,
+        sous réserve des conditions d&apos;accès, de météo, de préparation du
+        terrain et des contraintes techniques propres au site.
       </p>
 
-      <h3>15.2 Médiation (consommateurs)</h3>
+      <h3>16.3 Causes de report</h3>
+      <p>Les délais peuvent être prorogés en cas de :</p>
+      <ul>
+        <li>retard dans l&apos;obtention d&apos;une autorisation administrative ;</li>
+        <li>recours, retrait ou opposition administrative ;</li>
+        <li>retard de financement ;</li>
+        <li>retard de paiement ;</li>
+        <li>modification demandée par le Client ;</li>
+        <li>terrain non accessible ;</li>
+        <li>supports d&apos;accueil non conformes ;</li>
+        <li>intempéries ;</li>
+        <li>impossibilité de transport ;</li>
+        <li>retard fournisseur ;</li>
+        <li>force majeure ;</li>
+        <li>intervention d&apos;un tiers non coordonné par AHF ;</li>
+        <li>toute cause extérieure empêchant raisonnablement l&apos;exécution dans les délais prévus.</li>
+      </ul>
+
+      {/* 17 */}
+      <h2>17. Livraison, transport et installation</h2>
+      <p>La livraison est organisée selon les conditions prévues au devis et au contrat.</p>
+      <p>Le Client doit garantir l&apos;accès au terrain et communiquer à AHF toute information utile, notamment :</p>
+      <ul>
+        <li>largeur et état des voies d&apos;accès ;</li>
+        <li>présence de lignes aériennes ;</li>
+        <li>contraintes de stationnement ;</li>
+        <li>pente ;</li>
+        <li>portance ;</li>
+        <li>arbres, clôtures, murs ou obstacles ;</li>
+        <li>autorisations de voirie nécessaires ;</li>
+        <li>disponibilité des zones de manœuvre ;</li>
+        <li>contraintes de voisinage.</li>
+      </ul>
       <p>
-        En cas d&apos;échec de la réclamation amiable dans un délai de 2 mois,
-        le Client consommateur peut saisir gratuitement le médiateur compétent.
-        Pour les contrats de construction, le médiateur de la{" "}
-        <strong>Fédération Française du Bâtiment (FFB)</strong> ou tout
-        médiateur agréé peut être sollicité. La plateforme européenne de
-        règlement en ligne des litiges est accessible à{" "}
-        <a
-          href="https://ec.europa.eu/consumers/odr"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        Lorsque l&apos;installation nécessite un engin de levage, une
+        autorisation de voirie, une interruption de circulation ou une
+        prestation spécifique, ces éléments sont inclus uniquement s&apos;ils
+        sont expressément prévus au devis ou au contrat.
+      </p>
+      <p>À défaut, ils sont à la charge du Client.</p>
+
+      {/* 18 */}
+      <h2>18. Réception</h2>
+      <p>La réception intervient après installation de la maison ARKO sur site.</p>
+      <p>Elle donne lieu à l&apos;établissement d&apos;un procès-verbal signé par le Client et AHF, avec ou sans réserves.</p>
+      <p>
+        En cas de réserves, celles-ci sont listées précisément dans le
+        procès-verbal. Les délais et modalités de levée des réserves sont
+        convenus entre les parties.
+      </p>
+      <p>La réception marque le point de départ des garanties légales applicables aux prestations réalisées.</p>
+      <p>
+        Si le Client refuse de signer le procès-verbal sans motif légitime ou
+        ne se présente pas à la réception régulièrement organisée, AHF pourra
+        constater la situation par tout moyen utile et appliquer les
+        conséquences prévues au contrat.
+      </p>
+
+      {/* 19 */}
+      <h2>19. Garanties légales applicables</h2>
+      <p>
+        Les garanties légales applicables dépendent de la nature des
+        prestations réalisées, du périmètre contractuel et des règles
+        d&apos;ordre public applicables.
+      </p>
+      <p>
+        À compter de la réception, les prestations relevant de travaux de
+        construction peuvent notamment être couvertes par les garanties
+        suivantes.
+      </p>
+
+      <h3>19.1 Garantie de parfait achèvement</h3>
+      <p>
+        La garantie de parfait achèvement couvre, pendant un délai d&apos;un
+        an à compter de la réception, les désordres signalés par le Client
+        lors de la réception ou notifiés par écrit dans l&apos;année suivant
+        celle-ci, lorsqu&apos;ils relèvent des prestations réalisées par AHF
+        ou ses intervenants.
+      </p>
+
+      <h3>19.2 Garantie de bon fonctionnement</h3>
+      <p>
+        La garantie de bon fonctionnement couvre, pendant deux ans à compter
+        de la réception, les éléments d&apos;équipement dissociables de
+        l&apos;ouvrage, lorsqu&apos;ils relèvent du périmètre des prestations
+        réalisées et des garanties applicables.
+      </p>
+
+      <h3>19.3 Garantie décennale</h3>
+      <p>
+        La garantie décennale couvre, pendant dix ans à compter de la
+        réception, les dommages relevant des articles 1792 et suivants du
+        Code civil, notamment ceux qui compromettent la solidité de
+        l&apos;ouvrage ou le rendent impropre à sa destination.
+      </p>
+      <p>Cette garantie est attachée à l&apos;ouvrage et bénéficie aux propriétaires successifs pendant sa durée légale.</p>
+
+      <h3>19.4 Limites</h3>
+      <p>Les garanties ne couvrent pas les désordres résultant notamment :</p>
+      <ul>
+        <li>d&apos;une utilisation anormale ;</li>
+        <li>d&apos;un défaut d&apos;entretien ;</li>
+        <li>d&apos;une modification réalisée sans accord d&apos;AHF ;</li>
+        <li>d&apos;une intervention d&apos;un tiers ;</li>
+        <li>d&apos;un défaut affectant les travaux réalisés par le Client ou ses prestataires ;</li>
+        <li>d&apos;un défaut du terrain ou des supports non imputable à AHF ;</li>
+        <li>d&apos;un sinistre extérieur ;</li>
+        <li>d&apos;une cause étrangère.</li>
+      </ul>
+
+      {/* 20 */}
+      <h2>20. Assurances</h2>
+      <p>
+        AHF déclare être ou devoir être assurée pour les activités
+        effectivement exercées et les prestations réalisées, conformément aux
+        obligations légales applicables.
+      </p>
+      <p>
+        Les attestations d&apos;assurance pertinentes sont remises au Client
+        au plus tard à la signature du contrat ou avant le démarrage des
+        prestations concernées, selon le cas.
+      </p>
+      <p>
+        Le Client reconnaît avoir été informé de la nécessité de souscrire,
+        lorsque la réglementation l&apos;exige, une assurance
+        dommages-ouvrage avant l&apos;ouverture du chantier ou le démarrage des
+        travaux concernés.
+      </p>
+      <p>
+        AHF peut accompagner le Client dans l&apos;identification de cette
+        obligation, mais ne se substitue pas au Client dans sa qualité de
+        maître d&apos;ouvrage, sauf convention contraire expresse.
+      </p>
+
+      {/* 21 */}
+      <h2>21. Après-vente et suivi technique</h2>
+      <p>
+        Après l&apos;installation de la maison ARKO, un interlocuteur dédié
+        peut rester le référent du Client pour le suivi technique du projet.
+      </p>
+      <p>Il accompagne le Client pour les questions liées :</p>
+      <ul>
+        <li>à la maison livrée ;</li>
+        <li>à son installation ;</li>
+        <li>à ses équipements ;</li>
+        <li>au traitement des réserves ;</li>
+        <li>aux désordres signalés après réception.</li>
+      </ul>
+      <p>
+        Les désordres relevant de la garantie de parfait achèvement et
+        signalés dans l&apos;année suivant la réception sont traités dans ce
+        cadre, sans frais pour le Client, sous réserve qu&apos;ils relèvent
+        bien des prestations réalisées par AHF ou ses intervenants.
+      </p>
+      <p>
+        Le suivi après-vente ne constitue pas une mission générale
+        d&apos;urbanisme, d&apos;administration foncière, de gestion locative,
+        de maintenance permanente ou de contrôle technique du terrain.
+      </p>
+
+      {/* 22 */}
+      <h2>22. Responsabilité d&apos;AHF</h2>
+      <p>
+        AHF est responsable de la bonne exécution des prestations expressément
+        mises à sa charge par le devis, le contrat et leurs annexes.
+      </p>
+      <p>AHF ne saurait être tenue responsable :</p>
+      <ul>
+        <li>de l&apos;acquisition du terrain ;</li>
+        <li>des informations erronées ou incomplètes transmises par le Client ;</li>
+        <li>du refus ou du délai d&apos;une autorisation administrative ;</li>
+        <li>de la non-constructibilité du terrain ;</li>
+        <li>des servitudes ou contraintes non communiquées ;</li>
+        <li>des travaux réalisés par le Client ou par ses prestataires ;</li>
+        <li>des fondations ou supports réalisés hors périmètre AHF ;</li>
+        <li>des raccordements non inclus ;</li>
+        <li>du défaut d&apos;accès au terrain ;</li>
+        <li>des retards causés par le Client ou des tiers ;</li>
+        <li>des modifications demandées après validation ;</li>
+        <li>des événements de force majeure ;</li>
+        <li>des dommages causés par une utilisation non conforme ou un défaut d&apos;entretien.</li>
+      </ul>
+
+      {/* 23 */}
+      <h2>23. Responsabilité du Client</h2>
+      <p>Le Client est responsable :</p>
+      <ul>
+        <li>de la sincérité et de l&apos;exactitude des informations communiquées ;</li>
+        <li>du choix et de l&apos;acquisition éventuelle du terrain ;</li>
+        <li>de l&apos;obtention des droits permettant l&apos;installation ;</li>
+        <li>de l&apos;obtention des autorisations administratives ;</li>
+        <li>de la réalisation des travaux préparatoires à sa charge ;</li>
+        <li>de la souscription des assurances qui lui incombent ;</li>
+        <li>de l&apos;accès au terrain ;</li>
+        <li>du paiement des sommes dues ;</li>
+        <li>du respect des conditions de sécurité et de préparation du site ;</li>
+        <li>de la conservation et de l&apos;entretien normal de la maison après réception.</li>
+      </ul>
+
+      {/* 24 */}
+      <h2>24. Modifications du projet</h2>
+      <p>
+        Toute modification demandée par le Client après acceptation du devis
+        ou signature du contrat doit faire l&apos;objet d&apos;une validation
+        écrite d&apos;AHF.
+      </p>
+      <p>
+        Lorsque la modification affecte le prix, le délai, les
+        caractéristiques techniques ou le périmètre des prestations, elle
+        donne lieu à un avenant.
+      </p>
+      <p>
+        AHF peut refuser une modification devenue techniquement impossible,
+        incompatible avec la fabrication engagée, non conforme aux règles
+        applicables ou disproportionnée.
+      </p>
+
+      {/* 25 */}
+      <h2>25. Droit de rétractation</h2>
+      <p>
+        Lorsque le Client agit en qualité de consommateur, il bénéficie des
+        droits de rétractation prévus par les dispositions légales
+        applicables selon la nature du contrat, le mode de conclusion et le
+        régime juridique applicable au projet.
+      </p>
+      <p>
+        Lorsque le contrat est conclu à distance ou hors établissement, les
+        règles du Code de la consommation peuvent prévoir un délai de
+        rétractation.
+      </p>
+      <p>
+        Lorsque le projet relève d&apos;un régime juridique spécifique
+        applicable à la construction d&apos;une maison individuelle, les
+        règles de rétractation propres à ce régime s&apos;appliquent.
+      </p>
+      <p>
+        Les modalités précises de rétractation sont communiquées au Client
+        dans le contrat et, le cas échéant, au moyen d&apos;un formulaire de
+        rétractation.
+      </p>
+      <p>
+        Aucun démarrage de fabrication ne peut intervenir avant
+        l&apos;expiration ou la renonciation régulière au délai applicable
+        lorsque la réglementation l&apos;exige.
+      </p>
+
+      {/* 26 */}
+      <h2>26. Résiliation</h2>
+      <p>Le contrat peut être résilié dans les conditions prévues aux conditions particulières, notamment en cas :</p>
+      <ul>
+        <li>de non-réalisation d&apos;une condition suspensive ;</li>
+        <li>d&apos;impossibilité technique définitive ;</li>
+        <li>de refus définitif d&apos;autorisation administrative ;</li>
+        <li>de défaut de paiement ;</li>
+        <li>de manquement grave d&apos;une partie ;</li>
+        <li>de force majeure prolongée ;</li>
+        <li>d&apos;accord écrit entre les parties.</li>
+      </ul>
+      <p>Les conséquences financières de la résiliation sont déterminées par le contrat, les présentes CGV et le droit applicable.</p>
+
+      {/* 27 */}
+      <h2>27. Force majeure</h2>
+      <p>
+        Aucune des parties ne pourra être tenue responsable d&apos;un retard
+        ou d&apos;une inexécution résultant d&apos;un événement de force
+        majeure au sens de l&apos;article 1218 du Code civil.
+      </p>
+      <p>
+        Sont notamment susceptibles de constituer des événements de force
+        majeure, selon les circonstances : catastrophe naturelle, événement
+        climatique exceptionnel, incendie, inondation, grève externe, blocage
+        de transport, décision administrative, pandémie, pénurie majeure,
+        impossibilité d&apos;approvisionnement ou tout événement
+        imprévisible, irrésistible et extérieur empêchant l&apos;exécution
+        normale du contrat.
+      </p>
+
+      {/* 28 */}
+      <h2>28. Propriété intellectuelle</h2>
+      <p>
+        Les marques, noms, logos, plans, modèles, visuels, configurations,
+        notices, fiches techniques, designs et contenus relatifs à HOWNER, AHF
+        et ARKO sont protégés par les droits de propriété intellectuelle.
+      </p>
+      <p>Toute reproduction, représentation, adaptation, diffusion ou exploitation non autorisée est interdite.</p>
+      <p>
+        Le Client s&apos;interdit de reproduire, faire reproduire ou exploiter
+        les plans, modèles ou documents techniques transmis par AHF en dehors
+        de son projet personnel, sauf accord écrit préalable.
+      </p>
+
+      {/* 29 */}
+      <h2>29. Données personnelles</h2>
+      <p>AHF traite les données personnelles du Client pour les besoins :</p>
+      <ul>
+        <li>de la qualification du projet ;</li>
+        <li>de l&apos;édition du devis ;</li>
+        <li>de la gestion de la réservation ;</li>
+        <li>de la préparation du contrat ;</li>
+        <li>de l&apos;exécution des prestations ;</li>
+        <li>du suivi client ;</li>
+        <li>de la facturation ;</li>
+        <li>du service après-vente ;</li>
+        <li>du respect des obligations légales.</li>
+      </ul>
+      <p>
+        Les données traitées peuvent comprendre : identité, coordonnées,
+        informations relatives au projet, informations relatives au terrain,
+        documents techniques, documents administratifs, échanges commerciaux
+        et contractuels.
+      </p>
+      <p>
+        Le Client dispose des droits prévus par la réglementation applicable
+        en matière de protection des données personnelles, notamment les
+        droits d&apos;accès, de rectification, d&apos;opposition,
+        d&apos;effacement, de limitation et de portabilité lorsque ceux-ci
+        sont applicables.
+      </p>
+      <p>Pour exercer ses droits, le Client peut écrire à : contact@affinityhousefactory.com</p>
+      <p>La politique de confidentialité applicable est disponible sur le site ou communiquée sur demande.</p>
+
+      {/* 30 */}
+      <h2>30. Réclamations</h2>
+      <p>Toute réclamation doit être adressée prioritairement à AHF :</p>
+      <ul>
+        <li>par email : contact@affinityhousefactory.com</li>
+        <li>ou par courrier : Affinity House Factory, 28 Chemin de Sabalce OEV, 64100 Bayonne, France</li>
+      </ul>
+      <p>La réclamation doit préciser :</p>
+      <ul>
+        <li>l&apos;identité du Client ;</li>
+        <li>la référence du projet ;</li>
+        <li>l&apos;objet de la réclamation ;</li>
+        <li>les éléments justificatifs utiles ;</li>
+        <li>les coordonnées de contact.</li>
+      </ul>
+      <p>AHF s&apos;efforce de répondre dans un délai raisonnable à compter de la réception d&apos;une réclamation complète.</p>
+
+      {/* 31 */}
+      <h2>31. Médiation de la consommation</h2>
+      <p>
+        Lorsque le Client agit en qualité de consommateur, il peut recourir
+        gratuitement à un médiateur de la consommation en cas de litige non
+        résolu amiablement avec AHF.
+      </p>
+      <p>
+        Les coordonnées du médiateur compétent seront communiquées au Client
+        et doivent être complétées avant publication des présentes CGV :
+      </p>
+      <ul>
+        <li>Médiateur désigné : [à compléter]</li>
+        <li>Adresse : [à compléter]</li>
+        <li>Site internet : [à compléter]</li>
+      </ul>
+      <p>
+        Le Client peut également consulter la plateforme européenne de
+        règlement en ligne des litiges :{" "}
+        <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">
           ec.europa.eu/consumers/odr
         </a>
-        .
       </p>
 
-      <h3>15.3 Juridiction compétente</h3>
+      {/* 32 */}
+      <h2>32. Droit applicable et juridiction compétente</h2>
+      <p>Les présentes CGV sont soumises au droit français.</p>
+      <p>En cas de litige, les parties recherchent prioritairement une solution amiable.</p>
       <p>
-        En cas de litige non résolu amiablement, les tribunaux compétents du
-        ressort du siège d&apos;AHF seront saisis, sauf dispositions légales
-        impératives contraires (notamment pour les consommateurs : tribunal du
-        domicile du défendeur).
+        À défaut d&apos;accord amiable, le litige est porté devant les
+        juridictions compétentes conformément aux règles de droit commun et
+        aux dispositions impératives applicables, notamment lorsque le Client
+        agit en qualité de consommateur.
       </p>
 
-      {/* 16 — Droit applicable */}
-      <h2>16. Droit applicable</h2>
+      {/* 33 */}
+      <h2>33. Hiérarchie contractuelle</h2>
       <p>
-        Les présentes CGV sont soumises au <strong>droit français</strong>.
-        Toute clause contraire au droit de la construction ou à la protection
-        du consommateur est réputée non écrite.
+        En cas de contradiction entre plusieurs documents, l&apos;ordre de
+        priorité suivant s&apos;applique, sauf stipulation contraire expresse :
+      </p>
+      <ol>
+        <li>les conditions particulières du contrat signé ;</li>
+        <li>le contrat de fabrication, livraison et installation ;</li>
+        <li>le devis accepté ;</li>
+        <li>la notice technique contractuelle ;</li>
+        <li>les plans validés ;</li>
+        <li>les fiches techniques annexées ;</li>
+        <li>les présentes CGV ;</li>
+        <li>les documents commerciaux ou supports de présentation.</li>
+      </ol>
+      <p>
+        Les documents commerciaux, visuels, rendus, simulations et contenus du
+        site ne prévalent jamais sur les documents contractuels signés.
       </p>
 
-      {/* 17 — Dispositions finales */}
-      <h2>17. Dispositions finales</h2>
+      {/* 34 */}
+      <h2>34. Nullité partielle</h2>
+      <p>Si une clause des présentes CGV est déclarée nulle, illégale ou réputée non écrite, les autres clauses demeurent applicables.</p>
       <p>
-        En cas de contradiction entre les présentes CGV et le CCMI signé, le
-        CCMI prévaut. Les CGV s&apos;appliquent à toutes les réservations
-        passées avant la signature du CCMI.
+        La clause concernée est remplacée, dans la mesure du possible, par une
+        clause valable reflétant l&apos;intention économique et juridique
+        initiale des parties, dans le respect du droit applicable.
+      </p>
+
+      {/* 35 */}
+      <h2>35. Évolution des CGV</h2>
+      <p>AHF se réserve le droit de modifier les présentes CGV à tout moment.</p>
+      <p>
+        Les CGV applicables sont celles en vigueur à la date de la réservation
+        ou de la signature du devis, sauf stipulation contraire ou obligation
+        légale impérative.
+      </p>
+      <p>
+        Les modifications postérieures ne s&apos;appliquent pas aux contrats
+        déjà signés, sauf accord des parties ou nécessité de mise en
+        conformité légale.
       </p>
 
       <p>
         <em>
-          © 2026 HOWNER / Affinity House Factory — Fabriqué au Pays Basque.
-          Renders d&apos;intention — visuels non contractuels.
+          © 2026 HOWNER / Affinity House Factory — Maisons légères ARKO —
+          Fabriquées hors site et installées sur terrain client. Visuels,
+          rendus et simulations non contractuels, sauf mention contraire dans
+          les documents signés.
         </em>
       </p>
     </LegalShell>
