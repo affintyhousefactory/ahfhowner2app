@@ -181,10 +181,14 @@ export const REASSURANCE = [
   },
 ] as const;
 
-export const FAQ = [
+export const FAQ: { q: string; a: string | string[] }[] = [
   {
     q: "Quel est le délai ?",
-    a: "12 semaines de fabrication en atelier à compter de la levée des conditions du contrat de construction — urbanisme obtenu, financement confirmé, fondations réceptionnées. La pose se fait ensuite en une journée. Vous êtes informé par email à chaque étape clé : lancement, structure, finitions, module prêt à livrer, pose.",
+    a: [
+      "La fabrication de votre maison ARKO en atelier dure environ **12 semaines**, à compter de la levée des conditions prévues au contrat : autorisation d'urbanisme obtenue, financement confirmé, terrain accessible et fondations ou supports d'accueil réceptionnés.",
+      "L'installation sur site est ensuite généralement réalisée en **une journée**, sous réserve des conditions d'accès, de météo et de préparation du terrain.",
+      "À chaque étape importante — lancement, structure, finitions, maison prête à livrer, installation — vous êtes informé par email.",
+    ],
   },
   {
     q: "Et si je n'ai pas encore de terrain ?",
@@ -192,17 +196,39 @@ export const FAQ = [
   },
   {
     q: "Comment se passe le paiement ?",
-    a: "Après entretien téléphonique et proposition commerciale envoyée par email, vous devrez procéder à la réservation de votre maison ARKO par le virement d'un acompte de 5 000 €, remboursable à tout moment avant la signature du contrat de construction, sans condition ni justification. Cet acompte s'impute sur le premier appel de fonds. L'échéancier est adapté à la fabrication en atelier selon le décret du 6 février 2020 : 10 % à l'ouverture, 40 % à l'achèvement de la structure, 60 % aux finitions intérieures, 80 % au module prêt à livrer, 95 % à la réception, 100 % après levée des réserves. À noter que l'achat ou la négociation que vous devrez mener pour obtenir votre terrain est assujetti probablement à un acte notarial. Nous n'intervenons d'aucune manière sur cet aspect. À noter que nos partenaires Mandataires qui vous accompagneraient pour votre terrain ont vocation à agir seuls et sous leur propre responsabilité. Affinity ne joue qu'un rôle d'apporteur d'affaires dans cette situation.",
+    a: [
+      "Après un premier échange téléphonique, nous vous adressons par email une proposition commerciale comprenant le modèle ARKO retenu, les principales caractéristiques techniques, les options choisies et une estimation du calendrier de fabrication, de livraison et d'installation.",
+      "Pour confirmer votre intérêt et réserver votre projet, un versement initial de 5 000 € vous est demandé.",
+      "Ce versement est intégralement remboursable tant que le contrat de fabrication, livraison et installation n'a pas été signé. Vous pouvez donc renoncer à votre projet avant cette signature, sans avoir à justifier votre décision.",
+      "Une fois le contrat signé, ce versement de 5 000 € est déduit du prix total de votre maison ARKO et intégré à l'échéancier de paiement.",
+      "Le règlement s'effectue ensuite en plusieurs étapes, adaptées à la fabrication en atelier :",
+      "Étape 0 — Premier échange et proposition commerciale\nNous échangeons avec vous sur votre projet, votre terrain, le modèle ARKO envisagé et vos contraintes techniques. Nous vous envoyons ensuite un devis accompagné du portfolio produit correspondant.",
+      "Étape 1 — Réservation du projet\nVous validez le devis de réservation et l'échéancier prévisionnel. Une facture de réservation de 5 000 € vous est adressée. Le paiement peut être effectué par virement bancaire ou par paiement sécurisé en ligne.",
+      "Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d'étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des 5 000 € déjà versés.",
+      "Étape 3 — Sortie d'atelier\nLorsque votre maison ARKO est fabriquée et prête à être livrée, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
+      "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
+      "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
+      "Affinity House Factory n'intervient pas dans l'opération d'achat du terrain, ni dans les formalités juridiques, administratives ou notariales qui y sont attachées.",
+      "Les mandataires partenaires susceptibles d'accompagner le client dans sa recherche de terrain interviennent sous leur seule responsabilité, dans le cadre de leur propre activité professionnelle. Leur intervention est distincte de celle d'Affinity House Factory.",
+    ],
   },
   {
     q: "Quelles garanties ?",
-    a: "Trois garanties légales s'appliquent à chaque Maison ARKO : parfait achèvement (1 an — tous les désordres signalés à la réception ou dans l'année), biennale de bon fonctionnement (2 ans — volets, robinetterie, équipements électriques et éléments dissociables), et décennale (10 ans — structure et éléments indissociables). La garantie décennale est transférable en cas de revente. L'assurance dommages-ouvrage est à la charge du Client, obligatoire avant ouverture de chantier.",
+    a: [
+      "Votre maison ARKO bénéficie des garanties légales applicables aux travaux réalisés : parfait achèvement pendant 1 an, bon fonctionnement des équipements dissociables pendant 2 ans, et garantie décennale pendant 10 ans pour les dommages affectant la solidité de l'ouvrage ou son usage.",
+      "La garantie décennale est attachée à la maison et se transmet en cas de revente pendant sa durée de validité.",
+      "L'assurance dommages-ouvrage reste à la charge du client et doit être souscrite avant l'ouverture du chantier lorsque la réglementation l'exige.",
+    ],
   },
   {
     q: "Et l'après-vente ?",
-    a: "Un interlocuteur dédié vous accompagne après la pose. Il reste votre référent technique pour les questions de conformité, d'urbanisme et d'adaptation. Les désordres signalés dans l'année suivant la réception sont traités dans le cadre de la garantie de parfait achèvement, sans frais.",
+    a: [
+      "Après l'installation, un interlocuteur dédié reste votre référent technique.",
+      "Il vous accompagne dans le suivi de votre maison ARKO, le traitement des éventuelles réserves et les désordres signalés après réception.",
+      "Les désordres relevant de la garantie de parfait achèvement sont traités sans frais dans l'année suivant la réception, sous réserve qu'ils concernent les prestations réalisées par Affinity House Factory ou ses intervenants.",
+    ],
   },
-] as const;
+];
 
 // Navigation principale par routes (multi-pages — ADR-021).
 // « Produits » est rendu à part (méga-menu Tesla) via PRODUCT_LIST.
