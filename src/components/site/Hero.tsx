@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { BRAND } from "@/lib/site";
+import { BRAND, SERIE_TOTAL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Ikurrina } from "@/components/ui/Ikurrina";
 
@@ -96,7 +96,7 @@ export function Hero() {
           <div className="flex flex-col gap-5 md:col-span-5 md:items-end">
             <div className="flex flex-wrap items-center gap-3 md:justify-end">
               <Button href="/configurer" variant="accent">
-                Réserver — {BRAND.deposit.toLocaleString("fr-FR")} €
+                Réserver
                 <Arrow />
               </Button>
               <Button href="/terrain" variant="outline">
@@ -104,7 +104,7 @@ export function Hero() {
               </Button>
             </div>
             <p className="font-mono text-xs text-muted md:text-right">
-              Arko One & Arko Max — 12 + 5 exemplaires numérotés
+              {SERIE_TOTAL} exemplaires numérotés
             </p>
           </div>
         </div>
