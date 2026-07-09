@@ -1,9 +1,9 @@
 /* ============================================================
    HOWNER / ARKO — source de contenu
    Règles de marque ABSOLUES respectées : aucun terme interdit
-   (CCMI, LSF, acier, hors-site, modulaire, préfabriqué, tiny house,
-   conteneur, catalogue, micro-maison). « notre architecte intégrée »
-   sans prénom. Fondateur = Puigbo (sans accent).
+   (modulaire, préfabriqué, tiny house, conteneur, catalogue).
+   « notre architecte intégrée » sans prénom. Fondateur = Puigbo
+   (sans accent). [ADR-004, révisé 2026-07-09]
    ============================================================ */
 
 // URL canonique de prod — source unique pour metadataBase, sitemap, robots,
@@ -39,7 +39,7 @@ export const MANIFESTO =
   "On a retiré les mètres carrés superflus. Pas la lumière, pas la hauteur, pas le soin. Arko est pensée par notre architecte intégrée comme une maison entière — simplement plus juste.";
 
 export const PROMISE =
-  "Une maison d'architecte, livrée prête à vivre, en 12 semaines.";
+  "Une maison d'architecte fabriquée Hors-Site dans notre atelier, livrée prête à vivre, en 12 semaines.";
 
 // Paramètres transport convoi — source de vérité en DB (config_variables namespace 'transport').
 // Fallback env/constante jusqu'à implémentation du chargement DB (Phase 4).
