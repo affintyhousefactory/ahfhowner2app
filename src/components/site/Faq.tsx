@@ -35,9 +35,22 @@ export function Faq() {
                     +
                   </span>
                 </summary>
-                <p className="mt-4 max-w-2xl text-[0.98rem] leading-relaxed text-muted">
-                  {item.a}
-                </p>
+                <div className="mt-4 max-w-2xl space-y-4">
+                  {(Array.isArray(item.a) ? item.a : [item.a]).map((paragraph, j) => {
+                    const [maybeTitle, ...rest] = paragraph.split("\n");
+                    const isStep = rest.length > 0 && /^Étape \d/.test(maybeTitle);
+                    return (
+                      <div key={j}>
+                        {isStep && (
+                          <p className="text-[0.98rem] font-medium text-ink">{maybeTitle}</p>
+                        )}
+                        <p className="text-[0.98rem] leading-relaxed text-muted">
+                          {isStep ? rest.join("\n") : paragraph}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </details>
             </Reveal>
           ))}

@@ -192,7 +192,21 @@ export const FAQ = [
   },
   {
     q: "Comment se passe le paiement ?",
-    a: "Après entretien téléphonique et proposition commerciale envoyée par email, vous devrez procéder à la réservation de votre maison ARKO par le virement d'un acompte de 5 000 €, remboursable à tout moment avant la signature du contrat de construction, sans condition ni justification. Cet acompte s'impute sur le premier appel de fonds. L'échéancier est adapté à la fabrication en atelier selon le décret du 6 février 2020 : 10 % à l'ouverture, 40 % à l'achèvement de la structure, 60 % aux finitions intérieures, 80 % au module prêt à livrer, 95 % à la réception, 100 % après levée des réserves. À noter que l'achat ou la négociation que vous devrez mener pour obtenir votre terrain est assujetti probablement à un acte notarial. Nous n'intervenons d'aucune manière sur cet aspect. À noter que nos partenaires Mandataires qui vous accompagneraient pour votre terrain ont vocation à agir seuls et sous leur propre responsabilité. Affinity ne joue qu'un rôle d'apporteur d'affaires dans cette situation.",
+    a: [
+      "Après un premier échange téléphonique, nous vous adressons par email une proposition commerciale comprenant le modèle ARKO retenu, les principales caractéristiques techniques, les options choisies et une estimation du calendrier de fabrication, de livraison et d'installation.",
+      "Pour confirmer votre intérêt et réserver votre projet, un versement initial de 5 000 € vous est demandé.",
+      "Ce versement est intégralement remboursable tant que le contrat de fabrication, livraison et installation n'a pas été signé. Vous pouvez donc renoncer à votre projet avant cette signature, sans avoir à justifier votre décision.",
+      "Une fois le contrat signé, ce versement de 5 000 € est déduit du prix total de votre maison ARKO et intégré à l'échéancier de paiement.",
+      "Le règlement s'effectue ensuite en plusieurs étapes, adaptées à la fabrication en atelier :",
+      "Étape 0 — Premier échange et proposition commerciale\nNous échangeons avec vous sur votre projet, votre terrain, le modèle ARKO envisagé et vos contraintes techniques. Nous vous envoyons ensuite un devis accompagné du portfolio produit correspondant.",
+      "Étape 1 — Réservation du projet\nVous validez le devis de réservation et l'échéancier prévisionnel. Une facture de réservation de 5 000 € vous est adressée. Le paiement peut être effectué par virement bancaire ou par paiement sécurisé en ligne.",
+      "Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d'étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des 5 000 € déjà versés.",
+      "Étape 3 — Sortie d'atelier\nLorsque votre maison ARKO est fabriquée et prête à être livrée, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
+      "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
+      "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
+      "Affinity House Factory n'intervient pas dans l'opération d'achat du terrain, ni dans les formalités juridiques, administratives ou notariales qui y sont attachées.",
+      "Les mandataires partenaires susceptibles d'accompagner le client dans sa recherche de terrain interviennent sous leur seule responsabilité, dans le cadre de leur propre activité professionnelle. Leur intervention est distincte de celle d'Affinity House Factory.",
+    ],
   },
   {
     q: "Quelles garanties ?",
