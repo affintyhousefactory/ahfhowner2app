@@ -159,21 +159,24 @@ export const getProduct = (key: string | null | undefined): Product =>
 export const SERIES_DEADLINE_ISO = "2026-07-17T23:59:59+02:00";
 export const SERIES_DEADLINE_LABEL = "Fin des réservations Série 01";
 
-export const REASSURANCE = [
+export const REASSURANCE_INTRO = [
   {
-    t: "Notre architecte intégrée",
+    t: "Notre insight et expertise",
     d: "Chaque ARKO est dessinée et suivie par notre architecte intégrée, de l'esquisse à la pose.",
   },
   {
     t: "Le savoir-faire d'atelier",
     d: "Montée et finie au sol, à l'abri. Une précision d'atelier, un délai maîtrisé de 12 semaines.",
   },
+] as const;
+
+export const REASSURANCE = [
   {
     t: "Premier contact",
-    d: "Première étape : 30 min en visio avec notre architecte intégrée pour valider votre projet.",
+    d: "30 min en visio avec notre architecte intégrée pour valider votre projet et recevoir votre devis.",
   },
   {
-    t: "Après votre réservation",
+    t: "Devis signé, nous réservons votre ARKO",
     d: "Vous réservez votre numéro avec 5 000 € remboursables. Sans engagement de construction.",
   },
 ] as const;
