@@ -181,7 +181,7 @@ export const REASSURANCE = [
   },
 ] as const;
 
-export const FAQ = [
+export const FAQ: { q: string; a: string | string[] }[] = [
   {
     q: "Quel est le délai ?",
     a: "12 semaines de fabrication en atelier à compter de la levée des conditions du contrat de construction — urbanisme obtenu, financement confirmé, fondations réceptionnées. La pose se fait ensuite en une journée. Vous êtes informé par email à chaque étape clé : lancement, structure, finitions, module prêt à livrer, pose.",
@@ -210,13 +210,21 @@ export const FAQ = [
   },
   {
     q: "Quelles garanties ?",
-    a: "Trois garanties légales s'appliquent à chaque Maison ARKO : parfait achèvement (1 an — tous les désordres signalés à la réception ou dans l'année), biennale de bon fonctionnement (2 ans — volets, robinetterie, équipements électriques et éléments dissociables), et décennale (10 ans — structure et éléments indissociables). La garantie décennale est transférable en cas de revente. L'assurance dommages-ouvrage est à la charge du Client, obligatoire avant ouverture de chantier.",
+    a: [
+      "Votre maison ARKO bénéficie des garanties légales applicables aux travaux réalisés : parfait achèvement pendant 1 an, bon fonctionnement des équipements dissociables pendant 2 ans, et garantie décennale pendant 10 ans pour les dommages affectant la solidité de l'ouvrage ou son usage.",
+      "La garantie décennale est attachée à la maison et se transmet en cas de revente pendant sa durée de validité.",
+      "L'assurance dommages-ouvrage reste à la charge du client et doit être souscrite avant l'ouverture du chantier lorsque la réglementation l'exige.",
+    ],
   },
   {
     q: "Et l'après-vente ?",
-    a: "Un interlocuteur dédié vous accompagne après la pose. Il reste votre référent technique pour les questions de conformité, d'urbanisme et d'adaptation. Les désordres signalés dans l'année suivant la réception sont traités dans le cadre de la garantie de parfait achèvement, sans frais.",
+    a: [
+      "Après l'installation, un interlocuteur dédié reste votre référent technique.",
+      "Il vous accompagne dans le suivi de votre maison ARKO, le traitement des éventuelles réserves et les désordres signalés après réception.",
+      "Les désordres relevant de la garantie de parfait achèvement sont traités sans frais dans l'année suivant la réception, sous réserve qu'ils concernent les prestations réalisées par Affinity House Factory ou ses intervenants.",
+    ],
   },
-] as const;
+];
 
 // Navigation principale par routes (multi-pages — ADR-021).
 // « Produits » est rendu à part (méga-menu Tesla) via PRODUCT_LIST.
