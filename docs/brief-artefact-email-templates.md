@@ -79,8 +79,8 @@ await client.sendTransacEmail({
 | Texte footer | `#aaa` | Footer, liens |
 | Séparateur | `#e8e8e4` | `<hr>` |
 
-### Termes **interdits** (règle de marque absolue)
-`CCMI` · `LSF` · `acier` · `hors-site` · `modulaire` · `préfabriqué` · `tiny house` · `conteneur` · `catalogue` · `micro-maison`
+### Termes **interdits** (règle de marque absolue — ADR-004, révisé 2026-07-09)
+`modulaire` · `préfabriqué` · `tiny house` · `conteneur` · `catalogue`
 
 ### Termes corrects
 - « notre architecte intégrée » (sans prénom)
