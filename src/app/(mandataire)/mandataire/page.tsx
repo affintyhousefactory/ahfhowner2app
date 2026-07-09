@@ -145,7 +145,7 @@ export default function MandataireLandingPage() {
           <div className="relative">
             <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-[#7469F4]/10">
               <Image
-                src="/images/mandataires/arko-one-exterieur.jpg"
+                src="/images/mandataires/arko-one-exterieur2.JPG"
                 alt="Maison ARKO One installée sur son terrain"
                 fill
                 sizes="(min-width: 1024px) 480px, 90vw"
