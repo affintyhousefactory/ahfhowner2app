@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/shared/lib/cn";
 
@@ -39,7 +40,7 @@ const ETAPES = [
     n: "02",
     icon: "✍️",
     label: "Signez le contrat-cadre",
-    desc: "Signature électronique du contrat-cadre de sous-traitance : il encadre la collaboration (rémunération, exclusivité territoriale, obligations réciproques).",
+    desc: "Signature électronique du contrat-cadre de sous-traitance : il encadre la collaboration (exclusivité territoriale, obligations réciproques).",
     highlight: null as string | null,
   },
   {
@@ -60,7 +61,7 @@ const ETAPES = [
     n: "05",
     icon: "📨",
     label: "Recevez des leads qualifiés",
-    desc: "Chaque Lead correspond à un Prospect au projet défini. Vous accusez réception sous 48h.",
+    desc: "Chaque Lead correspond à un client qui recherche un terrain pour installer une maison ARKO. Nous vous passons le dossier. Vous accusez réception sous 48h.",
     highlight: null as string | null,
   },
   {
@@ -85,12 +86,12 @@ export default function MandataireLandingPage() {
       {/* Header sticky */}
       <header className="sticky top-0 z-20 border-b border-gray-200 bg-white/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#7469F4]">
               <span className="text-sm font-bold text-white">H</span>
             </div>
             <span className="font-semibold text-gray-900 text-sm sm:text-base">HOWNER</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             <Link
               href="/mandataire/auth/signin"
@@ -109,34 +110,56 @@ export default function MandataireLandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-24">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#7469F4]/10 px-4 py-1.5 text-sm font-medium text-[#7469F4]">
-          🚀 Mandataires Partenaires HOWNER
-        </div>
-        <h1 className="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl lg:text-5xl">
-          Donnez une nouvelle dimension
-          <br className="hidden sm:block" />
-          à vos opportunités immobilières
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-500">
-          Un terrain à valoriser. Un jardin sous-exploité. Un client qui cherche à habiter, investir ou agrandir autrement.{" "}
-          <span className="font-medium text-gray-800">
-            HOWNER vous aide à transformer ces opportunités en projets concrets.
-          </span>
-        </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            href="/mandataire/auth/signup"
-            className="w-full rounded-xl bg-[#7469F4] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-[#7469F4]/20 hover:bg-[#5a54d4] transition-colors sm:w-auto"
-          >
-            Devenir Mandataire →
-          </Link>
-          <Link
-            href="/mandataire/auth/signin"
-            className="w-full rounded-xl border border-gray-200 bg-white px-8 py-4 text-base font-medium text-gray-700 hover:border-gray-300 hover:text-gray-900 transition-colors sm:w-auto"
-          >
-            J'ai déjà un compte
-          </Link>
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="text-center lg:text-left">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#7469F4]/10 px-4 py-1.5 text-sm font-medium text-[#7469F4]">
+              🚀 Mandataires Partenaires HOWNER
+            </div>
+            <h1 className="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl lg:text-5xl">
+              Donnez une nouvelle dimension
+              <br className="hidden sm:block" />
+              à vos opportunités immobilières
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-500 lg:mx-0">
+              Un terrain à valoriser. Un jardin sous-exploité. Un client qui cherche à habiter, investir ou agrandir autrement.{" "}
+              <span className="font-medium text-gray-800">
+                HOWNER vous aide à transformer ces opportunités en projets concrets.
+              </span>
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
+              <Link
+                href="/mandataire/auth/signup"
+                className="w-full rounded-xl bg-[#7469F4] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-[#7469F4]/20 hover:bg-[#5a54d4] transition-colors sm:w-auto"
+              >
+                Devenir Mandataire →
+              </Link>
+              <Link
+                href="/mandataire/auth/signin"
+                className="w-full rounded-xl border border-gray-200 bg-white px-8 py-4 text-base font-medium text-gray-700 hover:border-gray-300 hover:text-gray-900 transition-colors sm:w-auto"
+              >
+                J'ai déjà un compte
+              </Link>
+            </div>
+          </div>
+          <div className="relative">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-[#7469F4]/10">
+              <Image
+                src="/images/mandataires/arko-one-exterieur.jpg"
+                alt="Maison ARKO One installée sur son terrain"
+                fill
+                sizes="(min-width: 1024px) 480px, 90vw"
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-6">
+                <p className="text-sm font-semibold text-white">L'ARKO One</p>
+                <p className="mt-1 text-xs leading-relaxed text-white/85">
+                  Il ne lui manque qu'un terrain. Trouvez-le, HOWNER s'occupe du reste.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -148,7 +171,7 @@ export default function MandataireLandingPage() {
               Pourquoi HOWNER
             </p>
             <h2 className="mt-2 text-2xl font-bold text-gray-900">
-              Chaque opportunité mérite un projet
+              Chaque terrain mérite une maison ARKO
             </h2>
             <p className="mx-auto mt-2 max-w-xl text-sm text-gray-500">
               Des modèles ARKO contemporains, conçus pour les nouveaux usages.
@@ -214,7 +237,7 @@ export default function MandataireLandingPage() {
           <div className="mt-6 rounded-2xl border border-gray-100 bg-gray-50 px-8 py-8 text-center">
             <p className="text-base text-gray-600">Ensemble, vous proposez plus qu'un bien :</p>
             <p className="mt-2 text-xl font-bold text-[#7469F4]">
-              une nouvelle façon d'habiter et de valoriser l'immobilier.
+              une nouvelle façon de valoriser le foncier de terrains.
             </p>
           </div>
         </div>
