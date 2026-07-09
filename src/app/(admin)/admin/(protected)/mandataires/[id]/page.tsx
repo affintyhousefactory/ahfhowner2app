@@ -14,7 +14,7 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
     supabase.from("mandataires").select("*").eq("id", id).single(),
     supabase
       .from("dossiers")
-      .select("id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht, created_at, accepted_at, email_sent_at, leads(id, prenom, nom, lead_number)")
+      .select("id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht, acte_notarie_at, created_at, accepted_at, email_sent_at, leads(id, prenom, nom, lead_number)")
       .eq("mandataire_id", id)
       .order("created_at", { ascending: false }),
     supabase
@@ -26,9 +26,7 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
 
   if (!m) notFound();
 
-  const finalisés       = (dossiers ?? []).filter((d) => d.statut === "finalisé");
-  const caGenere        = finalisés.reduce((s, d) => s + (d.pack_prix_ttc ?? 0), 0);
-  const remuDues        = finalisés.reduce((s, d) => s + (d.remuneration_mandataire_ht ?? 0), 0);
+  const finalisés       = (dossiers ?? []).filter((d) => d.acte_notarie_at);
   const activeDossiers  = (dossiers ?? []).filter((d) => ["proposé", "accepté"].includes(d.statut)).length;
 
   const RAYONS: Record<string, string> = {
@@ -63,18 +61,11 @@ export default async function MandataireFiche({ params }: { params: Promise<{ id
       </div>
 
       {/* KPIs */}
-      <div className="mb-6 grid grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:max-w-xs">
         <div className="rounded-2xl border border-white/10 bg-[#252521] p-4">
           <p className="text-[11px] uppercase tracking-wider text-white/30">Dossiers finalisés</p>
           <p className="mt-1 text-2xl font-semibold text-white">{finalisés.length}</p>
-        </div>
-        <div className="rounded-2xl border border-white/10 bg-[#252521] p-4">
-          <p className="text-[11px] uppercase tracking-wider text-white/30">CA généré</p>
-          <p className="mt-1 text-2xl font-semibold text-white">{caGenere.toLocaleString("fr-FR")} €</p>
-        </div>
-        <div className="rounded-2xl border border-white/10 bg-[#252521] p-4">
-          <p className="text-[11px] uppercase tracking-wider text-white/30">Rémunérations dues</p>
-          <p className="mt-1 text-2xl font-semibold text-[#7469F4]">{remuDues.toLocaleString("fr-FR")} €</p>
+          <p className="mt-0.5 text-[11px] text-white/20">Acte notarié signé</p>
         </div>
       </div>
 

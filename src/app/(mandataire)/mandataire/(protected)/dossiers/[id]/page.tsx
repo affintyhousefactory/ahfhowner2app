@@ -34,7 +34,7 @@ type LeadAnon = {
 type Document = { nom: string; signedUrl: string | null; taille_ko: number | null; created_at: string };
 
 type DossierDetail = {
-  dossier: { id: string; statut: string; pack_label: string | null; remuneration_mandataire_ht: number | null; notes: string | null; created_at: string; accepted_at: string | null; suspension_raison: string | null };
+  dossier: { id: string; statut: string; pack_label: string | null; acte_notarie_at: string | null; notes: string | null; created_at: string; accepted_at: string | null; suspension_raison: string | null };
   lead: LeadAnon | null;
   documents: Document[];
   niveau: 1 | 2;
@@ -265,15 +265,15 @@ export default function DossierPage({ params }: { params: Promise<{ id: string }
         </>
       )}
 
-      {/* Pack & rémunération (toujours visible si renseigné) */}
-      {dossier.pack_label && (
+      {/* Pack & acte notarié (toujours visible si renseigné) */}
+      {(dossier.pack_label || dossier.acte_notarie_at) && (
         <div className="rounded-2xl border border-gray-200 bg-white p-6">
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.15em] text-gray-400">Pack &amp; rémunération</p>
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.15em] text-gray-400">Pack &amp; statut</p>
           <div className="mt-3 flex items-center justify-between">
-            <p className="font-medium text-gray-900">{dossier.pack_label}</p>
-            {dossier.remuneration_mandataire_ht && (
-              <p className="font-semibold text-[#7469F4]">
-                {dossier.remuneration_mandataire_ht.toLocaleString("fr-FR")} € HT
+            {dossier.pack_label && <p className="font-medium text-gray-900">{dossier.pack_label}</p>}
+            {dossier.acte_notarie_at && (
+              <p className="text-sm font-medium text-green-600">
+                ✅ Acte notarié signé le {new Date(dossier.acte_notarie_at).toLocaleDateString("fr-FR")}
               </p>
             )}
           </div>

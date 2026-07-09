@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 
 export type FicheTerrain = {
@@ -978,13 +980,14 @@ export function TerrainForm({ initialData, ficheId, mandataireToken, onSaved }: 
             <label className="mb-1 block text-sm font-semibold text-gray-800">
               Tél. <span className="text-red-500">*</span>
             </label>
-            <input
-              type="tel"
-              required
+            <PhoneInput
+              international
+              defaultCountry="FR"
               value={form.contact_telephone}
-              onChange={(e) => set("contact_telephone", e.target.value)}
+              onChange={(v) => set("contact_telephone", v ?? "")}
               placeholder="Ex : 06 12 34 56 78"
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium focus:border-[#7469F4] focus:outline-none"
+              className="phone-input-mandataire"
+              numberInputProps={{ required: true }}
             />
           </div>
           <div>

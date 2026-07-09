@@ -10,6 +10,7 @@ type Dossier = {
   pack_label: string | null;
   pack_prix_ttc: number | null;
   remuneration_mandataire_ht: number | null;
+  acte_notarie_at: string | null;
   created_at: string;
   accepted_at: string | null;
   email_sent_at: string | null;
@@ -28,6 +29,27 @@ export default function MandataireDossiers({ dossiers, mandataireId }: { dossier
   const router  = useRouter();
   const [resending, setResending] = useState<string | null>(null);
   const [errors, setErrors]       = useState<Record<string, string>>({});
+  const [editingActe, setEditingActe] = useState<string | null>(null);
+  const [savingActe, setSavingActe]   = useState<string | null>(null);
+
+  async function saveActeNotarie(dossierId: string, date: string) {
+    setSavingActe(dossierId);
+    setErrors((e) => ({ ...e, [dossierId]: "" }));
+    try {
+      const res = await fetch(`/api/admin/dossiers/${dossierId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ acte_notarie_at: date ? new Date(date).toISOString() : null }),
+      });
+      if (!res.ok) throw new Error("Erreur enregistrement");
+      setEditingActe(null);
+      router.refresh();
+    } catch {
+      setErrors((e) => ({ ...e, [dossierId]: "Échec de l'enregistrement" }));
+    } finally {
+      setSavingActe(null);
+    }
+  }
 
   async function resendEmail(leadId: string, dossierId: string) {
     setResending(dossierId);
@@ -96,6 +118,52 @@ export default function MandataireDossiers({ dossiers, mandataireId }: { dossier
                 >
                   {resending === d.id ? "Envoi…" : "↻ Renvoyer l'email d'affectation"}
                 </button>
+                {errors[d.id] && <p className="mt-1 text-[10px] text-red-400">{errors[d.id]}</p>}
+              </div>
+            )}
+
+            {d.statut !== "proposé" && (
+              <div className="mt-2 border-t border-white/5 pt-2">
+                {editingActe === d.id ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const date = (e.currentTarget.elements.namedItem("date") as HTMLInputElement).value;
+                      saveActeNotarie(d.id, date);
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <input
+                      type="date"
+                      name="date"
+                      defaultValue={d.acte_notarie_at ? d.acte_notarie_at.slice(0, 10) : ""}
+                      className="rounded-lg border border-white/10 bg-[#1a1a18] px-2 py-1 text-xs text-white"
+                    />
+                    <button
+                      type="submit"
+                      disabled={savingActe === d.id}
+                      className="text-xs text-[#7469F4] hover:text-[#8f87ff] disabled:opacity-40 transition-colors"
+                    >
+                      {savingActe === d.id ? "…" : "Enregistrer"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingActe(null)}
+                      className="text-xs text-white/30 hover:text-white/60 transition-colors"
+                    >
+                      Annuler
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    onClick={() => setEditingActe(d.id)}
+                    className="text-xs text-white/40 hover:text-white/70 transition-colors"
+                  >
+                    {d.acte_notarie_at
+                      ? `✅ Acte notarié signé le ${new Date(d.acte_notarie_at).toLocaleDateString("fr-FR")} — modifier`
+                      : "📝 Renseigner la date de signature de l'acte notarié"}
+                  </button>
+                )}
                 {errors[d.id] && <p className="mt-1 text-[10px] text-red-400">{errors[d.id]}</p>}
               </div>
             )}
