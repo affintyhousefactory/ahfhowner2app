@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const { data: dossiers } = await supabase
     .from("dossiers")
     .select(`
-      id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht,
+      id, statut, pack_label, pack_prix_ttc, remuneration_mandataire_ht, acte_notarie_at,
       created_at, accepted_at,
       leads (
         id, lead_number, commune, description_projet, produit,

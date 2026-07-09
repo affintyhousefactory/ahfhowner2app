@@ -17,7 +17,7 @@ type FicheStatut = "disponible" | "compromis" | "retire";
 type Dossier = {
   id: string;
   statut: string;
-  remuneration_mandataire_ht: number | null;
+  acte_notarie_at: string | null;
 };
 
 export default function MandataireDashboard() {
@@ -26,7 +26,6 @@ export default function MandataireDashboard() {
   const [nbTerrainsActifs, setNbTerrainsActifs] = useState(0);
   const [dossiersActifs, setDossiersActifs] = useState(0);
   const [dossiersFinalises, setDossiersFinalises] = useState(0);
-  const [caGenere, setCaGenere] = useState(0);
 
   useEffect(() => {
     const supabase = getSupabaseBrowser();
@@ -67,10 +66,9 @@ export default function MandataireDashboard() {
         if (res.ok) {
           const dossiers: Dossier[] = await res.json();
           const actifs = dossiers.filter((d) => ["proposé", "accepté", "en_cours"].includes(d.statut));
-          const finalises = dossiers.filter((d) => d.statut === "finalisé");
+          const finalises = dossiers.filter((d) => d.acte_notarie_at);
           setDossiersActifs(actifs.length);
           setDossiersFinalises(finalises.length);
-          setCaGenere(finalises.reduce((s, d) => s + (d.remuneration_mandataire_ht ?? 0), 0));
         }
       } catch {
         // non bloquant
@@ -134,10 +132,9 @@ export default function MandataireDashboard() {
       )}
 
       {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <KpiCard label="Dossiers actifs" value={String(dossiersActifs)} sublabel="En cours de traitement" />
         <KpiCard label="Dossiers finalisés" value={String(dossiersFinalises)} sublabel="Acte notarié signé" />
-        <KpiCard label="CA généré" value={`${caGenere.toLocaleString("fr-FR")} €`} sublabel="Rémunérations versées" />
       </div>
 
       {/* Card Mes Terrains */}
