@@ -1,6 +1,6 @@
 "use client";
 
-import { REASSURANCE } from "@/lib/site";
+import { REASSURANCE, REASSURANCE_INTRO } from "@/lib/site";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/Reveal";
 
 export function Reassurance() {
@@ -19,11 +19,20 @@ export function Reassurance() {
         </Reveal>
         <Reveal delay={0.05}>
           <h2 className="editorial mt-12 max-w-4xl text-balance text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:text-[4.4rem]">
-            Réserver, sans rien risquer.
+            Réserver, sans rien risquer en deux étapes.
           </h2>
         </Reveal>
 
-        <Stagger className="mt-16 grid gap-x-10 gap-y-12 md:mt-24 md:grid-cols-2 lg:grid-cols-4">
+        <Stagger className="mt-10 grid gap-x-10 gap-y-6 md:grid-cols-2">
+          {REASSURANCE_INTRO.map((r) => (
+            <StaggerItem key={r.t}>
+              <h3 className="font-medium text-canvas">{r.t}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-canvas/60">{r.d}</p>
+            </StaggerItem>
+          ))}
+        </Stagger>
+
+        <Stagger className="mt-16 grid gap-x-10 gap-y-12 md:mt-24 md:grid-cols-2">
           {REASSURANCE.map((r, i) => (
             <StaggerItem key={r.t}>
               <div className="border-t border-canvas/15 pt-5">
