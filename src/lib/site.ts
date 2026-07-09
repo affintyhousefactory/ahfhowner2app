@@ -169,12 +169,12 @@ export const REASSURANCE = [
     d: "Montée et finie au sol, à l'abri. Une précision d'atelier, un délai maîtrisé de 12 semaines.",
   },
   {
-    t: "Acompte remboursable",
-    d: "Vous réservez votre numéro avec 5 000 € remboursables. Sans engagement de construction.",
+    t: "Premier contact",
+    d: "Première étape : 30 min en visio avec notre architecte intégrée pour valider votre projet.",
   },
   {
     t: "Après votre réservation",
-    d: "Prochaine étape : 30 min en visio avec notre architecte intégrée pour valider votre projet.",
+    d: "Vous réservez votre numéro avec 5 000 € remboursables. Sans engagement de construction.",
   },
 ] as const;
 
@@ -185,11 +185,11 @@ export const FAQ = [
   },
   {
     q: "Et si je n'ai pas encore de terrain ?",
-    a: "Notre outil terrain vérifie en ligne la compatibilité d'une adresse ou d'une annonce : PLU, accessibilité convoi, exposition. Si vous partez de zéro, le Pack Recherche Terrain (acompte de 1 500 €, optionnel et accessoire à la réservation) vous donne accès à un Mandataire Partenaire Howner-Affinity qualifié, titulaire de la carte T, qui conduit la recherche sur 3 mois. L'acompte est intégralement remboursable si aucun terrain compatible n'est trouvé dans le délai.",
+    a: "Si vous partez de zéro, nous vous proposons une sélection de terrains dans notre rubrique « Terrains » : des terrains sélectionnés par nos partenaires Mandataires. Sélectionnez-le et nous vous contactons pour faire le point sur sa disponibilité et vos options concernant votre maison ARKO. Aucun ne vous intéresse ? Nous restons à votre écoute, et ferons le nécessaire pour vous mettre en relation avec des partenaires de confiance.",
   },
   {
     q: "Comment se passe le paiement ?",
-    a: "La réservation déclenche un acompte de 5 000 €, remboursable à tout moment avant la signature du contrat de construction, sans condition ni justification. Cet acompte s'impute sur le premier appel de fonds. L'échéancier est adapté à la fabrication en atelier selon le décret du 6 février 2020 : 10 % à l'ouverture, 40 % à l'achèvement de la structure, 60 % aux finitions intérieures, 80 % au module prêt à livrer, 95 % à la réception, 100 % après levée des réserves.",
+    a: "Après entretien téléphonique et proposition commerciale envoyée par email, vous devrez procéder à la réservation de votre maison ARKO par le virement d'un acompte de 5 000 €, remboursable à tout moment avant la signature du contrat de construction, sans condition ni justification. Cet acompte s'impute sur le premier appel de fonds. L'échéancier est adapté à la fabrication en atelier selon le décret du 6 février 2020 : 10 % à l'ouverture, 40 % à l'achèvement de la structure, 60 % aux finitions intérieures, 80 % au module prêt à livrer, 95 % à la réception, 100 % après levée des réserves. À noter que l'achat ou la négociation que vous devrez mener pour obtenir votre terrain est assujetti probablement à un acte notarial. Nous n'intervenons d'aucune manière sur cet aspect. À noter que nos partenaires Mandataires qui vous accompagneraient pour votre terrain ont vocation à agir seuls et sous leur propre responsabilité. Affinity ne joue qu'un rôle d'apporteur d'affaires dans cette situation.",
   },
   {
     q: "Quelles garanties ?",
@@ -197,7 +197,7 @@ export const FAQ = [
   },
   {
     q: "Et l'après-vente ?",
-    a: "Un interlocuteur dédié vous accompagne après la pose. Notre architecte intégrée reste votre référente technique pour les questions de conformité, d'urbanisme et d'adaptation. Les désordres signalés dans l'année suivant la réception sont traités dans le cadre de la garantie de parfait achèvement, sans frais.",
+    a: "Un interlocuteur dédié vous accompagne après la pose. Il reste votre référent technique pour les questions de conformité, d'urbanisme et d'adaptation. Les désordres signalés dans l'année suivant la réception sont traités dans le cadre de la garantie de parfait achèvement, sans frais.",
   },
 ] as const;
 
