@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cn } from "@/shared/lib/cn";
 
 const OPPORTUNITES = [
   {
@@ -32,30 +33,42 @@ const ETAPES = [
     icon: "📝",
     label: "Créez votre compte",
     desc: "Profil professionnel, carte pro / RSAC, assurance RC — validé par nos équipes en 48h.",
+    highlight: null as string | null,
   },
   {
     n: "02",
-    icon: "📍",
-    label: "Déclarez vos zones",
-    desc: "Indiquez votre périmètre d'intervention. C'est la base de toute affectation de leads.",
+    icon: "✍️",
+    label: "Signez le contrat-cadre",
+    desc: "Signature électronique du contrat-cadre de sous-traitance : il encadre la collaboration (rémunération, exclusivité territoriale, obligations réciproques).",
+    highlight: null as string | null,
   },
   {
     n: "03",
-    icon: "🏞️",
-    label: "Référencez vos terrains",
-    desc: "Publiez vos biens compatibles ARKO — présélection selon le Cahier des Charges Technique.",
+    icon: "📍",
+    label: "Déclarez vos zones",
+    desc: "Indiquez votre périmètre d'intervention. C'est la base de toute affectation de leads.",
+    highlight: null as string | null,
   },
   {
     n: "04",
-    icon: "📨",
-    label: "Recevez des leads qualifiés",
-    desc: "Chaque Lead correspond à un Prospect au projet défini. Vous accusez réception sous 48h.",
+    icon: "🏞️",
+    label: "Référencez vos terrains",
+    desc: "Collez le lien d'une annonce déjà en ligne : notre IA récupère et pré-remplit automatiquement localisation, prix, urbanisme et photos — il ne vous reste qu'à vérifier et publier.",
+    highlight: "✨ Import IA en un clic",
   },
   {
     n: "05",
+    icon: "📨",
+    label: "Recevez des leads qualifiés",
+    desc: "Chaque Lead correspond à un Prospect au projet défini. Vous accusez réception sous 48h.",
+    highlight: null as string | null,
+  },
+  {
+    n: "06",
     icon: "🏆",
     label: "Activez votre exclusivité",
     desc: "10 terrains publiés en 90 jours, 8 maintenus actifs : la zone devient la vôtre.",
+    highlight: null as string | null,
   },
 ] as const;
 
@@ -127,7 +140,7 @@ export default function MandataireLandingPage() {
         </div>
       </section>
 
-      {/* Opportunités */}
+      {/* Opportunités + usages ARKO (regroupé pour alléger la page) */}
       <section className="bg-white py-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="mb-10 text-center">
@@ -137,6 +150,9 @@ export default function MandataireLandingPage() {
             <h2 className="mt-2 text-2xl font-bold text-gray-900">
               Chaque opportunité mérite un projet
             </h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-gray-500">
+              Des modèles ARKO contemporains, conçus pour les nouveaux usages.
+            </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             {OPPORTUNITES.map((o) => (
@@ -150,30 +166,17 @@ export default function MandataireLandingPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Micro-maisons */}
-      <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
-        <div className="mb-10 text-center">
-          <span className="text-3xl">🏡</span>
-          <h2 className="mt-3 text-2xl font-bold text-gray-900">
-            Des micro-maisons qui font la différence
-          </h2>
-          <p className="mt-2 text-gray-500">
-            Des modèles contemporains, conçus pour les nouveaux usages
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {USAGES.map((u) => (
-            <div
-              key={u.label}
-              className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
-            >
-              <span className="text-2xl shrink-0">{u.icon}</span>
-              <span className="font-medium text-gray-800">{u.label}</span>
-            </div>
-          ))}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            {USAGES.map((u) => (
+              <span
+                key={u.label}
+                className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-[#f4f4f0] px-3.5 py-1.5 text-xs font-medium text-gray-700"
+              >
+                <span>{u.icon}</span>
+                {u.label}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -234,20 +237,32 @@ export default function MandataireLandingPage() {
           </div>
 
           {/* Stepper */}
-          <div className="relative grid gap-6 sm:grid-cols-5">
+          <div className="relative grid gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
             <div
               aria-hidden="true"
-              className="absolute left-0 right-0 top-6 hidden h-px bg-gray-200 sm:block"
+              className="absolute left-0 right-0 top-6 hidden h-px bg-gray-200 lg:block"
             />
             {ETAPES.map((e) => (
               <div key={e.n} className="relative flex flex-col items-center text-center">
-                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#7469F4]/20 bg-white text-lg shadow-sm">
+                <div
+                  className={cn(
+                    "relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 bg-white text-lg shadow-sm",
+                    e.highlight
+                      ? "border-[#7469F4] ring-4 ring-[#7469F4]/15"
+                      : "border-[#7469F4]/20",
+                  )}
+                >
                   {e.icon}
                 </div>
                 <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-[#7469F4]/60">
                   Étape {e.n}
                 </p>
                 <h3 className="mt-1 text-sm font-semibold text-gray-900">{e.label}</h3>
+                {e.highlight && (
+                  <span className="mt-1.5 inline-flex items-center rounded-full bg-[#7469F4]/10 px-2.5 py-0.5 text-[0.65rem] font-semibold text-[#7469F4]">
+                    {e.highlight}
+                  </span>
+                )}
                 <p className="mt-1.5 text-xs leading-relaxed text-gray-500">{e.desc}</p>
               </div>
             ))}
