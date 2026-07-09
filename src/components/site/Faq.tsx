@@ -3,6 +3,19 @@
 import { FAQ } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 
+/* Rend les segments **gras** d'un texte FAQ en <strong>, sans dépendance markdown. */
+function renderInlineBold(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") ? (
+      <strong key={i} className="font-semibold text-ink">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  );
+}
+
 export function Faq() {
   return (
     <section id="faq" className="bg-canvas py-24 md:py-36">
@@ -45,7 +58,7 @@ export function Faq() {
                           <p className="text-[0.98rem] font-medium text-ink">{maybeTitle}</p>
                         )}
                         <p className="text-[0.98rem] leading-relaxed text-muted">
-                          {isStep ? rest.join("\n") : paragraph}
+                          {renderInlineBold(isStep ? rest.join("\n") : paragraph)}
                         </p>
                       </div>
                     );
