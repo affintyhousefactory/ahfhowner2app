@@ -5,7 +5,7 @@ import LeadMapClient from "@/components/admin/LeadMapClient";
 import LeadEditIdentite from "@/components/admin/LeadEditIdentite";
 import LeadEditLocalisation from "@/components/admin/LeadEditLocalisation";
 import LeadDocuments from "@/components/admin/LeadDocuments";
-import LeadConfigurateur from "@/components/admin/LeadConfigurateur";
+import LeadClientDocuments from "@/components/admin/LeadClientDocuments";
 import LeadStatutCommercial from "@/components/admin/LeadStatutCommercial";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
 
   const [{ data: lead }, { data: mandatairesActifs }, { data: fichesActives }] = await Promise.all([
     supabase.from("leads").select("*").eq("id", id).single(),
-    supabase.from("mandataires").select("id, prenom, nom, zone_activite").eq("statut", "actif"),
+    supabase.from("mandataires").select("id, prenom, nom, zone_activite, lat, lon, rayon_intervention").eq("statut", "actif"),
     supabase.from("fiches_terrain").select("mandataire_id, statut").in("statut", ["disponible", "compromis"]),
   ]);
 
@@ -54,12 +54,26 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Zone 1 — Identité & Projet (éditable) */}
-        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-          <LeadEditIdentite lead={lead} />
+        {/* Colonne 1 — Identité & Projet + GED Client */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+            <LeadEditIdentite lead={lead} />
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+            <div className="mb-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                GED Client
+              </h2>
+              <p className="mt-1 text-xs text-white/25">
+                Pièces internes du client (non partagées avec le mandataire), en préparation du devis.
+              </p>
+            </div>
+            <LeadClientDocuments leadId={id} />
+          </div>
         </div>
 
-        {/* Zone 2 — Localisation (éditable) */}
+        {/* Colonne 2 — Zone de recherche terrain (localisation + PLU + affectation + dossier mandataire) */}
         <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
           <LeadEditLocalisation lead={lead} />
 
@@ -95,70 +109,53 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
               </dl>
             </>
           )}
-        </div>
 
-        {/* Zone 3 — Configuration Arko (lecture seule, données configurateur) */}
-        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
-            Configuration Arko
-          </h2>
-          <LeadConfigurateur
-            produit={lead.produit ?? null}
-            surface={lead.surface ?? null}
-            house_total={lead.house_total ?? null}
-            delivery={lead.delivery ?? null}
-            grand_total={lead.grand_total ?? null}
-            terrain_mode={lead.terrain_mode ?? null}
-            pack_terrain={lead.pack_terrain ?? null}
-            config_json={(lead.config_json as { bardage?: string; facade?: string; bar?: string; chambre?: string; interieur?: string; terrasseM2?: number } | null) ?? null}
-            options_labels={(lead.options_labels as string[] | null) ?? null}
-          />
-        </div>
-
-        {/* Zone 4 — Affectation mandataire */}
-        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
-            Affectation mandataire
-          </h2>
-
-          {mandataireActuel ? (
-            <div className="mb-4 rounded-xl bg-[#7469F4]/10 px-4 py-3 text-sm">
-              <p className="text-white/60 text-xs mb-1">Mandataire actuel</p>
-              <p className="font-medium text-[#7469F4]">
-                {mandataireActuel.prenom} {mandataireActuel.nom}
-              </p>
-              {lead.affecte_at && (
-                <p className="mt-0.5 text-xs text-white/30">
-                  Affecté le {new Date(lead.affecte_at).toLocaleDateString("fr-FR")}
-                </p>
-              )}
-            </div>
-          ) : (
-            <p className="mb-3 text-sm text-white/30">Aucun mandataire affecté.</p>
-          )}
-
-          <AssignMandataire
-            leadId={id}
-            currentMandataireId={lead.mandataire_id ?? null}
-            mandataires={mandataires}
-            leadCommune={lead.commune ?? null}
-          />
-        </div>
-
-        {/* Zone 5 — Dossier client (pleine largeur) */}
-        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6 lg:col-span-2">
-          <div className="mb-4">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
-              Dossier client
+          {/* Sous-section — Affectation mandataire (matching géo 200 km) */}
+          <div className="mt-6 border-t border-white/10 pt-6">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
+              Affectation mandataire
             </h2>
-            <p className="mt-1 text-xs text-white/25">
-              Documents techniques, pré-contractuels et commerciaux à partager avec le mandataire affecté.
-            </p>
+
+            {mandataireActuel ? (
+              <div className="mb-4 rounded-xl bg-[#7469F4]/10 px-4 py-3 text-sm">
+                <p className="text-white/60 text-xs mb-1">Mandataire actuel</p>
+                <p className="font-medium text-[#7469F4]">
+                  {mandataireActuel.prenom} {mandataireActuel.nom}
+                </p>
+                {lead.affecte_at && (
+                  <p className="mt-0.5 text-xs text-white/30">
+                    Affecté le {new Date(lead.affecte_at).toLocaleDateString("fr-FR")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="mb-3 text-sm text-white/30">Aucun mandataire affecté.</p>
+            )}
+
+            <AssignMandataire
+              leadId={id}
+              currentMandataireId={lead.mandataire_id ?? null}
+              mandataires={mandataires}
+              leadLat={lead.plu_lat != null ? Number(lead.plu_lat) : null}
+              leadLon={lead.plu_lon != null ? Number(lead.plu_lon) : null}
+            />
           </div>
-          <LeadDocuments
-            leadId={id}
-            currentMandataireId={lead.mandataire_id ?? null}
-          />
+
+          {/* Sous-section — Dossier mandataire (documents partagés) */}
+          <div className="mt-6 border-t border-white/10 pt-6">
+            <div className="mb-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                Dossier mandataire
+              </h2>
+              <p className="mt-1 text-xs text-white/25">
+                Documents techniques, pré-contractuels et commerciaux à partager avec le mandataire affecté.
+              </p>
+            </div>
+            <LeadDocuments
+              leadId={id}
+              currentMandataireId={lead.mandataire_id ?? null}
+            />
+          </div>
         </div>
       </div>
     </div>

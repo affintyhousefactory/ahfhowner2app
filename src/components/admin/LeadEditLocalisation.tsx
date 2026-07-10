@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AdminPluAnalyser, { type ParcelleData } from "@/components/admin/AdminPluAnalyser";
+import { loadGooglePlacesScript } from "@/shared/lib/google-places";
 
 interface LeadLocalisation {
   id: string;
@@ -42,6 +43,46 @@ export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation 
 
   // Données PLU en attente d'application (non encore sauvegardées)
   const [pendingPlu, setPendingPlu] = useState<PluPatch | null>(null);
+
+  const containerRef    = useRef<HTMLDivElement>(null);
+  const placeElementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY ?? "";
+
+  // Init Google Places autocomplete quand on entre en mode édition
+  useEffect(() => {
+    if (!editing || !apiKey) return;
+
+    loadGooglePlacesScript(apiKey).then(() => {
+      if (!containerRef.current || placeElementRef.current) return;
+      const element = new window.google.maps.places.PlaceAutocompleteElement({
+        includedRegionCodes:  ["fr"],
+        includedPrimaryTypes: ["street_address", "route"],
+      });
+      containerRef.current.appendChild(element);
+      placeElementRef.current = element;
+
+      element.addEventListener("gmp-select", async (event) => {
+        const place = event.placePrediction.toPlace();
+        await place.fetchFields({ fields: ["formattedAddress", "addressComponents"] });
+        let cp = ""; let commune = "";
+        for (const comp of place.addressComponents ?? []) {
+          if (comp.types.includes("postal_code")) cp = comp.longText ?? "";
+          if (comp.types.includes("locality"))     commune = comp.longText ?? "";
+        }
+        setForm((prev) => ({
+          ...prev,
+          adresse_recherche: place.formattedAddress ?? prev.adresse_recherche,
+          code_postal: cp || prev.code_postal,
+          commune: commune || prev.commune,
+        }));
+      });
+    });
+
+    return () => {
+      placeElementRef.current?.remove();
+      placeElementRef.current = null;
+    };
+  }, [editing, apiKey]);
 
   const handleCancel = useCallback(() => {
     setForm({
@@ -161,7 +202,7 @@ export default function LeadEditLocalisation({ lead }: { lead: LeadLocalisation 
         <div className="mt-3 space-y-3">
           <div>
             <label className={labelCls}>Adresse de recherche</label>
-            <input className={inputCls} value={form.adresse_recherche} onChange={set("adresse_recherche")} />
+            <div ref={containerRef} className="gmap-autocomplete" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
