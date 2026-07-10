@@ -138,14 +138,20 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 4. ~~**`feat/admin-portal` Étapes 1→6**~~ ✅ livré 2026-06-30 — PR #14 mergée sur dev.
 5. ~~**Portail mandataire redesign + auth**~~ ✅ livré 2026-06-30 — PR #16 mergée sur dev.
 6. ~~**PR #17 `dev` → `main`**~~ ✅ mergée 2026-06-30. Migrations prod appliquées : `20260629_admin_tables` + `20260630_mandataires_invitation`.
-7. **ADR-026 reste** : SPF/DKIM prod (DNS au registrar — bloqueur externe).
-8. **ADR-018 SEO reste P2** (polish non bloquant).
-9. **Coordonnées atelier** : placeholder Bayonne (43.4933 / −1.4748) — à affiner.
+7. ~~**ADR-026 SPF/DKIM prod**~~ ✅ corrigé manuellement (2026-07-10) — n'est plus un bloqueur externe.
+8. ~~**`fix/scrape-annonce-error-logging` → `dev`**~~ ✅ mergée (PR #51) — inclut ADR-027 (fiche lead), refonte CGV (en attente confirmation avocat), révision blocklist marque ADR-004, refonte FAQ/hero/promesse/réassurance, import photos terrain, extraction IA Anthropic enrichie, contact Brevo direct.
+9. **Migration `20260710_lead_client_documents.sql`** (GED Client, ADR-027) — ✅ appliquée Preview (`ixozlavseaykxmjtkkrk`) le 2026-07-10 ; **Prod reste à appliquer au merge `dev`→`main`** (workflow migrations).
+10. **CGV nouvelle version** (`f3de62fe`) — en attente confirmation avocat avant passage en production (ADR-015 reste bloqué sur ce seul point).
+11. **ADR-018 SEO reste P2** (polish non bloquant).
+12. **Arko Max pricing grid** (perM2/options/terrasse/footprint/`reserved`) — toujours en attente données métier + grille tarifaire.
+13. **Coordonnées atelier** : placeholder Bayonne (43.4933 / −1.4748) — à affiner.
 
 ## Tokens / MCP
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-07-10 (confirmation post-merge — `fix/scrape-annonce-error-logging` → `dev`, PR #51)** — Branche mergée dans `dev` : elle portait un scope bien plus large que son nom (ADR-027 fiche lead + refonte CGV + révision blocklist marque ADR-004 + refonte FAQ/hero/promesse/réassurance + fiabilisation import photos terrain + extraction IA Anthropic + sélecteur téléphone international + contact Brevo direct). **SPF/DKIM prod corrigé manuellement** — n'est plus un bloqueur (ADR-026 clos sur ce point). **Légal (ADR-015) reste bloqué uniquement sur la confirmation avocat de la nouvelle version CGV** (`f3de62fe`) — le reste du volet légal n'a pas de nouveau bloqueur. **Migration `20260710_lead_client_documents.sql` (GED Client) reste à appliquer** Preview/Prod. **Arko Max pricing grid toujours en attente** de données métier + grille tarifaire (aucun changement).
 
 **2026-07-10 (ADR-027 — refonte fiche Lead admin : recherche terrain, affectation géo, GED double)** — Fiche `/admin/leads/[id]` réorganisée : suppression de « Configuration Arko » (redondante, `LeadConfigurateur.tsx` supprimé), « Affectation mandataire » et « Dossier mandataire » (renommé depuis « Dossier client ») déplacés en sous-sections de « Zone de recherche terrain ». **Matching géographique réel** (`AssignMandataire.tsx`) : Haversine `mandataires.lat/lon` vs `leads.plu_lat/lon`, rayon 200 km, tri exclusif puis distance (remplace l'ancien matching par substring sur `zone_activite`). Autocomplete Google Places sur « Adresse de recherche » (`LeadEditLocalisation.tsx`, même pattern que `LeadEditIdentite.tsx`). Deux nouveaux boutons email récap : mandataire affecté (`POST /api/admin/leads/[id]/affecter/recap`, réutilise `BREVO_TEMPLATE_AFFECTATION` + nouvelles variables `LEAD_DESCRIPTION`/`LEAD_PRODUIT`, lien direct `/mandataire/dossiers/{dossierId}`) et client (`POST /api/admin/leads/[id]/recap-client`, réutilise `BREVO_TEMPLATE_RECAP`, prépa devis futur). **Nouvelle GED Client** : table `lead_client_documents` (migration `20260710_lead_client_documents.sql`, à appliquer Preview/Prod), route `client-documents`, composant `LeadClientDocuments.tsx` — distincte de la GED mandataire (`lead_documents`). Détails : ADR-027. **Reste à faire** : ajouter les placeholders `LEAD_DESCRIPTION`/`LEAD_PRODUIT` au template Brevo `BREVO_TEMPLATE_AFFECTATION` ; génération du devis (hors scope de cet ADR).
 
