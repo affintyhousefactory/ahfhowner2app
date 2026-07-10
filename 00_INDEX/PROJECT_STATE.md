@@ -129,6 +129,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 022 | Split produit One/Max + repositionnement | **Accepté — valider Albert** | 🟠 |
 | 023 | Déploiement production Vercel | Proposé | ✅ |
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
+| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré** | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -145,6 +146,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-07-10 (ADR-027 — refonte fiche Lead admin : recherche terrain, affectation géo, GED double)** — Fiche `/admin/leads/[id]` réorganisée : suppression de « Configuration Arko » (redondante, `LeadConfigurateur.tsx` supprimé), « Affectation mandataire » et « Dossier mandataire » (renommé depuis « Dossier client ») déplacés en sous-sections de « Zone de recherche terrain ». **Matching géographique réel** (`AssignMandataire.tsx`) : Haversine `mandataires.lat/lon` vs `leads.plu_lat/lon`, rayon 200 km, tri exclusif puis distance (remplace l'ancien matching par substring sur `zone_activite`). Autocomplete Google Places sur « Adresse de recherche » (`LeadEditLocalisation.tsx`, même pattern que `LeadEditIdentite.tsx`). Deux nouveaux boutons email récap : mandataire affecté (`POST /api/admin/leads/[id]/affecter/recap`, réutilise `BREVO_TEMPLATE_AFFECTATION` + nouvelles variables `LEAD_DESCRIPTION`/`LEAD_PRODUIT`, lien direct `/mandataire/dossiers/{dossierId}`) et client (`POST /api/admin/leads/[id]/recap-client`, réutilise `BREVO_TEMPLATE_RECAP`, prépa devis futur). **Nouvelle GED Client** : table `lead_client_documents` (migration `20260710_lead_client_documents.sql`, à appliquer Preview/Prod), route `client-documents`, composant `LeadClientDocuments.tsx` — distincte de la GED mandataire (`lead_documents`). Détails : ADR-027. **Reste à faire** : ajouter les placeholders `LEAD_DESCRIPTION`/`LEAD_PRODUIT` au template Brevo `BREVO_TEMPLATE_AFFECTATION` ; génération du devis (hors scope de cet ADR).
 
 **2026-06-30 (portail admin complet + mandataire redesign + PR #17 dev→main)** — **Portail admin Étapes 1→6** (PR #14 sur dev) : dashboard KPIs, liste+fiche leads, liste+fiche mandataires, affectations, carte Leaflet PLU, formulaire création lead/mandataire avec PLU + Pappers, matching zones, validation/suspension, invitation onboarding. **Portail mandataire redesign** (PR #16 sur dev) : landing publique `/mandataire` (pitch + 2 CTA), dashboard déplacé `/mandataire/dashboard`, signup épuré (sans landing step), mot de passe oublié (`forgot-password` + `reset-password` via Supabase Auth). **Template Brevo 15** créé (affectation lead → mandataire). **PR #17 `dev`→`main` en attente** : 2 migrations à appliquer post-merge (`20260629_admin_tables.sql`, `20260630_mandataires_invitation.sql`), var Vercel `BREVO_TEMPLATE_AFFECTATION=15` à ajouter, Supabase Redirect URL reset-password à configurer.
 
