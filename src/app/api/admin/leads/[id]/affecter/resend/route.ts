@@ -9,7 +9,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data: lead } = await supabase
     .from("leads")
-    .select("mandataire_id, commune, pack_terrain, produit, lead_number")
+    .select("mandataire_id, commune, pack_terrain, produit, lead_number, description_projet")
     .eq("id", id)
     .single();
 
@@ -42,6 +42,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         LEAD_NUMBER:       `#${lead.lead_number ?? ""}`,
         LEAD_COMMUNE:      lead.commune ?? "",
         LEAD_PACK:         lead.pack_terrain ?? lead.produit ?? "",
+        LEAD_DESCRIPTION:  lead.description_projet ?? "",
+        LEAD_PRODUIT:      lead.produit ?? "",
         PORTAL_URL:        `${getSiteUrl(req)}/mandataire/dossiers`,
       },
     });

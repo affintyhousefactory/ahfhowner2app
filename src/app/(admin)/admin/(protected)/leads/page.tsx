@@ -26,7 +26,7 @@ const STATUT_COMMERCIAL: Record<string, { label: string; cls: string }> = {
 export default async function LeadsPage() {
   const { data: leads } = await getSupabaseAdmin()
     .from("leads")
-    .select("id, lead_number, prenom, nom, email, statut, statut_commercial, pack_terrain, produit, commune, created_at, mandataires(prenom, nom)")
+    .select("id, lead_number, prenom, nom, email, statut, statut_commercial, produit, commune, created_at, mandataires(prenom, nom)")
     .order("created_at", { ascending: false });
 
   return (
@@ -47,7 +47,7 @@ export default async function LeadsPage() {
             <tr className="border-b border-white/10 text-left text-xs text-white/30">
               <th className="px-4 py-3 font-normal">Dossier</th>
               <th className="px-4 py-3 font-normal">Email</th>
-              <th className="px-4 py-3 font-normal">Pack / Modèle</th>
+              <th className="px-4 py-3 font-normal">Modèle Arko</th>
               <th className="px-4 py-3 font-normal">Commune</th>
               <th className="px-4 py-3 font-normal">Mandataire</th>
               <th className="px-4 py-3 font-normal">Affectation</th>
@@ -68,7 +68,7 @@ export default async function LeadsPage() {
                     <span className="text-white">{l.prenom} {l.nom}</span>
                   </td>
                   <td className="px-4 py-3 text-white/50">{l.email}</td>
-                  <td className="px-4 py-3 text-white/50">{l.pack_terrain ?? l.produit ?? "—"}</td>
+                  <td className="px-4 py-3 text-white/50">{l.produit ?? "—"}</td>
                   <td className="px-4 py-3 text-white/50">{l.commune ?? "—"}</td>
                   <td className="px-4 py-3 text-white/40 text-xs">
                     {(() => {

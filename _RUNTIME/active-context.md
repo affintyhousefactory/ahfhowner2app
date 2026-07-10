@@ -4,12 +4,11 @@
 Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², 12 ex, 59 900 €) + **Arko Max** (40 m², 5 ex, 89 900 €). Front livré ; backend Phase 4 en attente ; lancement bloqué par le légal (ADR-015).
 
 ## Priorités actives
-1. **`feat/admin-portal` — continuer Étapes 3-5** (carte lead, recalcul PLU, formulaire création lead, matching affectation + email T4, création mandataire, validation/suspension, Pappers MCP). Branche locale, pas encore pushée.
-2. **Appliquer `20260629_admin_tables.sql`** sur preprod au merge dev, puis prod au merge main (ne pas appliquer manuellement avant).
-3. **SPF/DKIM prod** — DNS au registrar howner.fr (bloqueur externe). ADR-026.
-4. **DNS howner.fr** — configurer CNAME/A chez le registrar.
-5. **Reconfigurer Arko Max** (perM2, options, terrasse, footprint, `reserved`) — données métier à fournir.
-6. Faire valider par Albert : charte Affinity (ADR-002) + repositionnement bi-produit (ADR-022).
+1. ~~**Appliquer migration `20260710_lead_client_documents.sql`** (GED Client, ADR-027) sur Preview~~ ✅ appliquée 2026-07-10 — **Prod reste à appliquer au merge `dev`→`main`**.
+2. **CGV nouvelle version** (`f3de62fe`, mergée dans `dev` via PR #51) — en attente confirmation avocat avant prod (seul point encore bloquant d'ADR-015).
+3. **Reconfigurer Arko Max** (perM2, options, terrasse, footprint, `reserved`) — données métier + grille tarifaire toujours en attente.
+4. Faire valider par Albert : charte Affinity (ADR-002) + repositionnement bi-produit (ADR-022) + révision blocklist marque ADR-004 (2026-07-09).
+5. ~~SPF/DKIM prod~~ ✅ corrigé manuellement (2026-07-10) — n'est plus un bloqueur.
 
 ## Contraintes
 - Ne pas mélanger les projets (ce projet ≠ AHF_WEB2 : pas de segments/Brevo/Smart Nano-Max/Villa Arko).

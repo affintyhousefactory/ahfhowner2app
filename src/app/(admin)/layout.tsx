@@ -5,5 +5,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div data-theme="dark">{children}</div>;
 }
