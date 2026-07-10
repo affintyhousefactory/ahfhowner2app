@@ -439,3 +439,36 @@ html {
   display: block;
   width: 100%;
 }
+
+/* ============================================================
+   THÈME SOMBRE — champs de sélection natifs (admin)
+   Uniformise <select>/<option>/<optgroup> avec le design system
+   sombre de l'admin (fond #1a1a18/#252521, accent #7469F4), sans
+   toucher au comportement métier (values/onChange inchangés).
+   Scope : [data-theme="dark"] (posé sur le layout racine du
+   route group (admin)) — le site public et l'espace mandataire
+   restent en thème clair et ne sont pas affectés.
+   ============================================================ */
+[data-theme="dark"] select {
+  color-scheme: dark;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+[data-theme="dark"] select:focus-visible {
+  outline: none;
+  border-color: #7469f4;
+  box-shadow: 0 0 0 1px #7469f4;
+}
+
+[data-theme="dark"] select option,
+[data-theme="dark"] select optgroup {
+  background-color: #252521;
+  color: #ffffff;
+}
+
+[data-theme="dark"] select option:checked,
+[data-theme="dark"] select option:hover {
+  background-color: #7469f4;
+  color: #ffffff;
+}
