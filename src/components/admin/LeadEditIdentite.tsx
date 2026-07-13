@@ -43,6 +43,9 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recapLoading, setRecapLoading] = useState(false);
+  const [recapDone, setRecapDone] = useState(false);
+  const [recapError, setRecapError] = useState<string | null>(null);
   const containerRef    = useRef<HTMLDivElement>(null);
   const placeElementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
 
@@ -152,6 +155,23 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
     }
   }
 
+  async function handleSendRecap() {
+    setRecapLoading(true);
+    setRecapError(null);
+    try {
+      const res = await fetch(`/api/admin/leads/${lead.id}/recap-client`, { method: "POST" });
+      if (!res.ok) {
+        const body = (await res.json()) as { error?: string };
+        throw new Error(body.error ?? "Erreur serveur");
+      }
+      setRecapDone(true);
+    } catch (e) {
+      setRecapError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setRecapLoading(false);
+    }
+  }
+
   function set(key: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
@@ -216,6 +236,17 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
           <p className="text-sm text-white/60 whitespace-pre-wrap">
             {lead.notes_ahf || <span className="italic text-white/20">Aucune note</span>}
           </p>
+        </div>
+
+        <div className="mt-4">
+          <button
+            onClick={handleSendRecap}
+            disabled={recapLoading || !lead.email}
+            className="w-full rounded-xl border border-white/10 py-2.5 text-sm text-white/70 transition-colors hover:border-[#7469F4]/50 hover:text-white disabled:opacity-40"
+          >
+            {recapLoading ? "Envoi…" : recapDone ? "✓ Récap envoyé" : "✉️ Envoyer récap au client"}
+          </button>
+          {recapError && <p className="mt-1 text-xs text-red-400">{recapError}</p>}
         </div>
       </>
     );

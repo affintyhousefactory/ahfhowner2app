@@ -24,7 +24,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Vidéos via `useVisible` (sauf Hero) ; bundle 3D `src/components/arko3d/*` isolé à `/viewer` (ADR-006). Lighthouse 100 / LCP < 0.8s.
 
 ## Marque (absolu — ADR-004)
-Termes interdits : CCMI, LSF, acier, hors-site, modulaire, préfabriqué, tiny house, conteneur, catalogue, micro-maison. « Notre architecte intégrée » (sans prénom). « Puigbo » (sans accent).
+Termes interdits : modulaire, préfabriqué, tiny house, conteneur, catalogue. « Notre architecte intégrée » (sans prénom). « Puigbo » (sans accent).
 
 ## Secrets (ADR-003)
 Montants → `NEXT_PUBLIC_*` (env, fallback). Clés serveur jamais dans Git, jamais côté client. Placeholders uniquement dans la doc.

@@ -1,15 +1,15 @@
 /* ============================================================
    HOWNER / ARKO — source de contenu
    Règles de marque ABSOLUES respectées : aucun terme interdit
-   (CCMI, LSF, acier, hors-site, modulaire, préfabriqué, tiny house,
-   conteneur, catalogue, micro-maison). « notre architecte intégrée »
-   sans prénom. Fondateur = Puigbo (sans accent).
+   (modulaire, préfabriqué, tiny house, conteneur, catalogue).
+   « notre architecte intégrée » sans prénom. Fondateur = Puigbo
+   (sans accent). [ADR-004, révisé 2026-07-09]
    ============================================================ */
 
 // URL canonique de prod — source unique pour metadataBase, sitemap, robots,
 // canonical (ADR-018). Surchargeable par env pour les previews Vercel.
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://affinityhome.fr";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
 
 // Acompte : jamais en dur — lu depuis l'environnement (fallback 5000).
 const DEPOSIT_EUR = Number(
@@ -39,7 +39,7 @@ export const MANIFESTO =
   "On a retiré les mètres carrés superflus. Pas la lumière, pas la hauteur, pas le soin. Arko est pensée par notre architecte intégrée comme une maison entière — simplement plus juste.";
 
 export const PROMISE =
-  "Une maison d'architecte, livrée prête à vivre, en 12 semaines.";
+  "Une maison d'architecte fabriquée Hors-Site dans notre atelier, livrée prête à vivre, en 12 semaines.";
 
 // Paramètres transport convoi — source de vérité en DB (config_variables namespace 'transport').
 // Fallback env/constante jusqu'à implémentation du chargement DB (Phase 4).
@@ -159,47 +159,76 @@ export const getProduct = (key: string | null | undefined): Product =>
 export const SERIES_DEADLINE_ISO = "2026-07-17T23:59:59+02:00";
 export const SERIES_DEADLINE_LABEL = "Fin des réservations Série 01";
 
-export const REASSURANCE = [
+export const REASSURANCE_INTRO = [
   {
-    t: "Notre architecte intégrée",
+    t: "Notre insight et expertise",
     d: "Chaque ARKO est dessinée et suivie par notre architecte intégrée, de l'esquisse à la pose.",
   },
   {
     t: "Le savoir-faire d'atelier",
     d: "Montée et finie au sol, à l'abri. Une précision d'atelier, un délai maîtrisé de 12 semaines.",
   },
+] as const;
+
+export const REASSURANCE = [
   {
-    t: "Acompte remboursable",
-    d: "Vous réservez votre numéro avec 5 000 € remboursables. Sans engagement de construction.",
+    t: "Premier contact",
+    d: "30 min en visio avec notre architecte intégrée pour valider votre projet et recevoir votre devis.",
   },
   {
-    t: "Après votre réservation",
-    d: "Prochaine étape : 30 min en visio avec notre architecte intégrée pour valider votre projet.",
+    t: "Devis signé, nous réservons votre ARKO",
+    d: "Vous réservez votre numéro avec 5 000 € remboursables. Sans engagement de construction.",
   },
 ] as const;
 
-export const FAQ = [
+export const FAQ: { q: string; a: string | string[] }[] = [
   {
     q: "Quel est le délai ?",
-    a: "12 semaines de fabrication en atelier à compter de la levée des conditions du contrat de construction — urbanisme obtenu, financement confirmé, fondations réceptionnées. La pose se fait ensuite en une journée. Vous êtes informé par email à chaque étape clé : lancement, structure, finitions, module prêt à livrer, pose.",
+    a: [
+      "La fabrication de votre maison ARKO en atelier dure environ **12 semaines**, à compter de la levée des conditions prévues au contrat : autorisation d'urbanisme obtenue, financement confirmé, terrain accessible et fondations ou supports d'accueil réceptionnés.",
+      "L'installation sur site est ensuite généralement réalisée en **une journée**, sous réserve des conditions d'accès, de météo et de préparation du terrain.",
+      "À chaque étape importante — lancement, structure, finitions, maison prête à livrer, installation — vous êtes informé par email.",
+    ],
   },
   {
     q: "Et si je n'ai pas encore de terrain ?",
-    a: "Notre outil terrain vérifie en ligne la compatibilité d'une adresse ou d'une annonce : PLU, accessibilité convoi, exposition. Si vous partez de zéro, le Pack Recherche Terrain (acompte de 1 500 €, optionnel et accessoire à la réservation) vous donne accès à un Mandataire Partenaire Howner-Affinity qualifié, titulaire de la carte T, qui conduit la recherche sur 3 mois. L'acompte est intégralement remboursable si aucun terrain compatible n'est trouvé dans le délai.",
+    a: "Si vous partez de zéro, nous vous proposons une sélection de terrains dans notre rubrique « Terrains » : des terrains sélectionnés par nos partenaires Mandataires. Sélectionnez-le et nous vous contactons pour faire le point sur sa disponibilité et vos options concernant votre maison ARKO. Aucun ne vous intéresse ? Nous restons à votre écoute, et ferons le nécessaire pour vous mettre en relation avec des partenaires de confiance.",
   },
   {
     q: "Comment se passe le paiement ?",
-    a: "La réservation déclenche un acompte de 5 000 €, remboursable à tout moment avant la signature du contrat de construction, sans condition ni justification. Cet acompte s'impute sur le premier appel de fonds. L'échéancier est adapté à la fabrication en atelier selon le décret du 6 février 2020 : 10 % à l'ouverture, 40 % à l'achèvement de la structure, 60 % aux finitions intérieures, 80 % au module prêt à livrer, 95 % à la réception, 100 % après levée des réserves.",
+    a: [
+      "Après un premier échange téléphonique, nous vous adressons par email une proposition commerciale comprenant le modèle ARKO retenu, les principales caractéristiques techniques, les options choisies et une estimation du calendrier de fabrication, de livraison et d'installation.",
+      "Pour confirmer votre intérêt et réserver votre projet, un versement initial de 5 000 € vous est demandé.",
+      "Ce versement est intégralement remboursable tant que le contrat de fabrication, livraison et installation n'a pas été signé. Vous pouvez donc renoncer à votre projet avant cette signature, sans avoir à justifier votre décision.",
+      "Une fois le contrat signé, ce versement de 5 000 € est déduit du prix total de votre maison ARKO et intégré à l'échéancier de paiement.",
+      "Le règlement s'effectue ensuite en plusieurs étapes, adaptées à la fabrication en atelier :",
+      "Étape 0 — Premier échange et proposition commerciale\nNous échangeons avec vous sur votre projet, votre terrain, le modèle ARKO envisagé et vos contraintes techniques. Nous vous envoyons ensuite un devis accompagné du portfolio produit correspondant.",
+      "Étape 1 — Réservation du projet\nVous validez le devis de réservation et l'échéancier prévisionnel. Une facture de réservation de 5 000 € vous est adressée. Le paiement peut être effectué par virement bancaire ou par paiement sécurisé en ligne.",
+      "Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d'étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des 5 000 € déjà versés.",
+      "Étape 3 — Sortie d'atelier\nLorsque votre maison ARKO est fabriquée et prête à être livrée, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
+      "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
+      "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
+      "Affinity House Factory n'intervient pas dans l'opération d'achat du terrain, ni dans les formalités juridiques, administratives ou notariales qui y sont attachées.",
+      "Les mandataires partenaires susceptibles d'accompagner le client dans sa recherche de terrain interviennent sous leur seule responsabilité, dans le cadre de leur propre activité professionnelle. Leur intervention est distincte de celle d'Affinity House Factory.",
+    ],
   },
   {
     q: "Quelles garanties ?",
-    a: "Trois garanties légales s'appliquent à chaque Maison ARKO : parfait achèvement (1 an — tous les désordres signalés à la réception ou dans l'année), biennale de bon fonctionnement (2 ans — volets, robinetterie, équipements électriques et éléments dissociables), et décennale (10 ans — structure et éléments indissociables). La garantie décennale est transférable en cas de revente. L'assurance dommages-ouvrage est à la charge du Client, obligatoire avant ouverture de chantier.",
+    a: [
+      "Votre maison ARKO bénéficie des garanties légales applicables aux travaux réalisés : parfait achèvement pendant 1 an, bon fonctionnement des équipements dissociables pendant 2 ans, et garantie décennale pendant 10 ans pour les dommages affectant la solidité de l'ouvrage ou son usage.",
+      "La garantie décennale est attachée à la maison et se transmet en cas de revente pendant sa durée de validité.",
+      "L'assurance dommages-ouvrage reste à la charge du client et doit être souscrite avant l'ouverture du chantier lorsque la réglementation l'exige.",
+    ],
   },
   {
     q: "Et l'après-vente ?",
-    a: "Un interlocuteur dédié vous accompagne après la pose. Notre architecte intégrée reste votre référente technique pour les questions de conformité, d'urbanisme et d'adaptation. Les désordres signalés dans l'année suivant la réception sont traités dans le cadre de la garantie de parfait achèvement, sans frais.",
+    a: [
+      "Après l'installation, un interlocuteur dédié reste votre référent technique.",
+      "Il vous accompagne dans le suivi de votre maison ARKO, le traitement des éventuelles réserves et les désordres signalés après réception.",
+      "Les désordres relevant de la garantie de parfait achèvement sont traités sans frais dans l'année suivant la réception, sous réserve qu'ils concernent les prestations réalisées par Affinity House Factory ou ses intervenants.",
+    ],
   },
-] as const;
+];
 
 // Navigation principale par routes (multi-pages — ADR-021).
 // « Produits » est rendu à part (méga-menu Tesla) via PRODUCT_LIST.

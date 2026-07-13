@@ -22,7 +22,7 @@ type Dossier = {
   id: string;
   statut: string;
   pack_label: string | null;
-  remuneration_mandataire_ht: number | null;
+  acte_notarie_at: string | null;
   created_at: string;
   accepted_at: string | null;
   leads: LeadAnon | null;
@@ -55,8 +55,7 @@ export default function DossiersPage() {
   }, []);
 
   const actifs    = dossiers.filter((d) => ["proposé", "accepté", "en_cours"].includes(d.statut));
-  const finalisés = dossiers.filter((d) => d.statut === "finalisé");
-  const caTotal   = finalisés.reduce((s, d) => s + (d.remuneration_mandataire_ht ?? 0), 0);
+  const finalisés = dossiers.filter((d) => d.acte_notarie_at);
 
   if (loading) {
     return (
@@ -77,10 +76,9 @@ export default function DossiersPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <KpiCard label="Dossiers actifs"   value={String(actifs.length)}   sub="En attente ou en cours" />
         <KpiCard label="Finalisés"          value={String(finalisés.length)} sub="Acte notarié signé" />
-        <KpiCard label="CA généré"          value={`${caTotal.toLocaleString("fr-FR")} €`} sub="Rémunérations HT" accent />
       </div>
 
       {/* Liste */}
@@ -145,9 +143,9 @@ export default function DossiersPage() {
                     <p className="text-xs text-[#7469F4]">Cliquez pour voir et accepter ce lead →</p>
                   </div>
                 )}
-                {d.remuneration_mandataire_ht && d.statut === "finalisé" && (
-                  <p className="mt-3 text-right font-semibold text-[#7469F4]">
-                    {d.remuneration_mandataire_ht.toLocaleString("fr-FR")} € HT
+                {d.acte_notarie_at && (
+                  <p className="mt-3 text-right text-xs font-medium text-green-600">
+                    ✅ Acte notarié signé le {new Date(d.acte_notarie_at).toLocaleDateString("fr-FR")}
                   </p>
                 )}
               </Link>

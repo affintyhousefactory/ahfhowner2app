@@ -36,7 +36,7 @@ Toute décision structurante (archi, intégration externe, change de marque/desi
 - **Next 16 « non standard »** — lire `node_modules/next/dist/docs/` avant tout code (cf. AGENTS.md).
 
 ## Marque (ADR-004 — absolu)
-Termes **interdits** : CCMI, LSF, acier, hors-site, modulaire, préfabriqué, tiny house, conteneur, catalogue, micro-maison. Toujours « notre architecte intégrée » (sans prénom). Fondateur = « Puigbo » (sans accent). Source : `src/lib/site.ts`.
+Termes **interdits** : modulaire, préfabriqué, tiny house, conteneur, catalogue. Toujours « notre architecte intégrée » (sans prénom). Fondateur = « Puigbo » (sans accent). Source : `src/lib/site.ts` (ADR-004, révisé 2026-07-09).
 
 ## Secrets (ADR-003)
 Montants → `NEXT_PUBLIC_*` via env (fallback). Clés serveur (Supabase service-role, Stripe, Apify, Anthropic) → **jamais dans Git**, jamais côté client. Placeholders uniquement dans la doc.

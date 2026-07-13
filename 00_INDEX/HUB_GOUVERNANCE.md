@@ -27,7 +27,7 @@ Point d'entrée pour : gouvernance ADR, règles de marque, secrets, alertes Albe
 
 ## Règles
 - Toute décision structurante = un ADR (`ADR-NNN-titre.md`).
-- Marque (ADR-004) : interdits CCMI, LSF, acier, hors-site, modulaire, préfabriqué, tiny house, conteneur, catalogue, micro-maison ; « notre architecte intégrée » ; « Puigbo ».
+- Marque (ADR-004, révisé 2026-07-09) : interdits modulaire, préfabriqué, tiny house, conteneur, catalogue ; « notre architecte intégrée » ; « Puigbo ».
 - Secrets jamais dans Git ; placeholders only.
 
 ## Alertes Albert (AHF_CORE)

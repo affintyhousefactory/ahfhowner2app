@@ -22,6 +22,22 @@ function normalizeAttrs(
   return { ...attrs, SMS: normalizePhoneFr(attrs.SMS) };
 }
 
+// Un numéro de téléphone rejeté par Brevo (format invalide ou numéro inexistant, ex:
+// "0101010101") fait échouer toute la requête, pas seulement l'attribut SMS — sans ce
+// contrôle, un contact ne serait jamais créé (même en blocklist) à cause d'un simple
+// numéro de test malformé saisi par l'utilisateur.
+function isPhoneRejection(status: number, bodyText: string): boolean {
+  return status === 400 && /phone/i.test(bodyText);
+}
+
+function withoutSms(
+  attrs: Record<string, string | null | undefined>,
+): Record<string, string | null | undefined> {
+  const rest = { ...attrs };
+  delete rest.SMS;
+  return rest;
+}
+
 export async function sendBrevoTemplate({
   templateId,
   to,
@@ -67,19 +83,35 @@ export async function addBrevoContact(
     console.warn("[email] BREVO_API_KEY manquant — contact non ajouté.");
     return;
   }
-  const res = await fetch(BREVO_CONTACTS_API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "api-key": apiKey },
-    body: JSON.stringify({
+  const buildBody = (a: Record<string, string | null | undefined>) =>
+    JSON.stringify({
       email,
-      attributes: normalizeAttrs(attrs),
+      attributes: normalizeAttrs(a),
       listIds,
       updateEnabled: true,
       ...(options?.emailBlacklisted !== undefined ? { emailBlacklisted: options.emailBlacklisted } : {}),
-    }),
+    });
+
+  const res = await fetch(BREVO_CONTACTS_API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "api-key": apiKey },
+    body: buildBody(attrs),
   });
   if (!res.ok && res.status !== 204) {
-    console.warn(`[email] addBrevoContact ${res.status}:`, await res.text());
+    const errText = await res.text();
+    if (isPhoneRejection(res.status, errText) && "SMS" in attrs) {
+      console.warn("[email] addBrevoContact : téléphone rejeté, nouvelle tentative sans SMS.");
+      const retry = await fetch(BREVO_CONTACTS_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "api-key": apiKey },
+        body: buildBody(withoutSms(attrs)),
+      });
+      if (!retry.ok && retry.status !== 204) {
+        console.warn(`[email] addBrevoContact (retry) ${retry.status}:`, await retry.text());
+      }
+      return;
+    }
+    console.warn(`[email] addBrevoContact ${res.status}:`, errText);
   }
 }
 
@@ -95,18 +127,34 @@ export async function addBrevoContactDOI(
     console.warn("[email] BREVO_API_KEY ou templateId manquant — DOI non envoyé.");
     return;
   }
-  const res = await fetch(BREVO_DOI_API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "api-key": apiKey },
-    body: JSON.stringify({
+  const buildBody = (a: Record<string, string | null | undefined>) =>
+    JSON.stringify({
       email,
-      attributes: normalizeAttrs(attrs),
+      attributes: normalizeAttrs(a),
       includeListIds: [listId],
       templateId,
       redirectionUrl,
-    }),
+    });
+
+  const res = await fetch(BREVO_DOI_API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "api-key": apiKey },
+    body: buildBody(attrs),
   });
   if (!res.ok && res.status !== 204) {
-    console.warn(`[email] addBrevoContactDOI ${res.status}:`, await res.text());
+    const errText = await res.text();
+    if (isPhoneRejection(res.status, errText) && "SMS" in attrs) {
+      console.warn("[email] addBrevoContactDOI : téléphone rejeté, nouvelle tentative sans SMS.");
+      const retry = await fetch(BREVO_DOI_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "api-key": apiKey },
+        body: buildBody(withoutSms(attrs)),
+      });
+      if (!retry.ok && retry.status !== 204) {
+        console.warn(`[email] addBrevoContactDOI (retry) ${retry.status}:`, await retry.text());
+      }
+      return;
+    }
+    console.warn(`[email] addBrevoContactDOI ${res.status}:`, errText);
   }
 }

@@ -9,31 +9,33 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data: lead } = await supabase
     .from("leads")
-    .select("mandataire_id, commune, pack_terrain, produit, lead_number, description_projet")
+    .select("prenom, nom, commune, pack_terrain, produit, lead_number, description_projet, mandataire_id")
     .eq("id", id)
     .single();
 
   if (!lead?.mandataire_id) {
-    return NextResponse.json({ error: "Lead non affecté" }, { status: 400 });
+    return NextResponse.json({ error: "Aucun mandataire affecté" }, { status: 400 });
   }
 
-  const { data: mandataire } = await supabase
-    .from("mandataires")
-    .select("prenom, nom, email")
-    .eq("id", lead.mandataire_id)
-    .single();
+  const [{ data: mandataire }, { data: dossier }] = await Promise.all([
+    supabase.from("mandataires").select("prenom, nom, email").eq("id", lead.mandataire_id).single(),
+    supabase.from("dossiers").select("id").eq("lead_id", id).single(),
+  ]);
 
-  // Mettre à jour email_sent_at sur le dossier
-  await supabase
-    .from("dossiers")
-    .update({ email_sent_at: new Date().toISOString() })
-    .eq("lead_id", id)
-    .eq("mandataire_id", lead.mandataire_id);
+  if (!mandataire?.email) {
+    return NextResponse.json({ error: "Mandataire introuvable ou sans email" }, { status: 404 });
+  }
 
   const templateId = parseInt(process.env.BREVO_TEMPLATE_AFFECTATION ?? "0");
   if (!templateId) {
-    console.error("[affecter/resend] BREVO_TEMPLATE_AFFECTATION non défini — email non envoyé");
-  } else if (mandataire?.email) {
+    return NextResponse.json({ error: "BREVO_TEMPLATE_AFFECTATION non défini" }, { status: 500 });
+  }
+
+  const portalUrl = dossier?.id
+    ? `${getSiteUrl(req)}/mandataire/dossiers/${dossier.id}`
+    : `${getSiteUrl(req)}/mandataire/dossiers`;
+
+  try {
     await sendBrevoTemplate({
       templateId,
       to: [{ email: mandataire.email, name: `${mandataire.prenom} ${mandataire.nom}` }],
@@ -44,9 +46,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         LEAD_PACK:         lead.pack_terrain ?? lead.produit ?? "",
         LEAD_DESCRIPTION:  lead.description_projet ?? "",
         LEAD_PRODUIT:      lead.produit ?? "",
-        PORTAL_URL:        `${getSiteUrl(req)}/mandataire/dossiers`,
+        PORTAL_URL:        portalUrl,
       },
     });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Erreur envoi email" },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({ ok: true });

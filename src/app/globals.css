@@ -45,6 +45,73 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* react-phone-number-input — aligné sur le style des autres champs du formulaire contact */
+.phone-input.PhoneInput {
+  border: 1px solid var(--color-line);
+  border-radius: 9999px;
+  background: var(--color-surface);
+  padding: 0.875rem 1.25rem;
+  transition: border-color 0.2s;
+}
+.phone-input.PhoneInput--focus {
+  border-color: var(--color-accent);
+}
+.phone-input.phone-input--error {
+  border-color: #f87171;
+}
+.phone-input.phone-input--error .PhoneInputInput::placeholder {
+  color: #f87171;
+  opacity: 0.8;
+}
+.phone-input .PhoneInputInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  min-width: 0;
+}
+.phone-input .PhoneInputInput::placeholder {
+  color: var(--color-muted);
+  opacity: 0.6;
+}
+.phone-input .PhoneInputCountry {
+  margin-right: 0.6rem;
+}
+.phone-input .PhoneInputCountrySelect {
+  cursor: pointer;
+}
+
+/* Variante portail mandataire — aligné sur inputCls (rounded-lg, gray-200, accent #7469F4) */
+.phone-input-mandataire.PhoneInput {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #fff;
+  padding: 0.625rem 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.phone-input-mandataire.PhoneInput--focus {
+  border-color: #7469f4;
+  box-shadow: 0 0 0 2px rgba(116, 105, 244, 0.2);
+}
+.phone-input-mandataire .PhoneInputInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: #111827;
+  min-width: 0;
+}
+.phone-input-mandataire .PhoneInputInput::placeholder {
+  color: #9ca3af;
+}
+.phone-input-mandataire .PhoneInputCountry {
+  margin-right: 0.5rem;
+}
+.phone-input-mandataire .PhoneInputCountrySelect {
+  cursor: pointer;
+}
+
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
@@ -371,4 +438,37 @@ html {
 .gmap-autocomplete gmp-placeautocomplete {
   display: block;
   width: 100%;
+}
+
+/* ============================================================
+   THÈME SOMBRE — champs de sélection natifs (admin)
+   Uniformise <select>/<option>/<optgroup> avec le design system
+   sombre de l'admin (fond #1a1a18/#252521, accent #7469F4), sans
+   toucher au comportement métier (values/onChange inchangés).
+   Scope : [data-theme="dark"] (posé sur le layout racine du
+   route group (admin)) — le site public et l'espace mandataire
+   restent en thème clair et ne sont pas affectés.
+   ============================================================ */
+[data-theme="dark"] select {
+  color-scheme: dark;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+[data-theme="dark"] select:focus-visible {
+  outline: none;
+  border-color: #7469f4;
+  box-shadow: 0 0 0 1px #7469f4;
+}
+
+[data-theme="dark"] select option,
+[data-theme="dark"] select optgroup {
+  background-color: #252521;
+  color: #ffffff;
+}
+
+[data-theme="dark"] select option:checked,
+[data-theme="dark"] select option:hover {
+  background-color: #7469f4;
+  color: #ffffff;
 }

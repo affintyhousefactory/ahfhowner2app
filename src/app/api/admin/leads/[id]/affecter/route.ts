@@ -13,7 +13,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const [{ data: mandataire }, { data: lead }] = await Promise.all([
     supabase.from("mandataires").select("prenom, nom, email").eq("id", mandataire_id).single(),
-    supabase.from("leads").select("prenom, nom, commune, pack_terrain, produit, lead_number").eq("id", id).single(),
+    supabase.from("leads").select("prenom, nom, commune, pack_terrain, produit, lead_number, description_projet").eq("id", id).single(),
   ]);
 
   // 1. Mise à jour du lead
@@ -51,6 +51,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         LEAD_NUMBER:       `#${lead?.lead_number ?? ""}`,
         LEAD_COMMUNE:      lead?.commune ?? "",
         LEAD_PACK:         lead?.pack_terrain ?? lead?.produit ?? "",
+        LEAD_DESCRIPTION:  lead?.description_projet ?? "",
+        LEAD_PRODUIT:      lead?.produit ?? "",
         PORTAL_URL:        `${getSiteUrl(req)}/mandataire/dossiers`,
       },
     }).catch(console.error);

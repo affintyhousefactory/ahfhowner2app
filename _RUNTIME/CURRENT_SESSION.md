@@ -1,6 +1,8 @@
 # CURRENT_SESSION — Howner / ARKO
 
 ## Focus actuel
+**`fix/scrape-annonce-error-logging` mergée sur `dev`** (PR #51, 2026-07-10) — scope réel bien plus large que son nom : ADR-027 (fiche lead — recherche terrain, affectation géo, GED double), refonte CGV (attente confirmation avocat), révision blocklist marque ADR-004, refonte FAQ/hero/promesse/réassurance, fiabilisation import photos terrain, extraction IA Anthropic enrichie, contact Brevo direct.
+
 **`feat/admin-portal` COMPLET** — Étapes 1→6 mergées sur `dev` via PR #14 (commit 614b5f0c). Portail admin opérationnel : dashboard, leads, mandataires, affectations, carte Leaflet, formulaire lead/mandataire, Pappers, validation/suspension, invitation onboarding.
 
 ## Décisions prises — 2026-06-29 (session brevo-contacts + admin-portal)
@@ -42,9 +44,8 @@
 - Supabase local (CLI Docker) vs cloud `ahfhownerdb-dev` pour Development. Pas tranché.
 
 ## Blockers / À fournir
-- **SPF/DKIM prod** — DNS au registrar howner.fr (bloqueur externe). ADR-026.
-- **DNS howner.fr** — à configurer au registrar (externe).
-- **CGV + légal** — avocat (ADR-015, externe).
+- ~~**SPF/DKIM prod**~~ ✅ corrigé manuellement (2026-07-10), plus de bloqueur.
+- **CGV + légal** — nouvelle version CGV (`f3de62fe`) en attente confirmation avocat (ADR-015, seul point restant bloqué).
 - **Coordonnées atelier** — `transport.usine_lat/lon` dans `config_variables` = placeholder Bayonne (43.4933, −1.4748) — à affiner avec l'adresse réelle.
 - **Albert validation** — charte Affinity (ADR-002) + repositionnement bi-produit (ADR-022).
 - **Arko Max pricing grid** — `perM2/options/terrasse/footprint/reserved` — données métier attendues.
