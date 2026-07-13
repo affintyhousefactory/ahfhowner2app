@@ -4,7 +4,7 @@ import { LegalShell } from "@/components/site/LegalShell";
 export const metadata: Metadata = {
   title: "Mentions légales | HOWNER",
   description:
-    "Mentions légales du site affinityhome.fr : éditeur Affinity House Factory, hébergement Vercel, services tiers, propriété intellectuelle et droit applicable.",
+    "Mentions légales du site howner.fr : éditeur Affinity House Factory, hébergement Vercel, services tiers, propriété intellectuelle et droit applicable.",
   alternates: { canonical: "/mentions-legales" },
   robots: { index: true, follow: true },
 };
@@ -32,7 +32,7 @@ export default function MentionsPage() {
 
       <h2>2. Hébergement</h2>
       <p>
-        Le site <strong>affinityhome.fr</strong> est hébergé par :
+        Le site <strong>howner.fr</strong> est hébergé par :
       </p>
       <p>
         <strong>Vercel Inc.</strong>
@@ -107,7 +107,7 @@ export default function MentionsPage() {
 
       <h2>5. Conditions générales d'utilisation</h2>
       <p>
-        L'accès et l'utilisation du site affinityhome.fr valent acceptation des
+        L'accès et l'utilisation du site howner.fr valent acceptation des
         présentes mentions légales. Celles-ci sont susceptibles d'être modifiées
         à tout moment ; l'Utilisateur est invité à les consulter régulièrement.
       </p>
@@ -120,7 +120,7 @@ export default function MentionsPage() {
 
       <h2>6. Description des services</h2>
       <p>
-        Le site affinityhome.fr a pour objet de présenter les maisons compactes
+        Le site howner.fr a pour objet de présenter les maisons compactes
         d'architecte <strong>Arko One</strong> et <strong>Arko Max</strong>,
         conçues et fabriquées au Pays-Basque par Affinity House Factory, et de
         permettre leur réservation. Affinity House Factory s'efforce de fournir
