@@ -27,7 +27,7 @@ export default function CgvPage() {
         social est situé <strong>28 Chemin de Sabalce OEV, 64100 Bayonne, France</strong>.
       </p>
       <ul>
-        <li>Site internet : <a href="https://affinityhome.fr">https://affinityhome.fr</a></li>
+        <li>Site internet : <a href="https://howner.fr">https://howner.fr</a></li>
         <li>Contact commercial : contact@affinityhousefactory.com</li>
         <li>Directeur de la publication : Albert Puigbo</li>
         <li>Numéro de TVA intracommunautaire : FR[à compléter]</li>
