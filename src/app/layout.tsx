@@ -61,6 +61,18 @@ export default function RootLayout({
       className={`${display.variable} ${sans.variable} ${mono.variable} antialiased`}
     >
       <body>
+        {/* Active l'état masqué des révélations (voir globals.css).
+            Script inline brut, et non <Script beforeInteractive> : ce dernier
+            est différé au bootstrap du runtime Next, donc APRÈS le premier
+            paint — le contenu apparaîtrait puis disparaîtrait. Ici le
+            navigateur l'exécute pendant l'analyse du HTML, avant de peindre.
+            Sans JS, la classe n'est jamais posée : la page reste visible,
+            c'est ce qui garantit un HTML indexable. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add("js-motion")`,
+          }}
+        />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-[#7469F4] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"

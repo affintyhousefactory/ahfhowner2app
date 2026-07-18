@@ -174,7 +174,9 @@ export function Nav() {
             >
               <div>
                 <div className="flex items-baseline justify-between">
-                  <h3 className="editorial text-2xl text-ink">{p.name}</h3>
+                  {/* Libellé de menu, pas un titre de contenu : un <h3> ici
+                      précèderait le <h1> de la page et casserait le plan. */}
+                  <p className="editorial text-2xl text-ink">{p.name}</p>
                   <span className="font-mono text-xs text-muted">
                     {p.area} · {p.total} ex.
                   </span>

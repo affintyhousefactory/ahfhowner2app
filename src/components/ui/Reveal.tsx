@@ -1,11 +1,43 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { useEffect, useRef } from "react";
 import { cn } from "@/shared/lib/cn";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
+/* Révélation staggered au scroll (clip-path + translate).
+ *
+ * L'état masqué vit dans `globals.css` sous `.js-motion`, et non dans un style
+ * inline : le HTML rendu par le serveur reste visible, donc indexable. Ici on
+ * ne fait qu'observer l'entrée dans le viewport pour poser `is-in`.
+ * `prefers-reduced-motion` est traité en CSS (media query), plus en JS.
+ */
 
-/* Révélation staggered au scroll (clip-path + translate) */
+/* Marges de viewport reprises telles quelles de l'implémentation framer-motion. */
+const REVEAL_MARGIN = "-12% 0px -10% 0px";
+const GROUP_MARGIN = "-10% -10% -10% -10%";
+
+const DELAY_CHILDREN = 0.05;
+const STAGGER_CHILDREN = 0.08;
+
+/* Pose `is-in` au premier passage dans le viewport, puis cesse d'observer. */
+function observeOnce(el: Element, rootMargin: string) {
+  if (typeof IntersectionObserver === "undefined") {
+    el.classList.add("is-in");
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add("is-in");
+        io.unobserve(entry.target);
+      }
+    },
+    { rootMargin },
+  );
+  io.observe(el);
+  return () => io.disconnect();
+}
+
 export function Reveal({
   children,
   className,
@@ -17,37 +49,31 @@ export function Reveal({
   delay?: number;
   as?: "div" | "span" | "li" | "section";
 }) {
-  const reduce = useReducedMotion();
-  const MotionTag = motion[as] as typeof motion.div;
+  const ref = useRef<HTMLDivElement>(null);
 
-  if (reduce) {
-    const Tag = as;
-    return <Tag className={className}>{children}</Tag>;
-  }
+  useEffect(() => {
+    if (!ref.current) return;
+    return observeOnce(ref.current, REVEAL_MARGIN);
+  }, []);
+
+  const Tag = as as "div";
 
   return (
-    <MotionTag
-      className={className}
-      initial={{ opacity: 0, y: 22, clipPath: "inset(0 0 12% 0)" }}
-      whileInView={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)" }}
-      viewport={{ once: true, margin: "-12% 0px -10% 0px" }}
-      transition={{ duration: 0.9, ease: EASE, delay }}
+    <Tag
+      ref={ref}
+      className={cn("reveal", className)}
+      style={
+        delay
+          ? ({ "--reveal-delay": `${delay}s` } as React.CSSProperties)
+          : undefined
+      }
     >
       {children}
-    </MotionTag>
+    </Tag>
   );
 }
 
-/* Conteneur stagger pour enfants <RevealChild> */
-const parent: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-};
-const child: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
-};
-
+/* Conteneur stagger pour enfants <StaggerItem> */
 export function Stagger({
   children,
   className,
@@ -55,18 +81,28 @@ export function Stagger({
   children: React.ReactNode;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    /* Décalage posé côté client uniquement : les enfants doivent rester nus
+       dans le HTML du serveur. */
+    Array.from(el.children).forEach((child, i) => {
+      (child as HTMLElement).style.setProperty(
+        "--reveal-delay",
+        `${DELAY_CHILDREN + i * STAGGER_CHILDREN}s`,
+      );
+    });
+
+    return observeOnce(el, GROUP_MARGIN);
+  }, []);
+
   return (
-    <motion.div
-      className={className}
-      variants={parent}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-10%" }}
-    >
+    <div ref={ref} className={cn("reveal-group", className)}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -77,11 +113,5 @@ export function StaggerItem({
   children: React.ReactNode;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
-  return (
-    <motion.div className={cn(className)} variants={child}>
-      {children}
-    </motion.div>
-  );
+  return <div className={cn("reveal-item", className)}>{children}</div>;
 }
