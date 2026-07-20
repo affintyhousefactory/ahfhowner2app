@@ -221,6 +221,89 @@ html {
 }
 
 /* ============================================================
+   Révélations — état masqué conditionné à la présence de JS.
+   ------------------------------------------------------------
+   Le HTML rendu par le serveur ne doit porter aucun `opacity:0`
+   inline, sans quoi le contenu part invisible pour un crawler
+   ou un visiteur sans JS. L'état masqué est donc porté ici, sous
+   `.js-motion` — classe posée sur <html> avant le premier paint
+   par le script inline de `layout.tsx`, et seulement si JS
+   s'exécute. Pas de JS ⇒ pas de `.js-motion` ⇒ contenu visible.
+   ============================================================ */
+.js-motion .reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  clip-path: inset(0 0 12% 0);
+}
+.js-motion .reveal.is-in {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s),
+    clip-path 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s);
+}
+
+/* Stagger : le groupe déclenche, chaque enfant porte son propre délai
+   (`--reveal-delay` posé côté client par <Stagger>, jamais au SSR). */
+.js-motion .reveal-item {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.js-motion .reveal-group.is-in > .reveal-item {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s);
+}
+
+/* Hero : entrée jouée au chargement (et non au scroll). */
+.js-motion .hero-fade {
+  animation: hero-fade 1s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s)
+    both;
+}
+.js-motion .hero-rise {
+  animation: hero-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1)
+    var(--reveal-delay, 0s) both;
+}
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-motion .reveal,
+  .js-motion .reveal.is-in,
+  .js-motion .reveal-item,
+  .js-motion .reveal-group.is-in > .reveal-item {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+    transition: none;
+  }
+  .js-motion .hero-fade,
+  .js-motion .hero-rise {
+    animation: none;
+  }
+}
+
+/* ============================================================
    legal-prose — rendu des documents légaux finalisés (mentions,
    confidentialité). Titres display, tableaux RGPD, listes, liens,
    aux tokens charte Affinity. */

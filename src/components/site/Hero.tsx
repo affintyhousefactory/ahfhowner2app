@@ -6,8 +6,6 @@ import { BRAND, SERIE_TOTAL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Ikurrina } from "@/components/ui/Ikurrina";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
-
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
@@ -26,34 +24,36 @@ export function Hero() {
     >
       {/* Rail haut — marque + provenance (mono) */}
       <div className="container-page flex items-baseline justify-between pt-4">
-        <motion.span
-          className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.1 }}
+        <span
+          className="hero-fade font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted"
+          style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}
         >
           {BRAND.maker}
-        </motion.span>
-        <motion.span
-          className="inline-flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.15 }}
+        </span>
+        <span
+          className="hero-fade inline-flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted"
+          style={{ "--reveal-delay": "0.15s" } as React.CSSProperties}
         >
           <Ikurrina width={16} height={11} className="rounded-[1px]" />
           {BRAND.madeIn}
-        </motion.span>
+        </span>
       </div>
 
       {/* Média hero — la maison comme focal éditorial (sans wordmark, ADR-022). */}
       <div className="relative flex min-h-0 flex-1 flex-col justify-center">
         <div className="relative z-0 mt-8 flex justify-center">
+          {/* Parallaxe au scroll : reste en framer-motion (motion values sur le
+              transform). L'entrée en opacité, elle, passe par `hero-fade` —
+              sinon framer sérialise `opacity:0` dans le HTML du serveur. */}
           <motion.figure
-            style={{ y: mediaY, scale: mediaScale }}
-            className="relative aspect-video w-[min(94vw,1120px,96svh)] overflow-hidden rounded-xl bg-surface shadow-[0_50px_80px_rgba(26,23,20,0.16)]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.4, ease: EASE, delay: 0.35 }}
+            style={
+              {
+                y: mediaY,
+                scale: mediaScale,
+                "--reveal-delay": "0.35s",
+              } as React.ComponentProps<typeof motion.figure>["style"]
+            }
+            className="hero-fade relative aspect-video w-[min(94vw,1120px,96svh)] overflow-hidden rounded-xl bg-surface shadow-[0_50px_80px_rgba(26,23,20,0.16)]"
           >
             <video
               className="h-full w-full object-cover"
@@ -76,12 +76,11 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Rail bas — baseline + CTA + jauge */}
-      <motion.div
-        className="container-page pb-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.1, ease: EASE, delay: 0.6 }}
+      {/* Rail bas — baseline (h1) + CTA + jauge. Animé en CSS et non en
+          framer-motion : le h1 ne doit jamais être servi sous `opacity:0`. */}
+      <div
+        className="hero-rise container-page pb-8"
+        style={{ "--reveal-delay": "0.6s" } as React.CSSProperties}
       >
         <div className="rule grid grid-cols-1 gap-8 pt-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
@@ -108,7 +107,7 @@ export function Hero() {
             </p>
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
