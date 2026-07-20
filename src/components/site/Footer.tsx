@@ -19,9 +19,11 @@ export function Footer() {
             </Link>
           </div>
 
-          <h2 className="editorial text-balance text-[3rem] leading-[0.98] text-canvas md:text-[7rem]">
+          {/* Typo décorative de fin de page : reprend mot pour mot le <h1> du
+              Hero. En <h2> elle dupliquait le titre principal dans le plan. */}
+          <p className="editorial text-balance text-[3rem] leading-[0.98] text-canvas md:text-[7rem]">
             {BRAND.baseline}
-          </h2>
+          </p>
         </div>
 
         {/* Colonnes */}
