@@ -4,7 +4,7 @@
 > Mettre à jour la section « Dernier point » en fin de session. Ne pas dupliquer cet état ailleurs.
 
 ## Résumé exécutif
-Site **mono-produit** de réservation **ARKO** (série limitée 12 exemplaires). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Backend (Phase 4) non démarré**. **Lancement commercial bloqué par le légal.** Sources de vérité : `src/lib/site.ts` (marque/pricing), `DESIGN.md` (charte), `03_DECISIONS/` (ADR).
+Site **mono-produit** de réservation **ARKO** (série limitée 12 exemplaires). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Backend (Phase 4) non démarré**. **Lancement commercial bloqué par le légal.** ⚠️ **Voir « Dernier point » 2026-07-13 — CGV non confirmées avocat déjà live en prod, liées au tunnel de réservation.** Sources de vérité : `src/lib/site.ts` (marque/pricing), `DESIGN.md` (charte), `03_DECISIONS/` (ADR).
 
 ## État actuel
 - Phase 1 (front) livrée et validée. **Refonte multi-pages bi-produit** (Arko One + Arko Max) livrée le 2026-06-16 (ADR-020/021/022). Phase 1.5 (SEO) métadonnées par page posées, reste sitemap/robots/JSON-LD. Phase 4 (backend) non démarrée. Légal bloqué.
@@ -35,7 +35,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Phase | Périmètre | État | ADR |
 |---|---|---|---|
 | Phase 1 — Front | design, conversion, média, perf | ✅ Livré | 001,005,006 |
-| Phase 1.5 — SEO | sitemap/robots/OG/JSON-LD | 🟢 P0+P1 livrés (2026-06-17) ; P2 polish restant | 018 |
+| Phase 1.5 — SEO | sitemap/robots/OG/JSON-LD | 🟢 P0+P1 livrés (2026-06-17) ; **fix HTML front indexable (PR #54, 2026-07-20)** ; P2 polish restant | 018 |
 | Phase 4 — Backend | Stripe, Supabase, terrain, leads | ⛔ Non démarré | 007→013 |
 | Pré-lancement — Légal | acompte/arrhes, CGV | ⛔ Bloqué (avocat) | 015 |
 
@@ -62,6 +62,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 
 | Risque | Impact | Gravité | ADR |
 |---|---|---|---|
+| **⚠️ CGV non confirmées avocat (`f3de62fe`) déjà LIVE en prod** (`/cgv`, liée au checkbox d'acceptation de `Reservation.tsx`) — engagement contractuel possible sur texte non validé | Risque juridique direct | 🔴 Critique | 015 |
 | Légal acompte/arrhes + CGV non validés | Pas de vente | 🔴 Critique | 015 |
 | RLS Supabase mal configurée | Fuite leads/réservations | 🔴 Critique | 007 |
 | Service email non choisi | Bloque confirmation Stripe | 🟠 Haute | 026 |
@@ -119,7 +120,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 012 | LandTool annonce Apify | Proposé | 🟠 |
 | 013 | Contact terrain → leads | Proposé | ✅ |
 | 014 | Service email transactionnel | **Remplacé → ADR-026** | ✅ |
-| 015 | Légal acompte/arrhes/CGV | **Bloqué (avocat)** | 🔴 |
+| 015 | Légal acompte/arrhes/CGV | **Bloqué (avocat) — ⚠️ nouvelle CGV (`f3de62fe`) déployée en prod le 2026-07-13 SANS confirmation avocat obtenue** | 🔴 |
 | 016 | Échéancier 10/30/40/20 % | Différé | 🟠 |
 | 017 | Enrichissement terrain Anthropic | Différé (option) | ⚪ |
 | 018 | Socle SEO | **Accepté — P0+P1 livrés** | ✅ |
@@ -128,6 +129,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 021 | Architecture multi-pages + nav Tesla | Accepté | ✅ |
 | 022 | Split produit One/Max + repositionnement | **Accepté — valider Albert** | 🟠 |
 | 023 | Déploiement production Vercel | Proposé | ✅ |
+| 024 | Bandeau consentement cookies + Cloudflare Turnstile | Accepté | ✅ |
+| 025 | Page `/rechercheterrain` — recherche personnalisée de parcelles | Accepté | ✅ |
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
 | 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré** | ✅ |
 
@@ -150,6 +153,10 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-07-20 (SEO home — HTML front indexable, PR #54 → `dev`, en attente review)** — Diagnostic : la home (et pages produit) étaient déjà rendues côté serveur, mais servies **invisibles** — framer-motion sérialisait `opacity:0` inline dans le HTML SSR (**23 blocs sur `/`, jusqu'à 64 sur `/arko-max`**) ; sans JS = page blanche. Hiérarchie Hn cassée (méga-menu `<h3>` avant le `<h1>`, footer `<h2>` dupliquant le `<h1>`). Correctif (6 fichiers front, **aucune migration**, aucun texte modifié) : `Reveal.tsx` réécrit sans framer-motion (`IntersectionObserver` + classes CSS, API publique inchangée → **Configurator ADR-005 non touché**) ; état masqué déplacé dans `globals.css` sous `.js-motion` (posée sur `<html>` uniquement si JS s'exécute → pas de JS = contenu visible/indexable) ; `<script>` inline brut dans `layout.tsx` pose `.js-motion` avant le premier paint (écarte `next/script beforeInteractive` = flash) ; `Hero.tsx` `<h1>` sorti du conteneur `opacity:0` (parallaxe image conservée en framer) ; `Nav.tsx`/`Footer.tsx` titres décoratifs re-balisés `<p>`. **Vérifié sur Preview Vercel** (Googlebot, sans JS) : `opacity:0` inline **23 → 0**, plan des titres **H1 → H2 → H3** imbriqué, contenu FAQ visible. `tsc` + `eslint` OK. **Formulaires sans JS** (question Richard) : normal et **non-bloquant SEO** (Googlebot exécute le JS ; un form n'est pas du contenu indexable) — `/configurer` rend son form au SSR, `/contact` affiche un fallback vide car le form lit l'URL (`useSearchParams` → `<Suspense>`), `/rechercheterrain` = page vitrine sans form (CTA → `/configurer`) ; refonte no-JS (Server Actions + anti-spam) non retenue. **Reste** : validation visuelle Preview (animations au scroll, pas de flash, `/arko-max`) + merge PR #54.
+
+**2026-07-13 (PR #24 `dev`→`main` mergée + migration Prod GED Client + ⚠️ ALERTE ALBERT légal)** — `main` mis à jour avec tout l'accumulé `dev` depuis le 6 juillet (v2.2 : GED dossiers, portail admin/mandataire, fiches terrain, dashboard KPIs, CGU, fix SEO domaine `howner.fr`, ADR-027 fiche lead, etc.). Migration `20260710_lead_client_documents.sql` appliquée sur Prod (`ahfhownerdb`, `msrjocrcewvqkcehruny`) — Preview et Prod alignés. **⚠️ ALERTE : la nouvelle version des CGV (`f3de62fe`, 9 juillet 2026) est désormais LIVE en production sur `/cgv`, et cette page est directement liée au checkbox d'acceptation dans le tunnel de réservation (`Reservation.tsx` L283/L470-471, `accepte_cgv: true`) — alors que la confirmation de l'avocat n'a jamais été obtenue (ADR-015 reste marqué « Bloqué »). Concrètement : un client réservant aujourd'hui accepte contractuellement un texte de CGV non validé juridiquement. Page en `noindex,follow` (invisible aux moteurs) mais parfaitement accessible et opposable pour tout visiteur/client. **Action requise avant toute nouvelle réservation ou communication commerciale** : obtenir la confirmation avocat en urgence, ou dépublier temporairement `/cgv` et bloquer le tunnel de réservation le temps de la validation. À remonter à Albert (alerte risque juridique, cf. CLAUDE.md).
 
 **2026-07-10 (confirmation post-merge — `fix/scrape-annonce-error-logging` → `dev`, PR #51)** — Branche mergée dans `dev` : elle portait un scope bien plus large que son nom (ADR-027 fiche lead + refonte CGV + révision blocklist marque ADR-004 + refonte FAQ/hero/promesse/réassurance + fiabilisation import photos terrain + extraction IA Anthropic + sélecteur téléphone international + contact Brevo direct). **SPF/DKIM prod corrigé manuellement** — n'est plus un bloqueur (ADR-026 clos sur ce point). **Légal (ADR-015) reste bloqué uniquement sur la confirmation avocat de la nouvelle version CGV** (`f3de62fe`) — le reste du volet légal n'a pas de nouveau bloqueur. **Migration `20260710_lead_client_documents.sql` (GED Client) reste à appliquer** Preview/Prod. **Arko Max pricing grid toujours en attente** de données métier + grille tarifaire (aucun changement).
 
