@@ -1,6 +1,16 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions prises — 2026-07-20 (SEO home — HTML front indexable)
+- **PR #54 mergée** (`fix/homepage-ssr-seo-reveal` → `dev`) puis **PR #55 (`dev`→`main`) mergée le même jour** — **correctif LIVE en production**, `dev` et `main` alignés. 1 commit (`cde0b8c7`), 6 fichiers front, aucune migration.
+- **Diagnostic** : la home était déjà rendue côté serveur, mais servie **invisible** — framer-motion sérialisait `opacity:0` inline dans le HTML SSR (**23 blocs sur `/`, jusqu'à 64 sur `/arko-max`**). Sans JS = page blanche. Hiérarchie Hn cassée (méga-menu `<h3>` avant le `<h1>`, footer `<h2>` dupliquant le `<h1>`).
+- **Correctif** : `Reveal.tsx` réécrit sans framer-motion (`IntersectionObserver` + classes CSS, API publique inchangée → Configurator ADR-005 non touché) ; état masqué déplacé dans `globals.css` sous `.js-motion` (posée sur `<html>` uniquement si JS s'exécute → pas de JS = contenu visible) ; `<script>` inline brut dans `layout.tsx` pose `.js-motion` avant le premier paint (écarte `next/script beforeInteractive` = flash) ; `Hero.tsx` `<h1>` sorti du conteneur `opacity:0` (parallaxe image conservée en framer) ; `Nav.tsx`/`Footer.tsx` titres décoratifs re-balisés `<p>`. **Aucun texte modifié.**
+- **Vérifié sur Preview Vercel** (Googlebot, sans JS) : `opacity:0` inline **23 → 0**, plan des titres **H1 → H2 → H3** imbriqué, script synchrone présent, contenu FAQ visible. `tsc` + `eslint` OK.
+- **Formulaires sans JS** (question Richard) : normal et **non-bloquant SEO** (Googlebot exécute le JS ; un form n'est pas du contenu indexable). `/configurer` rend son form au SSR ; `/contact` affiche un fallback vide car le form lit l'URL (`useSearchParams` → `<Suspense>`) ; `/rechercheterrain` n'a pas de form (page vitrine → CTA `/configurer`). Rendre les forms utilisables sans JS = refonte progressive enhancement (Server Actions + anti-spam sans JS) — non retenu (audience quasi nulle, hors SEO). Amélioration optionnelle repérée : squelette de form au lieu de carte vide sur `/contact` (non fait).
+
 ## Focus actuel
+**Prod à jour** — `dev` et `main` alignés (0 commit d'écart). Aucun chantier de code en cours. Seuls points ouverts : blockers externes (CGV avocat, grille Arko Max, validations Albert) + reliquats non bloquants (SEO P2, placeholders Brevo template 15).
+
+## Historique
 **`fix/scrape-annonce-error-logging` mergée sur `dev`** (PR #51, 2026-07-10) — scope réel bien plus large que son nom : ADR-027 (fiche lead — recherche terrain, affectation géo, GED double), refonte CGV (attente confirmation avocat), révision blocklist marque ADR-004, refonte FAQ/hero/promesse/réassurance, fiabilisation import photos terrain, extraction IA Anthropic enrichie, contact Brevo direct.
 
 **`feat/admin-portal` COMPLET** — Étapes 1→6 mergées sur `dev` via PR #14 (commit 614b5f0c). Portail admin opérationnel : dashboard, leads, mandataires, affectations, carte Leaflet, formulaire lead/mandataire, Pappers, validation/suspension, invitation onboarding.

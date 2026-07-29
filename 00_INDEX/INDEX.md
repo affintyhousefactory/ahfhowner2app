@@ -18,7 +18,7 @@
 - `CURRENT_SESSION.md` · `active-context.md` · `recent-decisions.md` · `pending-questions.md`
 
 ## Mémoire décisionnelle (`03_DECISIONS/`, durable)
-- `ADR_TEMPLATE.md` + `ADR-001 … ADR-022`
+- `ADR_TEMPLATE.md` + `ADR-001 … ADR-027`
 
 ## Règles (ADR-019)
 Une seule vérité d'état = `00_INDEX/PROJECT_STATE.md`. `_RUNTIME` ≠ backlog. Ne pas mélanger les projets. Toute décision durable → ADR.
