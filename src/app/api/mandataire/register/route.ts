@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { addBrevoContact } from "@/shared/lib/email";
 import type { ContratData } from "@/shared/components/mandataire/ContratCanvas";
+// ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
+import { mandataireDisabled } from "@/shared/lib/feature-guard";
 
 export async function POST(req: NextRequest) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const body = await req.json().catch(() => null);
   if (!body?.email || !body?.password || !body?.contrat) {
     return NextResponse.json({ error: "Données manquantes." }, { status: 400 });

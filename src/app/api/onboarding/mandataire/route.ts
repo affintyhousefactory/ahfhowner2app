@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
+// ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
+import { mandataireDisabled } from "@/shared/lib/feature-guard";
 
 async function getByToken(token: string) {
   const { data } = await getSupabaseAdmin()
@@ -13,6 +15,9 @@ async function getByToken(token: string) {
 
 // Valider le token et retourner les données pré-remplies
 export async function GET(req: NextRequest) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const token = req.nextUrl.searchParams.get("token");
   if (!token) return NextResponse.json({ error: "Token manquant" }, { status: 400 });
 
@@ -37,6 +42,9 @@ export async function GET(req: NextRequest) {
 
 // Compléter l'inscription
 export async function POST(req: NextRequest) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const body = (await req.json()) as {
     token?: string;
     siret?: string;

@@ -5,20 +5,40 @@ import { LeadsDonut } from "@/shared/components/admin/LeadsDonut";
 import { DossiersDonut } from "@/shared/components/admin/DossiersDonut";
 import { MandatairesBar } from "@/shared/components/admin/MandatairesBar";
 import { Entonnoir } from "@/shared/components/admin/Entonnoir";
+import { FEATURES } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
+
+type Dossier = {
+  id: string;
+  statut: string;
+  pack_prix_ttc: number | null;
+  marge_ahf_ht: number | null;
+  acte_notarie_at: string | null;
+  acompte_client: number | null;
+  mandataire_id: string | null;
+  created_at: string;
+};
+type Mandataire = { id: string; prenom: string; nom: string; statut: string };
 
 export default async function AdminDashboard() {
   const supabase = getSupabaseAdmin();
 
+  // ADR-028 — `dossiers` et `mandataires` n'existent qu'à travers le réseau
+  // mandataire, suspendu : on ne les lit pas et les widgets qui en dérivent
+  // disparaissent (afficher des zéros serait trompeur).
   const [
     { data: leads },
     { data: dossiers },
     { data: mandataires },
   ] = await Promise.all([
     supabase.from("leads").select("id, statut, created_at, mandataire_id, affecte_at"),
-    supabase.from("dossiers").select("id, statut, pack_prix_ttc, marge_ahf_ht, acte_notarie_at, acompte_client, mandataire_id, created_at"),
-    supabase.from("mandataires").select("id, prenom, nom, statut"),
+    FEATURES.mandataire
+      ? supabase.from("dossiers").select("id, statut, pack_prix_ttc, marge_ahf_ht, acte_notarie_at, acompte_client, mandataire_id, created_at")
+      : Promise.resolve({ data: [] as Dossier[] }),
+    FEATURES.mandataire
+      ? supabase.from("mandataires").select("id, prenom, nom, statut")
+      : Promise.resolve({ data: [] as Mandataire[] }),
   ]);
 
   const now = Date.now();
@@ -29,9 +49,12 @@ export default async function AdminDashboard() {
   const caBrut = dossiersFinaux.reduce((s, d) => s + (d.pack_prix_ttc ?? 0), 0);
   const revenusAhf = dossiersFinaux.reduce((s, d) => s + (d.marge_ahf_ht ?? 0) + (d.acompte_client ?? 0), 0);
 
-  // Alertes
-  const leadsEnAttente = (leads ?? []).filter(
-    (l) => !l.mandataire_id && l.statut !== "perdu" && (now - new Date(l.created_at).getTime()) > h48,
+  // Alertes — sans affectation possible, le critère devient « lead non traité »
+  // (statut resté `nouveau`) plutôt que « lead sans mandataire ».
+  const leadsEnAttente = (leads ?? []).filter((l) =>
+    FEATURES.mandataire
+      ? !l.mandataire_id && l.statut !== "perdu" && (now - new Date(l.created_at).getTime()) > h48
+      : (l.statut ?? "nouveau") === "nouveau" && (now - new Date(l.created_at).getTime()) > h48,
   ).length;
   const mandatairesEnAttente = (mandataires ?? []).filter((m) => m.statut === "en_attente").length;
   const dossiersAlerte = (dossiers ?? []).filter(
@@ -76,27 +99,44 @@ export default async function AdminDashboard() {
           <p className="mt-1 text-sm text-white/40">Vue synthétique — Affinity House Factory</p>
         </div>
         <div className="flex gap-3">
-          {leadsEnAttente > 0 && <AlertBadge label={`${leadsEnAttente} lead${leadsEnAttente > 1 ? "s" : ""} sans affectation > 48h`} color="orange" />}
-          {mandatairesEnAttente > 0 && <AlertBadge label={`${mandatairesEnAttente} mandataire${mandatairesEnAttente > 1 ? "s" : ""} en attente`} color="violet" />}
-          {dossiersAlerte > 0 && <AlertBadge label={`${dossiersAlerte} dossier${dossiersAlerte > 1 ? "s" : ""} sans réponse > 48h`} color="red" />}
+          {leadsEnAttente > 0 && (
+            <AlertBadge
+              label={`${leadsEnAttente} lead${leadsEnAttente > 1 ? "s" : ""} ${FEATURES.mandataire ? "sans affectation" : "sans traitement"} > 48h`}
+              color="orange"
+            />
+          )}
+          {FEATURES.mandataire && mandatairesEnAttente > 0 && <AlertBadge label={`${mandatairesEnAttente} mandataire${mandatairesEnAttente > 1 ? "s" : ""} en attente`} color="violet" />}
+          {FEATURES.mandataire && dossiersAlerte > 0 && <AlertBadge label={`${dossiersAlerte} dossier${dossiersAlerte > 1 ? "s" : ""} sans réponse > 48h`} color="red" />}
         </div>
       </div>
 
-      {/* KPIs financiers */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KpiCard label="CA brut" value={`${caBrut.toLocaleString("fr-FR")} €`} sub="dossiers finalisés" />
-        <KpiCard label="Revenus AHF nets" value={`${revenusAhf.toLocaleString("fr-FR")} €`} sub="marge + acomptes" />
-        <KpiCard label="Dossiers finalisés" value={String(dossiersFinaux.length)} sub={`/ ${(dossiers ?? []).length} total — acte notarié signé`} />
-      </div>
+      {/* KPIs — les indicateurs financiers dérivent tous des dossiers, qui
+          n'existent qu'à travers le réseau mandataire (ADR-028). */}
+      {FEATURES.mandataire ? (
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <KpiCard label="CA brut" value={`${caBrut.toLocaleString("fr-FR")} €`} sub="dossiers finalisés" />
+          <KpiCard label="Revenus AHF nets" value={`${revenusAhf.toLocaleString("fr-FR")} €`} sub="marge + acomptes" />
+          <KpiCard label="Dossiers finalisés" value={String(dossiersFinaux.length)} sub={`/ ${(dossiers ?? []).length} total — acte notarié signé`} />
+        </div>
+      ) : (
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <KpiCard label="Leads" value={String(totalLeads)} sub="tous statuts confondus" />
+          <KpiCard
+            label="Leads à traiter"
+            value={String((leads ?? []).filter((l) => (l.statut ?? "nouveau") === "nouveau").length)}
+            sub="statut « nouveau »"
+          />
+        </div>
+      )}
 
       {/* Graphiques */}
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className={`mb-8 grid grid-cols-1 gap-6 ${FEATURES.mandataire ? "lg:grid-cols-3" : ""}`}>
         <LeadsDonut data={leadsByStatut} />
-        <DossiersDonut data={dossiersByStatut} />
-        <Entonnoir total={totalLeads} affectes={affectes} finalises={finalises} />
+        {FEATURES.mandataire && <DossiersDonut data={dossiersByStatut} />}
+        {FEATURES.mandataire && <Entonnoir total={totalLeads} affectes={affectes} finalises={finalises} />}
       </div>
 
-      <MandatairesBar data={perfData} />
+      {FEATURES.mandataire && <MandatairesBar data={perfData} />}
     </div>
   );
 }

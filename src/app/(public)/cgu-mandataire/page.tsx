@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalShell } from "@/components/site/LegalShell";
+import { guardMandataire } from "@/shared/lib/feature-guard";
 
 export const metadata: Metadata = {
   title: "CGU Portail Mandataires | HOWNER",
@@ -10,6 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default function CguMandatairePage() {
+  // ADR-028 — CGU du portail mandataire, suspendu. Le texte reste versionné.
+  guardMandataire();
+
   return (
     <LegalShell
       eyebrow="Légal · Portail Mandataires"

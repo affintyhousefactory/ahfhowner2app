@@ -29,3 +29,9 @@ Reprend et exécute `plans/seo-avancement.md` (qui reste le tracker détaillé j
 
 ## Sources
 `plans/seo-avancement.md`, `src/app/layout.tsx`, audit du 2026-06-15.
+
+## Amendement 2026-07-30 — ADR-028 (suspension domaine mandataire)
+`/rechercheterrain` et `/terrains` sortent du sitemap (elles répondent 404) et rejoignent le
+`disallow` de `robots.txt` avec `/terrain` et `/cgu-mandataire`. La ligne « Votre terrain » est
+retirée de `llms.txt`. Toutes ces exclusions sont conditionnées au flag : la réactivation les
+remet automatiquement. Sitemap : 9 URLs → **7**.

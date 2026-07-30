@@ -49,7 +49,11 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Analyse terrain (zonage) | `LandTool.tsx` | BAN réel + zonage heuristique | GPU/IGN réel | 011 |
 | Analyse via lien d'annonce | `LandTool.tsx` mode `annonce` | dégradé | Apify + BAN | 012 |
 | Contact terrain (annonce) | `LandTool.tsx` (~L392) | `setSent(true)` | lead Supabase | 013 |
-| Pack Terrain submit (configurateur) | `Configurator.tsx` `PackTerrainContactForm`, `Reservation.tsx` `submit()` | ✅ câblé → `/api/recherche-terrain` (sessionStorage bridge) | — | 025 |
+| Pack Terrain submit (configurateur) | `Configurator.tsx` `PackTerrainContactForm`, `Reservation.tsx` `submit()` | ⏸ **suspendu** — mode « pack » retiré, `/api/recherche-terrain` en 404 | réactivation par flag | 025, 028 |
+| Portail mandataire (landing, auth, dossiers, contrat, terrains) | `src/app/(mandataire)/**` | ⏸ **suspendu** — 404 via layout de groupe | réactivation par flag | 028 |
+| Admin — affectation lead ↔ mandataire + GED mandataire | `leads/[id]/page.tsx`, `AssignMandataire.tsx`, `LeadDocuments.tsx` | ⏸ **suspendu** — sections masquées, routes en 404 | réactivation par flag | 027, 028 |
+| Admin — écrans Mandataires / Affectations / GED / Terrains | `(admin)/admin/(protected)/{mandataires,affectations,ged,terrains}` | ⏸ **suspendu** — 404 par layout de segment | réactivation par flag | 028 |
+| Public — `/terrains`, `/rechercheterrain`, `/terrain`, `/cgu-mandataire` | pages `(public)/**` | ⏸ **suspendu** — 404, hors sitemap, en `disallow` | réactivation par flag | 018, 028 |
 | Devis 3 couches multi-produit | `Configurator.tsx`, `config-store.tsx` | ✅ logique verrouillée, paramétrée par produit | — | 005,020 |
 | Email confirmations contact | `src/app/api/contact/route.ts`, `src/lib/email.ts` | ✅ Brevo template `10` — câblé | — | 026 |
 | Email recap configurateur/terrain | `src/app/api/recherche-terrain/route.ts` | ✅ Brevo template `9` — câblé | — | 026 |
@@ -95,6 +99,12 @@ BREVO_TEMPLATE_RECAP=9
 # Transport livraison (valeurs par défaut dans site.ts)
 NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR=1440
 
+# Feature flags (ADR-028)
+# Domaine « Mandataire & Terrain » SUSPENDU : ne PAS définir cette variable.
+# L'absence vaut suspension (défaut sûr). Réactivation = la poser à "true",
+# d'abord sur un scope Preview. Voir ADR-028 § Procédure de réactivation.
+# NEXT_PUBLIC_FEATURE_MANDATAIRE=true   ← ne pas configurer
+
 # Divers (Phase 4+)
 APIFY_TOKEN=
 ANTHROPIC_API_KEY=                 # optionnel (ADR-017)
@@ -129,9 +139,10 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 022 | Split produit One/Max + repositionnement | **Accepté — valider Albert** | 🟠 |
 | 023 | Déploiement production Vercel | Proposé | ✅ |
 | 024 | Bandeau consentement cookies + Cloudflare Turnstile | Accepté | ✅ |
-| 025 | Page `/rechercheterrain` — recherche personnalisée de parcelles | Accepté | ✅ |
+| 025 | Page `/rechercheterrain` — recherche personnalisée de parcelles | Accepté — **⏸ suspendue (028)** | ✅ |
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
-| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré** | ✅ |
+| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** | ✅ |
+| 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -153,6 +164,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-07-30 (ADR-028 — suspension réversible du domaine « Mandataire & Terrain »)** — AHF suspend l'ensemble du dispositif mandataire/terrain : **finalité de marché et cible non mûres**. Le site promettait un service (« l'expert Mandataire Affinity vous re-contacte sous 48 h ») qu'AHF ne veut pas honorer aujourd'hui. **Suspension, pas suppression** : aucun fichier supprimé, aucune migration, aucune donnée ni aucun compte touché — seules les interfaces et les points d'entrée sont neutralisés, derrière un interrupteur unique `FEATURES.mandataire` (`src/lib/features.ts`, piloté par `NEXT_PUBLIC_FEATURE_MANDATAIRE` ; **variable absente = suspendu**, défaut sûr). Deux gardes : `guardMandataire()` (404 sur pages/layouts serveur) et `mandataireDisabled()` (404 sur API). **Coupé** : portail mandataire complet (une garde dans le layout de groupe couvre landing + auth + `(protected)`), onboarding, écrans admin Mandataires/Affectations/GED/Terrains (layouts de segment), sous-sections affectation + GED mandataire de la fiche lead, colonne Mandataire de la liste, widgets dashboard dérivés des dossiers, pages publiques `/terrains` `/rechercheterrain` `/terrain` `/cgu-mandataire`, liens Footer/NAV, CTA « Tester mon terrain » redirigés vers `/configurer`, sitemap/robots/llms.txt, mode « Je cherche un terrain » du configurateur, **29 routes API / 36 handlers**. **Conservé** : tunnel de réservation, pricing 3 couches intact, analyse PLU « J'ai un terrain », livraison GPS, `/contact`, Leads + fiche lead + **GED Client**, emails Brevo contact/récap. Amende **ADR-005** (UI configurateur touchée, verrou de pricing tenu), **ADR-018**, **ADR-025**, **ADR-027**. Effet de bord positif : `terrainMode` démarrant sur `"have"`, l'analyse PLU et le total livraison s'affichent sans clic préalable. `tsc` propre ; `eslint` : **322 erreurs avant / 322 après** (dette préexistante, zéro régression). **Alerte Albert** : retrait d'une offre commerciale du site public — changement de positionnement.
 
 **2026-07-20 (SEO home — HTML front indexable : PR #54 → `dev` puis PR #55 → `main` mergées, ✅ LIVE en prod)** — Diagnostic : la home (et pages produit) étaient déjà rendues côté serveur, mais servies **invisibles** — framer-motion sérialisait `opacity:0` inline dans le HTML SSR (**23 blocs sur `/`, jusqu'à 64 sur `/arko-max`**) ; sans JS = page blanche. Hiérarchie Hn cassée (méga-menu `<h3>` avant le `<h1>`, footer `<h2>` dupliquant le `<h1>`). Correctif (6 fichiers front, **aucune migration**, aucun texte modifié) : `Reveal.tsx` réécrit sans framer-motion (`IntersectionObserver` + classes CSS, API publique inchangée → **Configurator ADR-005 non touché**) ; état masqué déplacé dans `globals.css` sous `.js-motion` (posée sur `<html>` uniquement si JS s'exécute → pas de JS = contenu visible/indexable) ; `<script>` inline brut dans `layout.tsx` pose `.js-motion` avant le premier paint (écarte `next/script beforeInteractive` = flash) ; `Hero.tsx` `<h1>` sorti du conteneur `opacity:0` (parallaxe image conservée en framer) ; `Nav.tsx`/`Footer.tsx` titres décoratifs re-balisés `<p>`. **Vérifié sur Preview Vercel** (Googlebot, sans JS) : `opacity:0` inline **23 → 0**, plan des titres **H1 → H2 → H3** imbriqué, contenu FAQ visible. `tsc` + `eslint` OK. **Formulaires sans JS** (question Richard) : normal et **non-bloquant SEO** (Googlebot exécute le JS ; un form n'est pas du contenu indexable) — `/configurer` rend son form au SSR, `/contact` affiche un fallback vide car le form lit l'URL (`useSearchParams` → `<Suspense>`), `/rechercheterrain` = page vitrine sans form (CTA → `/configurer`) ; refonte no-JS (Server Actions + anti-spam) non retenue. **Validation visuelle Preview OK**, PR #54 mergée sur `dev` puis PR #55 (`dev`→`main`) mergée le même jour — **le correctif est en production**, `dev` et `main` alignés, aucune migration associée. **Reste (non bloquant)** : SEO P2 polish ; amélioration optionnelle du squelette de form `/contact` sans JS.
 

@@ -15,6 +15,7 @@ import {
   type ProductKey,
   type Product,
 } from "@/lib/site";
+import { FEATURES } from "@/lib/features";
 
 // Pool commun — les deux clés retournent le même compteur partagé (SERIE_TOTAL = 12)
 type ReservedMap = Record<ProductKey, number>;
@@ -80,7 +81,13 @@ export function ConfigProvider({
   const [terrasseM2, setTerrasseM2] = useState(0);
   const [options, setOptions] = useState<string[]>([]);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
-  const [terrainMode, setTerrainMode] = useState<"have" | "pack" | null>(null);
+  // ADR-028 — sans réseau mandataire, le mode « pack » (Je cherche un terrain)
+  // est inatteignable : on démarre directement sur « have », ce qui affiche
+  // l'analyse PLU et débloque le calcul de livraison. Le calcul de prix est
+  // inchangé (ADR-005 : logique 3 couches intacte).
+  const [terrainMode, setTerrainMode] = useState<"have" | "pack" | null>(
+    FEATURES.mandataire ? null : "have",
+  );
   const [packTerrain, setPackTerrain] = useState<string | null>(null);
   const [totalReserved, setTotalReserved] = useState<number>(DEMO_RESERVED);
 
@@ -96,6 +103,13 @@ export function ConfigProvider({
     } catch {
       /* noop */
     }
+  }, []);
+
+  // ADR-028 — verrou : tant que le domaine mandataire est suspendu, le mode
+  // « pack » ne peut pas être posé, quelle que soit l'origine de l'appel.
+  const setTerrainModeSafe = useCallback((v: "have" | "pack" | null) => {
+    if (!FEATURES.mandataire && v === "pack") return;
+    setTerrainMode(v);
   }, []);
 
   const toggleOption = (id: string) =>
@@ -141,7 +155,7 @@ export function ConfigProvider({
       bedroom, setBedroom, interior, setInterior,
       terrasseM2, setTerrasseM2, options, toggleOption,
       distanceKm, setDistanceKm,
-      terrainMode, setTerrainMode, packTerrain, setPackTerrain,
+      terrainMode, setTerrainMode: setTerrainModeSafe, packTerrain, setPackTerrain,
       optionsTotal, houseTotal, delivery, grandTotal,
       reservedByProduct, remainingByProduct,
       activeReserved, activeRemaining, incrementReserved,
@@ -149,6 +163,7 @@ export function ConfigProvider({
   }, [
     product, cladding, facade, bar, bedroom, interior, terrasseM2,
     options, distanceKm, terrainMode, packTerrain, totalReserved, incrementReserved,
+    setTerrainModeSafe,
   ]);
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendBrevoTemplate, addBrevoContact } from "@/shared/lib/email";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+// ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
+import { mandataireDisabled } from "@/shared/lib/feature-guard";
 
 type Commune = { nom: string; cp: string };
 
@@ -17,6 +19,9 @@ type Payload = {
 };
 
 export async function POST(req: NextRequest) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const body = (await req.json()) as Payload;
   const { prenom, nom, telephone, email, modele, communes, source, accepte_cgv, optIn } = body;
 

@@ -67,3 +67,9 @@ Carte Google Maps parcelles candidates (mode carte + satellite), récapitulatif 
 - `supabase/migrations/20260620_recherche_terrain_source.sql`
 - `ADR-007` — Supabase schémas + RLS
 - `ADR-013` — Contact terrain → leads
+
+## Amendement 2026-07-30 — ADR-028 (suspension domaine mandataire)
+L'offre est **suspendue** : `/rechercheterrain` répond 404, `/api/recherche-terrain` aussi, et le
+mode « Je cherche un terrain » disparaît du configurateur. L'offre repose sur le réseau
+mandataire, que la suspension coupe — la maintenir reviendrait à promettre un rappel sous 48 h
+sans personne pour l'honorer. Code, schéma et migrations conservés en l'état.
