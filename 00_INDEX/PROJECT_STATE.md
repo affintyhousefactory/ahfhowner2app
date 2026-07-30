@@ -101,8 +101,8 @@ NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR=1440
 
 # Feature flags (ADR-028)
 # Domaine « Mandataire & Terrain » SUSPENDU : ne PAS définir cette variable.
-# L'absence vaut suspension (défaut sûr). Réactivation = la poser à "true",
-# d'abord sur un scope Preview. Voir ADR-028 § Procédure de réactivation.
+# L'absence vaut suspension (défaut sûr). Seule la chaîne exacte "true" active.
+# Mode d'emploi (activer / re-suspendre / vérifier) : docs/feature-flags.md
 # NEXT_PUBLIC_FEATURE_MANDATAIRE=true   ← ne pas configurer
 
 # Divers (Phase 4+)

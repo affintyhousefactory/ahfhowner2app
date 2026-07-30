@@ -66,8 +66,12 @@ Tunnel de réservation, configurateur et pricing 3 couches, analyse PLU du terra
 
 ## Procédure de réactivation
 
+> Mode d'emploi opérationnel (activer **et** re-suspendre, checklist de
+> vérification, contrôle curl) : **`docs/feature-flags.md`**. Les étapes
+> ci-dessous portent le volet décisionnel et métier.
+
 1. Poser `NEXT_PUBLIC_FEATURE_MANDATAIRE=true` — d'abord sur un scope **Preview** Vercel pour valider, puis Production. Aucun déploiement de code n'est nécessaire.
-2. Vérifier le retour des surfaces : portail `/mandataire`, écrans admin (sidebar à 6 entrées), `/terrains`, `/rechercheterrain`, sélecteur terrain du configurateur, `sitemap.xml` (11 URLs), `robots.txt`.
+2. Vérifier le retour des surfaces : portail `/mandataire`, écrans admin (sidebar à 6 entrées), `/terrains`, `/rechercheterrain`, sélecteur terrain du configurateur, `sitemap.xml` (**7 → 9 URLs**), `robots.txt`.
 3. **Revalider les textes publics** avant réouverture : la FAQ et le paragraphe « mandataires partenaires » du parcours de paiement reviennent à leur version d'origine — les relire au regard d'ADR-004 (blocklist marque) et de l'état du réseau à ce moment-là.
 4. Vérifier l'état des comptes mandataires et des fiches terrain en base : des données peuvent être devenues obsolètes pendant la suspension (statuts, exclusivités territoriales, annonces).
 5. Retester le tunnel `/configurer` en mode « Je cherche un terrain » → `/api/recherche-terrain` → lead → affectation → email Brevo template 15.
