@@ -5,15 +5,18 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseBrowser } from "@/shared/lib/supabase-browser";
 import { cn } from "@/shared/lib/cn";
+import { FEATURES } from "@/lib/features";
 
-const NAV = [
+// ADR-028 — les entrées marquées `mandataire` disparaissent de la sidebar tant
+// que le domaine est suspendu ; les pages correspondantes répondent 404.
+const NAV: { href: string; label: string; sub?: boolean; mandataire?: boolean }[] = [
   { href: "/admin",              label: "Dashboard" },
   { href: "/admin/leads",        label: "Leads" },
-  { href: "/admin/affectations", label: "En attente", sub: true },
-  { href: "/admin/ged",          label: "GED Dossiers", sub: true },
-  { href: "/admin/mandataires",  label: "Mandataires" },
-  { href: "/admin/terrains",     label: "Terrains" },
-];
+  { href: "/admin/affectations", label: "En attente",   sub: true, mandataire: true },
+  { href: "/admin/ged",          label: "GED Dossiers", sub: true, mandataire: true },
+  { href: "/admin/mandataires",  label: "Mandataires",             mandataire: true },
+  { href: "/admin/terrains",     label: "Terrains",                mandataire: true },
+].filter((item) => FEATURES.mandataire || !item.mandataire);
 
 export default function AdminProtectedLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();

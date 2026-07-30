@@ -24,3 +24,10 @@ Les intégrations Phase 4 (Stripe ADR-008) **consomment** le store sans le réé
 
 ## Sources
 `PASSATION_RICHARD.md` (table features — Devis « ne pas toucher »), `config-store.tsx`.
+
+## Amendement 2026-07-30 — ADR-028 (suspension domaine mandataire)
+`Configurator.tsx` et `config-store.tsx` sont modifiés sous **ADR-028** : le sélecteur
+« J'ai un terrain / Je cherche un terrain » est retiré tant que le réseau mandataire est
+suspendu, `terrainMode` démarre sur `"have"` et le mode `"pack"` est verrouillé dans le store.
+**Le verrou de pricing tient** : `optionsTotal`, `houseTotal`, `delivery`, `grandTotal` et la
+logique 3 couches sont inchangés. La modification est strictement UI / parcours.

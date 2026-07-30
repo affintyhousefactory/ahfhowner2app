@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import TerrainsGrid from "@/components/site/TerrainsGrid";
 import type { TerrainPublic } from "@/components/site/TerrainDetailModal";
+import { guardMandataire } from "@/shared/lib/feature-guard";
 
 export const revalidate = 3600;
 
@@ -10,6 +11,10 @@ export const metadata = {
 };
 
 export default async function TerrainsPubliquePage() {
+  // ADR-028 — les fiches terrain sont alimentées par le réseau mandataire,
+  // suspendu. Garde avant toute requête Supabase.
+  guardMandataire();
+
   const { data } = await getSupabaseAdmin()
     .from("fiches_terrain")
     .select("id, titre, commune, secteur, prix, surface, zonage, compatibilite_arko, modele_arko, photos, description_publique, publie_at, statut, afficher_statut_mandataire")

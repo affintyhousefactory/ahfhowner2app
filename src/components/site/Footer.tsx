@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BRAND, NAV, INFO_NAV, PRODUCT_LIST } from "@/lib/site";
+import { FEATURES } from "@/lib/features";
 
 export function Footer() {
   return (
@@ -62,18 +63,24 @@ export function Footer() {
                 {n.label}
               </Link>
             ))}
-            <Link
-              href="/rechercheterrain"
-              className="text-sm text-canvas/65 transition-colors hover:text-canvas"
-            >
-              Recherche terrain
-            </Link>
-            <Link
-              href="/mandataire"
-              className="text-sm font-semibold text-orange-400 transition-colors hover:text-orange-300"
-            >
-              Accès Mandataire
-            </Link>
+            {/* Recherche terrain + Accès Mandataire — masqués tant que le
+                domaine mandataire est suspendu (ADR-028). */}
+            {FEATURES.mandataire && (
+              <>
+                <Link
+                  href="/rechercheterrain"
+                  className="text-sm text-canvas/65 transition-colors hover:text-canvas"
+                >
+                  Recherche terrain
+                </Link>
+                <Link
+                  href="/mandataire"
+                  className="text-sm font-semibold text-orange-400 transition-colors hover:text-orange-300"
+                >
+                  Accès Mandataire
+                </Link>
+              </>
+            )}
           </nav>
 
           <nav className="flex flex-col gap-2.5">

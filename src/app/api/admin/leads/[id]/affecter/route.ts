@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
 import { getSiteUrl } from "@/shared/lib/site-url";
+// ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
+import { mandataireDisabled } from "@/shared/lib/feature-guard";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const { id } = await params;
   const { mandataire_id } = (await req.json()) as { mandataire_id: string };
 

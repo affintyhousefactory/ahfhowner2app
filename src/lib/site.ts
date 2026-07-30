@@ -6,6 +6,8 @@
    (sans accent). [ADR-004, révisé 2026-07-09]
    ============================================================ */
 
+import { FEATURES } from "@/lib/features";
+
 // URL canonique de prod — source unique pour metadataBase, sitemap, robots,
 // canonical (ADR-018). Surchargeable par env pour les previews Vercel.
 export const SITE_URL =
@@ -192,7 +194,12 @@ export const FAQ: { q: string; a: string | string[] }[] = [
   },
   {
     q: "Et si je n'ai pas encore de terrain ?",
-    a: "Si vous partez de zéro, nous vous proposons une sélection de terrains dans notre rubrique « Terrains » : des terrains sélectionnés par nos partenaires Mandataires. Sélectionnez-le et nous vous contactons pour faire le point sur sa disponibilité et vos options concernant votre maison ARKO. Aucun ne vous intéresse ? Nous restons à votre écoute, et ferons le nécessaire pour vous mettre en relation avec des partenaires de confiance.",
+    // La réponse renvoyait à la rubrique « Terrains » et aux partenaires
+    // mandataires — suspendus (ADR-028). Repli sur le contact direct tant que
+    // le dispositif n'est pas réactivé.
+    a: FEATURES.mandataire
+      ? "Si vous partez de zéro, nous vous proposons une sélection de terrains dans notre rubrique « Terrains » : des terrains sélectionnés par nos partenaires Mandataires. Sélectionnez-le et nous vous contactons pour faire le point sur sa disponibilité et vos options concernant votre maison ARKO. Aucun ne vous intéresse ? Nous restons à votre écoute, et ferons le nécessaire pour vous mettre en relation avec des partenaires de confiance."
+      : "L'acquisition du terrain relève de vous. Si vous n'en avez pas encore, écrivez-nous : nous faisons le point sur votre projet, le modèle ARKO envisagé et les contraintes de la parcelle que vous visez. Vous pouvez aussi vérifier dès maintenant la compatibilité d'une parcelle depuis le configurateur, en renseignant son adresse.",
   },
   {
     q: "Comment se passe le paiement ?",
@@ -209,7 +216,11 @@ export const FAQ: { q: string; a: string | string[] }[] = [
       "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
       "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
       "Affinity House Factory n'intervient pas dans l'opération d'achat du terrain, ni dans les formalités juridiques, administratives ou notariales qui y sont attachées.",
-      "Les mandataires partenaires susceptibles d'accompagner le client dans sa recherche de terrain interviennent sous leur seule responsabilité, dans le cadre de leur propre activité professionnelle. Leur intervention est distincte de celle d'Affinity House Factory.",
+      // Mention des mandataires partenaires — retirée tant que le dispositif
+      // est suspendu (ADR-028) : plus aucun mandataire n'est mobilisé.
+      ...(FEATURES.mandataire
+        ? ["Les mandataires partenaires susceptibles d'accompagner le client dans sa recherche de terrain interviennent sous leur seule responsabilité, dans le cadre de leur propre activité professionnelle. Leur intervention est distincte de celle d'Affinity House Factory."]
+        : []),
     ],
   },
   {
@@ -232,10 +243,13 @@ export const FAQ: { q: string; a: string | string[] }[] = [
 
 // Navigation principale par routes (multi-pages — ADR-021).
 // « Produits » est rendu à part (méga-menu Tesla) via PRODUCT_LIST.
-export const NAV = [
-  { label: "Terrains", href: "/terrains" },
+// « Terrains » dépend du réseau mandataire : masqué tant qu'il est suspendu
+// (ADR-028). Filtrer ici plutôt que chez les consommateurs (Nav + Footer)
+// garde un point de vérité unique.
+export const NAV: { label: string; href: string }[] = [
+  ...(FEATURES.mandataire ? [{ label: "Terrains", href: "/terrains" }] : []),
   { label: "Contact",  href: "/contact" },
-] as const;
+];
 
 // Liens « Informations » (footer + légal). Contenu réel CGV/etc. bloqué ADR-015.
 export const INFO_NAV = [

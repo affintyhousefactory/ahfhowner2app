@@ -1,6 +1,8 @@
 # ACTIVE CONTEXT — Howner / ARKO
 
 ## Contexte actif
+> ⏸ **Domaine « Mandataire & Terrain » suspendu (ADR-028, 2026-07-30)** — portail mandataire, affectation admin, gestion des terrains et offre `/rechercheterrain` masqués derrière `FEATURES.mandataire`. Suspension réversible : ne pas re-linker une surface suspendue sans lever le flag et amender ADR-028.
+
 Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², 12 ex, 59 900 €) + **Arko Max** (40 m², 5 ex, 89 900 €). Front livré ; backend Phase 4 en attente ; lancement bloqué par le légal (ADR-015).
 
 ## Priorités actives

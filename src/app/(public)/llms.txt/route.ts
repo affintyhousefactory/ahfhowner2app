@@ -1,4 +1,5 @@
 import { SITE_URL, BRAND, PRODUCT_LIST } from "@/lib/site";
+import { FEATURES } from "@/lib/features";
 
 // /llms.txt — résumé du site pour les agents/LLM (ADR-018 P1). Statique,
 // alimenté par site.ts (suit le domaine via SITE_URL). Conformité marque
@@ -8,6 +9,12 @@ export const dynamic = "force-static";
 const eur = (n: number) => `${n.toLocaleString("fr-FR")} €`;
 
 export function GET() {
+  // ADR-028 — `/terrain` renvoie 404 tant que le domaine mandataire est
+  // suspendu : ne pas l'annoncer aux agents.
+  const terrain = FEATURES.mandataire
+    ? `\n- [Votre terrain](${SITE_URL}/terrain) — vérification d'une adresse ou d'une annonce, estimation de livraison.`
+    : "";
+
   const products = PRODUCT_LIST.map(
     (p) =>
       `- [${p.name}](${SITE_URL}${p.slug}) — ${p.area}, à partir de ${eur(p.pricing.base)}, série limitée à ${p.total} exemplaires numérotés.`,
@@ -23,8 +30,7 @@ ${BRAND.maker} conçoit et livre des maisons compactes d'architecte en série li
 ${products}
 
 ## Pages clés
-- [Configurer & réserver](${SITE_URL}/configurer) — configuration et réservation d'un exemplaire numéroté.
-- [Votre terrain](${SITE_URL}/terrain) — vérification d'une adresse ou d'une annonce, estimation de livraison.
+- [Configurer & réserver](${SITE_URL}/configurer) — configuration et réservation d'un exemplaire numéroté.${terrain}
 - [Contact](${SITE_URL}/contact) — questions et accompagnement projet.
 
 ## Informations légales

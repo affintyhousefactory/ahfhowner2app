@@ -7,17 +7,35 @@ import LeadEditLocalisation from "@/components/admin/LeadEditLocalisation";
 import LeadDocuments from "@/components/admin/LeadDocuments";
 import LeadClientDocuments from "@/components/admin/LeadClientDocuments";
 import LeadStatutCommercial from "@/components/admin/LeadStatutCommercial";
+import { FEATURES } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
+
+type MandataireActif = {
+  id: string;
+  prenom: string;
+  nom: string;
+  zone_activite: string | null;
+  lat: number | null;
+  lon: number | null;
+  rayon_intervention: number | null;
+};
 
 export default async function LeadFiche({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 
+  // ADR-028 — les lectures `mandataires` / `fiches_terrain` n'alimentent que
+  // les sous-sections d'affectation, masquées quand le domaine est suspendu :
+  // on ne les interroge pas inutilement.
   const [{ data: lead }, { data: mandatairesActifs }, { data: fichesActives }] = await Promise.all([
     supabase.from("leads").select("*").eq("id", id).single(),
-    supabase.from("mandataires").select("id, prenom, nom, zone_activite, lat, lon, rayon_intervention").eq("statut", "actif"),
-    supabase.from("fiches_terrain").select("mandataire_id, statut").in("statut", ["disponible", "compromis"]),
+    FEATURES.mandataire
+      ? supabase.from("mandataires").select("id, prenom, nom, zone_activite, lat, lon, rayon_intervention").eq("statut", "actif")
+      : Promise.resolve({ data: [] as MandataireActif[] }),
+    FEATURES.mandataire
+      ? supabase.from("fiches_terrain").select("mandataire_id, statut").in("statut", ["disponible", "compromis"])
+      : Promise.resolve({ data: [] as { mandataire_id: string; statut: string }[] }),
   ]);
 
   if (!lead) notFound();
@@ -110,6 +128,11 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
             </>
           )}
 
+          {/* Sous-sections Affectation + Dossier mandataire — masquées tant que
+              le domaine mandataire est suspendu (ADR-028). La GED Client
+              ci-dessus reste active : elle ne dépend pas du mandataire. */}
+          {FEATURES.mandataire && (
+          <>
           {/* Sous-section — Affectation mandataire (matching géo 200 km) */}
           <div className="mt-6 border-t border-white/10 pt-6">
             <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
@@ -156,6 +179,8 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
               currentMandataireId={lead.mandataire_id ?? null}
             />
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>

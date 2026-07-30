@@ -87,3 +87,10 @@ problèmes concrets :
 `src/components/admin/LeadClientDocuments.tsx`,
 `supabase/migrations/20260630_mandataires_profil_geo.sql`,
 `supabase/migrations/20260710_lead_client_documents.sql`, ADR-026 (seuil exclusivité).
+
+## Amendement 2026-07-30 — ADR-028 (suspension domaine mandataire)
+Les sous-sections « Affectation mandataire » (matching géo 200 km) et « Dossier mandataire »
+(GED mandataire) de la fiche lead sont **masquées**, ainsi que les routes `affecter`,
+`affecter/recap`, `affecter/resend` et `documents`. **La GED Client est conservée** : elle ne
+dépend pas du mandataire. Le reliquat « placeholders Brevo `LEAD_DESCRIPTION` / `LEAD_PRODUIT`
+sur le template 15 » devient sans objet tant que la suspension tient.

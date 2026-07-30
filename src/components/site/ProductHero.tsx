@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { BRAND, type Product } from "@/lib/site";
+import { FEATURES } from "@/lib/features";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Gauge } from "@/components/ui/Gauge";
 import { HeroBackdrop, type HeroBackdropVariant } from "@/components/effects/HeroBackdrop";
@@ -115,7 +116,12 @@ export function ProductHero({
                 Réserver — {BRAND.deposit.toLocaleString("fr-FR")} €
                 <Arrow />
               </Button>
-              <Button href="/terrain" variant="outline">
+              {/* `/terrain` est suspendue (ADR-028) — repli sur le configurateur,
+                  qui porte l'analyse PLU sous « J'ai un terrain ». */}
+              <Button
+                href={FEATURES.mandataire ? "/terrain" : `/configurer?produit=${product.key}`}
+                variant="outline"
+              >
                 Tester mon terrain
               </Button>
             </div>

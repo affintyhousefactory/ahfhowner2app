@@ -1,5 +1,14 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions prises — 2026-07-30 (ADR-028 — suspension du domaine « Mandataire & Terrain »)
+- **Suspension, pas suppression** : aucun fichier supprimé, aucune migration, aucune donnée ni compte touché. Interrupteur unique `FEATURES.mandataire` (`src/lib/features.ts`) piloté par `NEXT_PUBLIC_FEATURE_MANDATAIRE` — **variable absente = suspendu** (défaut sûr, à ne PAS configurer sur Vercel).
+- **Motif** : finalité de marché et cible non mûres. Le site promettait un rappel « sous 48 h par un expert Mandataire Affinity » qu'AHF ne veut pas honorer.
+- **Coupé** : portail mandataire (garde unique dans le layout de groupe), onboarding, écrans admin Mandataires/Affectations/GED/Terrains (layouts de segment), affectation + GED mandataire de la fiche lead, colonne Mandataire de la liste, widgets dashboard dérivés des dossiers, `/terrains` `/rechercheterrain` `/terrain` `/cgu-mandataire`, liens Footer/NAV, sitemap/robots/llms.txt, mode « Je cherche un terrain » du configurateur, **29 routes API / 36 handlers**.
+- **Conservé** : réservation, pricing 3 couches **intact**, analyse PLU « J'ai un terrain », livraison GPS, `/contact`, Leads + fiche lead + **GED Client**, Brevo contact/récap.
+- **Amende ADR-005** (UI configurateur, verrou de pricing tenu), ADR-018, ADR-025, ADR-027.
+- **Vérif** : `tsc` propre ; `eslint` 322 erreurs avant / 322 après (dette préexistante, zéro régression).
+- **Reste** : validation visuelle Preview + test de réversibilité (`NEXT_PUBLIC_FEATURE_MANDATAIRE=true` sur une Preview) ; **alerte Albert** à envoyer (retrait d'offre commerciale = changement de positionnement).
+
 ## Décisions prises — 2026-07-20 (SEO home — HTML front indexable)
 - **PR #54 mergée** (`fix/homepage-ssr-seo-reveal` → `dev`) puis **PR #55 (`dev`→`main`) mergée le même jour** — **correctif LIVE en production**, `dev` et `main` alignés. 1 commit (`cde0b8c7`), 6 fichiers front, aucune migration.
 - **Diagnostic** : la home était déjà rendue côté serveur, mais servie **invisible** — framer-motion sérialisait `opacity:0` inline dans le HTML SSR (**23 blocs sur `/`, jusqu'à 64 sur `/arko-max`**). Sans JS = page blanche. Hiérarchie Hn cassée (méga-menu `<h3>` avant le `<h1>`, footer `<h2>` dupliquant le `<h1>`).
