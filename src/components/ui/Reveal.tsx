@@ -73,7 +73,7 @@ export function Reveal({
   );
 }
 
-/* Conteneur stagger pour enfants <StaggerItem> */
+/* Bloc stagger pour enfants <StaggerItem> */
 export function Stagger({
   children,
   className,
