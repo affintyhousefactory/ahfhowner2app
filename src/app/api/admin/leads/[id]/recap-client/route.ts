@@ -59,6 +59,10 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         EMAIL: lead.email ?? "",
         TEL: lead.tel ?? "",
         PRODUIT: `${lead.produit ?? ""} ${lead.surface ?? ""}`.trim(),
+        // ADR-029 — `MAISON_TTC` est un nom de paramètre du template Brevo
+        // (BREVO_TEMPLATE_RECAP), configuré dans le dashboard. Le renommer ici
+        // sans renommer le placeholder côté Brevo viderait le montant de l'email :
+        // à traiter en une seule fois, code + template. Invisible du client.
         MAISON_TTC: lead.house_total ? `${lead.house_total.toLocaleString("fr-FR")} €` : "",
         LIVRAISON: livraisonLabel,
         TERRAIN: terrainLabel,

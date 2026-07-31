@@ -88,7 +88,7 @@ export function RevealScrub({
           ) : (
             <Image
               src={POSTER}
-              alt="ARKO — la maison qui se révèle"
+              alt="ARKO — le module qui se révèle"
               fill
               sizes="100vw"
               className="object-cover"
@@ -118,7 +118,7 @@ export function RevealScrub({
               />
             </div>
             <p className="mt-4 max-w-md font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/60">
-              {scrub ? "Faites défiler — vous entrez dans la maison." : "ARKO — la maison qui se révèle."}
+              {scrub ? "Faites défiler — vous entrez dans le module." : "ARKO — le module qui se révèle."}
             </p>
           </div>
         </div>

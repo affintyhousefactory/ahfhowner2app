@@ -47,7 +47,7 @@ export function Specs() {
           ))}
         </Stagger>
 
-        {/* Du trait à la maison — l'étude au trait mariée au plan technique */}
+        {/* Du trait au module — l'étude au trait mariée au plan technique */}
         <div className="mt-20 grid gap-6 md:mt-28 md:grid-cols-2 md:gap-8">
           <Reveal>
             <figure className="group">
