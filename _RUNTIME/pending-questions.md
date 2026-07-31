@@ -2,7 +2,7 @@
 
 ## Questions ouvertes
 
-- **Grille Arko One ?** perM2, options, terrasse, dimensions/footprint, `reserved` — valeurs provisoires `TODO ARKO ONE` dans `site.ts` (base 59 900 € / 20 m² / 12 ex confirmés).
+- ~~**Grille Arko One ?**~~ ✅ **répondu par la spec** (ADR-029) : base **77 900 €**, emprise **6,65 × 3,60 m**. Les champs `perM2` / `terrassePerM2` deviennent sans objet — ADR-030 remplace le modèle de calcul (paliers de terrasse, options tarifées, transport par zone) au lieu de l'ajuster.
 - **Asset vidéo Arko One ?** Absent du repo → fallback provisoire = footage Max (`placeholderMedia: true`). Fournir le fichier 20 m².
 - **`reserved` par produit ?** Jauges One/Max actuellement One=0, Max=4 (placeholder).
 - **Email de contact ?** Destinataire + service d'envoi pour `/contact` (Phase 4, lié ADR-014).

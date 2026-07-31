@@ -25,8 +25,10 @@ Site **bi-produit** de réservation — **Arko One** (20 m², 12 exemplaires) + 
 
 ## Produit
 **Bi-produit** (ADR-022) — registre `PRODUCTS` (`src/lib/site.ts`) :
-- **Arko One** — 20 m², 12 exemplaires, 59 900 € (grille confirmée).
-- **Arko Max** — 40 m² (= ARKO historique), 5 exemplaires, 89 900 € (**grille à reconfigurer** — perM2/options/terrasse/footprint/`reserved` en attente ; `TODO` actuellement sur `ONE_PRICING` dans `site.ts` → à corriger dès données reçues).
+- **Arko One** — 20 m², emprise 6,65 × 3,60 m, **77 900 € TTC** (grille §5 de la spec, ADR-029).
+- **Arko Max** — 40 m² (= ARKO historique), emprise 4,00 × 11,00 m, **99 900 € TTC** (grille §5 de la spec, ADR-029).
+
+> Prix de base corrigés le 2026-07-31 (ADR-029). Le **reste de la grille** — paliers de terrasse, 6 options dont 3 structurelles, transport par zone — relève d'ADR-030 : le modèle de calcul actuel (`perM2`, `terrassePerM2`, livraison au km) est remplacé, pas ajusté. Le nombre d'exemplaires passe à **Série 01 = 6 unités** avec ADR-031 (créneaux en base), pas avant.
 
 Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (ADR-005/020), montants par produit. Configurateur avec sélecteur One/Max (`/configurer?produit=`). Réservation d'un numéro avec acompte 1 500 €. Pas de multi-segment, pas de catalogue. Wordmark ARKO retiré de l'accueil ; noms produits conservés.
 
@@ -66,7 +68,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 
 | Risque | Impact | Gravité | ADR |
 |---|---|---|---|
-| **⚠️ Prix publics faux** — le site affiche 59 900 / 89 900 € ; la grille en vigueur est 77 900 / 99 900 € (écart de 18 000 € sur l'Arko One). Information commerciale inexacte tant que la bascule n'est pas faite | Juridique + commercial | 🔴 Critique | 029 |
+| ~~Prix publics faux (59 900 / 89 900 €)~~ ✅ **corrigés le 2026-07-31** → 77 900 / 99 900 € en production. Reste : acompte affiché 5 000 € vs 2 000 € au §7 de la spec — couplé au récit de paiement de la FAQ, traité en ADR-031 | Commercial | 🟠 Moyenne | 029, 031 |
 | **⚠️ CGV non confirmées avocat (`f3de62fe`) déjà LIVE en prod** (`/cgv`, liée au checkbox d'acceptation de `Reservation.tsx`) — engagement contractuel possible sur texte non validé | Risque juridique direct | 🔴 Critique | 015 |
 | Légal acompte/arrhes + CGV non validés | Pas de vente | 🔴 Critique | 015 |
 | RLS Supabase mal configurée | Fuite leads/réservations | 🔴 Critique | 007 |
