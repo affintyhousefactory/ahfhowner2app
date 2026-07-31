@@ -54,8 +54,10 @@ export const TRANSPORT = {
 } as const;
 
 // Prix — base & livraison en env (jamais en dur), catalogue d'options en données.
+// ADR-029 : grille §5 de la spec configurateur v2 — Arko Max 99 900 € TTC
+// (TVA 20 %, construction neuve). Remplace l'ancien 89 900 €.
 export const PRICING = {
-  base: Number(process.env.NEXT_PUBLIC_ARKO_BASE_EUR ?? 89900),
+  base: Number(process.env.NEXT_PUBLIC_ARKO_BASE_EUR ?? 99900),
   perM2: 2250,
   terrassePerM2: 300,
   delivery: {
@@ -86,13 +88,15 @@ export const PRICING = {
    Arko One = nouveau modèle 20 m². Les valeurs marquées TODO ARKO ONE
    sont des PLACEHOLDERS provisoires (en attente des vraies données
    métier) — jamais inventées comme définitives. base/area/total/ex
-   sont confirmés (59 900 € / 20 m² / 12 ex).
+   sont confirmés (77 900 € / 20 m² — grille §5 de la spec, ADR-029).
    Montants en env via fallback (ADR-003), jamais en dur ailleurs.
    ============================================================ */
 
 // Grille tarifaire Arko One (20 m²) — provisoire (TODO ARKO ONE).
+// ADR-029 : grille §5 de la spec configurateur v2 — Arko One 77 900 € TTC
+// (TVA 20 %, construction neuve). Remplace l'ancien 59 900 €.
 const ONE_PRICING = {
-  base: Number(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR ?? 59900),
+  base: Number(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR ?? 77900),
   perM2: 2250, // TODO ARKO ONE : confirmer €/m²
   terrassePerM2: 300, // TODO ARKO ONE : confirmer
   delivery: {
@@ -114,7 +118,7 @@ export const PRODUCTS = {
     slug: "/arko-one",
     tagline: "20 m² d'architecte, l'essentiel juste.",
     area: "20 m²",
-    footprint: "à confirmer", // TODO ARKO ONE : dimensions réelles du 20 m²
+    footprint: "6,65 × 3,60 m", // ADR-029 — emprise §5 de la spec configurateur v2
     total: 12, // SERIE_TOTAL — pool partagé One + Max
     reserved: 2, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
     series: "Série 01",
