@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import Link from "next/link";
+import { FEATURES } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
@@ -24,10 +25,17 @@ const STATUT_COMMERCIAL: Record<string, { label: string; cls: string }> = {
 };
 
 export default async function LeadsPage() {
-  const { data: leads } = await getSupabaseAdmin()
-    .from("leads")
-    .select("id, lead_number, prenom, nom, email, statut, statut_commercial, produit, commune, created_at, mandataires(prenom, nom)")
-    .order("created_at", { ascending: false });
+  // ADR-028 — la jointure `mandataires` n'alimente qu'une colonne masquée tant
+  // que le domaine est suspendu. Deux `select()` littéraux plutôt qu'une
+  // concaténation : Supabase infère le type des lignes depuis la chaîne.
+  const table = getSupabaseAdmin().from("leads");
+  const { data: leads } = FEATURES.mandataire
+    ? await table
+        .select("id, lead_number, prenom, nom, email, statut, statut_commercial, produit, commune, created_at, mandataires(prenom, nom)")
+        .order("created_at", { ascending: false })
+    : await table
+        .select("id, lead_number, prenom, nom, email, statut, statut_commercial, produit, commune, created_at")
+        .order("created_at", { ascending: false });
 
   return (
     <div className="p-8">
@@ -49,7 +57,7 @@ export default async function LeadsPage() {
               <th className="px-4 py-3 font-normal">Email</th>
               <th className="px-4 py-3 font-normal">Modèle Arko</th>
               <th className="px-4 py-3 font-normal">Commune</th>
-              <th className="px-4 py-3 font-normal">Mandataire</th>
+              {FEATURES.mandataire && <th className="px-4 py-3 font-normal">Mandataire</th>}
               <th className="px-4 py-3 font-normal">Affectation</th>
               <th className="px-4 py-3 font-normal">Commercial</th>
               <th className="px-4 py-3 font-normal">Date</th>
@@ -70,13 +78,19 @@ export default async function LeadsPage() {
                   <td className="px-4 py-3 text-white/50">{l.email}</td>
                   <td className="px-4 py-3 text-white/50">{l.produit ?? "—"}</td>
                   <td className="px-4 py-3 text-white/50">{l.commune ?? "—"}</td>
-                  <td className="px-4 py-3 text-white/40 text-xs">
-                    {(() => {
-                      const raw = l.mandataires as unknown as { prenom: string; nom: string } | { prenom: string; nom: string }[] | null;
-                      const m = Array.isArray(raw) ? raw[0] ?? null : raw;
-                      return m ? `${m.prenom} ${m.nom}` : "—";
-                    })()}
-                  </td>
+                  {FEATURES.mandataire && (
+                    <td className="px-4 py-3 text-white/40 text-xs">
+                      {(() => {
+                        const raw = (l as { mandataires?: unknown }).mandataires as
+                          | { prenom: string; nom: string }
+                          | { prenom: string; nom: string }[]
+                          | null
+                          | undefined;
+                        const m = Array.isArray(raw) ? raw[0] ?? null : raw;
+                        return m ? `${m.prenom} ${m.nom}` : "—";
+                      })()}
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUT_AFFECT[l.statut ?? "nouveau"] ?? ""}`}>
                       {l.statut ?? "nouveau"}

@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Arrow } from "@/components/ui/Button";
 import { cn } from "@/shared/lib/cn";
+import { FEATURES } from "@/lib/features";
 import type { ParcelleData } from "@/shared/types/plu";
 
 export type { ParcelleData };
@@ -721,25 +722,29 @@ function IneligibleResult({
         {result.etat_doc && <span className={textMuted}>État · <span className={textBase}>{ETAT_LABELS[result.etat_doc] ?? result.etat_doc}</span></span>}
       </div>
 
-      <div className={cn("mt-4 border-t pt-4", divider)}>
-        <p className={cn("text-sm leading-relaxed", textMuted)}>
-          Si vous cherchez un terrain compatible Arko, notre{" "}
-          <strong className={isDark ? "text-canvas" : "text-ink"}>Pack Recherche Terrain</strong>{" "}
-          confie la mission à un Mandataire Partenaire Affinity qualifié — off-market inclus.
-        </p>
-        <a
-          href="/terrain#search"
-          className={cn(
-            "mt-4 inline-flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-medium transition-colors",
-            isDark
-              ? "border-canvas/25 text-canvas hover:border-canvas/60"
-              : "border-line text-ink hover:border-ink/40",
-          )}
-        >
-          Lancer ma recherche de terrain
-          <Arrow />
-        </a>
-      </div>
+      {/* Renvoi vers le Pack Recherche Terrain — masqué tant que le réseau
+          mandataire qui l'exécute est suspendu (ADR-028). */}
+      {FEATURES.mandataire && (
+        <div className={cn("mt-4 border-t pt-4", divider)}>
+          <p className={cn("text-sm leading-relaxed", textMuted)}>
+            Si vous cherchez un terrain compatible Arko, notre{" "}
+            <strong className={isDark ? "text-canvas" : "text-ink"}>Pack Recherche Terrain</strong>{" "}
+            confie la mission à un Mandataire Partenaire Affinity qualifié — off-market inclus.
+          </p>
+          <a
+            href="/terrain#search"
+            className={cn(
+              "mt-4 inline-flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-medium transition-colors",
+              isDark
+                ? "border-canvas/25 text-canvas hover:border-canvas/60"
+                : "border-line text-ink hover:border-ink/40",
+            )}
+          >
+            Lancer ma recherche de terrain
+            <Arrow />
+          </a>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
+import { guardMandataire } from "@/shared/lib/feature-guard";
 
 export const metadata: Metadata = {
   title: "Recherche de terrain personnalisée | Réseau Affinity · HOWNER",
@@ -76,6 +77,9 @@ const LIVRABLES = [
 ];
 
 export default function RechercheTerrainPage() {
+  // ADR-028 — l'offre repose sur le réseau mandataire, suspendu.
+  guardMandataire();
+
   return (
     <main className="pt-16 md:pt-[4.5rem]">
 

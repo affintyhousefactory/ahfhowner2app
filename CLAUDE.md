@@ -31,7 +31,8 @@ Vendre et réserver l'ARKO : présenter le produit, configurer (devis 3 couches)
 Toute décision structurante (archi, intégration externe, change de marque/design/pricing, RGPD) = **un ADR** dans `03_DECISIONS/` (template `ADR_TEMPLATE.md`). Numérotation `ADR-NNN-titre.md`. Tenir l'**index ADR** de `PROJECT_STATE.md` synchronisé avec les fichiers. Chaque ADR Phase 4 porte un verdict de faisabilité (✅/🟠/🔴/❓) + dépendances externes.
 
 ## Guardrails (ne pas régresser)
-- **Configurator / pricing verrouillé** (ADR-005) — ne pas toucher `Configurator.tsx` / `config-store.tsx`.
+- **Domaine « Mandataire & Terrain » suspendu** (ADR-028) — portail mandataire, onboarding, affectation lead↔mandataire, GED mandataire, écrans admin Mandataires/Affectations/GED/Terrains, `/terrains`, `/rechercheterrain`, `/terrain`, `/cgu-mandataire` et le mode « Je cherche un terrain » du configurateur sont **masqués derrière `FEATURES.mandataire`** (`src/lib/features.ts`). **Ne jamais re-linker ni ré-exposer une de ces surfaces sans lever le flag et amender ADR-028.** Toute nouvelle surface du domaine doit naître gardée (`guardMandataire()` / `mandataireDisabled()`).
+- **Configurator / pricing verrouillé** (ADR-005) — ne pas toucher `Configurator.tsx` / `config-store.tsx`. Seule dérogation actée : le retrait UI du sélecteur terrain (ADR-028), pricing inchangé.
 - **Perf & média** (ADR-006) — vidéos via `useVisible` (sauf Hero) ; bundle 3D (`arko3d/*`) isolé à `/viewer` ; Lighthouse 100, LCP < 0.8s.
 - **Next 16 « non standard »** — lire `node_modules/next/dist/docs/` avant tout code (cf. AGENTS.md).
 

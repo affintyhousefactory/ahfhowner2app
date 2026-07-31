@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
 import type { ContratData } from "@/shared/components/mandataire/ContratCanvas";
+// ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
+import { mandataireDisabled } from "@/shared/lib/feature-guard";
 
 async function getByToken(token: string) {
   const { data } = await getSupabaseAdmin()
@@ -13,6 +15,9 @@ async function getByToken(token: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const body = (await req.json()) as {
     token?: string;
     contratData?: ContratData;

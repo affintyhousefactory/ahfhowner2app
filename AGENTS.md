@@ -20,7 +20,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Garder l'index ADR de `PROJECT_STATE.md` synchronisé avec les fichiers.
 
 ## Guardrails (ne pas régresser)
-- **Ne pas toucher** `src/components/site/Configurator.tsx` ni `config-store.tsx` (pricing verrouillé — ADR-005).
+- **Domaine « Mandataire & Terrain » suspendu** (ADR-028) — masqué derrière `FEATURES.mandataire` (`src/lib/features.ts`). Ne pas re-linker ni ré-exposer une surface suspendue sans lever le flag et amender l'ADR ; toute nouvelle surface du domaine naît gardée (`guardMandataire()` / `mandataireDisabled()`).
+- **Ne pas toucher** `src/components/site/Configurator.tsx` ni `config-store.tsx` (pricing verrouillé — ADR-005 ; seule dérogation actée : retrait UI du sélecteur terrain, ADR-028).
 - Vidéos via `useVisible` (sauf Hero) ; bundle 3D `src/components/arko3d/*` isolé à `/viewer` (ADR-006). Lighthouse 100 / LCP < 0.8s.
 
 ## Marque (absolu — ADR-004)

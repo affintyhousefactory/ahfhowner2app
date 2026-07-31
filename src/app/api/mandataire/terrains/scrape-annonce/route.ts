@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { fetchAnnoncePage, extractPageContent, ScrapeError } from "@/shared/lib/scrape-annonce";
 import { extractFieldsFromText } from "@/shared/lib/anthropic";
+// ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
+import { mandataireDisabled } from "@/shared/lib/feature-guard";
 
 export const maxDuration = 60;
 
@@ -17,6 +19,9 @@ async function requireMandataire(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const user = await requireMandataire(req);
   if (!user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 

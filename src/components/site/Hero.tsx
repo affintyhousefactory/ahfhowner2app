@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { BRAND, SERIE_TOTAL } from "@/lib/site";
+import { FEATURES } from "@/lib/features";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Ikurrina } from "@/components/ui/Ikurrina";
 
@@ -98,7 +99,9 @@ export function Hero() {
                 Réserver
                 <Arrow />
               </Button>
-              <Button href="/terrain" variant="outline">
+              {/* `/terrain` est suspendue (ADR-028). L'analyse PLU vit dans le
+                  configurateur, sous « J'ai un terrain » — le CTA garde son sens. */}
+              <Button href={FEATURES.mandataire ? "/terrain" : "/configurer"} variant="outline">
                 Tester mon terrain
               </Button>
             </div>

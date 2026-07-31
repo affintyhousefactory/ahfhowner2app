@@ -5,6 +5,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CONFIG, PRODUCT_LIST } from "@/lib/site";
+import { FEATURES } from "@/lib/features";
 import { loadGooglePlacesScript } from "@/shared/lib/google-places";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
@@ -368,30 +369,37 @@ function Devis() {
       {/* Votre situation terrain — avant l'encadré total */}
       <div className="mt-5 border-t border-line pt-4">
         <p className="mb-3 text-sm font-semibold text-ink">Votre situation terrain</p>
-        <div className="flex gap-2">
-          <button
-            onClick={() => c.setTerrainMode("have")}
-            className={cn(
-              "flex-1 rounded-full border px-3 py-2 text-center text-xs transition-all",
-              c.terrainMode === "have"
-                ? "border-accent bg-accent/5 text-ink"
-                : "border-line text-muted hover:border-ink/30 hover:text-ink",
-            )}
-          >
-            J'ai un terrain
-          </button>
-          <button
-            onClick={() => c.setTerrainMode("pack")}
-            className={cn(
-              "flex-1 rounded-full border px-3 py-2 text-center text-xs transition-all",
-              c.terrainMode === "pack"
-                ? "border-accent bg-accent/5 text-ink"
-                : "border-line text-muted hover:border-ink/30 hover:text-ink",
-            )}
-          >
-            Je cherche un terrain
-          </button>
-        </div>
+
+        {/* ADR-028 — le sélecteur n'a plus qu'une branche utile tant que le
+            réseau mandataire est suspendu : on affiche directement l'analyse
+            PLU au lieu d'un choix à option unique. Aucun impact sur le calcul
+            de prix (ADR-005). */}
+        {FEATURES.mandataire && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => c.setTerrainMode("have")}
+              className={cn(
+                "flex-1 rounded-full border px-3 py-2 text-center text-xs transition-all",
+                c.terrainMode === "have"
+                  ? "border-accent bg-accent/5 text-ink"
+                  : "border-line text-muted hover:border-ink/30 hover:text-ink",
+              )}
+            >
+              J'ai un terrain
+            </button>
+            <button
+              onClick={() => c.setTerrainMode("pack")}
+              className={cn(
+                "flex-1 rounded-full border px-3 py-2 text-center text-xs transition-all",
+                c.terrainMode === "pack"
+                  ? "border-accent bg-accent/5 text-ink"
+                  : "border-line text-muted hover:border-ink/30 hover:text-ink",
+              )}
+            >
+              Je cherche un terrain
+            </button>
+          </div>
+        )}
 
         {c.terrainMode === "have" && (
           <div className="mt-3">

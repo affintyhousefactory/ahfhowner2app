@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+// ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
+import { mandataireDisabled } from "@/shared/lib/feature-guard";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 
@@ -33,6 +38,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const { id } = await params;
   const form = await req.formData();
   const file = form.get("file") as File | null;
@@ -76,6 +84,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const off = mandataireDisabled();
+  if (off) return off;
+
   const { id } = await params;
   const { docId } = (await req.json()) as { docId: string };
   if (!docId) return NextResponse.json({ error: "docId requis" }, { status: 400 });

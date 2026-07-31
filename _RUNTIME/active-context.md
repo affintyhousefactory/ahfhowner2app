@@ -1,10 +1,12 @@
 # ACTIVE CONTEXT — Howner / ARKO
 
 ## Contexte actif
+> ⏸ **Domaine « Mandataire & Terrain » suspendu (ADR-028, 2026-07-30)** — portail mandataire, affectation admin, gestion des terrains et offre `/rechercheterrain` masqués derrière `FEATURES.mandataire`. Suspension réversible : ne pas re-linker une surface suspendue sans lever le flag et amender ADR-028.
+
 Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², 12 ex, 59 900 €) + **Arko Max** (40 m², 5 ex, 89 900 €). Front livré ; backend Phase 4 en attente ; lancement bloqué par le légal (ADR-015).
 
 ## Priorités actives
-1. ~~**Appliquer migration `20260710_lead_client_documents.sql`** (GED Client, ADR-027) sur Preview~~ ✅ appliquée 2026-07-10 — **Prod reste à appliquer au merge `dev`→`main`**.
+1. ~~**Migration `20260710_lead_client_documents.sql`** (GED Client, ADR-027)~~ ✅ appliquée Preview 2026-07-10 et **Prod 2026-07-13** — Preview/Prod alignés.
 2. **CGV nouvelle version** (`f3de62fe`, mergée dans `dev` via PR #51) — en attente confirmation avocat avant prod (seul point encore bloquant d'ADR-015).
 3. **Reconfigurer Arko Max** (perM2, options, terrasse, footprint, `reserved`) — données métier + grille tarifaire toujours en attente.
 4. Faire valider par Albert : charte Affinity (ADR-002) + repositionnement bi-produit (ADR-022) + révision blocklist marque ADR-004 (2026-07-09).
