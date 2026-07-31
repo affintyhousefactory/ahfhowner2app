@@ -3,10 +3,15 @@ import { notFound } from "next/navigation";
 import MandataireActions from "@/components/admin/MandataireActions";
 import MandataireEditContact from "@/components/admin/MandataireEditContact";
 import MandataireDossiers from "@/components/admin/MandataireDossiers";
+import { guardMandataire } from "@/shared/lib/feature-guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function MandataireFiche({ params }: { params: Promise<{ id: string }> }) {
+  // ADR-028 — défense en profondeur derrière le proxy : empêche la
+  // requête Supabase si la page était atteinte par un autre chemin.
+  guardMandataire();
+
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 

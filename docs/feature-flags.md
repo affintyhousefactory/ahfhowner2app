@@ -10,7 +10,20 @@ seulement *comment actionner l'interrupteur*, dans les deux sens.
 |---|---|---|---|
 | `FEATURES.mandataire` | `NEXT_PUBLIC_FEATURE_MANDATAIRE` | **suspendu** (variable non définie) | 028 |
 
-Source : `src/lib/features.ts`. Gardes : `src/shared/lib/feature-guard.ts`.
+Source : `src/lib/features.ts`. Gardes : `src/shared/lib/feature-guard.ts` et
+`src/proxy.ts` (écrans admin — voir l'encadré ci-dessous).
+
+> ⚠️ **Piège vérifié en production.** Une garde `notFound()` posée dans un
+> layout serveur **imbriqué sous un layout client** ne coupe rien : le shell
+> client streame en premier, le statut 200 est figé et le payload RSC de la
+> page part quand même — le contenu réel se retrouve dans le HTML, sous la page
+> 404. C'est le cas de `(admin)/admin/(protected)/layout.tsx`, qui est en
+> `"use client"`. Ces chemins sont donc coupés dans **`src/proxy.ts`**, qui
+> s'exécute avant tout rendu. En posant une nouvelle garde, vérifier qu'aucun
+> layout client ne la précède dans l'arbre — sinon, couper au proxy.
+>
+> Ne pas se fier au code HTTP seul pour valider un masquage : vérifier aussi
+> que le corps servi ne contient pas la page (`curl … | grep '<h1'`).
 
 ## Règle de lecture
 
@@ -82,10 +95,16 @@ Contrôle rapide en ligne de commande :
 BASE=https://<deployment>.vercel.app
 for p in /mandataire /terrains /rechercheterrain /terrain /cgu-mandataire \
          /admin/mandataires /admin/affectations /admin/ged /admin/terrains; do
-  printf '%-28s %s\n' "$p" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE$p")"
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE$p")
+  # Un 404 ne suffit pas : vérifier qu'aucun <h1> de la vraie page n'est servi.
+  body=$(curl -s "$BASE$p" | grep -c '<h1')
+  printf '%-28s %s  h1=%s\n' "$p" "$code" "$body"
 done
 curl -s "$BASE/sitemap.xml" | grep -c '<url>'
 ```
+
+Attendu en état suspendu : **404** partout et **`h1=0`**. Un `h1` non nul
+signale une fuite de contenu même si le statut est correct.
 
 ## Ajouter un nouveau flag
 

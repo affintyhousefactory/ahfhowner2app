@@ -2,6 +2,7 @@ import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import LeadDocuments from "@/components/admin/LeadDocuments";
+import { guardMandataire } from "@/shared/lib/feature-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,10 @@ interface Props {
 }
 
 export default async function GedDossierPage({ params }: Props) {
+  // ADR-028 — défense en profondeur derrière le proxy : empêche la
+  // requête Supabase si la page était atteinte par un autre chemin.
+  guardMandataire();
+
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 
