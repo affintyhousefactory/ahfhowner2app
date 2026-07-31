@@ -1,7 +1,19 @@
 # CURRENT_SESSION — Howner / ARKO
 
 ## Focus actuel
-**ADR-028 livrée et vérifiée en production (2026-07-31).** `dev` et `main` alignés, aucune migration, aucune variable Vercel créée. Aucun chantier de code ouvert. Seul risque ouvert : **CGV non confirmées avocat, live en prod** (ADR-015, 🔴, depuis le 2026-07-13).
+**Chantier configurateur v2 ouvert** (spec Albert v1). ADR-029 écrite — repositionnement produit & marque, précondition des ADR-030→034. Aucun code applicatif touché à ce stade.
+Deux risques 🔴 ouverts : **prix publics faux de 18 000 € sur l'Arko One** (ADR-029, à corriger au lot 1) et **CGV non confirmées avocat, live en prod** (ADR-015, depuis le 2026-07-13).
+
+## Décisions prises — 2026-07-31 (ADR-029 — repositionnement produit & marque)
+- **Spec Albert versée au dépôt** (`docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md`, PR #63) — fidélité vérifiée à l'octet près (30 765 o hors en-tête). Accès Drive déclaré dans `project-access.json` (lecture seule, 2 dossiers).
+- **Cadre de vente restreint** : annexe sur parcelle bâtie + hébergement professionnel. **Terrain nu fermé** → « prochainement », sans prix ni explication (critère de recette §16).
+- **Vocabulaire inversé** : « maison » (105 occurrences), « maison individuelle », « résidence principale », « clé en main » interdits → module / unité / studio / hébergement / annexe.
+- **Prix 77 900 / 99 900 €**, réservation **2 000 €** + acompte 30 %, **Série 01 = 6 unités**.
+- **ADR-004 remplacée** par ADR-029. Blocklists **cumulatives** : « module » imposé, « modulaire » toujours interdit.
+- **Périmètre : hors pages légales** (§17.10 + risque ADR-015).
+- **Pas d'alerte Albert** — il est l'auteur de la décision. La règle CLAUDE.md ne s'applique pas quand il en est l'émetteur.
+- **3 arbitrages remontés à Howner** : contradiction « clé en main » dans la spec (§1 vs §2/§12/§16) ; lecture cumulative module/modulaire ; « identité Howner seule » vs obligation de nommer l'éditeur légal (AHF SAS) en mentions légales.
+- **Reste** : ADR-030→034, plan de chantier en affinage à distance.
 
 ## Décisions prises — 2026-07-31 (ADR-028 — correctif : le masquage admin ne tenait pas)
 - **Défaut constaté en production** après le merge de la PR #58 : `/admin/{mandataires,affectations,ged,terrains}` renvoyaient **200** et le HTML servi contenait la **vraie page** (titre, boutons Inviter/Nouveau, liens de tri `?sort=zone_activite`, état de table) sous la page 404. Le composant serveur s'exécutait, **requêtes Supabase comprises**.
