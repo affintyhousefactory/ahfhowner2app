@@ -1,10 +1,10 @@
 # ADR-028 — Suspension réversible du domaine « Mandataire & Terrain »
 
-- **Statut** : Accepté — livré
-- **Date** : 2026-07-30
+- **Statut** : Accepté — **livré et vérifié en production le 2026-07-31** (PRs #57/#58, correctif #59/#60)
+- **Date** : 2026-07-30 (correctif du masquage admin : 2026-07-31)
 - **Phase** : All
 - **Faisabilité** : ✅ Élevée
-- **Alerte Albert** : **Oui — retrait d'une offre commerciale du site public et du discours de marque (changement de positionnement)**
+- **Alerte Albert** : **Oui — retrait d'une offre commerciale du site public et du discours de marque (changement de positionnement)** — ✅ **remontée verbalement par Richard le 2026-07-31**
 
 ## Contexte
 
@@ -46,7 +46,11 @@ Correctif : **`src/proxy.ts`** (ex-Middleware, renommé Proxy en Next 16) interc
 
 Les surfaces publiques et le portail mandataire **ne sont pas concernés** : leurs layouts serveur n'ont pas de parent client, `notFound()` y produit un vrai 404 stylé sans aucune fuite — vérifié en production (aucun `<h1>`, aucun contenu de corps, aucune donnée ; seul l'objet `metadata` du segment reste évalué, ce qui est cosmétique).
 
-**Règle à retenir** : une garde `notFound()` n'est fiable que si aucun layout client ne la précède dans l'arbre. Dans le doute, couper au proxy.
+**Vérifié en production après déploiement du correctif** (2026-07-31) : les 4 écrans admin et leurs sous-routes répondent **404 avec un corps vide (0 octet)**, aucune fuite de contenu ; `/admin` et `/admin/leads` restent en 200 (le matcher du proxy est borné aux 4 chemins suspendus) ; les surfaces publiques et le portail mandataire en 404 sans `<h1>` ; les pages conservées en 200 ; les API en 404 ; sitemap à 7 URLs.
+
+**Deux règles à retenir** :
+1. Une garde `notFound()` n'est fiable que si **aucun layout client ne la précède** dans l'arbre. Dans le doute, couper au proxy.
+2. **Un code HTTP 404 ne prouve pas un masquage.** Vérifier aussi le corps servi (`curl … | grep -c '<h1'`, taille de la réponse) — c'est ce contrôle manquant qui a laissé le défaut partir en production.
 
 ### Périmètre suspendu
 
@@ -54,7 +58,7 @@ Les surfaces publiques et le portail mandataire **ne sont pas concernés** : leu
 |---|---|
 | Portail mandataire | `src/app/(mandataire)/layout.tsx` — une garde couvre landing, auth (signin/signup/forgot/reset) et tout `(protected)` : dashboard, dossiers, contrat, documents, profil, terrains |
 | Onboarding mandataire | `src/app/onboarding/mandataire/layout.tsx` (layout serveur créé pour garder une page client) |
-| Admin — écrans | `layout.tsx` de segment sur `affectations/`, `ged/`, `mandataires/`, `terrains/` (couvre les sous-routes) + entrées retirées de la sidebar |
+| Admin — écrans | **`src/proxy.ts`** — 404 avant tout rendu sur `affectations/`, `ged/`, `mandataires/`, `terrains/` et leurs sous-routes (le layout parent est client, cf. encadré ci-dessus). En défense en profondeur : `layout.tsx` de segment + `guardMandataire()` en tête des 7 pages serveur. Entrées retirées de la sidebar |
 | Admin — fiche lead | Sous-sections « Affectation mandataire » et « Dossier mandataire » masquées ; lectures `mandataires` / `fiches_terrain` non exécutées. **GED Client conservée** (ADR-027) |
 | Admin — liste leads | Colonne « Mandataire » et jointure associée retirées |
 | Admin — dashboard | KPI financiers, `DossiersDonut`, `Entonnoir`, `MandatairesBar` et alertes mandataires/dossiers masqués ; remplacés par 2 KPI leads. L'alerte « leads sans affectation > 48 h » devient « sans traitement > 48 h » |
@@ -110,4 +114,5 @@ Tunnel de réservation, configurateur et pricing 3 couches, analyse PLU du terra
 
 ## Sources
 
-`src/lib/features.ts`, `src/shared/lib/feature-guard.ts`, `CLAUDE.md` § Guardrails, ADR-005, ADR-018, ADR-025, ADR-027, `00_INDEX/PROJECT_STATE.md`.
+`src/lib/features.ts`, `src/shared/lib/feature-guard.ts`, `src/proxy.ts`, `docs/feature-flags.md` (mode d'emploi), `CLAUDE.md` § Guardrails, ADR-005, ADR-018, ADR-025, ADR-027, `00_INDEX/PROJECT_STATE.md`.
+Doc Next 16 sur le renommage Middleware → Proxy : `node_modules/next/dist/docs/01-app/01-getting-started/16-proxy.md`.
