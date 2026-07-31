@@ -4,7 +4,10 @@ import { BRAND } from "@/lib/site";
 // Aperçu social 1200×630 généré à la volée (next/og) — typographique, sobre,
 // aux tokens charte Affinity. Aucun asset requis (ADR-018). Neutre vis-à-vis
 // de la charte tant qu'elle n'est pas validée par Albert (ADR-002).
-export const alt = "HOWNER — Une maison compacte faite pour vous";
+// ADR-029 — le texte alternatif est une métadonnée : vocabulaire corrigé ici.
+// ⚠ L'image elle-même rend `BRAND.baseline`, qui porte encore « maison » et
+// sert aussi de <h1> au Hero : sa réécriture relève du chantier éditorial (lot 1).
+export const alt = "HOWNER — Deux modules d'architecte, prêts à vivre";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

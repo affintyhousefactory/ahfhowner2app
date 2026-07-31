@@ -10,7 +10,7 @@ import { AvantPremiere } from "@/components/site/AvantPremiere";
 export const metadata: Metadata = {
   title: "Arko One — 20 m² d'architecte | HOWNER",
   description:
-    "Arko One : maison compacte d'architecte de 20 m², livrée prête à vivre. Série 01 — 12 exemplaires numérotés. Fabriquée au Pays-Basque.",
+    "Arko One : studio d'architecte de 20 m², livré prêt à vivre. Série 01 — 12 exemplaires numérotés. Fabriqué au Pays-Basque.",
   alternates: { canonical: "/arko-one" },
 };
 

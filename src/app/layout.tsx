@@ -21,17 +21,20 @@ const mono = Space_Mono({
   display: "swap",
 });
 
+// ADR-029 — vocabulaire de marque : « maison » proscrit, « module » imposé.
+// Le <h1> du Hero et l'image OG portent encore `BRAND.baseline` : ils relèvent
+// du chantier éditorial (lot 1), pas des métadonnées.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "HOWNER — Une maison compacte faite pour vous",
+  title: "HOWNER — Deux modules d'architecte, prêts à vivre",
   description:
-    "HOWNER : deux maisons compactes d'architecte, Arko One (20 m²) et Arko Max (40 m²), livrées prêtes à vivre. Fabriquées au Pays-Basque. Découvrir, configurer, réserver.",
-  keywords: ["HOWNER", "Arko One", "Arko Max", "maison compacte", "maison d'architecte", "Pays-Basque"],
+    "HOWNER : deux modules compacts d'architecte, Arko One (20 m²) et Arko Max (40 m²), livrés prêts à vivre. Fabriqués au Pays-Basque. Découvrir, configurer, réserver.",
+  keywords: ["HOWNER", "Arko One", "Arko Max", "module d'architecte", "studio 20 m²", "Pays-Basque"],
   alternates: { canonical: "/" },
   openGraph: {
-    title: "HOWNER — Une maison compacte faite pour vous",
+    title: "HOWNER — Deux modules d'architecte, prêts à vivre",
     description:
-      "Deux maisons compactes d'architecte, Arko One (20 m²) et Arko Max (40 m²), livrées prêtes à vivre. Fabriquées au Pays-Basque.",
+      "Deux modules compacts d'architecte, Arko One (20 m²) et Arko Max (40 m²), livrés prêts à vivre. Fabriqués au Pays-Basque.",
     type: "website",
     locale: "fr_FR",
     siteName: "HOWNER",
@@ -39,9 +42,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "HOWNER — Une maison compacte faite pour vous",
+    title: "HOWNER — Deux modules d'architecte, prêts à vivre",
     description:
-      "Deux maisons compactes d'architecte, Arko One (20 m²) et Arko Max (40 m²), livrées prêtes à vivre. Fabriquées au Pays-Basque.",
+      "Deux modules compacts d'architecte, Arko One (20 m²) et Arko Max (40 m²), livrés prêts à vivre. Fabriqués au Pays-Basque.",
   },
   robots: { index: true, follow: true },
 };
