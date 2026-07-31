@@ -1,5 +1,17 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Focus actuel
+**ADR-028 livrée et vérifiée en production (2026-07-31).** `dev` et `main` alignés, aucune migration, aucune variable Vercel créée. Aucun chantier de code ouvert. Seul risque ouvert : **CGV non confirmées avocat, live en prod** (ADR-015, 🔴, depuis le 2026-07-13).
+
+## Décisions prises — 2026-07-31 (ADR-028 — correctif : le masquage admin ne tenait pas)
+- **Défaut constaté en production** après le merge de la PR #58 : `/admin/{mandataires,affectations,ged,terrains}` renvoyaient **200** et le HTML servi contenait la **vraie page** (titre, boutons Inviter/Nouveau, liens de tri `?sort=zone_activite`, état de table) sous la page 404. Le composant serveur s'exécutait, **requêtes Supabase comprises**.
+- **Cause** : `(admin)/admin/(protected)/layout.tsx` est un composant **client** (garde d'auth). Il streame en premier → statut 200 figé ; le `notFound()` du layout serveur enfant arrive trop tard et n'annule ni le statut ni le payload RSC déjà émis.
+- **Correctif** (PR #59 → `dev`, PR #60 → `main`) : **`src/proxy.ts`** (Middleware renommé **Proxy** en Next 16) intercepte les 4 chemins admin avant tout rendu → 404 sec ; `guardMandataire()` ajouté en première instruction des **7 pages serveur** du périmètre en défense en profondeur. Matcher strictement borné : `/admin` et `/admin/leads` intacts.
+- **Non touché** : surfaces publiques, portail mandataire et 29 routes API étaient **corrects dès #57** — 404 réel, aucun `<h1>`, aucun contenu de corps, aucune donnée. Seul l'objet `metadata` du segment reste évalué (cosmétique).
+- **Vérifié en production** après déploiement : 4 écrans admin + sous-routes en **404 / `h1=0` / corps vide**, aucune fuite ; `/admin` + `/admin/leads` en 200 ; suspendues en 404 ; publiques en 200 ; API en 404 ; sitemap 7 URLs.
+- **Règle actée** : une garde `notFound()` n'est fiable que si **aucun layout client ne la précède** dans l'arbre — sinon couper au proxy. Documentée dans ADR-028 + `docs/feature-flags.md`.
+- **Leçon de méthode** : **un code HTTP 404 ne prouve pas un masquage**. Le contrôle `curl` de `docs/feature-flags.md` compte désormais les `<h1>` et la taille du corps en plus du statut.
+
 ## Décisions prises — 2026-07-30 (ADR-028 — suspension du domaine « Mandataire & Terrain »)
 - **Suspension, pas suppression** : aucun fichier supprimé, aucune migration, aucune donnée ni compte touché. Interrupteur unique `FEATURES.mandataire` (`src/lib/features.ts`) piloté par `NEXT_PUBLIC_FEATURE_MANDATAIRE` — **variable absente = suspendu** (défaut sûr, à ne PAS configurer sur Vercel).
 - **Motif** : finalité de marché et cible non mûres. Le site promettait un rappel « sous 48 h par un expert Mandataire Affinity » qu'AHF ne veut pas honorer.
@@ -7,7 +19,9 @@
 - **Conservé** : réservation, pricing 3 couches **intact**, analyse PLU « J'ai un terrain », livraison GPS, `/contact`, Leads + fiche lead + **GED Client**, Brevo contact/récap.
 - **Amende ADR-005** (UI configurateur, verrou de pricing tenu), ADR-018, ADR-025, ADR-027.
 - **Vérif** : `tsc` propre ; `eslint` 322 erreurs avant / 322 après (dette préexistante, zéro régression).
-- **Reste** : validation visuelle Preview + test de réversibilité (`NEXT_PUBLIC_FEATURE_MANDATAIRE=true` sur une Preview) ; **alerte Albert** à envoyer (retrait d'offre commerciale = changement de positionnement).
+- **Livré** : PR #57 → `dev`, PR #58 → `main` (2026-07-30). ⚠️ Le masquage des écrans admin ne tenait pas — voir la session du 2026-07-31 ci-dessus.
+- **Alerte Albert** ✅ faite verbalement par Richard (retrait d'offre commerciale = changement de positionnement).
+- **Reste** : test de réversibilité (`NEXT_PUBLIC_FEATURE_MANDATAIRE=true` sur une Preview) — non exécuté à ce jour.
 
 ## Décisions prises — 2026-07-20 (SEO home — HTML front indexable)
 - **PR #54 mergée** (`fix/homepage-ssr-seo-reveal` → `dev`) puis **PR #55 (`dev`→`main`) mergée le même jour** — **correctif LIVE en production**, `dev` et `main` alignés. 1 commit (`cde0b8c7`), 6 fichiers front, aucune migration.
