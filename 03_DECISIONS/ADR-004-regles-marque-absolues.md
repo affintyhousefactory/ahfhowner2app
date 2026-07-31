@@ -1,6 +1,6 @@
 # ADR-004 — Règles de marque absolues
 
-- **Statut** : Accepté (gouvernance) — révisé 2026-07-09
+- **Statut** : **Remplacé → ADR-029** (2026-07-31) — voir la note en fin de fichier
 - **Date** : 2026-06-16
 - **Phase** : All
 - **Faisabilité** : ✅ Vérifiable par grep
@@ -30,3 +30,22 @@ Tout nouveau texte (pages, SEO ADR-018, JSON-LD) passe le contrôle blocklist. C
 
 ## Sources
 `src/lib/site.ts` (lignes d'en-tête 1–7).
+
+## Remplacement 2026-07-31 — ADR-029
+
+Cet ADR est **remplacé par ADR-029** (repositionnement produit & marque), qui applique la
+spécification configurateur v2 d'Albert (`docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md`).
+
+**Ce qui est repris tel quel** : « notre architecte intégrée » (sans prénom, sans marqueur de
+genre additionnel), « Puigbo » (sans accent), et la blocklist historique — modulaire,
+préfabriqué, tiny house, conteneur, catalogue.
+
+**Ce qui change** : la blocklist est étendue à *maison*, *votre maison*, *maison individuelle*,
+*résidence principale*, *clé en main*, toute raison sociale autre que Howner, tout nom de
+fournisseur ou de sous-traitant. Un vocabulaire imposé apparaît — module, unité, studio,
+hébergement, annexe, espace supplémentaire, prêt à vivre.
+
+Les deux blocklists sont **cumulatives** : « module » (nom, imposé) et « modulaire » (adjectif,
+interdit) coexistent sans se contredire.
+
+Ne plus amender ce fichier : toute évolution des règles de marque passe désormais par ADR-029.
