@@ -36,6 +36,18 @@ Variable absente = **suspendu**. C'est le défaut sûr : un oubli de configurati
 
 404 et non 403 : côté visiteur, une fonctionnalité suspendue doit être indiscernable d'une fonctionnalité inexistante.
 
+### ⚠️ Une garde serveur sous un layout client ne suffit pas
+
+**Constaté en production le 2026-07-31.** Les quatre écrans admin renvoyaient **200** et le HTML servi contenait la **vraie page** (titre, boutons, liens de tri) sous la page 404 : le composant serveur s'était exécuté, requêtes Supabase comprises.
+
+Cause : `(admin)/admin/(protected)/layout.tsx` est un composant **client**. Il commence à streamer immédiatement, le statut 200 est figé, et le `notFound()` du layout serveur enfant arrive trop tard — il rend la page d'erreur mais n'annule ni le statut ni le payload RSC déjà émis pour la page.
+
+Correctif : **`src/proxy.ts`** (ex-Middleware, renommé Proxy en Next 16) intercepte les chemins admin concernés **avant tout rendu** et renvoie un 404 sec. Les `guardMandataire()` restent en place en défense en profondeur, y compris en première instruction des 7 pages serveur du périmètre, pour bloquer la requête Supabase si la page était atteinte par un autre chemin.
+
+Les surfaces publiques et le portail mandataire **ne sont pas concernés** : leurs layouts serveur n'ont pas de parent client, `notFound()` y produit un vrai 404 stylé sans aucune fuite — vérifié en production (aucun `<h1>`, aucun contenu de corps, aucune donnée ; seul l'objet `metadata` du segment reste évalué, ce qui est cosmétique).
+
+**Règle à retenir** : une garde `notFound()` n'est fiable que si aucun layout client ne la précède dans l'arbre. Dans le doute, couper au proxy.
+
 ### Périmètre suspendu
 
 | Surface | Points de coupure |

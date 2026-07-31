@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { notFound } from "next/navigation";
 import TerrainAdminActions from "@/components/admin/TerrainAdminActions";
+import { guardMandataire } from "@/shared/lib/feature-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,10 @@ type FicheTerrainFull = {
 };
 
 export default async function TerrainFicheAdmin({ params }: { params: Promise<{ id: string }> }) {
+  // ADR-028 — défense en profondeur derrière le proxy : empêche la
+  // requête Supabase si la page était atteinte par un autre chemin.
+  guardMandataire();
+
   const { id } = await params;
   const { data: fiche } = await getSupabaseAdmin()
     .from("fiches_terrain")

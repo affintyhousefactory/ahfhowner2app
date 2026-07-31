@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import Link from "next/link";
+import { guardMandataire } from "@/shared/lib/feature-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,10 @@ const STATUT_COLORS: Record<string, string> = {
 };
 
 export default async function GedPage() {
+  // ADR-028 — défense en profondeur derrière le proxy : empêche la
+  // requête Supabase si la page était atteinte par un autre chemin.
+  guardMandataire();
+
   const supabase = getSupabaseAdmin();
 
   const { data: leads } = await supabase

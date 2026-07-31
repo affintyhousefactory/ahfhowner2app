@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import Link from "next/link";
+import { guardMandataire } from "@/shared/lib/feature-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,10 @@ export default async function TerrainsAdminPage({
 }: {
   searchParams: Promise<{ statut?: string }>;
 }) {
+  // ADR-028 — défense en profondeur derrière le proxy : empêche la
+  // requête Supabase si la page était atteinte par un autre chemin.
+  guardMandataire();
+
   const { statut } = await searchParams;
   const supabase = getSupabaseAdmin();
 
