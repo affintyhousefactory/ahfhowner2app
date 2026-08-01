@@ -40,7 +40,7 @@ export function Hero() {
         </span>
       </div>
 
-      {/* Média hero — la maison comme focal éditorial (sans wordmark, ADR-022). */}
+      {/* Média hero — le module comme focal éditorial (sans wordmark, ADR-022). */}
       <div className="relative flex min-h-0 flex-1 flex-col justify-center">
         <div className="relative z-0 mt-8 flex justify-center">
           {/* Parallaxe au scroll : reste en framer-motion (motion values sur le

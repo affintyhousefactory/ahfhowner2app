@@ -15,7 +15,7 @@ export function Price() {
               005 — Le prix
             </span>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              TTC · clé en main
+              TTC · prêt à vivre
             </span>
           </div>
         </Reveal>
@@ -27,13 +27,13 @@ export function Price() {
               {base} €
             </p>
             <p className="mt-4 font-mono text-[0.75rem] uppercase tracking-[0.16em] text-muted">
-              TTC, clé en main · ~{PRICING.perM2.toLocaleString("fr-FR")} €/m²
+              TTC, prêt à vivre · ~{PRICING.perM2.toLocaleString("fr-FR")} €/m²
             </p>
           </Reveal>
 
           <Reveal delay={0.05}>
             <p className="max-w-md text-[1.05rem] leading-relaxed text-ink">
-              Tout est compris : la maison finie, prête à vivre. La livraison
+              Tout est compris : le module fini, prêt à vivre. La livraison
               s'estime selon votre terrain, les frais de terrain restent à part.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">

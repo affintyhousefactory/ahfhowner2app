@@ -6,7 +6,8 @@
     "dev": "WATCHPACK_POLLING=true next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:vocabulaire": "node scripts/check-vocabulaire.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",

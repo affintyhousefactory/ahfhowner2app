@@ -18,8 +18,9 @@ export function organizationSchema(): JsonLdObject {
     name: BRAND.maker,
     legalName: "Affinity House Factory",
     url: SITE_URL,
+    // ADR-029 — vocabulaire : « maison » est proscrit, « module » imposé.
     description:
-      "Maisons compactes d'architecte livrées prêtes à vivre, fabriquées au Pays-Basque.",
+      "Modules compacts d'architecte livrés prêts à vivre, fabriqués au Pays-Basque.",
     email: "contact@affinityhousefactory.com",
     address: {
       "@type": "PostalAddress",
@@ -39,8 +40,9 @@ export function productSchema(product: Product): JsonLdObject {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: `${product.name} — maison compacte d'architecte de ${product.area}, livrée prête à vivre. ${product.series}, série limitée à ${product.total} exemplaires numérotés.`,
-    category: "Maison",
+    // ADR-029 — vocabulaire : « module » remplace « maison », accord au masculin.
+    description: `${product.name} — module compact d'architecte de ${product.area}, livré prêt à vivre. ${product.series}, série limitée à ${product.total} exemplaires numérotés.`,
+    category: "Module d'habitation",
     brand: { "@type": "Brand", name: BRAND.maker },
     url: `${SITE_URL}${product.slug}`,
     offers: {

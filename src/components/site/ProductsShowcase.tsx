@@ -24,7 +24,7 @@ export function ProductsShowcase() {
         </Reveal>
         <Reveal delay={0.05}>
           <h2 className="editorial mt-12 text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:whitespace-nowrap md:text-[4.6rem]">
-            Deux maisons, un même soin.
+            Deux modules, un même soin.
           </h2>
         </Reveal>
 

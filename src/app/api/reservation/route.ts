@@ -112,6 +112,10 @@ export async function POST(req: NextRequest) {
     // Réservation
     NUMERO: slot ? String(slot).padStart(2, "0") : "",
     PRODUIT: `${produit} ${surface}`,
+    // ADR-029 — `MAISON_TTC` est un nom de paramètre du template Brevo
+    // (BREVO_TEMPLATE_RECAP), configuré dans le dashboard. Le renommer ici
+    // sans renommer le placeholder côté Brevo viderait le montant de l'email :
+    // à traiter en une seule fois, code + template. Invisible du client.
     MAISON_TTC: `${houseTotal?.toLocaleString("fr-FR")} €`,
     LIVRAISON: livraisonLabel,
     TERRAIN: terrainLabel,

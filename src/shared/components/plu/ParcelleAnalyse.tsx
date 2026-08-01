@@ -712,7 +712,7 @@ function IneligibleResult({
           Cette parcelle est classée{" "}
           <strong>{result.zone_urba ?? result.typezone}</strong>
           {meta && ` — ${meta.label}`}.
-          La construction d&apos;une maison neuve y est très limitée, voire interdite, en l&apos;état du document d&apos;urbanisme.
+          La construction neuve y est très limitée, voire interdite, en l&apos;état du document d&apos;urbanisme.
         </p>
       </div>
 

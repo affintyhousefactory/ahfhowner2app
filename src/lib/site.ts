@@ -1,9 +1,10 @@
 /* ============================================================
    HOWNER / ARKO — source de contenu
-   Règles de marque ABSOLUES respectées : aucun terme interdit
-   (modulaire, préfabriqué, tiny house, conteneur, catalogue).
+   Règles de marque ABSOLUES — voir ADR-029 (remplace ADR-004).
+   Vocabulaire imposé : module, unité, studio, hébergement, annexe,
+   espace supplémentaire, prêt à vivre.
    « notre architecte intégrée » sans prénom. Fondateur = Puigbo
-   (sans accent). [ADR-004, révisé 2026-07-09]
+   (sans accent). Contrôle : node scripts/check-vocabulaire.mjs
    ============================================================ */
 
 import { FEATURES } from "@/lib/features";
@@ -24,7 +25,7 @@ export const SERIE_TOTAL = 12;
 export const BRAND = {
   maker: "HOWNER",
   model: "ARKO",
-  baseline: "Une maison compacte faite pour vous",
+  baseline: "Un espace supplémentaire, dessiné pour vous",
   subline:
     "Deux modèles d'architecte, livrés prêts à vivre. Fabriqués au Pays-Basque.",
   series: "Série 01",
@@ -38,10 +39,10 @@ export const BRAND = {
 } as const;
 
 export const MANIFESTO =
-  "On a retiré les mètres carrés superflus. Pas la lumière, pas la hauteur, pas le soin. Arko est pensée par notre architecte intégrée comme une maison entière — simplement plus juste.";
+  "On a retiré les mètres carrés superflus. Pas la lumière, pas la hauteur, pas le soin. Arko est pensé par notre architecte intégrée comme un lieu de vie entier — simplement plus juste.";
 
 export const PROMISE =
-  "Une maison d'architecte fabriquée Hors-Site dans notre atelier, livrée prête à vivre, en 12 semaines.";
+  "Un module d'architecte fabriqué Hors-Site dans notre atelier, livré prêt à vivre, en 12 semaines.";
 
 // Paramètres transport convoi — source de vérité en DB (config_variables namespace 'transport').
 // Fallback env/constante jusqu'à implémentation du chargement DB (Phase 4).
@@ -53,7 +54,7 @@ export const TRANSPORT = {
   poids: { one: 6, max: 9 } as Record<string, number>, // tonnes par produit
 } as const;
 
-// Prix — base & livraison en env (jamais en dur), catalogue d'options en données.
+// Prix — base & livraison en env (jamais en dur), grille d'options en données.
 // ADR-029 : grille §5 de la spec configurateur v2 — Arko Max 99 900 € TTC
 // (TVA 20 %, construction neuve). Remplace l'ancien 89 900 €.
 export const PRICING = {
@@ -73,7 +74,7 @@ export const PRICING = {
     { id: "solaire", label: "Pack Solaire", price: 5880 },
     { id: "domotique", label: "Pack Domotique", price: 2640 },
   ],
-  // Couche 3 — frais complémentaires, hors proposition, jamais dans le total maison.
+  // Couche 3 — frais complémentaires, hors proposition, jamais dans le total du module.
   landFees: [
     { label: "Étude de sol G2 si souhaité", value: "Estimé à partir de 2 400 €" },
     { label: "Assainissement (micro-station)", value: "Estimé à 9 000 €" },
@@ -191,9 +192,9 @@ export const FAQ: { q: string; a: string | string[] }[] = [
   {
     q: "Quel est le délai ?",
     a: [
-      "La fabrication de votre maison ARKO en atelier dure environ **12 semaines**, à compter de la levée des conditions prévues au contrat : autorisation d'urbanisme obtenue, financement confirmé, terrain accessible et fondations ou supports d'accueil réceptionnés.",
+      "La fabrication de votre module ARKO en atelier dure environ **12 semaines**, à compter de la levée des conditions prévues au contrat : autorisation d'urbanisme obtenue, financement confirmé, terrain accessible et fondations ou supports d'accueil réceptionnés.",
       "L'installation sur site est ensuite généralement réalisée en **une journée**, sous réserve des conditions d'accès, de météo et de préparation du terrain.",
-      "À chaque étape importante — lancement, structure, finitions, maison prête à livrer, installation — vous êtes informé par email.",
+      "À chaque étape importante — lancement, structure, finitions, module prêt à livrer, installation — vous êtes informé par email.",
     ],
   },
   {
@@ -202,7 +203,7 @@ export const FAQ: { q: string; a: string | string[] }[] = [
     // mandataires — suspendus (ADR-028). Repli sur le contact direct tant que
     // le dispositif n'est pas réactivé.
     a: FEATURES.mandataire
-      ? "Si vous partez de zéro, nous vous proposons une sélection de terrains dans notre rubrique « Terrains » : des terrains sélectionnés par nos partenaires Mandataires. Sélectionnez-le et nous vous contactons pour faire le point sur sa disponibilité et vos options concernant votre maison ARKO. Aucun ne vous intéresse ? Nous restons à votre écoute, et ferons le nécessaire pour vous mettre en relation avec des partenaires de confiance."
+      ? "Si vous partez de zéro, nous vous proposons une sélection de terrains dans notre rubrique « Terrains » : des terrains sélectionnés par nos partenaires Mandataires. Sélectionnez-le et nous vous contactons pour faire le point sur sa disponibilité et vos options concernant votre module ARKO. Aucun ne vous intéresse ? Nous restons à votre écoute, et ferons le nécessaire pour vous mettre en relation avec des partenaires de confiance."
       : "L'acquisition du terrain relève de vous. Si vous n'en avez pas encore, écrivez-nous : nous faisons le point sur votre projet, le modèle ARKO envisagé et les contraintes de la parcelle que vous visez. Vous pouvez aussi vérifier dès maintenant la compatibilité d'une parcelle depuis le configurateur, en renseignant son adresse.",
   },
   {
@@ -211,12 +212,12 @@ export const FAQ: { q: string; a: string | string[] }[] = [
       "Après un premier échange téléphonique, nous vous adressons par email une proposition commerciale comprenant le modèle ARKO retenu, les principales caractéristiques techniques, les options choisies et une estimation du calendrier de fabrication, de livraison et d'installation.",
       "Pour confirmer votre intérêt et réserver votre projet, un versement initial de 5 000 € vous est demandé.",
       "Ce versement est intégralement remboursable tant que le contrat de fabrication, livraison et installation n'a pas été signé. Vous pouvez donc renoncer à votre projet avant cette signature, sans avoir à justifier votre décision.",
-      "Une fois le contrat signé, ce versement de 5 000 € est déduit du prix total de votre maison ARKO et intégré à l'échéancier de paiement.",
+      "Une fois le contrat signé, ce versement de 5 000 € est déduit du prix total de votre module ARKO et intégré à l'échéancier de paiement.",
       "Le règlement s'effectue ensuite en plusieurs étapes, adaptées à la fabrication en atelier :",
       "Étape 0 — Premier échange et proposition commerciale\nNous échangeons avec vous sur votre projet, votre terrain, le modèle ARKO envisagé et vos contraintes techniques. Nous vous envoyons ensuite un devis accompagné du portfolio produit correspondant.",
       "Étape 1 — Réservation du projet\nVous validez le devis de réservation et l'échéancier prévisionnel. Une facture de réservation de 5 000 € vous est adressée. Le paiement peut être effectué par virement bancaire ou par paiement sécurisé en ligne.",
       "Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d'étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des 5 000 € déjà versés.",
-      "Étape 3 — Sortie d'atelier\nLorsque votre maison ARKO est fabriquée et prête à être livrée, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
+      "Étape 3 — Sortie d'atelier\nLorsque votre module ARKO est fabriqué et prêt à être livré, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
       "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
       "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
       "Affinity House Factory n'intervient pas dans l'opération d'achat du terrain, ni dans les formalités juridiques, administratives ou notariales qui y sont attachées.",
@@ -230,8 +231,8 @@ export const FAQ: { q: string; a: string | string[] }[] = [
   {
     q: "Quelles garanties ?",
     a: [
-      "Votre maison ARKO bénéficie des garanties légales applicables aux travaux réalisés : parfait achèvement pendant 1 an, bon fonctionnement des équipements dissociables pendant 2 ans, et garantie décennale pendant 10 ans pour les dommages affectant la solidité de l'ouvrage ou son usage.",
-      "La garantie décennale est attachée à la maison et se transmet en cas de revente pendant sa durée de validité.",
+      "Votre module ARKO bénéficie des garanties légales applicables aux travaux réalisés : parfait achèvement pendant 1 an, bon fonctionnement des équipements dissociables pendant 2 ans, et garantie décennale pendant 10 ans pour les dommages affectant la solidité de l'ouvrage ou son usage.",
+      "La garantie décennale est attachée au module et se transmet en cas de revente pendant sa durée de validité.",
       "L'assurance dommages-ouvrage reste à la charge du client et doit être souscrite avant l'ouverture du chantier lorsque la réglementation l'exige.",
     ],
   },
@@ -239,7 +240,7 @@ export const FAQ: { q: string; a: string | string[] }[] = [
     q: "Et l'après-vente ?",
     a: [
       "Après l'installation, un interlocuteur dédié reste votre référent technique.",
-      "Il vous accompagne dans le suivi de votre maison ARKO, le traitement des éventuelles réserves et les désordres signalés après réception.",
+      "Il vous accompagne dans le suivi de votre module ARKO, le traitement des éventuelles réserves et les désordres signalés après réception.",
       "Les désordres relevant de la garantie de parfait achèvement sont traités sans frais dans l'année suivant la réception, sous réserve qu'ils concernent les prestations réalisées par Affinity House Factory ou ses intervenants.",
     ],
   },
@@ -268,7 +269,7 @@ export const PROCESS = [
   {
     step: "01",
     title: "L'atelier",
-    text: "Construite entière, à l'abri, à la précision du millimètre. Pendant que le terrain se prépare, la maison prend forme — sans pluie, sans aléa.",
+    text: "Construite entière, à l'abri, à la précision du millimètre. Pendant que le terrain se prépare, le module prend forme — sans pluie, sans aléa.",
   },
   {
     step: "02",
@@ -283,7 +284,7 @@ export const PROCESS = [
   {
     step: "04",
     title: "La pose",
-    text: "Le jour J, une grue la dépose sur ses fondations. En quelques heures : posée, de niveau, raccordée. Pas un chantier de plusieurs mois — une maison.",
+    text: "Le jour J, une grue la dépose sur ses fondations. En quelques heures : posée, de niveau, raccordée. Pas un chantier de plusieurs mois — un lieu de vie.",
   },
   {
     step: "05",
@@ -293,7 +294,7 @@ export const PROCESS = [
 ] as const;
 
 export const PROCESS_CONCLUSION =
-  "Vous ne vivez pas un chantier de plusieurs mois. Vous recevez une maison finie.";
+  "Vous ne vivez pas un chantier de plusieurs mois. Vous recevez un espace fini, prêt à vivre.";
 
 /* — Préparer votre terrain : les préparatifs côté parcelle, reliés à l'outil terrain — */
 export const LAND_PREP = [
@@ -336,7 +337,7 @@ export const SPECS = [
 ] as const;
 
 export const INCLUDED = [
-  "La maison complète, prête à vivre",
+  "Le module complet, prêt à vivre",
   "Cuisine & salle de bain équipées",
   "Fondations technopieux",
   "Raccordements jusqu'à 20 ml",
