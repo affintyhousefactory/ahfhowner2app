@@ -36,8 +36,13 @@ Toute décision structurante (archi, intégration externe, change de marque/desi
 - **Perf & média** (ADR-006) — vidéos via `useVisible` (sauf Hero) ; bundle 3D (`arko3d/*`) isolé à `/viewer` ; Lighthouse 100, LCP < 0.8s.
 - **Next 16 « non standard »** — lire `node_modules/next/dist/docs/` avant tout code (cf. AGENTS.md).
 
-## Marque (ADR-004 — absolu)
-Termes **interdits** : modulaire, préfabriqué, tiny house, conteneur, catalogue. Toujours « notre architecte intégrée » (sans prénom). Fondateur = « Puigbo » (sans accent). Source : `src/lib/site.ts` (ADR-004, révisé 2026-07-09).
+## Marque (ADR-029 — absolu, remplace ADR-004)
+Termes **interdits** : **maison**, votre maison, maison individuelle, résidence principale, **clé en main**, toute raison sociale autre que Howner, tout nom de fournisseur — plus la blocklist historique : modulaire, préfabriqué, tiny house, conteneur, catalogue.
+Vocabulaire **imposé** : module, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
+Toujours « notre architecte intégrée » (sans prénom). Fondateur = « Puigbo » (sans accent).
+**Cadre de vente** (ADR-029) : annexe sur parcelle déjà bâtie, ou hébergement professionnel. Le logement indépendant sur terrain nu **n'est pas ouvert** — « prochainement », sans prix ni explication.
+Contrôle avant chaque PR : `npm run check:vocabulaire`. Source : `src/lib/site.ts`, spec `docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md`.
+Exclus du contrôle : pages légales (§17.10 + ADR-015), domaine mandataire suspendu (ADR-028), back-office.
 
 ## Secrets (ADR-003)
 Montants → `NEXT_PUBLIC_*` via env (fallback). Clés serveur (Supabase service-role, Stripe, Apify, Anthropic) → **jamais dans Git**, jamais côté client. Placeholders uniquement dans la doc.
