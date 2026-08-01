@@ -3,7 +3,7 @@
 Complément d'**ADR-030**. La décision de parcours et de données est dans l'ADR ;
 ce document porte les choix d'interface et le comportement des composants.
 
-Maquette interactive (écrans 1→4 fonctionnels) :
+Maquette interactive (écrans 1→4 et 6 fonctionnels) — révision 5 :
 <https://claude.ai/code/artifact/8275bfd1-b83d-490f-80c4-eada6d3d4fc3>
 
 ## Cadre
@@ -41,7 +41,11 @@ oblige à remonter pour décider.
 | **Groupe structurel** | Les 3 options d'ossature dans un cadre distinct, mention en tête du groupe | La contrainte porte sur le groupe, pas sur chaque ligne — le dire une fois au bon niveau |
 | **Filtrage par modèle** | Option incompatible **absente**, jamais grisée | Une option grisée invite à demander pourquoi ; une option absente ne pose pas la question (§15) |
 | **Mention + dépliant** | Mention courte toujours visible ; détail au clic/toucher, atteignable au clavier | Une bulle au survol n'existe pas sur un téléphone (§10) |
-| **Chip de zone** | Zone de transport déduite et affichée, jamais saisie | Seul calcul automatique du configurateur (§5) |
+| **Transport au km** | Distance déduite de la pré-analyse, détail du calcul affiché (grutage + km × €/km) | Seul calcul automatique ; varie avec le poids du modèle, donc se recalcule au changement d'unité |
+| **Sélecteur de numéro** | 6 cases, confirmés barrés, le vôtre en évidence ; le CTA devient « Réserver le n° 04 » | Seul FOMO autorisé par le §6 : rareté réelle et vérifiable, jamais de compte à rebours |
+| **« Demandé » après le choix** | Un numéro déjà demandé reste libre ; l'information n'apparaît qu'une fois ce numéro sélectionné | Un 3ᵉ état sur la grille n'est pas actionnable, crée de l'hésitation au pire endroit du tunnel et brouille le compteur |
+| **Téléphone à indicatif** | Drapeau + préfixe + numéro dans une seule pilule (`react-phone-number-input`, `defaultCountry="FR"`) | Composant déjà en place dans `Reservation.tsx` — pas de nouveau motif à apprendre |
+| **Porte conditionnelle** | CTA inactif tant que les CGV ne sont pas cochées, motif écrit sous le bouton | Un bouton qui refuse silencieusement laisse chercher l'erreur (§7 : case jamais pré-cochée) |
 
 ## Adaptation
 
@@ -51,6 +55,9 @@ oblige à remonter pour décider.
 | Barre de prix | Ancrée bas, safe-area | Panneau collant en colonne droite |
 | Progression | 7 filets | Étapes nommées, cliquables en arrière |
 | Modèles | Cartes empilées | Deux cartes côte à côte, visuel agrandi |
+| Pré-analyse | Champ pleine largeur, bouton dessous sous 340 px | Champ + bouton sur une ligne |
+| Numéros de série | 6 cases en grille | 6 cases alignées, plus hautes |
+| Coordonnées | Prénom/Nom sur une ligne, reste empilé | Deux colonnes |
 | Cibles tactiles | ≥ 48 px | Survol autorisé **en plus** du clic, jamais à sa place |
 
 ## Accessibilité — non négociable
@@ -68,6 +75,29 @@ Trois cibles tactiles pleine largeur, chacune avec sa situation explicitée. La
 troisième — « un logement indépendant sur un terrain nu » — remplace le corps
 par le bloc « prochainement » et **retire la barre de prix** : aucun montant
 n'est jamais affiché sur cette branche. Critère de recette n°1 (§16).
+
+## Écran 1 — pré-analyse du terrain
+
+Le champ « Votre situation terrain » est repris tel quel : même placeholder
+(`Ex : 12 rue de la Paix, 64100 Bayonne`), même bascule vers le numéro de
+parcelle, même bouton « Pré-analyser ». Il est placé **après le choix du modèle
+et avant le total** : une seule saisie rend le zonage PLU et la distance de
+transport, donc elle doit précéder le prix.
+
+Tant que l'adresse n'est pas saisie, la ligne transport reste « à estimer » et
+n'entre pas au total.
+
+## Écran 6 — réserver un numéro, sans paiement
+
+Le CTA dit « Réserver ce numéro » : l'écran doit donc montrer **lequel**. Les six
+numéros de la Série 01 sont affichés, les confirmés barrés et non cliquables.
+
+Le formulaire fait quatre champs, tous obligatoires, puis deux cases dont aucune
+n'est pré-cochée : opt-in email **facultatif**, acceptation des CGV
+**obligatoire**. Le bouton reste inactif tant que la seconde n'est pas cochée.
+
+Aucun paiement à cet écran — le devis et le lien arrivent après l'appel de
+qualification.
 
 ## Ce qui reste ouvert
 
