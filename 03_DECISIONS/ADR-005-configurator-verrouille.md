@@ -1,6 +1,6 @@
 # ADR-005 — Configurator / pricing 3 couches verrouillé
 
-- **Statut** : Accepté (guardrail) — **amendé par ADR-020** (2026-06-16)
+- **Statut** : **Remplacé → ADR-030** (2026-08-01) — **amendé par ADR-020** (2026-06-16)
 - **Date** : 2026-06-16
 - **Phase** : 1
 - **Faisabilité** : ✅ Guardrail
@@ -31,3 +31,15 @@ Les intégrations Phase 4 (Stripe ADR-008) **consomment** le store sans le réé
 suspendu, `terrainMode` démarre sur `"have"` et le mode `"pack"` est verrouillé dans le store.
 **Le verrou de pricing tient** : `optionsTotal`, `houseTotal`, `delivery`, `grandTotal` et la
 logique 3 couches sont inchangés. La modification est strictement UI / parcours.
+
+## Remplacement 2026-08-01 — ADR-030
+
+Le verrou posé par cet ADR est **levé**. `Configurator.tsx` et `config-store.tsx`
+sont réécrits par ADR-030 : parcours en 7 écrans, grilles pilotées par données,
+`perM2` et `terrassePerM2` supprimés du modèle de calcul.
+
+La règle qui prend la relève n'est plus « ne pas toucher » mais **« ne jamais coder
+les grilles en dur »** : prix, paliers, options et volume de série doivent rester
+éditables sans redéploiement (§12 de la spec — « elles bougeront »).
+
+Ne plus amender ce fichier.

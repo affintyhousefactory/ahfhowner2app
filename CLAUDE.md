@@ -32,7 +32,7 @@ Toute décision structurante (archi, intégration externe, change de marque/desi
 
 ## Guardrails (ne pas régresser)
 - **Domaine « Mandataire & Terrain » suspendu** (ADR-028) — portail mandataire, onboarding, affectation lead↔mandataire, GED mandataire, écrans admin Mandataires/Affectations/GED/Terrains, `/terrains`, `/rechercheterrain`, `/terrain`, `/cgu-mandataire` et le mode « Je cherche un terrain » du configurateur sont **masqués derrière `FEATURES.mandataire`** (`src/lib/features.ts`). **Ne jamais re-linker ni ré-exposer une de ces surfaces sans lever le flag et amender ADR-028.** Toute nouvelle surface du domaine doit naître gardée (`guardMandataire()` / `mandataireDisabled()`).
-- **Configurator / pricing verrouillé** (ADR-005) — ne pas toucher `Configurator.tsx` / `config-store.tsx`. Seule dérogation actée : le retrait UI du sélecteur terrain (ADR-028), pricing inchangé.
+- **Configurateur — verrou LEVÉ** (ADR-030 remplace ADR-005 et ADR-020). `Configurator.tsx` et `config-store.tsx` sont réécrits : parcours en 7 écrans, grilles pilotées par données, `perM2`/`terrassePerM2` supprimés. Nouvelle règle : **ne jamais coder les grilles en dur** — prix, paliers et options sont éditables sans redéploiement (§12 de la spec, « elles bougeront »).
 - **Perf & média** (ADR-006) — vidéos via `useVisible` (sauf Hero) ; bundle 3D (`arko3d/*`) isolé à `/viewer` ; Lighthouse 100, LCP < 0.8s.
 - **Next 16 « non standard »** — lire `node_modules/next/dist/docs/` avant tout code (cf. AGENTS.md).
 
