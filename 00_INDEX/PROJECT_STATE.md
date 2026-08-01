@@ -122,7 +122,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 002 | Charte Affinity (`@theme`) | **Accepté — valider Albert** | ⚠️ |
 | 003 | Secrets & montants via env | Accepté (partiel) | ✅ |
 | 004 | Règles de marque absolues | **Remplacé → ADR-029** | ✅ |
-| 005 | Configurator/pricing verrouillé | Accepté (guardrail) | ✅ |
+| 005 | Configurator/pricing verrouillé | **Remplacé → ADR-030** | ✅ |
 | 006 | Guardrails perf & média | Accepté (guardrail) | ✅ |
 | 007 | Supabase schémas + RLS | Proposé | ✅ |
 | 008 | Réservation paiement (hors-ligne — Stripe retiré MVP) | **Différé** | ⚪ |
@@ -137,7 +137,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 017 | Enrichissement terrain Anthropic | Différé (option) | ⚪ |
 | 018 | Socle SEO | **Accepté — P0+P1 livrés** | ✅ |
 | 019 | Gouvernance cognitive INDEX/HUB/_RUNTIME | Accepté | ✅ |
-| 020 | Configurateur multi-produit (amende 005) | Accepté | ✅ |
+| 020 | Configurateur multi-produit (amende 005) | **Remplacé → ADR-030** | ✅ |
 | 021 | Architecture multi-pages + nav Tesla | Accepté | ✅ |
 | 022 | Split produit One/Max + repositionnement | **Accepté — valider Albert** | 🟠 |
 | 023 | Déploiement production Vercel | Proposé | ✅ |
@@ -146,7 +146,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
 | 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** | ✅ |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
-| 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — mise en ligne conditionnée §17** | 🟠 |
+| 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** | ✅ |
+| 030 | **Configurateur v2** — 7 écrans, grilles pilotées par données (remplace 005 et 020) | **Accepté — en développement** | 🟠 |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -168,6 +169,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-01 (ADR-030 — configurateur v2 : parcours en 7 écrans + proposition d'interface)** — ADR-030 écrite et acceptée. Le configurateur passe d'un écran unique à un **tunnel en 7 écrans** (filtre d'usage, modèle, ambiance, terrasse, options, terrain, récapitulatif). **Le verrou ADR-005 est levé** : `Configurator.tsx` et `config-store.tsx` sont réécrits, `perM2` et `terrassePerM2` disparaissent au profit de grilles à paliers. La règle qui remplace « ne pas toucher » est **« ne jamais coder les grilles en dur »** — prix, paliers, options et volume de série restent éditables sans redéploiement (§12 : « elles bougeront », et §17.4 avertit que les montants d'options sont provisoires). ADR-005 et ADR-020 marquées **Remplacées**, guardrails de `CLAUDE.md` et `AGENTS.md` réécrits. **Écran 0 = filtre, pas confort** : la branche « terrain nu » n'affiche jamais de prix et termine le parcours (critère de recette §16 n°1). **Options** filtrées par le champ `modeles` — une option incompatible est *absente*, jamais grisée (§15) ; les 3 options structurelles sont groupées avec leur verrou « non modifiable après réservation ». **Transport par zone** = seul calcul automatique. **Proposition d'interface** livrée dans `docs/design/configurateur-v2.md` + maquette interactive (écrans 1→4 fonctionnels) : barre de prix ancrée, delta transitoire, paliers proportionnels sans prix au m², mention courte toujours visible + dépliant accessible au clavier. Mobile d'abord, cible **390 px**, cibles tactiles ≥ 48 px, budget 2,5 s en 4G. **Visuels actuels conservés** (décision Richard). **2 arbitrages ouverts**, câblés comme des drapeaux : nombre d'ambiances au lancement (§17.3) et bloc rentabilité dans le parcours particulier (§17.5). Les écrans 5 et 6 relèvent d'ADR-032 et ADR-031.
 
 **2026-07-31 (ADR-029 — repositionnement produit & marque, précondition du chantier configurateur v2)** — Albert a produit une spécification complète du configurateur (`docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md`, v1 du 30/07, 17 sections, versée au dépôt en PR #63 avec l'accès Drive déclaré dans `project-access.json`). Le document **redéfinit le produit, le cadre de vente et le vocabulaire de marque**, bien au-delà du configurateur. **ADR-029 écrite et acceptée** : cadre de vente restreint à l'annexe sur parcelle bâtie et à l'hébergement professionnel — le logement indépendant sur terrain nu, promesse actuelle du site, est **fermé** (« prochainement », sans prix ni explication, critère de recette §16) ; vocabulaire inversé — « maison », « maison individuelle », « résidence principale », « clé en main » deviennent **interdits** (105 occurrences de « maison » dans le code), remplacés par module / unité / studio / hébergement / annexe ; prix **77 900 / 99 900 €**, réservation **2 000 €** + acompte 30 %, **Série 01 = 6 unités**. **ADR-004 est remplacée** par ADR-029 (ses règles « architecte intégrée » et « Puigbo » et sa blocklist historique sont reprises ; les deux blocklists sont cumulatives — « module » imposé, « modulaire » toujours interdit). Périmètre d'application : tout le site **sauf les pages légales** (§17.10 + risque ADR-015 ouvert). **Trois points d'arbitrage remontés à Howner** : (1) la spec se contredit sur « clé en main » — le §1 l'emploie, les §2/§12/§16 l'interdisent ; (2) « module » imposé vs « modulaire » interdit, lecture cumulative à confirmer ; (3) « une seule identité Howner, y compris mentions légales » se heurte à l'obligation légale de nommer l'éditeur réel, **Affinity House Factory SAS** — inapplicable à la lettre sans validation juridique. **Pas d'alerte Albert** : il est l'auteur de la décision. **Nouveau risque 🔴 consigné** : les prix publics sont faux de 18 000 € sur l'Arko One. Suite : ADR-030 → 034 (configurateur v2, créneaux & paiement, dossier terrain, back-office, espace client), plan de chantier en affinage.
 
