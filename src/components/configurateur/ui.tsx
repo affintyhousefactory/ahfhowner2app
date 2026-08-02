@@ -171,24 +171,28 @@ export function Scene({
           l'ambiance suivante pour que le changement soit instantané. Un montage
           conditionnel ferait apparaître un carré vide le temps du téléchargement,
           c'est-à-dire exactement au moment où l'on compare deux teintes. */}
-      {ambiances.map((a) => {
-        const actif = a.id === ambianceActive;
-        return (
-          <Image
-            key={a.id}
-            src={a.visuel}
-            alt={actif ? `${nom} — ambiance ${a.nom}` : ""}
-            aria-hidden={!actif}
-            fill
-            priority={actif}
-            sizes="(max-width: 1024px) 100vw, 60vw"
-            className={cn(
-              "object-cover transition-opacity duration-500 motion-reduce:transition-none",
-              actif ? "opacity-100" : "opacity-0",
-            )}
-          />
-        );
-      })}
+      {/* Calque `absolute` explicite : `fill` exige un parent en position
+          absolute/fixed/relative, et la scène est en `sticky`. */}
+      <div className="absolute inset-0">
+        {ambiances.map((a) => {
+          const actif = a.id === ambianceActive;
+          return (
+            <Image
+              key={a.id}
+              src={a.visuel}
+              alt={actif ? `${nom} — ambiance ${a.nom}` : ""}
+              aria-hidden={!actif}
+              fill
+              priority={actif}
+              sizes="(max-width: 1024px) 100vw, 60vw"
+              className={cn(
+                "object-cover transition-opacity duration-500 motion-reduce:transition-none",
+                actif ? "opacity-100" : "opacity-0",
+              )}
+            />
+          );
+        })}
+      </div>
 
       {/* Voile : le nom du module et les pastilles doivent rester lisibles
           quelle que soit la teinte du bardage derrière eux. */}
@@ -197,7 +201,15 @@ export function Scene({
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/10 to-ink/70"
       />
 
-      <div className="relative flex items-start justify-between gap-3">
+      {/* Une fois la scène calée en haut, elle passe sous l'en-tête du tunnel :
+          on lui réserve la hauteur que celui-ci occupe réellement (`--cfg-nav`,
+          nulle dès qu'il s'est effacé) pour que le nom du module ne finisse
+          jamais derrière le logo. Hors calage, aucune réserve — la scène est
+          déjà sous l'en-tête dans le flux. */}
+      <div
+        style={compact ? { paddingTop: "var(--cfg-nav, 0px)" } : undefined}
+        className="relative flex items-start justify-between gap-3 transition-[padding] duration-300 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none"
+      >
         <div className="min-w-0">
           <p className="truncate text-[1.15rem] font-semibold tracking-tight text-white lg:text-[1.5rem]">
             {nom}

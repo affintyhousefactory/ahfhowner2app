@@ -116,6 +116,21 @@ sur `/configurer/v2?produit=one|max`. Le paramètre est lu **côté serveur** pa
 page ; `useSearchParams` imposerait une frontière Suspense et ferait basculer le
 parcours entier en rendu client.
 
+**Sur 390 px, l'en-tête s'efface en descente et revient en montée.** La scène
+collante et l'en-tête se disputent la même bande de 64 px : empiler deux barres
+ne laisserait qu'un tiers d'écran aux options. L'en-tête sort donc du champ dès
+qu'on descend et rentre au premier geste vers le haut — la porte de sortie est
+toujours à un geste, jamais à un aller-retour. Seuil de 6 px sur le sens du
+défilement : l'inertie de Lenis produit des micro-inversions qui, sans seuil,
+feraient clignoter la barre.
+
+La réserve que l'en-tête occupe au-dessus de la scène transite par une variable
+CSS (`--cfg-nav`, publiée sur la racine) : la scène vit dans la page, l'en-tête
+dans la mise en page, et c'est la seule couture qui les relie sans remonter un
+état partagé jusqu'au groupe de routes. Nulle quand l'en-tête s'est effacé, nulle
+aussi au-delà de 1024 px où le comportement ne s'applique pas — la place n'y
+manque pas et un en-tête mobile y serait du bruit.
+
 ## Ambiances — teinte et rendu
 
 Chaque ambiance porte son `visuel` et sa `teinte` dans la grille (`config.ts`),
