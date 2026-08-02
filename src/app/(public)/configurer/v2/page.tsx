@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ConfigurateurV2 } from "@/components/configurateur/Configurateur";
+import type { ModeleId } from "@/lib/configurateur/config";
 
 /**
  * Configurateur v2 — exposé sur une route dédiée le temps de la validation.
@@ -17,10 +18,22 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function ConfigurerV2Page() {
+/**
+ * `?produit=one|max` est lu ici, côté serveur : la présélection arrive dans le
+ * HTML initial. Le parcours reste rendu côté serveur — `useSearchParams` aurait
+ * exigé une frontière Suspense et fait basculer la page en rendu client.
+ */
+export default async function ConfigurerV2Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ produit?: string | string[] }>;
+}) {
+  const { produit } = await searchParams;
+  const modeleInitial: ModeleId = produit === "one" || produit === "max" ? produit : "max";
+
   return (
     <main id="main-content" className="pt-16 md:pt-[4.5rem]">
-      <ConfigurateurV2 />
+      <ConfigurateurV2 modeleInitial={modeleInitial} />
     </main>
   );
 }

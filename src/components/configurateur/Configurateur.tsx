@@ -15,7 +15,6 @@
  */
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { MENTIONS } from "@/lib/configurateur/mentions";
 import type { ModeleId } from "@/lib/configurateur/config";
 import { ConfigurateurProvider, useConfigurateur } from "./store";
@@ -117,12 +116,15 @@ function Parcours() {
   );
 }
 
-export function ConfigurateurV2() {
-  const params = useSearchParams();
-  const p = params.get("produit");
-  /* Présélection depuis le CTA « Réserver » du menu Modules. */
-  const modeleInitial: ModeleId = p === "one" || p === "max" ? p : "max";
-
+/**
+ * Présélection depuis le CTA « Réserver » du menu Modules.
+ *
+ * `?produit=` est lu côté serveur par la page et passé en prop : `useSearchParams`
+ * imposerait une frontière Suspense et ferait tomber le parcours entier en rendu
+ * client, et la lecture de `window.location` en effet (cf. `ProductSync`) ferait
+ * clignoter le module par défaut avant la présélection.
+ */
+export function ConfigurateurV2({ modeleInitial = "max" }: { modeleInitial?: ModeleId }) {
   return (
     <ConfigurateurProvider modeleInitial={modeleInitial}>
       <Parcours />
