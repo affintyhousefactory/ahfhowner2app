@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { BRAND, reserverHref, type Product } from "@/lib/site";
-import { FEATURES } from "@/lib/features";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Gauge } from "@/components/ui/Gauge";
 import { HeroBackdrop, type HeroBackdropVariant } from "@/components/effects/HeroBackdrop";
@@ -105,24 +104,21 @@ export function ProductHero({
               {product.tagline}
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
-              À partir de {product.pricing.base.toLocaleString("fr-FR")} € — clé
-              en main, prête à vivre.
+              À partir de {product.pricing.base.toLocaleString("fr-FR")} € —
+              livré prêt à vivre.
             </p>
           </div>
 
           <div className="flex flex-col gap-5 md:col-span-5 md:items-end">
+            {/* Un seul CTA, comme sur l'accueil. « Tester mon terrain » retiré
+                le 2026-08-02 : `/terrain` est suspendue (ADR-028) et son repli
+                menait au configurateur v1, que plus aucun autre bouton ne
+                dessert. La vérification de parcelle vit dans le parcours, en
+                section 05. */}
             <div className="flex flex-wrap items-center gap-3 md:justify-end">
               <Button href={reserverHref(product.key)} variant="accent">
                 Réserver — {BRAND.deposit.toLocaleString("fr-FR")} €
                 <Arrow />
-              </Button>
-              {/* `/terrain` est suspendue (ADR-028) — repli sur le configurateur,
-                  qui porte l'analyse PLU sous « J'ai un terrain ». */}
-              <Button
-                href={FEATURES.mandataire ? "/terrain" : `/configurer?produit=${product.key}`}
-                variant="outline"
-              >
-                Tester mon terrain
               </Button>
             </div>
             <Gauge

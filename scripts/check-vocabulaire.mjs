@@ -71,15 +71,37 @@ for (const cible of CIBLES) {
     if (EXCLUS.some((e) => rel.startsWith(e))) continue;
 
     const lignes = readFileSync(chemin, "utf-8").split("\n");
+
+    // Le contrôle s'exerce sur le texte **tel que le visiteur le lit**, pas tel
+    // qu'il est écrit. Un terme proscrit coupé par un retour à la ligne JSX
+    // — « … € — clé\n  en main … » — échappait à une lecture ligne à ligne :
+    // le rendu affichait « clé en main » sur /arko-one et /arko-max pendant que
+    // le contrôle annonçait « conforme » (constaté le 2026-08-02).
+    // On aplatit donc les blancs, en gardant de quoi retrouver la ligne.
+    const debuts = [];
+    let plat = "";
     lignes.forEach((ligne, i) => {
       // Les commentaires citant la règle ne sont pas des infractions.
-      if (/ADR-029|ADR-004/.test(ligne)) return;
-      for (const { mot, libelle } of PROSCRITS) {
-        if (new RegExp(`\\b${mot}\\b`, "i").test(ligne)) {
-          infractions.push({ fichier: rel, ligne: i + 1, terme: libelle, texte: ligne.trim().slice(0, 100) });
-        }
-      }
+      const utile = /ADR-029|ADR-004/.test(ligne) ? "" : ligne;
+      debuts.push({ index: plat.length, ligne: i + 1, texte: ligne });
+      plat += utile + " ";
     });
+
+    const ligneDe = (index) => {
+      let trouve = debuts[0];
+      for (const d of debuts) {
+        if (d.index > index) break;
+        trouve = d;
+      }
+      return trouve;
+    };
+
+    for (const { mot, libelle } of PROSCRITS) {
+      for (const m of plat.matchAll(new RegExp(`\\b${mot}\\b`, "gi"))) {
+        const { ligne, texte } = ligneDe(m.index);
+        infractions.push({ fichier: rel, ligne, terme: libelle, texte: texte.trim().slice(0, 100) });
+      }
+    }
   }
 }
 
