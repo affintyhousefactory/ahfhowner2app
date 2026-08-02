@@ -3,13 +3,14 @@
 /**
  * État du parcours configurateur v2 (ADR-030).
  *
+ * Le parcours n'est plus un stepper mais **une colonne de sections dépliantes**
+ * à côté d'une scène collante — arbitrage du 2026-08-01. Il n'y a donc plus
+ * d'étape courante : toutes les sections coexistent, l'état ne porte que les
+ * choix.
+ *
  * Toutes les grilles viennent de `loadConfig()` — jamais de constante lue
  * directement. Le calcul est local : « Le configurateur ne doit pas dépendre
- * d'un appel réseau pour recalculer un prix : toutes les grilles sont chargées
- * une fois » (§14).
- *
- * Ne remplace pas `config-store.tsx` tant que l'ancien parcours vit : les deux
- * coexistent le temps de la bascule, puis l'ancien est retiré.
+ * d'un appel réseau pour recalculer un prix » (§14).
  */
 
 import {
@@ -36,39 +37,37 @@ import {
   type UsageId,
 } from "@/lib/configurateur/config";
 
-/** Écrans du parcours — l'ordre est celui du §3. */
-export const ETAPES = [
-  { n: 0, cle: "usage", titre: "Votre projet" },
-  { n: 1, cle: "modele", titre: "Votre unité" },
+/**
+ * Ordre des sections. Le module ouvre le parcours et arrive présélectionné
+ * depuis le menu ; l'implantation et le terrain passent en avant-dernier,
+ * juste avant la réservation, là où l'engagement se précise.
+ */
+export const SECTIONS = [
+  { n: 1, cle: "module", titre: "Le module" },
   { n: 2, cle: "ambiance", titre: "Ambiance" },
   { n: 3, cle: "terrasse", titre: "Terrasse" },
   { n: 4, cle: "options", titre: "Options" },
-  { n: 5, cle: "terrain", titre: "Dossier terrain" },
-  { n: 6, cle: "recap", titre: "Récapitulatif" },
+  { n: 5, cle: "terrain", titre: "Votre situation terrain" },
+  { n: 6, cle: "reservation", titre: "Réserver un numéro" },
 ] as const;
 
 export type PreAnalyse = {
   adresse: string;
-  /** Zonage indicatif — jamais présenté comme un verdict de constructibilité. */
   zone: string | null;
   parcelle: string | null;
-  /** Distance routière depuis l'atelier, en km. Entre dans le transport. */
   distanceKm: number | null;
 };
 
 type Ctx = {
   cfg: ConfigurateurConfig;
 
-  etape: number;
-  aller: (n: number) => void;
-  suivant: () => void;
-  precedent: () => void;
-
   usage: UsageId | null;
   setUsage: (u: UsageId) => void;
+  /** Branche fermée : ni prix, ni adresse, ni réservation. */
+  brancheFermee: boolean;
+
   quantite: number;
   setQuantite: (n: number) => void;
-  /** Parcours pro au-delà du seuil : le récapitulatif bascule sur devis dédié. */
   devisDedie: boolean;
 
   modele: ModeleId;
@@ -86,7 +85,6 @@ type Ctx = {
   numero: number | null;
   setNumero: (n: number | null) => void;
 
-  /* dérivés */
   paliers: Palier[];
   optionsDisponibles: Option[];
   optionsStructurelles: Option[];
@@ -101,29 +99,26 @@ type Ctx = {
 
 const ConfigCtx = createContext<Ctx | null>(null);
 
-export function ConfigurateurProvider({ children }: { children: ReactNode }) {
+export function ConfigurateurProvider({
+  children,
+  modeleInitial = "max",
+}: {
+  children: ReactNode;
+  /** Présélection depuis le menu Modules (`?produit=one|max`). */
+  modeleInitial?: ModeleId;
+}) {
   const cfg = useMemo(() => loadConfig(), []);
 
-  const [etape, setEtape] = useState(0);
-  const [usage, setUsageState] = useState<UsageId | null>(null);
+  const [usage, setUsage] = useState<UsageId | null>(null);
   const [quantite, setQuantite] = useState(1);
-  const [modele, setModeleState] = useState<ModeleId>("max");
+  const [modele, setModeleState] = useState<ModeleId>(modeleInitial);
   const [ambiance, setAmbiance] = useState<string>(cfg.ambiances[0].id);
   const [terrasse, setTerrasse] = useState<PalierId>("sans");
   const [options, setOptions] = useState<string[]>([]);
   const [preAnalyse, setPreAnalyse] = useState<PreAnalyse | null>(null);
   const [numero, setNumero] = useState<number | null>(null);
 
-  const aller = useCallback((n: number) => {
-    setEtape(Math.max(0, Math.min(6, n)));
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-  const suivant = useCallback(() => aller(etape + 1), [aller, etape]);
-  const precedent = useCallback(() => aller(etape - 1), [aller, etape]);
-
-  const setUsage = useCallback((u: UsageId) => setUsageState(u), []);
-
-  /* Changer de modèle purge les options devenues incompatibles : le poêle
+  /* Changer de module purge les options devenues incompatibles : le poêle
      n'existe pas sur l'Arko One, et une option fantôme fausserait le total. */
   const setModele = useCallback(
     (m: ModeleId) => {
@@ -155,12 +150,9 @@ export function ConfigurateurProvider({ children }: { children: ReactNode }) {
 
     return {
       cfg,
-      etape,
-      aller,
-      suivant,
-      precedent,
       usage,
       setUsage,
+      brancheFermee: usage === "logement_nu",
       quantite,
       setQuantite,
       devisDedie: Boolean(seuil && quantite >= seuil),
@@ -187,10 +179,7 @@ export function ConfigurateurProvider({ children }: { children: ReactNode }) {
       transportDetailPerKm: transportPerKm(m),
       total: prixBase + prixTerrasse + prixOptions + (transport ?? 0),
     };
-  }, [
-    cfg, etape, aller, suivant, precedent, usage, setUsage, quantite, modele,
-    setModele, ambiance, terrasse, options, toggleOption, preAnalyse, numero,
-  ]);
+  }, [cfg, usage, quantite, modele, setModele, ambiance, terrasse, options, toggleOption, preAnalyse, numero]);
 
   return <ConfigCtx.Provider value={value}>{children}</ConfigCtx.Provider>;
 }

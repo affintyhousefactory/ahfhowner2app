@@ -85,3 +85,18 @@ export const SOCLE = {
 /** Opt-in email — texte repris de `ContactForm.tsx`, inchangé (ADR-026). */
 export const OPTIN_TEXTE =
   "J'accepte de recevoir des informations et actualités sur l'ARKO par email. Désinscription possible à tout moment.";
+
+/**
+ * Branche « terrain nu » — CTA vers le formulaire de contact.
+ *
+ * Sujet « Autre demande » et message pré-rempli. ADR-029 : Howner est la seule
+ * entité citée côté client, jamais une autre raison sociale.
+ *
+ * ⚠ `ContactForm` ne lit aujourd'hui que `?numero=` et `?ref=` — la lecture de
+ * `sujet` et `message` est ajoutée avec cette fonctionnalité.
+ */
+export const CONTACT_TERRAIN_NU_MESSAGE =
+  "Je souhaite être informé des options personnalisées que Howner peut me proposer en terme de recherche de terrain.";
+
+export const CONTACT_TERRAIN_NU =
+  `/contact?sujet=autre&message=${encodeURIComponent(CONTACT_TERRAIN_NU_MESSAGE)}`;

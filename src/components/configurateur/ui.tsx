@@ -3,76 +3,64 @@
 /**
  * Composants partagés du configurateur v2 (ADR-030, `docs/design/configurateur-v2.md`).
  *
- * Trois règles gouvernent ce fichier :
+ * Règles qui gouvernent ce fichier :
  * — toute commande est un <button> porteur de son état ARIA, jamais un <div>
  *   cliquable ;
  * — une mention essentielle est visible sans interaction, le détail s'ouvre au
  *   clic ou au toucher, jamais au seul survol (§10) ;
- * — cibles tactiles ≥ 48 px, cible de conception 390 px (§14).
+ * — cibles tactiles ≥ 44 px sur les en-têtes, ≥ 48 px sur les CTA.
  */
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
-import { ETAPES, eur } from "./store";
+import { eur } from "./store";
 import type { MentionTexte } from "@/lib/configurateur/mentions";
 
 /* ------------------------------------------------------------------ */
-/* Progression                                                         */
+/* Section dépliante — le résumé remplace le compteur d'étapes         */
 /* ------------------------------------------------------------------ */
 
-export function Progression({ etape, onAller }: { etape: number; onAller: (n: number) => void }) {
-  return (
-    <nav aria-label="Progression" className="flex gap-1">
-      {ETAPES.map((e) => {
-        const atteinte = e.n <= etape;
-        const cliquable = e.n < etape;
-        return (
-          <button
-            key={e.n}
-            type="button"
-            disabled={!cliquable}
-            onClick={() => cliquable && onAller(e.n)}
-            aria-label={`Étape ${e.n + 1} sur ${ETAPES.length} — ${e.titre}`}
-            aria-current={e.n === etape ? "step" : undefined}
-            className={cn(
-              "h-1.5 flex-1 rounded-full transition-colors",
-              atteinte ? "bg-accent" : "bg-line",
-              cliquable ? "cursor-pointer hover:opacity-80" : "cursor-default",
-            )}
-          />
-        );
-      })}
-    </nav>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Coque d'écran                                                       */
-/* ------------------------------------------------------------------ */
-
-export function Ecran({
+export function Section({
+  n,
   titre,
-  sous,
+  resume,
+  ouvertParDefaut,
   children,
 }: {
+  n: number;
   titre: string;
-  sous?: string;
+  /** Choix courant, lisible sans déplier. C'est ce qui remplace « étape 3/7 ». */
+  resume: string;
+  ouvertParDefaut?: boolean;
   children: ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-1">
-      <h2 className="text-[1.35rem] font-semibold tracking-tight text-ink md:text-[1.6rem]">
-        {titre}
-      </h2>
-      {sous && <p className="text-sm leading-relaxed text-muted">{sous}</p>}
-      <div className="mt-4 flex flex-col gap-3">{children}</div>
-    </section>
+    <details open={ouvertParDefaut} className="border-b border-line">
+      <summary className="flex min-h-[60px] cursor-pointer list-none items-center gap-3 px-4 py-3.5 transition-colors hover:bg-paper [&::-webkit-details-marker]:hidden">
+        <span className="w-[18px] shrink-0 font-mono text-[0.66rem] tracking-[0.08em] text-accent">
+          {String(n).padStart(2, "0")}
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="text-[0.94rem] font-semibold text-ink">{titre}</span>
+          <span className="truncate text-[0.76rem] text-muted">{resume}</span>
+        </span>
+        <svg
+          viewBox="0 0 10 6"
+          fill="none"
+          aria-hidden
+          className="h-2.5 w-2.5 shrink-0 text-muted transition-transform [details[open]_&]:rotate-180"
+        >
+          <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </summary>
+      <div className="flex flex-col gap-3 px-4 pb-4">{children}</div>
+    </details>
   );
 }
 
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="font-mono text-[0.68rem] uppercase tracking-[0.18em] text-muted">{children}</p>
+    <p className="font-mono text-[0.66rem] uppercase tracking-[0.18em] text-muted">{children}</p>
   );
 }
 
@@ -84,13 +72,13 @@ export function Mention({ texte }: { texte: MentionTexte }) {
   return (
     <div className="flex flex-col gap-1.5">
       {texte.courte && (
-        <p className="font-mono text-[0.66rem] leading-relaxed text-muted">{texte.courte}</p>
+        <p className="font-mono text-[0.64rem] leading-relaxed text-muted">{texte.courte}</p>
       )}
       <details className="border-t border-dashed border-line pt-1.5">
-        <summary className="flex min-h-[30px] cursor-pointer list-none items-center gap-1.5 text-xs font-medium text-accent [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-[28px] cursor-pointer list-none items-center text-xs font-medium text-accent [&::-webkit-details-marker]:hidden">
           Détail
         </summary>
-        <p className="pb-1 pt-1.5 text-[0.78rem] leading-relaxed text-muted">{texte.detail}</p>
+        <p className="pb-1 pt-1.5 text-[0.76rem] leading-relaxed text-muted">{texte.detail}</p>
       </details>
     </div>
   );
@@ -119,7 +107,7 @@ export function Choix({
       aria-pressed={actif}
       onClick={onClick}
       className={cn(
-        "flex min-h-[56px] w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition-all",
+        "flex min-h-[52px] w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition-all",
         actif
           ? "border-accent bg-accent/[0.07] shadow-[inset_0_0_0_1px_var(--color-accent)]"
           : "border-line bg-surface hover:border-accent/45",
@@ -128,50 +116,92 @@ export function Choix({
       <span
         aria-hidden
         className={cn(
-          "grid h-5 w-5 shrink-0 place-items-center rounded-full border transition-all",
+          "grid h-[19px] w-[19px] shrink-0 place-items-center rounded-full border transition-all",
           actif ? "border-accent bg-accent" : "border-line",
         )}
       >
-        <svg width="11" height="11" viewBox="0 0 12 12" className={actif ? "opacity-100" : "opacity-0"}>
-          <path
-            d="M2 6.2l2.6 2.6L10 3.4"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+        <svg width="10" height="10" viewBox="0 0 12 12" className={actif ? "opacity-100" : "opacity-0"}>
+          <path d="M2 6.2l2.6 2.6L10 3.4" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[0.95rem] font-semibold text-ink">{titre}</span>
-        {detail && <span className="text-xs leading-snug text-muted">{detail}</span>}
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="text-[0.9rem] font-semibold text-ink">{titre}</span>
+        {detail && <span className="text-[0.74rem] leading-snug text-muted">{detail}</span>}
       </span>
-      {prix && (
-        <span className="whitespace-nowrap font-mono text-[0.82rem] tabular-nums text-ink">{prix}</span>
-      )}
+      {prix && <span className="whitespace-nowrap font-mono text-[0.8rem] tabular-nums text-ink">{prix}</span>}
     </button>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Barre de prix ancrée — delta transitoire                            */
+/* Scène collante — l'objet configuré                                  */
+/* ------------------------------------------------------------------ */
+
+export function Scene({
+  nom,
+  sous,
+  tag,
+  pastilles,
+  compact,
+}: {
+  nom: string;
+  sous: string;
+  tag: string;
+  pastilles: string[];
+  compact: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "sticky top-0 z-10 flex flex-col justify-between border-b border-line bg-gradient-to-br from-accent/[0.14] to-transparent p-4 transition-[height] duration-200 motion-reduce:transition-none",
+        "lg:top-3 lg:h-[min(calc(100svh-1.5rem),640px)] lg:self-start lg:border-b-0 lg:border-r lg:p-5",
+        compact ? "h-[132px]" : "h-[232px]",
+        "lg:!h-[min(calc(100svh-1.5rem),640px)]",
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-[1.15rem] font-semibold tracking-tight text-ink lg:text-[1.5rem]">
+            {nom}
+          </p>
+          {!compact && <p className="truncate text-[0.8rem] text-muted">{sous}</p>}
+        </div>
+        <span className="shrink-0 rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-muted">
+          {tag}
+        </span>
+      </div>
+      <div className={cn("flex flex-wrap gap-1.5 transition-opacity", compact && "pointer-events-none opacity-0 lg:pointer-events-auto lg:opacity-100")}>
+        {pastilles.map((p) => (
+          <span
+            key={p}
+            className="rounded-full border border-line bg-surface px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.06em] text-muted"
+          >
+            {p}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Barre de prix collante — delta transitoire                          */
 /* ------------------------------------------------------------------ */
 
 export function BarrePrix({
   total,
   mention,
   action,
-  onAction,
   actionDesactivee,
-  motifBlocage,
+  motif,
+  onAction,
 }: {
   total: number;
   mention: string;
   action: string;
-  onAction: () => void;
   actionDesactivee?: boolean;
-  motifBlocage?: string;
+  motif: string;
+  onAction: () => void;
 }) {
   const [delta, setDelta] = useState<number | null>(null);
   const precedent = useRef<number | null>(null);
@@ -187,42 +217,36 @@ export function BarrePrix({
   }, [total]);
 
   return (
-    <div className="sticky bottom-0 z-20 border-t border-line bg-paper/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
-      <div className="mx-auto flex max-w-2xl flex-col gap-2">
-        <div className="flex items-center justify-between gap-3">
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-muted">
-            {mention}
-          </span>
-          <span
-            aria-live="polite"
-            className={cn(
-              "font-mono text-[0.7rem] text-accent transition-all",
-              delta === null ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100",
-            )}
-          >
-            {delta !== null && `${delta > 0 ? "+ " : "− "}${eur(Math.abs(delta))}`}
-          </span>
-        </div>
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[1.3rem] font-semibold tabular-nums tracking-tight text-ink">
-            {eur(total)}
-          </span>
-          <button
-            type="button"
-            onClick={onAction}
-            disabled={actionDesactivee}
-            className={cn(
-              "min-h-[48px] whitespace-nowrap rounded-xl px-5 text-[0.92rem] font-semibold text-white transition-opacity",
-              actionDesactivee ? "cursor-not-allowed bg-accent opacity-45" : "bg-accent hover:bg-accent-ink",
-            )}
-          >
-            {action}
-          </button>
-        </div>
-        {actionDesactivee && motifBlocage && (
-          <p className="text-center font-mono text-[0.62rem] text-muted">{motifBlocage}</p>
-        )}
+    <div className="sticky bottom-0 z-20 flex flex-col gap-2 border-t border-line bg-paper/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-muted">
+          {mention}
+        </span>
+        <span
+          aria-live="polite"
+          className={cn(
+            "font-mono text-[0.66rem] text-accent transition-all",
+            delta === null ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100",
+          )}
+        >
+          {delta !== null && `${delta > 0 ? "+ " : "− "}${eur(Math.abs(delta))}`}
+        </span>
       </div>
+      <span className="text-[1.3rem] font-semibold tabular-nums tracking-tight text-ink">
+        {eur(total)}
+      </span>
+      <button
+        type="button"
+        onClick={onAction}
+        disabled={actionDesactivee}
+        className={cn(
+          "min-h-[46px] w-full rounded-xl bg-accent px-4 text-[0.9rem] font-semibold text-white transition-opacity",
+          actionDesactivee ? "cursor-not-allowed opacity-45" : "hover:bg-accent-ink",
+        )}
+      >
+        {action}
+      </button>
+      <p className="text-center font-mono text-[0.6rem] text-muted">{motif}</p>
     </div>
   );
 }
