@@ -124,6 +124,14 @@ toujours à un geste, jamais à un aller-retour. Seuil de 6 px sur le sens du
 défilement : l'inertie de Lenis produit des micro-inversions qui, sans seuil,
 feraient clignoter la barre.
 
+**La scène ne rétrécit pas** (arbitrage Richard, 2026-08-02). Une hauteur qui
+tombe de 232 à 132 px recadre le rendu : sur un visuel 4:3, `object-cover`
+coupait le pied du module — terrasse et sol disparaissaient, et le module
+semblait remonter dans le cadre. Un tiers d'écran constant vaut mieux qu'un
+rendu qui s'ampute ; le sous-titre et les pastilles restent donc visibles en
+permanence. C'est l'escamotage de l'en-tête, et lui seul, qui rend de la place
+aux sections.
+
 La réserve que l'en-tête occupe au-dessus de la scène transite par une variable
 CSS (`--cfg-nav`, publiée sur la racine) : la scène vit dans la page, l'en-tête
 dans la mise en page, et c'est la seule couture qui les relie sans remonter un

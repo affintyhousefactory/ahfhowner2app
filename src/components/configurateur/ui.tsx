@@ -144,7 +144,7 @@ export function Scene({
   sous,
   tag,
   pastilles,
-  compact,
+  cale,
   ambiances,
   ambianceActive,
 }: {
@@ -152,18 +152,25 @@ export function Scene({
   sous: string;
   tag: string;
   pastilles: string[];
-  compact: boolean;
+  /**
+   * Scène calée en haut de l'écran. Ne change **pas** sa taille : elle réserve
+   * seulement la place de l'en-tête qui vient se poser dessus.
+   */
+  cale: boolean;
   /** Toutes les ambiances, pas seulement l'active — cf. empilement ci-dessous. */
   ambiances: Ambiance[];
   ambianceActive: string;
 }) {
   return (
+    /* Hauteur constante (arbitrage Richard, 2026-08-02). Une scène qui rétrécit
+       au défilement recadre le rendu : à 132 px sur un visuel 4:3, `object-cover`
+       coupait le pied du module — terrasse et sol disparaissaient, et le module
+       semblait remonter dans le cadre. Mieux vaut un tiers d'écran constant
+       qu'un rendu qui s'ampute. */
     <div
       className={cn(
-        "sticky top-0 z-10 flex flex-col justify-between overflow-hidden border-b border-line bg-ink p-4 transition-[height] duration-200 motion-reduce:transition-none",
+        "sticky top-0 z-10 flex h-[232px] flex-col justify-between overflow-hidden border-b border-line bg-ink p-4",
         "lg:top-3 lg:h-[min(calc(100svh-1.5rem),640px)] lg:self-start lg:border-b-0 lg:border-r lg:p-5",
-        compact ? "h-[132px]" : "h-[232px]",
-        "lg:!h-[min(calc(100svh-1.5rem),640px)]",
       )}
     >
       {/* Les trois rendus sont empilés et permutés en opacité, pas montés à la
@@ -207,20 +214,20 @@ export function Scene({
           jamais derrière le logo. Hors calage, aucune réserve — la scène est
           déjà sous l'en-tête dans le flux. */}
       <div
-        style={compact ? { paddingTop: "var(--cfg-nav, 0px)" } : undefined}
+        style={cale ? { paddingTop: "var(--cfg-nav, 0px)" } : undefined}
         className="relative flex items-start justify-between gap-3 transition-[padding] duration-300 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none"
       >
         <div className="min-w-0">
           <p className="truncate text-[1.15rem] font-semibold tracking-tight text-white lg:text-[1.5rem]">
             {nom}
           </p>
-          {!compact && <p className="truncate text-[0.8rem] text-white/75">{sous}</p>}
+          <p className="truncate text-[0.8rem] text-white/75">{sous}</p>
         </div>
         <span className="shrink-0 rounded border border-white/25 bg-ink/40 px-1.5 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-white/80 backdrop-blur">
           {tag}
         </span>
       </div>
-      <div className={cn("relative flex flex-wrap gap-1.5 transition-opacity", compact && "pointer-events-none opacity-0 lg:pointer-events-auto lg:opacity-100")}>
+      <div className="relative flex flex-wrap gap-1.5">
         {pastilles.map((p) => (
           <span
             key={p}

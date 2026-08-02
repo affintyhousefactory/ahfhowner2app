@@ -31,19 +31,22 @@ import {
 function Parcours() {
   const c = useConfigurateur();
   const [cgvOk, setCgvOk] = useState(false);
-  const [compact, setCompact] = useState(false);
+  const [cale, setCale] = useState(false);
 
-  /* Rétrécissement de la scène sur mobile — piloté au défilement de la page,
-     en rAF et en listener passif pour ne pas peser sur le scroll. */
+  /* La scène est-elle calée en haut de l'écran ? Elle ne change pas de taille
+     pour autant (arbitrage Richard, 2026-08-02 : le rétrécissement recadrait
+     le module et lui coupait le pied) — l'état sert uniquement à lui faire
+     réserver la place de l'en-tête quand celui-ci vient se poser dessus.
+     Mesure en rAF, listener passif : rien qui pèse sur le défilement. */
   useEffect(() => {
     const el = document.getElementById("cfg-app");
     if (!el) return;
     let tick = false;
     const mesurer = () => {
       if (window.innerWidth >= 1024) {
-        setCompact(false);
+        setCale(false);
       } else {
-        setCompact(el.getBoundingClientRect().top < -40);
+        setCale(el.getBoundingClientRect().top < -40);
       }
       tick = false;
     };
@@ -78,7 +81,7 @@ function Parcours() {
         sous={`${modele.surface} m² · ${modele.typologie} · ${modele.emprise}`}
         tag={`${modele.id === "one" ? "arko-one" : "arko-max"} · ${c.ambiance}`}
         pastilles={pastilles}
-        compact={compact}
+        cale={cale}
         ambiances={c.cfg.ambiances}
         ambianceActive={c.ambiance}
       />
