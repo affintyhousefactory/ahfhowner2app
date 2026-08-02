@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SERIES_DEADLINE_ISO, SERIES_DEADLINE_LABEL } from "@/lib/site";
+import { RESERVER_PATH, SERIES_DEADLINE_ISO, SERIES_DEADLINE_LABEL } from "@/lib/site";
 import { useCountdown } from "@/components/effects/useCountdown";
 import { cn } from "@/shared/lib/cn";
 
@@ -16,7 +16,7 @@ const pad = (n: number) => n.toString().padStart(2, "0");
 export function CountdownBanner({
   variant = "bar",
   className,
-  href = "/configurer",
+  href = RESERVER_PATH,
 }: {
   variant?: "bar" | "compact";
   className?: string;

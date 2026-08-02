@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { PRODUCT_LIST, type Product } from "@/lib/site";
+import { PRODUCT_LIST, reserverHref, type Product } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { useTilt } from "@/components/effects/useTilt";
 
@@ -87,7 +87,7 @@ function ProductCard({ p }: { p: Product }) {
             Découvrir
           </Link>
           <Link
-            href={`/configurer?produit=${p.key}`}
+            href={reserverHref(p.key)}
             className="btn-rl btn-rl-accent px-5 py-2.5 text-sm"
           >
             Réserver

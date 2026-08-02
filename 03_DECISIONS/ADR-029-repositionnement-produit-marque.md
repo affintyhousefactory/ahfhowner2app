@@ -22,8 +22,8 @@ Tant que ce cadre n'est pas acté, tout écran construit sur l'ancien vocabulair
 | Terrain nu | cœur de la promesse | **fermé** — « prochainement », sans prix ni explication |
 | Vocabulaire | 105 occurrences de « maison » | terme **interdit** |
 | Arko One / Max | 59 900 / 89 900 € | **77 900 / 99 900 €** |
-| Réservation | 5 000 € (`DEPOSIT_EUR`) | **2 000 €** + acompte 30 % |
-| Série | `SERIE_TOTAL = 12` | **Série 01 = 6 unités**, puis Série 02 illimitée |
+| Réservation | 5 000 € (`DEPOSIT_EUR`) | **2 000 €** + acompte 30 % — ✅ `DEPOSIT_EUR` aligné le 2026-08-02 |
+| Série | `SERIE_TOTAL = 12` | ~~Série 01 = 6 unités~~ → **maintenu à 12** (amendement du 2026-08-02) |
 
 ## Décision
 
@@ -47,7 +47,9 @@ La spec est catégorique et le formule comme une contrainte de développement : 
 
 ### 3. Prix et volumes
 
-Arko One **77 900 € TTC**, Arko Max **99 900 € TTC** (TVA 20 %, construction neuve). Réservation **2 000 €**, intégralement remboursable, imputée sur le prix. Acompte de confirmation **30 %**. **Série 01 = 6 unités**, puis Série 02 sans limite.
+Arko One **77 900 € TTC**, Arko Max **99 900 € TTC** (TVA 20 %, construction neuve). Réservation **2 000 €**, intégralement remboursable, imputée sur le prix. Acompte de confirmation **30 %**.
+
+> **Amendement du 2026-08-02 — Série 01 reste à 12 unités.** La spec fixait 6 ; **arbitrage de Richard : le volume public ne change pas**. `SERIE_TOTAL = 12` (`site.ts`) et `serie.unites = 12` (`configurateur/config.ts`) sont donc alignés, et le sélecteur de numéros du configurateur v2 en propose douze. La Série 02 sans limite reste prévue. Écart assumé par rapport au §5 de la spec, au même titre que les trois écarts d'ADR-030.
 
 Le §17.1 est explicite : « le site public porte encore d'autres montants que ceux du §5. Un seul jeu de prix doit exister. »
 

@@ -2,6 +2,12 @@
 
 ## Décisions récentes
 
+### 2026-08-02 (ADR-030 — mise en œuvre du configurateur v2)
+- **Colonne de sections dépliantes** retenue contre le stepper : l'écran 0 étant descendu en section 05, le stepper n'avait plus d'avantage. → ADR-030 § Amendement.
+- **Groupe de routes `(configurateur)`** pour servir `/configurer/v2` sans nav — une mise en page imbriquée ne peut pas retirer la `<Nav>` de sa parente.
+- **Scène à hauteur constante** : le rétrécissement mobile est rejeté après essai (`object-cover` coupait le pied du module). C'est l'en-tête qui s'efface.
+- **Plus de test local** (dev server, Playwright, `next build`) : HMR aveugle sur `/mnt/d`, laptop lent. Gate = `tsc` + `eslint` + `check:vocabulaire` + Preview Vercel.
+
 ### 2026-06-17 (ingestion `claude-knowledge` + audit)
 - **Base de connaissances officielle ingérée** dans `~/.claude/rules/` (14 thèmes, 119 fichiers). `~/.claude/CLAUDE.md` remplacé par celui du repo (charge les règles via `@import`). Backup : `CLAUDE.md.pre-ingest-2026-06-17.bak`.
 - **`PROFIL.md` créé** à la racine du projet (convention `rules/discovery/profil-md-convention.md`) + câblé dans `CLAUDE.md` projet (directive lecture obligatoire).

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BRAND, NAV, INFO_NAV, PRODUCT_LIST } from "@/lib/site";
+import { BRAND, NAV, INFO_NAV, PRODUCT_LIST, reserverHref } from "@/lib/site";
 import { FEATURES } from "@/lib/features";
 
 export function Footer() {
@@ -13,7 +13,7 @@ export function Footer() {
               {BRAND.madeIn}
             </span>
             <Link
-              href="/configurer"
+              href={reserverHref()}
               className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-canvas/55 transition-colors hover:text-canvas"
             >
               Réserver →

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { BRAND, SERIE_TOTAL } from "@/lib/site";
+import { BRAND, SERIE_TOTAL, reserverHref } from "@/lib/site";
 import { FEATURES } from "@/lib/features";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Ikurrina } from "@/components/ui/Ikurrina";
@@ -95,7 +95,7 @@ export function Hero() {
 
           <div className="flex flex-col gap-5 md:col-span-5 md:items-end">
             <div className="flex flex-wrap items-center gap-3 md:justify-end">
-              <Button href="/configurer" variant="accent">
+              <Button href={reserverHref()} variant="accent">
                 Réserver
                 <Arrow />
               </Button>

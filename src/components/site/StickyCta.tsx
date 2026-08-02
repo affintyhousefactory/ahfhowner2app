@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BRAND } from "@/lib/site";
+import { BRAND, reserverHref } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Gauge } from "@/components/ui/Gauge";
 import { useConfig, eur } from "./config-store";
@@ -55,7 +55,7 @@ export function StickyCta() {
                 </span>
               </div>
               <Button
-                href="/configurer"
+                href={reserverHref()}
                 variant="accent"
                 magnetic={false}
                 className="px-5 py-2.5 text-sm"

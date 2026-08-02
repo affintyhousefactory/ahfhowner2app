@@ -1,10 +1,10 @@
 # ADR-030 — Configurateur v2 : parcours en 7 écrans, grilles pilotées par données
 
-- **Statut** : **Accepté — en cours de développement**
-- **Date** : 2026-08-01
+- **Statut** : **Accepté — parcours livré sur `/configurer/v2` (branche mergée sur `dev` le 2026-08-02) ; bascule sur `/configurer` conditionnée à ADR-031**
+- **Date** : 2026-08-01 — **amendé le 2026-08-02** (§ Amendement — mise en œuvre)
 - **Phase** : All
 - **Faisabilité** : 🟠 Moyenne — le parcours et les grilles sont entièrement spécifiés ; les montants d'options restent provisoires (§17.4) et deux points d'arbitrage conditionnent la mise en ligne
-- **Alerte Albert** : **Oui — trois écarts assumés par rapport à sa spécification** (§8 pré-analyse PLU, §6-§7 paiement en ligne, §5 tarif de transport). Ce ne sont pas des impossibilités techniques mais des arbitrages produit de Richard, à porter à sa connaissance. Deux points ouverts lui reviennent par ailleurs (§ Points ouverts).
+- **Alerte Albert** : **traitée verbalement par Richard le 2026-08-02 — écarts maintenus et assumés.** Quatre écarts par rapport à la spécification (§8 pré-analyse PLU conservée, §6-§7 aucun paiement en ligne, §5 transport au kilomètre, §5 Série 01 maintenue à 12 unités), plus le parti « colonne de sections dépliantes » au lieu du tunnel en 7 écrans. Ce sont des arbitrages produit, pas des impossibilités techniques ; Richard les assume et les reprendra avec Albert si le cas se présente. Deux points ouverts lui reviennent par ailleurs (§ Points ouverts).
 
 ## Contexte
 
@@ -27,6 +27,10 @@ Ce n'est pas une évolution du configurateur : c'est son remplacement. Le modèl
 | 4 | Options | 6 options tarifées, dont 3 structurelles |
 | 5 | Dossier terrain | Qualification d'accès, uploads, rendez-vous → **ADR-032** |
 | 6 | Récapitulatif | Prix, inclus, à votre charge, **choix du numéro**, coordonnées → **ADR-031** |
+
+> ⚠ **Amendé le 2026-08-02** — le parcours n'est pas un stepper : ces sept
+> étapes sont rendues en **colonne de sections dépliantes**, et l'écran 0 est
+> descendu en section 05. Voir § Amendement — mise en œuvre, point A.
 
 **L'écran 1 porte aussi la pré-analyse du terrain** (champ d'adresse + zonage PLU). Une seule saisie sert deux réponses : la constructibilité indicative et les coordonnées, qui donnent la distance de transport. Elle précède donc le total. Voir § Écarts assumés, point 1.
 
@@ -155,6 +159,114 @@ recalcule le transport. Le total doit en tenir compte.
   pas cochée, avec le motif affiché sous le bouton.
 - « À votre charge » : « …étude de sol si exigée, **aménagement des accès camion
   et grue si nécessaire**, mobilier et décoration. »
+
+## Amendement du 2026-08-02 — mise en œuvre
+
+Le parcours est développé sur la branche `feat/adr-030-configurateur-ecrans`,
+mergée sur `dev` le 2026-08-02 (`0300237b..1bc955c4`, 6 commits, fast-forward).
+Six décisions se sont prises pendant la mise en œuvre ; elles amendent le §1 et
+le §6 ci-dessus.
+
+### A. Colonne de sections dépliantes, pas un stepper (2026-08-01)
+
+Le tableau du §1 décrit **sept écrans successifs**. L'implémentation retient une
+**colonne de sections dépliantes** : six sections numérotées (`01 Le module` →
+`06 Réserver un numéro`), chacune affichant son choix courant en résumé, à côté
+d'une **scène collante** qui montre l'objet configuré.
+
+Motif : le stepper ne gagnait que sur « forcer une décision ». Or l'écran 0
+— le filtre d'usage — est **descendu en section 05** (« Votre situation
+terrain »), là où la question se pose naturellement ; le stepper perdait donc
+son seul avantage, tout en obligeant à naviguer pour comparer deux choix, ce que
+la scène collante rend immédiat. Le résumé par section remplace le compteur
+« étape 3/7 ».
+
+⚠ Le critère de recette §16 n°1 est inchangé : la branche « terrain nu » ne
+mène ni à un prix ni à un paiement. C'est `brancheFermee` qui retire la **barre
+de prix entière**, pas seulement son bouton.
+
+### B. Route dédiée et coque sans navigation
+
+Le parcours est servi sur **`/configurer/v2`**, en `noindex` : `/configurer`
+continue de servir le tunnel actuel tant qu'ADR-031 n'a pas livré la
+persistance, et deux URLs servant le même parcours ne doivent pas se concurrencer
+dans l'index. **Le `noindex` sera levé à la bascule.**
+
+La route vit dans un **groupe de routes dédié** `src/app/(configurateur)/` et non
+sous `(public)` : une mise en page imbriquée s'ajoute à sa parente, elle ne peut
+pas en retirer la `<Nav>`. Le tunnel n'a donc ni méga-menu ni pied de page — une
+seule porte de sortie, le logo Howner. `Analytics` et `CookieBanner` sont
+conservés : le consentement (ADR-015) doit être présent sur l'écran qui collecte
+des coordonnées.
+
+**Entrée : tous les CTA « Réserver » du site public** (décision Richard,
+2026-08-02) — méga-menu Modules, en-tête, compteur de rareté, Hero,
+`AvantPremiere`, `ProductsShowcase`, `StickyCta`, bandeau de compte à rebours,
+pied de page et les deux pages produit. Le paramètre `?produit=` est lu **côté
+serveur** : `useSearchParams` impose une frontière Suspense et fait basculer le
+parcours entier en rendu client (le build de production échoue sans elle).
+
+La destination passe par **`reserverHref()`** (`src/lib/site.ts`) et non par des
+chaînes en dur : la bascule vers `/configurer` après ADR-031 doit être **une
+seule ligne**, pas une chasse dans dix composants. Restent hors périmètre les
+liens portant un paramètre propre au v1 — `?parcelle=` (`ParcelleAnalyse`) et
+`?pack=` (domaine suspendu, ADR-028) — que le v2 ne lit pas, ainsi que les CTA
+« Tester mon terrain ».
+
+> ⚠ **Conséquence à traiter avec ADR-031** : l'entonnoir de réservation entier
+> pointe désormais sur un parcours dont le bouton final n'a pas de handler, et
+> sur une page en `noindex` alors que `/configurer` reste au sitemap sans lien
+> entrant. Tant qu'ADR-031 n'est pas livrée, **cet état ne doit pas atteindre
+> `main`**.
+
+### C. Ambiances — visuel et teinte dans la grille
+
+Chaque ambiance porte son `visuel` et sa `teinte` dans `config.ts`, jamais dans
+un composant : le §2 vaut aussi pour les médias. Les trois ambiances réutilisent
+les rendus de la v1 (décision Richard du 2026-08-01, « visuels conservés ») —
+Littoral = bleu pigeon, Atelier = anthracite, Basque = vert.
+
+Le sélecteur signale la sélection par **la teinte de l'ambiance** et non par
+l'accent : trois boutons cerclés du même orange ne diraient pas lequel des trois
+bardages on regarde. Les rendus sont **empilés et permutés en opacité**, ce qui
+satisfait le préchargement exigé au §6.
+
+### D. Mobile — l'en-tête s'efface, la scène ne rétrécit pas (2026-08-02)
+
+Sur 390 px, la scène collante et l'en-tête se disputent la même bande de 64 px.
+Arbitrage : **c'est l'en-tête qui cède**, pas le visuel. Il sort du champ en
+descente et revient au premier geste vers le haut ; la scène garde une hauteur
+constante de 232 px.
+
+Une première version faisait rétrécir la scène de 232 à 132 px. Rejetée après
+essai : sur un rendu 4:3, `object-cover` coupait le pied du module — terrasse et
+sol disparaissaient et le module semblait remonter dans le cadre. **Un tiers
+d'écran constant vaut mieux qu'un rendu qui s'ampute.**
+
+La réserve que l'en-tête occupe au-dessus de la scène transite par une variable
+CSS (`--cfg-nav`) : la scène vit dans la page, l'en-tête dans la mise en page,
+et c'est la seule couture qui les relie sans remonter un état partagé jusqu'au
+groupe de routes.
+
+### E. Compteur de rareté — « 2 séries · 12 exemplaires », série maintenue à 12
+
+L'en-tête public affichait « 12 exemplaires », ce qui laissait croire à une série
+unique. Il affiche désormais les deux nombres (constante `SERIE_COUNT`).
+
+**Le volume reste à 12** — arbitrage de Richard du 2026-08-02, qui amende le §5
+de la spec et ADR-029 (lesquels fixaient la Série 01 à 6 unités). `SERIE_TOTAL`
+(`site.ts`) et `serie.unites` (`configurateur/config.ts`) sont alignés à 12 : le
+sélecteur de numéros du récapitulatif en propose donc douze. Sans cet alignement,
+l'en-tête aurait annoncé douze exemplaires et le sélecteur n'en aurait offert six.
+
+### F. Vérification — pas de test local
+
+Le HMR de Turbopack ne voit pas les modifications sur `/mnt/d` (WSL → NTFS) :
+chaque essai local impose de supprimer `.next` et de redémarrer. **Le gate est
+donc `tsc --noEmit` + `eslint` + `npm run check:vocabulaire`, puis la Preview
+Vercel.** `next build` local reste proscrit (trop lent) — ce qui laisse une
+classe d'erreurs invisible avant le push : le bailout `useSearchParams` du
+2026-08-02 n'est apparu qu'au prerender de production.
 
 ## Points ouverts — arbitrage Howner
 

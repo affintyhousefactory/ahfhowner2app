@@ -222,7 +222,11 @@ const CONFIG_V1: ConfigurateurConfig = {
     },
   ],
 
-  serie: { id: "serie_01", libelle: "Série 01", unites: 6 },
+  // 12 et non 6 : arbitrage Richard du 2026-08-02, qui amende le §5 de la spec
+  // et ADR-029. Le pool public (`SERIE_TOTAL` dans `site.ts`) est de 12 depuis
+  // l'origine ; en garder 6 ici aurait affiché « 12 exemplaires » dans l'en-tête
+  // et proposé six numéros dans le sélecteur.
+  serie: { id: "serie_01", libelle: "Série 01", unites: 12 },
   reservation: { montantTtc: 2000, delaiRetractationJours: 30 },
 };
 

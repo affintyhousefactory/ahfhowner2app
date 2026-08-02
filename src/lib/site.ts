@@ -14,10 +14,18 @@ import { FEATURES } from "@/lib/features";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
 
-// Acompte : jamais en dur — lu depuis l'environnement (fallback 5000).
+// Réservation : jamais en dur — lue depuis l'environnement.
+// Fallback passé de 5 000 à 2 000 € le 2026-08-02 (§7 de la spec, ADR-029) —
+// le configurateur v2 affichait déjà 2 000 € et la page d'accueil 5 000 €.
+// `NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR` n'est défini dans aucun scope Vercel
+// (vérifié le 2026-08-02) : c'est bien ce fallback qui sert en production.
+// La définir un jour la ferait gagner sur toutes les surfaces d'un coup.
 const DEPOSIT_EUR = Number(
-  process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR ?? 5000,
+  process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR ?? 2000,
 );
+
+/** Montant de réservation formaté, pour les textes éditoriaux (FAQ, réassurance). */
+const DEPOT = `${DEPOSIT_EUR.toLocaleString("fr-FR")} €`;
 
 // Pool commun de 12 exemplaires — Arko One + Arko Max confondus, numérotage 1→12 partagé.
 export const SERIE_TOTAL = 12;
@@ -159,6 +167,23 @@ export type Product = (typeof PRODUCTS)[ProductKey];
 
 export const PRODUCT_LIST = [PRODUCTS.one, PRODUCTS.max] as const;
 
+/**
+ * Destination de tous les CTA « Réserver » du site public (ADR-030).
+ *
+ * Une constante et non huit chaînes en dur : le tunnel v2 vit sur
+ * `/configurer/v2` le temps de la validation, et la bascule vers `/configurer`
+ * (après ADR-031) doit être **une seule ligne**, pas une chasse dans les
+ * composants. Ne pas contourner cette fonction.
+ *
+ * Hors périmètre : les liens qui portent un paramètre propre au tunnel v1
+ * (`?parcelle=`, `?pack=`) — le v2 ne les lit pas.
+ */
+export const RESERVER_PATH = "/configurer/v2";
+
+export function reserverHref(produit?: ProductKey) {
+  return produit ? `${RESERVER_PATH}?produit=${produit}` : RESERVER_PATH;
+}
+
 export const getProduct = (key: string | null | undefined): Product =>
   key === "one" ? PRODUCTS.one : PRODUCTS.max;
 
@@ -188,7 +213,7 @@ export const REASSURANCE = [
   },
   {
     t: "Devis signé, nous réservons votre ARKO",
-    d: "Vous réservez votre numéro avec 5 000 € remboursables. Sans engagement de construction.",
+    d: `Vous réservez votre numéro avec ${DEPOT} remboursables. Sans engagement de construction.`,
   },
 ] as const;
 
@@ -214,13 +239,13 @@ export const FAQ: { q: string; a: string | string[] }[] = [
     q: "Comment se passe le paiement ?",
     a: [
       "Après un premier échange téléphonique, nous vous adressons par email une proposition commerciale comprenant le modèle ARKO retenu, les principales caractéristiques techniques, les options choisies et une estimation du calendrier de fabrication, de livraison et d'installation.",
-      "Pour confirmer votre intérêt et réserver votre projet, un versement initial de 5 000 € vous est demandé.",
+      `Pour confirmer votre intérêt et réserver votre projet, un versement initial de ${DEPOT} vous est demandé. Il bloque l\u2019un des 12 numéros de la Série 01.`,
       "Ce versement est intégralement remboursable tant que le contrat de fabrication, livraison et installation n'a pas été signé. Vous pouvez donc renoncer à votre projet avant cette signature, sans avoir à justifier votre décision.",
-      "Une fois le contrat signé, ce versement de 5 000 € est déduit du prix total de votre module ARKO et intégré à l'échéancier de paiement.",
+      `Une fois le contrat signé, ce versement de ${DEPOT} est déduit du prix total de votre module ARKO et intégré à l\u2019échéancier de paiement.`,
       "Le règlement s'effectue ensuite en plusieurs étapes, adaptées à la fabrication en atelier :",
       "Étape 0 — Premier échange et proposition commerciale\nNous échangeons avec vous sur votre projet, votre terrain, le modèle ARKO envisagé et vos contraintes techniques. Nous vous envoyons ensuite un devis accompagné du portfolio produit correspondant.",
-      "Étape 1 — Réservation du projet\nVous validez le devis de réservation et l'échéancier prévisionnel. Une facture de réservation de 5 000 € vous est adressée. Le paiement peut être effectué par virement bancaire ou par paiement sécurisé en ligne.",
-      "Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d'étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des 5 000 € déjà versés.",
+      `Étape 1 — Réservation du projet\nVous validez le devis de réservation et l\u2019échéancier prévisionnel. Une facture de réservation de ${DEPOT} vous est adressée, réglable par virement bancaire. Aucun paiement n\u2019est encaissé depuis le site : le lien de règlement vous parvient après l\u2019échange de qualification.`,
+      `Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d\u2019étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des ${DEPOT} déjà versés.`,
       "Étape 3 — Sortie d'atelier\nLorsque votre module ARKO est fabriqué et prêt à être livré, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
       "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
       "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
@@ -230,6 +255,18 @@ export const FAQ: { q: string; a: string | string[] }[] = [
       ...(FEATURES.mandataire
         ? ["Les mandataires partenaires susceptibles d'accompagner le client dans sa recherche de terrain interviennent sous leur seule responsabilité, dans le cadre de leur propre activité professionnelle. Leur intervention est distincte de celle d'Affinity House Factory."]
         : []),
+    ],
+  },
+  {
+    // §5 de la spec : les options qui entrent dans l'étude d'exécution de
+    // l'ossature ne sont plus ajoutables après la réservation. Le configurateur
+    // v2 le mentionne à l'écran ; la FAQ le taisait, ce qui laissait croire
+    // qu'on pouvait tout arbitrer plus tard.
+    q: "Puis-je modifier mes options après avoir réservé ?",
+    a: [
+      "Les finitions et les équipements dissociables restent ajustables jusqu'au lancement de la fabrication.",
+      "Trois options font exception : la **casquette pare-soleil**, le **poêle à bois** et le **kit solaire photovoltaïque**. Elles entrent dans l'étude d'exécution de l'ossature, qui est figée à la réservation — elles se choisissent donc avant, et ne peuvent pas être ajoutées ensuite.",
+      "Le configurateur les signale comme telles au moment du choix.",
     ],
   },
   {
