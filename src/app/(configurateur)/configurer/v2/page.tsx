@@ -31,9 +31,7 @@ export default async function ConfigurerV2Page({
   const { produit } = await searchParams;
   const modeleInitial: ModeleId = produit === "one" || produit === "max" ? produit : "max";
 
-  return (
-    <main id="main-content" className="pt-16 md:pt-[4.5rem]">
-      <ConfigurateurV2 modeleInitial={modeleInitial} />
-    </main>
-  );
+  /* Le <main> et le décalage sous l'en-tête sont portés par la coque du
+     groupe `(configurateur)` — cf. `../../layout.tsx`. */
+  return <ConfigurateurV2 modeleInitial={modeleInitial} />;
 }

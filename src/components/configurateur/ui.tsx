@@ -12,9 +12,11 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { cn } from "@/shared/lib/cn";
 import { eur } from "./store";
 import type { MentionTexte } from "@/lib/configurateur/mentions";
+import type { Ambiance } from "@/lib/configurateur/config";
 
 /* ------------------------------------------------------------------ */
 /* Section dépliante — le résumé remplace le compteur d'étapes         */
@@ -143,38 +145,74 @@ export function Scene({
   tag,
   pastilles,
   compact,
+  ambiances,
+  ambianceActive,
 }: {
   nom: string;
   sous: string;
   tag: string;
   pastilles: string[];
   compact: boolean;
+  /** Toutes les ambiances, pas seulement l'active — cf. empilement ci-dessous. */
+  ambiances: Ambiance[];
+  ambianceActive: string;
 }) {
   return (
     <div
       className={cn(
-        "sticky top-0 z-10 flex flex-col justify-between border-b border-line bg-gradient-to-br from-accent/[0.14] to-transparent p-4 transition-[height] duration-200 motion-reduce:transition-none",
+        "sticky top-0 z-10 flex flex-col justify-between overflow-hidden border-b border-line bg-ink p-4 transition-[height] duration-200 motion-reduce:transition-none",
         "lg:top-3 lg:h-[min(calc(100svh-1.5rem),640px)] lg:self-start lg:border-b-0 lg:border-r lg:p-5",
         compact ? "h-[132px]" : "h-[232px]",
         "lg:!h-[min(calc(100svh-1.5rem),640px)]",
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      {/* Les trois rendus sont empilés et permutés en opacité, pas montés à la
+          demande : le §« mobile d'abord » d'ADR-030 demande le préchargement de
+          l'ambiance suivante pour que le changement soit instantané. Un montage
+          conditionnel ferait apparaître un carré vide le temps du téléchargement,
+          c'est-à-dire exactement au moment où l'on compare deux teintes. */}
+      {ambiances.map((a) => {
+        const actif = a.id === ambianceActive;
+        return (
+          <Image
+            key={a.id}
+            src={a.visuel}
+            alt={actif ? `${nom} — ambiance ${a.nom}` : ""}
+            aria-hidden={!actif}
+            fill
+            priority={actif}
+            sizes="(max-width: 1024px) 100vw, 60vw"
+            className={cn(
+              "object-cover transition-opacity duration-500 motion-reduce:transition-none",
+              actif ? "opacity-100" : "opacity-0",
+            )}
+          />
+        );
+      })}
+
+      {/* Voile : le nom du module et les pastilles doivent rester lisibles
+          quelle que soit la teinte du bardage derrière eux. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/10 to-ink/70"
+      />
+
+      <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-[1.15rem] font-semibold tracking-tight text-ink lg:text-[1.5rem]">
+          <p className="truncate text-[1.15rem] font-semibold tracking-tight text-white lg:text-[1.5rem]">
             {nom}
           </p>
-          {!compact && <p className="truncate text-[0.8rem] text-muted">{sous}</p>}
+          {!compact && <p className="truncate text-[0.8rem] text-white/75">{sous}</p>}
         </div>
-        <span className="shrink-0 rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-muted">
+        <span className="shrink-0 rounded border border-white/25 bg-ink/40 px-1.5 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-white/80 backdrop-blur">
           {tag}
         </span>
       </div>
-      <div className={cn("flex flex-wrap gap-1.5 transition-opacity", compact && "pointer-events-none opacity-0 lg:pointer-events-auto lg:opacity-100")}>
+      <div className={cn("relative flex flex-wrap gap-1.5 transition-opacity", compact && "pointer-events-none opacity-0 lg:pointer-events-auto lg:opacity-100")}>
         {pastilles.map((p) => (
           <span
             key={p}
-            className="rounded-full border border-line bg-surface px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.06em] text-muted"
+            className="rounded-full border border-white/25 bg-ink/40 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.06em] text-white/85 backdrop-blur"
           >
             {p}
           </span>

@@ -79,6 +79,8 @@ function Parcours() {
         tag={`${modele.id === "one" ? "arko-one" : "arko-max"} · ${c.ambiance}`}
         pastilles={pastilles}
         compact={compact}
+        ambiances={c.cfg.ambiances}
+        ambianceActive={c.ambiance}
       />
 
       <div className="flex min-w-0 flex-col bg-surface">

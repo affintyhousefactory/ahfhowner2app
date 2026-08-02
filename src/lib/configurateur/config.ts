@@ -48,7 +48,23 @@ export type Modele = {
   poidsTonnes: number;
 };
 
-export type Ambiance = { id: string; nom: string; supplementTtc: number };
+export type Ambiance = {
+  id: string;
+  nom: string;
+  supplementTtc: number;
+  /**
+   * Rendu extérieur associé — c'est lui que montre la scène collante. Les
+   * fichiers actuels sont ceux de la v1 (décision Richard, 2026-08-01) ; la
+   * nomenclature cible `{modele}_{vue}_{ambiance}.webp` s'y substituera au fil
+   * des livraisons sans toucher aux composants, puisque le chemin est ici.
+   */
+  visuel: string;
+  /**
+   * Teinte du bardage. Sert l'aperçu du sélecteur : un carré de couleur dit
+   * ce que le libellé ne dit pas — « Basque » ne se devine pas.
+   */
+  teinte: string;
+};
 export type Palier = { id: PalierId; nom: string; prixTtc: number };
 
 export type Option = {
@@ -129,9 +145,27 @@ const CONFIG_V1: ConfigurateurConfig = {
   // §17.3 — deux ou trois au lancement selon la disponibilité des visuels.
   // Le parcours doit fonctionner à 2 comme à 3 : ne jamais indexer en dur.
   ambiances: [
-    { id: "littoral", nom: "Littoral", supplementTtc: 0 },
-    { id: "atelier", nom: "Atelier", supplementTtc: 0 },
-    { id: "basque", nom: "Basque", supplementTtc: 0 },
+    {
+      id: "littoral",
+      nom: "Littoral",
+      supplementTtc: 0,
+      visuel: "/assets/arko/skins/skin-bleu.jpg",
+      teinte: "#5d7d8f", // bleu pigeon — CONFIG.cladding.bleu
+    },
+    {
+      id: "atelier",
+      nom: "Atelier",
+      supplementTtc: 0,
+      visuel: "/assets/arko/skins/skin-anthracite.jpg",
+      teinte: "#3a3f3c", // anthracite — CONFIG.cladding.anthracite
+    },
+    {
+      id: "basque",
+      nom: "Basque",
+      supplementTtc: 0,
+      visuel: "/assets/arko/skins/skin-vert.jpg",
+      teinte: "#5a6a43", // vert — CONFIG.cladding.vert
+    },
   ],
 
   terrasse: {

@@ -96,6 +96,9 @@ export function SectionAmbiance() {
     <Section n={2} titre="Ambiance" resume={`${a?.nom} · incluse`}>
       {/* Le tableau `ambiances` doit rester bouclé : la v1 peut sortir à 2
           comme à 3 items (§17.3, arbitrage ouvert). */}
+      {/* La sélection est signalée par la teinte de l'ambiance, pas par
+          l'accent : trois boutons cerclés du même orange ne diraient pas
+          lequel des trois bardages on est en train de regarder. */}
       <div role="tablist" aria-label="Ambiance" className="grid grid-cols-3 gap-2">
         {c.cfg.ambiances.map((x) => {
           const actif = c.ambiance === x.id;
@@ -106,12 +109,21 @@ export function SectionAmbiance() {
               type="button"
               aria-selected={actif}
               onClick={() => c.setAmbiance(x.id)}
+              style={
+                actif
+                  ? { borderColor: x.teinte, backgroundColor: `${x.teinte}14`, boxShadow: `inset 0 0 0 1px ${x.teinte}` }
+                  : undefined
+              }
               className={cn(
                 "flex min-h-[78px] flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all",
-                actif ? "border-accent bg-accent/[0.07]" : "border-line bg-surface hover:border-accent/45",
+                actif ? "" : "border-line bg-surface hover:border-accent/45",
               )}
             >
-              <span aria-hidden className="h-[30px] w-[30px] rounded-full bg-gradient-to-br from-accent/40 to-accent/10 ring-1 ring-inset ring-ink/10" />
+              <span
+                aria-hidden
+                style={{ backgroundColor: x.teinte }}
+                className="h-[30px] w-[30px] rounded-full ring-1 ring-inset ring-ink/15"
+              />
               <span className="text-[0.74rem] font-semibold text-ink">{x.nom}</span>
             </button>
           );

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { NAV, BRAND, PRODUCT_LIST, SERIE_TOTAL } from "@/lib/site";
+import { NAV, BRAND, PRODUCT_LIST, SERIE_COUNT, SERIE_TOTAL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { cn } from "@/shared/lib/cn";
 
@@ -104,13 +104,16 @@ export function Nav() {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Compteur cumulé 12 + 5 exemplaires */}
+          {/* Compteur de rareté — deux séries, pool commun de 12 numéros */}
           <Link
             href="/configurer"
-            aria-label={`Série limitée à ${SERIE_TOTAL} exemplaires au total — Arko One + Arko Max`}
+            aria-label={`${SERIE_COUNT} séries, ${SERIE_TOTAL} exemplaires au total — Arko One + Arko Max`}
             className="hidden items-center gap-1.5 font-mono text-xs text-muted transition-colors hover:text-ink sm:flex"
           >
             <span className="h-2 w-2 rounded-full bg-accent" />
+            {SERIE_COUNT}
+            <span className="text-muted/70">séries</span>
+            <span className="text-muted/40">·</span>
             {SERIE_TOTAL}
             <span className="text-muted/70">exemplaires</span>
           </Link>
@@ -195,8 +198,10 @@ export function Nav() {
                 >
                   Découvrir
                 </Button>
+                {/* Entrée dans le tunnel v2 : le module choisi ici est
+                    présélectionné côté serveur (ADR-030). */}
                 <Button
-                  href={`/configurer?produit=${p.key}`}
+                  href={`/configurer/v2?produit=${p.key}`}
                   variant="accent"
                   className="px-4 py-2 text-sm"
                   magnetic={false}
@@ -243,7 +248,7 @@ export function Nav() {
                   Découvrir
                 </Link>
                 <Link
-                  href={`/configurer?produit=${p.key}`}
+                  href={`/configurer/v2?produit=${p.key}`}
                   onClick={() => setOpen(false)}
                   className="rounded-full bg-accent px-4 py-1.5 text-sm text-white"
                 >
@@ -266,7 +271,7 @@ export function Nav() {
 
           <div className="mt-4 flex items-center justify-between">
             <span className="font-mono text-xs text-muted">
-              {SERIE_TOTAL} exemplaires
+              {SERIE_COUNT} séries · {SERIE_TOTAL} exemplaires
             </span>
             <Button
               href="/configurer"

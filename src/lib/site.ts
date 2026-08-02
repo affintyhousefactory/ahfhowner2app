@@ -22,6 +22,10 @@ const DEPOSIT_EUR = Number(
 // Pool commun de 12 exemplaires — Arko One + Arko Max confondus, numérotage 1→12 partagé.
 export const SERIE_TOTAL = 12;
 
+// Nombre de séries ouvertes (une par modèle). Le compteur de l'en-tête affiche
+// les deux nombres : « 12 exemplaires » seul laissait croire à une seule série.
+export const SERIE_COUNT = 2;
+
 export const BRAND = {
   maker: "HOWNER",
   model: "ARKO",

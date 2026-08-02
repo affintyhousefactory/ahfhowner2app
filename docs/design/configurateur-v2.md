@@ -99,6 +99,40 @@ n'est pré-cochée : opt-in email **facultatif**, acceptation des CGV
 Aucun paiement à cet écran — le devis et le lien arrivent après l'appel de
 qualification.
 
+## Coque du tunnel — une seule porte de sortie
+
+Le parcours ne porte **ni navigation ni pied de page**. Une fois entré, chaque
+lien sortant est un abandon ; il reste exactement une porte, le logo Howner en
+haut à gauche, qui ramène à l'accueil.
+
+Techniquement cela impose un **groupe de routes dédié** `src/app/(configurateur)`
+plutôt qu'une mise en page imbriquée sous `(public)` : une mise en page enfant
+s'ajoute à sa parente, elle ne peut pas en retirer la `<Nav>`. Sont conservés de
+la coque publique `Analytics` et `CookieBanner` — le consentement (ADR-015) doit
+être présent sur l'écran où l'on saisit ses coordonnées.
+
+Entrée dans le tunnel : les deux CTA « Réserver » du méga-menu Modules pointent
+sur `/configurer/v2?produit=one|max`. Le paramètre est lu **côté serveur** par la
+page ; `useSearchParams` imposerait une frontière Suspense et ferait basculer le
+parcours entier en rendu client.
+
+## Ambiances — teinte et rendu
+
+Chaque ambiance porte son `visuel` et sa `teinte` dans la grille (`config.ts`),
+jamais dans un composant : le back-office (ADR-033) doit pouvoir en ajouter une
+sans redéploiement.
+
+La scène collante affiche le rendu extérieur de l'ambiance courante. Les rendus
+sont **empilés et permutés en opacité**, pas montés à la demande — le budget
+performance ci-dessous exige le préchargement de l'ambiance suivante, et un
+montage conditionnel ferait apparaître un carré vide au moment précis où l'on
+compare deux teintes. Un voile dégradé garde le nom du module lisible quelle que
+soit la teinte du bardage derrière lui.
+
+Le sélecteur signale la sélection par **la teinte de l'ambiance**, pas par
+l'accent : trois boutons cerclés du même orange ne diraient pas lequel des trois
+bardages on regarde.
+
 ## Ce qui reste ouvert
 
 Câblés comme des drapeaux, pas comme des branches de code — basculer l'un ou
