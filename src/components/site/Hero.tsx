@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { BRAND, SERIE_TOTAL, reserverHref } from "@/lib/site";
-import { FEATURES } from "@/lib/features";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Ikurrina } from "@/components/ui/Ikurrina";
 
@@ -94,15 +93,15 @@ export function Hero() {
           </div>
 
           <div className="flex flex-col gap-5 md:col-span-5 md:items-end">
+            {/* Un seul CTA. « Tester mon terrain » a été retiré le 2026-08-02 :
+                `/terrain` est suspendue (ADR-028) et son repli menait au
+                configurateur v1, que plus aucun autre bouton de la page ne
+                dessert. La vérification de parcelle vit désormais dans le
+                parcours lui-même, en section 05. */}
             <div className="flex flex-wrap items-center gap-3 md:justify-end">
               <Button href={reserverHref()} variant="accent">
                 Réserver
                 <Arrow />
-              </Button>
-              {/* `/terrain` est suspendue (ADR-028). L'analyse PLU vit dans le
-                  configurateur, sous « J'ai un terrain » — le CTA garde son sens. */}
-              <Button href={FEATURES.mandataire ? "/terrain" : "/configurer"} variant="outline">
-                Tester mon terrain
               </Button>
             </div>
             <p className="font-mono text-xs text-muted md:text-right">
