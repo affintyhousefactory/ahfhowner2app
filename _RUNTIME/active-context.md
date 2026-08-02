@@ -21,5 +21,5 @@ Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², **77 900 �
 - Ne pas dupliquer l'état hors `00_INDEX/PROJECT_STATE.md`. `_RUNTIME` reste court, jamais backlog.
 - Configurateur v2 (ADR-030, remplace 005/020) : **ne jamais coder les grilles en dur** — prix, paliers, options, visuels et teintes passent par `src/lib/configurateur/config.ts`. Le v1 (`Configurator.tsx`, `config-store.tsx`) sert encore `/configurer` ; le v2 vit dans le groupe de routes `(configurateur)`, sans nav. Vidéos `useVisible` sauf Hero, 3D isolé `/viewer` (ADR-006).
 - **Pas de test local** : ni dev server, ni Playwright, ni `next build` (HMR aveugle sur `/mnt/d`, laptop lent). Gate = `tsc --noEmit` + `eslint` + `npm run check:vocabulaire`, puis Preview Vercel.
-- Marque (ADR-029, remplace 004) : termes interdits maintenus, « notre architecte intégrée », « Puigbo ». Wordmark ARKO retiré de l'accueil ; « Arko One »/« Arko Max » = noms produits.
+- Marque (ADR-029, remplace 004) — le contrôle `npm run check:vocabulaire` lit le **texte rendu** depuis le 2026-08-02 : termes interdits maintenus, « notre architecte intégrée », « Puigbo ». Wordmark ARKO retiré de l'accueil ; « Arko One »/« Arko Max » = noms produits.
 - Secrets jamais dans Git (ADR-003).

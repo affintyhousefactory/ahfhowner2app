@@ -40,6 +40,7 @@ Routes App Router : `/` · `/arko-one` · `/arko-max` · `/configurer` · `/conf
 - Vidéos via `useVisible` (sauf Hero) ; bundle 3D isolé `/viewer`.
 - Configurateur v2 : **ne jamais coder les grilles en dur** (ADR-030) — prix, paliers, options, visuels et teintes d'ambiance passent tous par `src/lib/configurateur/config.ts`, jamais par un composant. Le verrou ADR-005 est levé, celui-ci le remplace.
 - Configurateur v1 (`Configurator.tsx`, `config-store.tsx`) : sert encore `/configurer`, à retirer à la bascule (ADR-031). Montants par produit via `PRODUCTS[key].pricing`.
+- **Vocabulaire (ADR-029)** : `npm run check:vocabulaire` avant chaque PR. Il lit le texte **tel que rendu** (blancs aplatis) depuis le 2026-08-02 — une lecture ligne à ligne laissait passer « clé en main » coupé par un retour à la ligne JSX, servi en production sur les deux pages produit. Tout nouveau contrôle éditorial doit lire la sortie, pas le source.
 - **Pas de test local** : le HMR Turbopack ne voit pas `/mnt/d` et `next build` local est trop lent. Gate = `tsc --noEmit` + `eslint` + `npm run check:vocabulaire`, puis Preview Vercel.
 
 ## Risques

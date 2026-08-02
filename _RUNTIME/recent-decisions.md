@@ -6,6 +6,8 @@
 - **Colonne de sections dépliantes** retenue contre le stepper : l'écran 0 étant descendu en section 05, le stepper n'avait plus d'avantage. → ADR-030 § Amendement.
 - **Groupe de routes `(configurateur)`** pour servir `/configurer/v2` sans nav — une mise en page imbriquée ne peut pas retirer la `<Nav>` de sa parente.
 - **Scène à hauteur constante** : le rétrécissement mobile est rejeté après essai (`object-cover` coupait le pied du module). C'est l'en-tête qui s'efface.
+- **CTA « Tester mon terrain » retiré** de l'accueil et des pages produit : son repli menait au configurateur v1, que plus aucun bouton ne dessert.
+- **Le vocabulaire s'apprécie sur le texte rendu, pas sur le code.** « clé en main » était servi sur les pages produit, coupé par un retour à la ligne JSX, invisible au contrôle. → ADR-029 § Amendement.
 - **Plus de test local** (dev server, Playwright, `next build`) : HMR aveugle sur `/mnt/d`, laptop lent. Gate = `tsc` + `eslint` + `check:vocabulaire` + Preview Vercel.
 
 ### 2026-06-17 (ingestion `claude-knowledge` + audit)

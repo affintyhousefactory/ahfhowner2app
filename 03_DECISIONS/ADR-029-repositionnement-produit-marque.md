@@ -61,6 +61,39 @@ Howner est la seule entité citée côté client. Aucun nom de fournisseur, de s
 
 Tout le site **sauf les pages légales** — CGV, mentions légales, politique de confidentialité. Elles sont listées au §17.10 comme à fournir par Howner, et les CGV portent le risque 🔴 ouvert d'ADR-015 (texte non validé par l'avocat, déjà opposable en production). Une incohérence de vocabulaire subsistera donc temporairement entre le site et ses pages légales : elle est assumée et lève dès que §17.10 est fourni.
 
+## Amendement du 2026-08-02 — un contrôle vert ne prouvait pas la conformité
+
+**Constat.** « À partir de 99 900 € — clé en main, prête à vivre. » était servi
+sur `/arko-one` et `/arko-max`. « clé en main » est proscrit au §2 ci-dessus.
+Pendant ce temps, `npm run check:vocabulaire` annonçait « conforme ».
+
+**Cause.** Le contrôle lisait le **source, ligne à ligne**. Le terme était coupé
+en deux par un retour à la ligne JSX :
+
+```
+À partir de {…} € — clé
+en main, prête à vivre.
+```
+
+Aucune ligne ne contenait « clé en main ». Le rendu, lui, l'affichait.
+
+**Correctif.** `scripts/check-vocabulaire.mjs` analyse désormais le texte **tel
+que le visiteur le lit** — blancs aplatis avant recherche — tout en rapportant la
+ligne d'origine. Vérifié sur un fichier témoin ; aucun faux positif sur le code
+existant. Passage de toute la blocklist au crible avec cette lecture : **c'était
+la seule occurrence du dépôt**.
+
+Le texte est corrigé en « livré prêt à vivre » (vocabulaire imposé). L'accord
+féminin de « prête » était par ailleurs un reste de « maison ».
+
+**Règle actée.** Le vocabulaire de marque s'apprécie sur le **texte rendu**, pas
+sur le code. Tout nouveau contrôle éditorial doit lire ce que le visiteur lit.
+
+> C'est la deuxième fois qu'un garde-fou de ce projet rapporte un succès sur une
+> surface non conforme — après « un code HTTP 404 ne prouve pas un masquage »
+> (ADR-028, 2026-07-31). Même leçon sous deux formes : **un contrôle qui n'observe
+> pas la sortie réelle ne contrôle rien.**
+
 ## Points ouverts — arbitrage Howner requis
 
 Ces trois points sont apparus en croisant la spec avec le code existant. Aucun n'empêche de commencer ; les deux premiers doivent être tranchés avant la réécriture des textes, le troisième avant toute mise en ligne.
