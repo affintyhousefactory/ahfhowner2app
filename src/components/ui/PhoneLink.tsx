@@ -69,8 +69,11 @@ export function PhoneLink({
          purement visuelle, reste `aria-hidden` — sinon un lecteur d'écran
          énoncerait deux fois la même chose. */
       aria-label={`${CONTACT.phoneLabel} au ${CONTACT.phone}`}
+      /* La taille du texte vit sur le lien, pas sur le numéro : le libellé en
+         hérite, et un appelant peut l'agrandir d'une classe (`text-sm` sur la
+         page contact) sans que le composant expose une variante. */
       className={cn(
-        "group relative flex items-center gap-2 rounded-full border border-line px-3 py-1.5",
+        "group relative flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-xs",
         "text-ink/70 transition-colors hover:border-ink/25 hover:text-ink",
         className,
       )}
@@ -79,7 +82,7 @@ export function PhoneLink({
       <DrapeauFrance />
       <span
         className={cn(
-          "whitespace-nowrap font-mono text-xs",
+          "whitespace-nowrap font-mono",
           full ? "inline" : "hidden lg:inline",
         )}
       >
