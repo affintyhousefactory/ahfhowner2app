@@ -37,8 +37,10 @@ Toute décision structurante (archi, intégration externe, change de marque/desi
 - **Next 16 « non standard »** — lire `node_modules/next/dist/docs/` avant tout code (cf. AGENTS.md).
 
 ## Marque (ADR-029 — absolu, remplace ADR-004)
-Termes **interdits** : **maison**, votre maison, maison individuelle, résidence principale, **clé en main**, toute raison sociale autre que Howner, tout nom de fournisseur — plus la blocklist historique : modulaire, préfabriqué, tiny house, conteneur, catalogue.
-Vocabulaire **imposé** : module, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
+> **Amendement du 2026-08-03 (décision de Richard)** : « maison » **n'est plus interdit** — c'est le terme **imposé**, il remplace « module » sur tout le site client (accord au **féminin**). « maison individuelle » reste proscrit : c'est l'expression qui déclenche le régime **CCMI** (loi du 19 déc. 1990). Ne pas relâcher cette ligne sans l'avocat. À remonter à Albert.
+
+Termes **interdits** : **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner, tout nom de fournisseur — plus la blocklist historique : modulaire, préfabriqué, tiny house, conteneur, catalogue.
+Vocabulaire **imposé** : **maison**, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
 Toujours « notre architecte intégrée » (sans prénom). Fondateur = « Puigbo » (sans accent).
 **Cadre de vente** (ADR-029) : annexe sur parcelle déjà bâtie, ou hébergement professionnel. Le logement indépendant sur terrain nu **n'est pas ouvert** — « prochainement », sans prix ni explication.
 Contrôle avant chaque PR : `npm run check:vocabulaire`. Source : `src/lib/site.ts`, spec `docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md`.

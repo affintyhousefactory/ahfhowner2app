@@ -25,8 +25,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Vidéos via `useVisible` (sauf Hero) ; bundle 3D `src/components/arko3d/*` isolé à `/viewer` (ADR-006). Lighthouse 100 / LCP < 0.8s.
 
 ## Marque (absolu — ADR-029, remplace ADR-004)
-Termes interdits : **maison**, maison individuelle, résidence principale, **clé en main**, toute raison sociale autre que Howner, tout nom de fournisseur — plus modulaire, préfabriqué, tiny house, conteneur, catalogue.
-Vocabulaire imposé : module, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
+> **Amendée le 2026-08-03** : « maison » est passé d'interdit à **imposé** et remplace « module » (accord au féminin). « maison individuelle » reste interdit — régime CCMI.
+
+Termes interdits : **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner, tout nom de fournisseur — plus modulaire, préfabriqué, tiny house, conteneur, catalogue.
+Vocabulaire imposé : **maison**, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
 « Notre architecte intégrée » (sans prénom). « Puigbo » (sans accent).
 Cadre de vente : annexe sur parcelle bâtie ou hébergement professionnel ; terrain nu **non ouvert**.
 Contrôle : `npm run check:vocabulaire` avant chaque PR.

@@ -3,10 +3,10 @@
 /**
  * Les six sections du configurateur v2 (ADR-030).
  *
- * 01 Le module · 02 Ambiance · 03 Terrasse · 04 Options ·
+ * 01 La maison · 02 Ambiance · 03 Terrasse · 04 Options ·
  * 05 Votre situation terrain · 06 Réserver un numéro
  *
- * Le module ouvre le parcours et arrive présélectionné depuis le menu ;
+ * La maison ouvre le parcours et arrive présélectionnée depuis le menu ;
  * l'implantation et le terrain passent en avant-dernier, là où l'engagement se
  * précise. Le « dossier terrain » a été retiré du parcours (recueil oral par le
  * conseiller) — décision du 2026-08-01.
@@ -34,7 +34,7 @@ import type { ParcelleData } from "@/shared/types/plu";
 import type { UsageId } from "@/lib/configurateur/config";
 
 /* ------------------------------------------------------------------ */
-/* 01 — le module                                                      */
+/* 01 — la maison                                                      */
 /* ------------------------------------------------------------------ */
 
 export function SectionModule() {
@@ -43,9 +43,9 @@ export function SectionModule() {
   const usageDef = c.cfg.usages.find((u) => u.id === c.usage);
 
   return (
-    <Section n={1} titre="Le module" resume={`${m.nom} · ${eur(m.prixBaseTtc)}`} ouvertParDefaut>
+    <Section n={1} titre="La maison" resume={`${m.nom} · ${eur(m.prixBaseTtc)}`} ouvertParDefaut>
       <p className="font-mono text-[0.64rem] leading-relaxed text-muted">
-        Présélectionné depuis le menu Modules — modifiable ici.
+        Présélectionnée depuis le menu Maisons — modifiable ici.
       </p>
       {c.cfg.modeles.map((x) => (
         <Choix
@@ -299,7 +299,7 @@ export function SectionTerrain() {
 
   return (
     <Section n={5} titre="Votre situation terrain" resume={resume}>
-      <Eyebrow>Où votre Module Arko va-t-il s&apos;implanter ?</Eyebrow>
+      <Eyebrow>Où votre Maison Arko va-t-elle s&apos;implanter ?</Eyebrow>
       {c.cfg.usages.map((u) => (
         <Choix
           key={u.id}

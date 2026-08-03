@@ -36,7 +36,7 @@ export function Footer() {
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-canvas/60">
-              Deux modules compacts d'architecte, conçus avec notre architecte
+              Deux maisons compactes d'architecte, conçues avec notre architecte
               intégrée et livrées prêtes à vivre. Fabriquées au Pays-Basque.
             </p>
           </div>

@@ -164,7 +164,7 @@ export function Scene({
   return (
     /* Hauteur constante (arbitrage Richard, 2026-08-02). Une scène qui rétrécit
        au défilement recadre le rendu : à 132 px sur un visuel 4:3, `object-cover`
-       coupait le pied du module — terrasse et sol disparaissaient, et le module
+       coupait le pied de la maison — terrasse et sol disparaissaient, et la maison
        semblait remonter dans le cadre. Mieux vaut un tiers d'écran constant
        qu'un rendu qui s'ampute. */
     <div
@@ -201,7 +201,7 @@ export function Scene({
         })}
       </div>
 
-      {/* Voile : le nom du module et les pastilles doivent rester lisibles
+      {/* Voile : le nom de la maison et les pastilles doivent rester lisibles
           quelle que soit la teinte du bardage derrière eux. */}
       <div
         aria-hidden
@@ -210,7 +210,7 @@ export function Scene({
 
       {/* Une fois la scène calée en haut, elle passe sous l'en-tête du tunnel :
           on lui réserve la hauteur que celui-ci occupe réellement (`--cfg-nav`,
-          nulle dès qu'il s'est effacé) pour que le nom du module ne finisse
+          nulle dès qu'il s'est effacé) pour que le nom de la maison ne finisse
           jamais derrière le logo. Hors calage, aucune réserve — la scène est
           déjà sous l'en-tête dans le flux. */}
       <div

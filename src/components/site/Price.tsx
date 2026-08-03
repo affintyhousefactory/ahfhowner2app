@@ -33,7 +33,7 @@ export function Price() {
 
           <Reveal delay={0.05}>
             <p className="max-w-md text-[1.05rem] leading-relaxed text-ink">
-              Tout est compris : le module fini, prêt à vivre. La livraison
+              Tout est compris : la maison finie, prête à vivre. La livraison
               s'estime selon votre terrain, les frais de terrain restent à part.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">

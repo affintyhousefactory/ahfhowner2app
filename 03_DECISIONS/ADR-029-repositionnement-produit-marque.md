@@ -37,9 +37,14 @@ La spec est catégorique et le formule comme une contrainte de développement : 
 
 ### 2. Vocabulaire — cette blocklist remplace celle d'ADR-004
 
-**Interdits** : maison, votre maison, maison individuelle, résidence principale, clé en main, toute raison sociale autre que Howner, tout nom de fournisseur ou de sous-traitant.
+> ⚠ **Ce paragraphe est amendé** — voir « Amendement du 2026-08-03 » plus bas.
+> « maison » n'est plus interdit : c'est désormais le terme **imposé**, et il
+> remplace « module ». Seul « maison individuelle » reste proscrit. Le reste de
+> la blocklist ci-dessous est inchangé.
 
-**Imposés** : module, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
+**Interdits** : ~~maison, votre maison~~, maison individuelle, résidence principale, clé en main, toute raison sociale autre que Howner, tout nom de fournisseur ou de sous-traitant.
+
+**Imposés** : maison (depuis le 2026-08-03, ~~module~~), unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
 
 **Repris d'ADR-004, non contredits par la spec, donc maintenus** : « notre architecte intégrée » (sans prénom, sans marqueur de genre additionnel) ; « Puigbo » (sans accent) ; et la blocklist historique — modulaire, préfabriqué, tiny house, conteneur, catalogue.
 
@@ -93,6 +98,51 @@ sur le code. Tout nouveau contrôle éditorial doit lire ce que le visiteur lit.
 > surface non conforme — après « un code HTTP 404 ne prouve pas un masquage »
 > (ADR-028, 2026-07-31). Même leçon sous deux formes : **un contrôle qui n'observe
 > pas la sortie réelle ne contrôle rien.**
+
+## Amendement du 2026-08-03 — « maison » devient le terme imposé
+
+**Décision de Richard**, prise en connaissance de l'alerte ci-dessous et
+maintenue après celle-ci. Elle **inverse le §2** sur son point principal.
+
+**Ce qui change.**
+
+- **« maison » sort de la liste des interdits et remplace « module »** partout
+  côté client : menu principal, titres, métadonnées, JSON-LD, FAQ, configurateur
+  v2. 70 occurrences réécrites, avec passage du masculin au féminin (« un module
+  livré prêt à vivre » → « une maison livrée prête à vivre »).
+- **`maisons?` est retiré de `PROSCRITS`** dans `scripts/check-vocabulaire.mjs`.
+- **« maison individuelle » est ajouté à sa place** — voir le risque ci-dessous.
+  « clé en main », « résidence principale » et la blocklist historique
+  (modulaire, préfabriqué, tiny house, conteneur, catalogue) sont **inchangés**.
+- Le §2 ci-dessus et le critère de recette **§16 de la spec** deviennent caducs
+  sur ce seul point. Le reste du §2 tient.
+
+**Ce qui ne change pas.** Le **cadre de vente du §1** : annexe sur parcelle déjà
+bâtie, ou hébergement professionnel. Le logement indépendant sur terrain nu
+reste fermé. Le mot change, l'offre non.
+
+**Alerte formulée avant exécution — non levée.**
+
+| | |
+|---|---|
+| **Sujet** | « maison » réintroduit comme terme imposé |
+| **Impact** | 70 occurrences ; désarmement de la règle n°1 du contrôle vocabulaire ; exposition CCMI |
+| **Gravité** | Élevée |
+| **Décision** | Prise par Richard le 2026-08-03 — bascule complète assumée |
+| **Reco. émise** | Attendre le retour de l'avocat sur les CGV, ou passer par « Nos modèles » (conforme, sans effet juridique) |
+
+Le risque tient en une phrase : vendre une **maison** à un particulier qui
+fournit son terrain, c'est le champ du **contrat de construction de maison
+individuelle** (loi n° 90-1129 du 19 décembre 1990) — contrat de forme imposée,
+garantie de livraison à prix et délais convenus, assurances spécifiques. Le
+déclencheur juridique est l'expression « maison individuelle » et le montage
+contractuel, pas le mot « maison » isolé : d'où le maintien du premier dans la
+blocklist. **Cette lecture est celle de Claude, pas celle d'un avocat.** Elle
+doit être confirmée avec la validation des CGV (ADR-015, risque 🔴 ouvert), qui
+porte sur les mêmes textes.
+
+**À remonter à Albert** — changement de positionnement de marque, au sens du
+protocole d'alerte de `CLAUDE.md`.
 
 ## Points ouverts — arbitrage Howner requis
 

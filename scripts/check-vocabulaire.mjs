@@ -2,9 +2,13 @@
 /**
  * Garde-fou vocabulaire de marque — ADR-029.
  *
- * La spec configurateur v2 en fait un critère de recette (§16) :
+ * La spec configurateur v2 en faisait un critère de recette (§16) :
  *   « Aucune occurrence de "maison", "clé en main", "résidence principale"
  *     dans les textes. »
+ * Amendement du 2026-08-03 : « maison » sort de la liste et devient le terme
+ * imposé (ADR-029 § Amendement). Le critère §16 de la spec est caduc sur ce
+ * point ; les deux autres termes restent contrôlés, ainsi que « maison
+ * individuelle » qui, lui, porte un régime contractuel (CCMI).
  *
  * Usage :  node scripts/check-vocabulaire.mjs
  * Sortie :  code 0 si conforme, 1 sinon (utilisable en CI ou pre-commit).
@@ -42,7 +46,13 @@ const EXCLUS = [
 
 // Termes proscrits. `mot` : recherché sur frontière de mot, insensible à la casse.
 const PROSCRITS = [
-  { mot: "maisons?", libelle: "maison" },
+  /* « maison » seul n'est plus proscrit — ADR-029 § Amendement du 2026-08-03,
+     décision de Richard : le terme devient le vocabulaire imposé du site.
+     « maison individuelle » reste interdit, et c'est le point dur : c'est
+     l'expression qui qualifie le contrat de construction de maison
+     individuelle (loi du 19 déc. 1990), régime que Howner ne veut pas
+     déclencher. Ne pas relâcher cette ligne sans l'avocat. */
+  { mot: "maisons? individuelles?", libelle: "maison individuelle" },
   { mot: "clé[ -]en[ -]main", libelle: "clé en main" },
   { mot: "résidences? principales?", libelle: "résidence principale" },
   // Blocklist historique reprise d'ADR-004.

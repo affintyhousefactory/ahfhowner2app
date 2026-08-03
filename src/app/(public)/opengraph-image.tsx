@@ -6,7 +6,7 @@ import { BRAND } from "@/lib/site";
 // de la charte tant qu'elle n'est pas validée par Albert (ADR-002).
 // ADR-029 — vocabulaire de marque. L'image rend `BRAND.baseline`, désormais
 // conforme (lot 1) ; ce texte alternatif reste volontairement descriptif.
-export const alt = "HOWNER — Deux modules d'architecte, prêts à vivre";
+export const alt = "HOWNER — Deux maisons d'architecte, prêtes à vivre";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

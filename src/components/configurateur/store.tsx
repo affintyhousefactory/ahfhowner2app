@@ -38,12 +38,12 @@ import {
 } from "@/lib/configurateur/config";
 
 /**
- * Ordre des sections. Le module ouvre le parcours et arrive présélectionné
+ * Ordre des sections. La maison ouvre le parcours et arrive présélectionnée
  * depuis le menu ; l'implantation et le terrain passent en avant-dernier,
  * juste avant la réservation, là où l'engagement se précise.
  */
 export const SECTIONS = [
-  { n: 1, cle: "module", titre: "Le module" },
+  { n: 1, cle: "module", titre: "La maison" },
   { n: 2, cle: "ambiance", titre: "Ambiance" },
   { n: 3, cle: "terrasse", titre: "Terrasse" },
   { n: 4, cle: "options", titre: "Options" },
@@ -104,7 +104,7 @@ export function ConfigurateurProvider({
   modeleInitial = "max",
 }: {
   children: ReactNode;
-  /** Présélection depuis le menu Modules (`?produit=one|max`). */
+  /** Présélection depuis le menu Maisons (`?produit=one|max`). */
   modeleInitial?: ModeleId;
 }) {
   const cfg = useMemo(() => loadConfig(), []);
@@ -118,7 +118,7 @@ export function ConfigurateurProvider({
   const [preAnalyse, setPreAnalyse] = useState<PreAnalyse | null>(null);
   const [numero, setNumero] = useState<number | null>(null);
 
-  /* Changer de module purge les options devenues incompatibles : le poêle
+  /* Changer de maison purge les options devenues incompatibles : le poêle
      n'existe pas sur l'Arko One, et une option fantôme fausserait le total. */
   const setModele = useCallback(
     (m: ModeleId) => {

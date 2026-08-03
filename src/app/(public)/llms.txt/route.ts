@@ -24,7 +24,7 @@ export function GET() {
 
 > ${BRAND.baseline}. ${BRAND.subline}
 
-${BRAND.maker} conçoit et livre des modules compacts d'architecte en série limitée, fabriqués au Pays-Basque. Chaque modèle est dessiné et suivi par notre architecte intégrée, livré prêt à vivre. Parcours utilisateur : découvrir un modèle, configurer un devis indicatif, vérifier la compatibilité d'un terrain, réserver un exemplaire numéroté avec un acompte remboursable.
+${BRAND.maker} conçoit et livre des maisons compactes d'architecte en série limitée, fabriquées au Pays-Basque. Chaque modèle est dessiné et suivi par notre architecte intégrée, livré prêt à vivre. Parcours utilisateur : découvrir un modèle, configurer un devis indicatif, vérifier la compatibilité d'un terrain, réserver un exemplaire numéroté avec un acompte remboursable.
 
 ## Modèles
 ${products}

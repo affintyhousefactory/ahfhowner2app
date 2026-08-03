@@ -5,8 +5,8 @@ import { PROCESS, PROCESS_CONCLUSION, LAND_PREP } from "@/lib/site";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/Reveal";
 
 /* Parcours sobre : frise typographique des étapes + une seule image,
-   le module sur son terrain. Aucune imagerie de transport ni de levage —
-   on installe un module d'architecte, on ne largue pas une boîte. */
+   la maison sur son terrain. Aucune imagerie de transport ni de levage —
+   on installe une maison d'architecte, on ne largue pas une boîte. */
 
 export function Process() {
   return (
@@ -43,7 +43,7 @@ export function Process() {
           ))}
         </Stagger>
 
-        {/* La seule image : le module sur son terrain */}
+        {/* La seule image : la maison sur son terrain */}
         <div className="mt-20 grid items-center gap-10 md:mt-28 md:grid-cols-[1fr_1fr] md:gap-16">
           <Reveal>
             <figure className="group">
@@ -60,7 +60,7 @@ export function Process() {
                 </span>
               </div>
               <figcaption className="mt-3 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-muted">
-                Pays Basque — le module posé, terrasse installée
+                Pays Basque — la maison posée, terrasse installée
               </figcaption>
             </figure>
           </Reveal>
@@ -73,7 +73,7 @@ export function Process() {
             </Reveal>
             <Reveal delay={0.15}>
               <p className="mt-6 max-w-md font-mono text-[0.7rem] leading-relaxed text-muted">
-                La terrasse voyage à part et n'est posée qu'une fois le module
+                La terrasse voyage à part et n'est posée qu'une fois la maison
                 installée sur ses fondations.
               </p>
             </Reveal>
