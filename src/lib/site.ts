@@ -48,7 +48,18 @@ export const CONTACT = {
      derrière l'indicatif +33, il fait échouer l'appel — on le retire. */
   phoneTel: PHONE_DISPLAY.replace("(0)", "").replace(/[^\d+]/g, ""),
   phoneLabel: "Nous appeler",
+  /** Plage d'ouverture de la ligne — le texte affiché et le JSON-LD lisent
+   *  la même source, `phoneHoursSpec` en étant la traduction machine. */
+  phoneDays: "Du lundi au vendredi",
+  phoneHours: "9 h–12 h et 14 h–18 h",
 } as const;
+
+/* Même plage, au format schema.org (`ContactPoint.hoursAvailable`) : deux
+   créneaux, la coupure de midi devant rester visible d'un moteur. */
+export const PHONE_HOURS_SPEC = [
+  { opens: "09:00", closes: "12:00" },
+  { opens: "14:00", closes: "18:00" },
+] as const;
 
 export const BRAND = {
   maker: "HOWNER",

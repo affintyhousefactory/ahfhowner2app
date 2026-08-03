@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ContactForm } from "@/components/site/ContactForm";
 import { PhoneLink } from "@/components/ui/PhoneLink";
+import { CONTACT } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact | HOWNER",
@@ -44,8 +45,9 @@ export default function ContactPage() {
                 Contacter un conseiller
               </p>
               <p className="mt-1.5 text-sm leading-relaxed text-muted">
-                Du lundi au vendredi. Plus direct que le formulaire quand la
-                question porte sur votre parcelle ou sur un délai.
+                {CONTACT.phoneDays}, {CONTACT.phoneHours}. Plus direct que le
+                formulaire quand la question porte sur votre parcelle ou sur un
+                délai.
               </p>
               <PhoneLink full className="mt-5 w-fit px-4 py-2 text-sm" />
             </div>

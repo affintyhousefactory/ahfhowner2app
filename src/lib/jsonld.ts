@@ -5,7 +5,14 @@
    la charte n'est pas figée (ADR-002). Prix Offer = miroir des prix
    déjà publics sur les pages produit.
    ============================================================ */
-import { SITE_URL, BRAND, CONTACT, FAQ, type Product } from "@/lib/site";
+import {
+  SITE_URL,
+  BRAND,
+  CONTACT,
+  PHONE_HOURS_SPEC,
+  FAQ,
+  type Product,
+} from "@/lib/site";
 
 type JsonLdObject = Record<string, unknown>;
 
@@ -31,6 +38,18 @@ export function organizationSchema(): JsonLdObject {
       contactType: "sales",
       areaServed: "FR",
       availableLanguage: "French",
+      hoursAvailable: PHONE_HOURS_SPEC.map((h) => ({
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+        ],
+        opens: h.opens,
+        closes: h.closes,
+      })),
     },
     address: {
       "@type": "PostalAddress",
