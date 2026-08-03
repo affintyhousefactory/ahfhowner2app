@@ -38,7 +38,7 @@ export const SERIE_COUNT = 2;
 // JSON-LD Organization s'y branchent. Surchargeable par env pour ne pas
 // dépendre d'un commit le jour où le numéro change.
 const PHONE_DISPLAY =
-  process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+33 (0)5 64 37 37 38";
+  process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+33 (0)5 64 37 37 14";
 
 export const CONTACT = {
   /** Forme lue par un humain, telle qu'affichée. */
