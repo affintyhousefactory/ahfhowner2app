@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/shared/lib/cn";
+import { PhoneLink } from "@/components/ui/PhoneLink";
 import { BRAND } from "@/lib/site";
 
 /**
@@ -113,6 +114,11 @@ export function TunnelHeader() {
             {BRAND.maker}
           </span>
         </Link>
+
+        {/* Ligne d'appel — seule autre affordance de la barre du tunnel : au
+            moment de choisir, la question qui bloque se règle plus vite au
+            téléphone qu'en sortant du parcours. */}
+        <PhoneLink className="ml-auto" />
       </div>
     </header>
   );

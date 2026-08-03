@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { NAV, BRAND, PRODUCT_LIST, SERIE_COUNT, SERIE_TOTAL, reserverHref } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
+import { PhoneLink } from "@/components/ui/PhoneLink";
 import { cn } from "@/shared/lib/cn";
 
 export function Nav() {
@@ -104,6 +105,11 @@ export function Nav() {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Ligne d'appel — visible à toutes les largeurs, y compris à côté
+              du burger : sur mobile, appeler est le geste le plus direct. Le
+              numéro n'apparaît qu'à partir de `lg`, où la barre a la place. */}
+          <PhoneLink />
+
           {/* Compteur de rareté — deux séries, pool commun de 12 numéros */}
           <Link
             href={reserverHref()}
@@ -268,6 +274,11 @@ export function Nav() {
               {n.label}
             </Link>
           ))}
+
+          {/* Numéro en clair dans le menu déplié : sur écran tactile
+              l'infobulle ne se déclenche jamais, l'icône seule de la barre ne
+              dit donc pas quel numéro on appelle. */}
+          <PhoneLink full className="mt-5 self-start" />
 
           <div className="mt-4 flex items-center justify-between">
             <span className="font-mono text-xs text-muted">

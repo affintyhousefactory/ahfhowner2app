@@ -5,7 +5,7 @@
    la charte n'est pas figée (ADR-002). Prix Offer = miroir des prix
    déjà publics sur les pages produit.
    ============================================================ */
-import { SITE_URL, BRAND, FAQ, type Product } from "@/lib/site";
+import { SITE_URL, BRAND, CONTACT, FAQ, type Product } from "@/lib/site";
 
 type JsonLdObject = Record<string, unknown>;
 
@@ -22,6 +22,16 @@ export function organizationSchema(): JsonLdObject {
     description:
       "Modules compacts d'architecte livrés prêts à vivre, fabriqués au Pays-Basque.",
     email: "contact@affinityhousefactory.com",
+    // Numéro au format E.164 — seul format que les moteurs composent
+    // correctement (bouton « Appeler » du knowledge panel).
+    telephone: CONTACT.phoneTel,
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: CONTACT.phoneTel,
+      contactType: "sales",
+      areaServed: "FR",
+      availableLanguage: "French",
+    },
     address: {
       "@type": "PostalAddress",
       streetAddress: "28 Chemin de Sabalce OEV",

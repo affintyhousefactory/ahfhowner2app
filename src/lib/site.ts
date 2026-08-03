@@ -34,6 +34,22 @@ export const SERIE_TOTAL = 12;
 // les deux nombres : « 12 exemplaires » seul laissait croire à une seule série.
 export const SERIE_COUNT = 2;
 
+// Ligne d'appel — source unique : en-tête du site, en-tête du tunnel et
+// JSON-LD Organization s'y branchent. Surchargeable par env pour ne pas
+// dépendre d'un commit le jour où le numéro change.
+const PHONE_DISPLAY =
+  process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+33 (0)5 64 37 37 38";
+
+export const CONTACT = {
+  /** Forme lue par un humain, telle qu'affichée. */
+  phone: PHONE_DISPLAY,
+  /* Forme composable (E.164), exigée par le protocole `tel:` et par
+     schema.org. Le « (0) » est une commodité de lecture nationale : composé
+     derrière l'indicatif +33, il fait échouer l'appel — on le retire. */
+  phoneTel: PHONE_DISPLAY.replace("(0)", "").replace(/[^\d+]/g, ""),
+  phoneLabel: "Nous appeler",
+} as const;
+
 export const BRAND = {
   maker: "HOWNER",
   model: "ARKO",
