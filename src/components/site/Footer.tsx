@@ -100,8 +100,8 @@ export function Footer() {
         </div>
 
         <p className="border-t border-canvas/15 py-6 text-center font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/60">
-          {BRAND.maker} · Arko One · Arko Max · {BRAND.madeIn} — Conçu avec notre
-          architecte intégrée
+          {BRAND.maker} · Arko One · Arko Max · {BRAND.madeIn} — Conçue avec
+          notre architecte intégrée
         </p>
 
         <div className="flex flex-col gap-3 border-t border-canvas/15 py-7 text-xs text-canvas/60 sm:flex-row sm:items-center sm:justify-between">

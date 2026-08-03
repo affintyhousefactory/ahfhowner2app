@@ -74,7 +74,9 @@ export const BRAND = {
   area: "40 m²", // compat héritée (= Arko Max) — préférer PRODUCTS[key].area
   footprint: "4 × 11 m", // compat héritée (= Arko Max)
   location: "Pays Basque",
-  madeIn: "Fabriqué au Pays-Basque", // rendu UI (ADR-022)
+  // Accordé au féminin le 2026-08-03 avec la bascule « module » → « maison »
+  // (ADR-029 § Amendement). Rendu en libellé isolé sur 4 surfaces.
+  madeIn: "Fabriquée au Pays-Basque", // rendu UI (ADR-022)
 } as const;
 
 export const MANIFESTO =
