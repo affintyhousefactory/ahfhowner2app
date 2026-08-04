@@ -1,5 +1,17 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-04 (ADR-035 — CRM interne, chantier prioritaire)
+Détail : **ADR-035** et « Dernier point » de `PROJECT_STATE.md`. Ici, ce qui doit rester présent à l'esprit.
+
+- **Branche `feat/adr-035-crm-leads` (`7aac1145`) — non poussée, PR non ouverte.** `dev` reste à `96f084f0`.
+- **Le CRM est refait AVANT ADR-031, à dessein** : il pose le contrat de données (`config_v2` + `cfg_*` + `slot`) que la soumission du configurateur remplira. Dans l'autre ordre, ADR-031 aurait improvisé un format.
+- **Numérotation 035** — 031→034 sont réservés et cités dans ADR-030 et dans le code. Priorité ≠ numéro.
+- **« Affectation » = conseiller AHF** (`responsable`), **sans rapport avec `mandataire_id`**. La colonne « Affectation » (champ `statut`) est retirée de la liste ; le champ reste en base.
+- **Deux retards distincts** : rappel daté dépassé (rouge) · silence > 7 j sur lead actif (orange). Un lead **jamais appelé** compte depuis sa **création**.
+- **Journal d'appels manuel** : « Appeler » ouvre `tel:` et pré-ouvre la fiche, mais **rien n'est enregistré sans validation**.
+- **Migration `20260804_crm_leads.sql` NON appliquée** (ni Preview, ni Prod). Le **trigger `dernier_appel_at` n'est pas testable en local** — vérification sur Preview.
+- **Gate** : `tsc` propre · vocabulaire conforme · eslint admin **21 → 20 erreurs** (pas de régression).
+
 ## Focus actuel
 `dev` est à **`e284cac4`** (2026-08-03) — 6 commits mergés en fast-forward depuis `b7339d44`, aucune migration. **`main` reste à `4d34ed26`.** Contenu : ligne d'appel (site + tunnel + `/contact`) et **bascule « module » → « maison »**. Le configurateur v2 vit toujours sur `/configurer/v2` (`noindex`) ; `/configurer` sert le v1, qu'aucun CTA n'atteint.
 
@@ -42,7 +54,8 @@ Détail et motifs : **ADR-030 § Amendement du 2026-08-02**, ADR-029 § Amendeme
 - **Pas de test local** : HMR aveugle sur `/mnt/d`, laptop lent. Gate = `tsc` + `eslint` + `check:vocabulaire`, puis Preview Vercel. Revers assumé — une classe d'erreurs ne se voit qu'au prerender de production.
 
 ## Prochaine action
-**ADR-031** — soumission de la demande de numéro. Bloquante : elle conditionne le passage sur `main`, puis la bascule sur `/configurer`, la levée du `noindex`, le retrait du v1 et la sortie de `/configurer` du sitemap.
+1. **ADR-035** — pousser `feat/adr-035-crm-leads`, ouvrir la PR vers `dev` (**à valider par Richard**), vérifier sur Preview, appliquer la migration.
+2. **ADR-031** — soumission de la demande de numéro. Toujours bloquante pour `main` : elle conditionne la bascule sur `/configurer`, la levée du `noindex`, le retrait du v1 et la sortie de `/configurer` du sitemap. Elle écrit désormais dans le contrat posé par ADR-035.
 
 ## Blockers / À fournir
 - **CGV + légal** — version `f3de62fe` en attente confirmation avocat (ADR-015). **Y joindre la question CCMI** ouverte par la bascule « maison » du 03/08 : même texte, même interlocuteur.

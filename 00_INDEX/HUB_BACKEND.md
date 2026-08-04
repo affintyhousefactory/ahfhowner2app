@@ -27,6 +27,10 @@ Point d'entrée pour : Phase 4 — Supabase, Stripe, outil terrain, leads, email
 | 013 | Contact terrain → leads | Proposé | ✅ |
 | 014 | Service email transactionnel | Proposé — ouvert | ❓ |
 | 017 | Enrichissement terrain Anthropic | Différé (option) | ⚪ |
+| 027 | Fiche lead admin — terrain, affectation géo, GED double | Accepté — livré | ✅ |
+| **035** | **Refonte du CRM interne** — suivi, journal d'appels, capture configurateur v2, GED double origine | **Accepté — livré sur branche** | ✅ |
+
+> ADR-035 définit le **contrat de données** que la soumission du configurateur v2 (ADR-031) devra remplir : `config_v2` + colonnes `cfg_*` + `slot`. Migration `20260804_crm_leads.sql`, additive, **non appliquée**.
 
 ## Env requis (Phase 4)
 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `APIFY_TOKEN`, `ANTHROPIC_API_KEY` (option). Jamais commités.
