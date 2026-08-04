@@ -114,10 +114,17 @@ create policy "admin_lead_appels_all" on public.lead_appels
 -- durablement fausse, seulement une valeur en retard d'une écriture. Couvre
 -- INSERT / UPDATE / DELETE, y compris un déplacement d'entrée entre deux leads.
 
+-- ⚠ `security invoker` et non `definer` : cette fonction n'est appelée que
+-- depuis le trigger ci-dessous, lui-même `security definer` — elle s'exécute
+-- donc déjà avec les droits du propriétaire. En `definer`, PostgREST l'exposait
+-- en `/rest/v1/rpc/` : n'importe quel appelant **anonyme** pouvait écrire
+-- `leads.dernier_appel_at` sur un lead dont il devinait l'UUID, en contournant
+-- la RLS. Défaut relevé par l'audit Supabase à l'application sur Preview.
+
 create or replace function public.leads_recalc_dernier_appel(p_lead_id uuid)
 returns void
 language sql
-security definer
+security invoker
 set search_path = public
 as $$
   update public.leads l
@@ -150,6 +157,14 @@ begin
   return null;
 end;
 $$;
+
+-- Ces deux fonctions n'ont aucune raison d'être appelables depuis l'API REST.
+-- PostgREST expose tout ce qui vit dans `public` : le droit d'exécution se
+-- retire explicitement. Un trigger ne vérifie pas `EXECUTE` au déclenchement
+-- (le contrôle a lieu à la création du trigger) — le retrait est donc sans
+-- effet sur le fonctionnement.
+revoke all on function public.leads_recalc_dernier_appel(uuid) from public, anon, authenticated;
+revoke all on function public.leads_sync_dernier_appel()       from public, anon, authenticated;
 
 drop trigger if exists trg_lead_appels_sync on public.lead_appels;
 create trigger trg_lead_appels_sync

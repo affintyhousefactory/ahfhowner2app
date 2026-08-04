@@ -9,7 +9,8 @@ Détail : **ADR-035** et « Dernier point » de `PROJECT_STATE.md`. Ici, ce qui 
 - **« Affectation » = conseiller AHF** (`responsable`), **sans rapport avec `mandataire_id`**. La colonne « Affectation » (champ `statut`) est retirée de la liste ; le champ reste en base.
 - **Deux retards distincts** : rappel daté dépassé (rouge) · silence > 7 j sur lead actif (orange). Un lead **jamais appelé** compte depuis sa **création**.
 - **Journal d'appels manuel** : « Appeler » ouvre `tel:` et pré-ouvre la fiche, mais **rien n'est enregistré sans validation**.
-- **Migration `20260804_crm_leads.sql` NON appliquée** (ni Preview, ni Prod). Le **trigger `dernier_appel_at` n'est pas testable en local** — vérification sur Preview.
+- **Migration `20260804_crm_leads.sql` ✅ appliquée sur Preview** (`ahfhownerdb-preprod`), structure et **trigger vérifiés fonctionnellement**, données de test retirées. **Toujours PAS sur Prod** — à la validation de la PR `dev` → `main`.
+- **⚠ Défaut de sécurité introduit puis corrigé** : fonctions du trigger en `SECURITY DEFINER` dans `public` = exposées en `/rest/v1/rpc/` au rôle `anon`, donc écriture sur `leads.dernier_appel_at` hors RLS. Corrigé (`security invoker` + `revoke`), audit Supabase propre. **Règle : dans Supabase, une fonction `SECURITY DEFINER` dans `public` est une route API publique tant qu'on ne lui retire pas l'exécution.**
 - **Gate** : `tsc` propre · vocabulaire conforme · eslint admin **21 → 20 erreurs** (pas de régression).
 
 ## Focus actuel
@@ -54,7 +55,7 @@ Détail et motifs : **ADR-030 § Amendement du 2026-08-02**, ADR-029 § Amendeme
 - **Pas de test local** : HMR aveugle sur `/mnt/d`, laptop lent. Gate = `tsc` + `eslint` + `check:vocabulaire`, puis Preview Vercel. Revers assumé — une classe d'erreurs ne se voit qu'au prerender de production.
 
 ## Prochaine action
-1. **ADR-035** — **PR #73 ouverte** : vérifier sur Preview (trigger `dernier_appel_at`, Kanban, journal d'appels, GED double origine), puis merger et appliquer la migration.
+1. **ADR-035** — **PR #73 ouverte**, migration Preview appliquée et trigger vérifié. Reste : contrôler le **Kanban**, le **journal d'appels** et la **GED double origine** sur la Preview Vercel, puis merger. La migration Prod (correctif de sécurité inclus) part à la validation `dev` → `main`.
 2. **ADR-031** — soumission de la demande de numéro. Toujours bloquante pour `main` : elle conditionne la bascule sur `/configurer`, la levée du `noindex`, le retrait du v1 et la sortie de `/configurer` du sitemap. Elle écrit désormais dans le contrat posé par ADR-035.
 
 ## Blockers / À fournir
