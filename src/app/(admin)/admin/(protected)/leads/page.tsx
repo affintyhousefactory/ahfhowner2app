@@ -1,41 +1,33 @@
-import { getSupabaseAdmin } from "@/shared/lib/supabase";
+/**
+ * Liste des leads — ADR-035 §6.
+ *
+ * `?vue=` est lu **côté serveur** et passé en propriété : `useSearchParams`
+ * impose une frontière Suspense et fait échouer le prerender de production
+ * (leçon d'ADR-030, § « ?produit= lu côté serveur »).
+ */
+
 import Link from "next/link";
-import { FEATURES } from "@/lib/features";
+import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import LeadsVue, { type LeadListe } from "@/components/admin/LeadsVue";
 
 export const dynamic = "force-dynamic";
 
-const STATUT_AFFECT: Record<string, string> = {
-  nouveau:      "bg-[#7469F4]/20 text-[#7469F4]",
-  qualifié:     "bg-blue-500/20 text-blue-400",
-  affecté:      "bg-[#e07b28]/20 text-[#e07b28]",
-  en_cours:     "bg-yellow-500/20 text-yellow-400",
-  finalisé:     "bg-[#2d6b27]/30 text-green-400",
-  perdu:        "bg-white/10 text-white/30",
-};
+export default async function LeadsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ vue?: string }>;
+}) {
+  const { vue } = await searchParams;
 
-const STATUT_COMMERCIAL: Record<string, { label: string; cls: string }> = {
-  nouveau:       { label: "Nouveau",        cls: "bg-white/10 text-white/30" },
-  a_rappeler:    { label: "À rappeler",     cls: "bg-blue-500/20 text-blue-400" },
-  contact_pris:  { label: "Contact pris",   cls: "bg-[#7469F4]/20 text-[#7469F4]" },
-  en_discussion: { label: "En discussion",  cls: "bg-[#e07b28]/20 text-[#e07b28]" },
-  devis_envoye:  { label: "Devis envoyé",   cls: "bg-yellow-500/20 text-yellow-400" },
-  chaud:         { label: "Lead chaud",     cls: "bg-orange-500/20 text-orange-400" },
-  signe:         { label: "Signé",          cls: "bg-green-500/20 text-green-400" },
-  perdu:         { label: "Non retenu",     cls: "bg-red-500/10 text-red-400/60" },
-};
-
-export default async function LeadsPage() {
-  // ADR-028 — la jointure `mandataires` n'alimente qu'une colonne masquée tant
-  // que le domaine est suspendu. Deux `select()` littéraux plutôt qu'une
-  // concaténation : Supabase infère le type des lignes depuis la chaîne.
-  const table = getSupabaseAdmin().from("leads");
-  const { data: leads } = FEATURES.mandataire
-    ? await table
-        .select("id, lead_number, prenom, nom, email, statut, statut_commercial, produit, commune, created_at, mandataires(prenom, nom)")
-        .order("created_at", { ascending: false })
-    : await table
-        .select("id, lead_number, prenom, nom, email, statut, statut_commercial, produit, commune, created_at")
-        .order("created_at", { ascending: false });
+  // ADR-028/035 — la jointure `mandataires` alimentait la colonne « Mandataire »
+  // et la colonne « Affectation » ; les deux sont retirées de la liste. Une
+  // seule requête suffit désormais.
+  const { data } = await getSupabaseAdmin()
+    .from("leads")
+    .select(
+      "id, lead_number, prenom, nom, email, tel, statut, statut_commercial, responsable, produit, commune, created_at, dernier_appel_at, prochain_rappel_at, cfg_modele, cfg_total",
+    )
+    .order("created_at", { ascending: false });
 
   return (
     <div className="p-8">
@@ -49,79 +41,10 @@ export default async function LeadsPage() {
         </Link>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#252521]">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/10 text-left text-xs text-white/30">
-              <th className="px-4 py-3 font-normal">Dossier</th>
-              <th className="px-4 py-3 font-normal">Email</th>
-              <th className="px-4 py-3 font-normal">Modèle Arko</th>
-              <th className="px-4 py-3 font-normal">Commune</th>
-              {FEATURES.mandataire && <th className="px-4 py-3 font-normal">Mandataire</th>}
-              <th className="px-4 py-3 font-normal">Affectation</th>
-              <th className="px-4 py-3 font-normal">Commercial</th>
-              <th className="px-4 py-3 font-normal">Date</th>
-              <th className="px-4 py-3 font-normal"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {(leads ?? []).map((l) => {
-              const comm = STATUT_COMMERCIAL[(l.statut_commercial as string | null) ?? "nouveau"] ?? STATUT_COMMERCIAL.nouveau;
-              return (
-                <tr key={l.id} className="hover:bg-white/5">
-                  <td className="px-4 py-3">
-                    {l.lead_number && (
-                      <span className="mr-2 font-mono text-[11px] text-white/30">#{l.lead_number}</span>
-                    )}
-                    <span className="text-white">{l.prenom} {l.nom}</span>
-                  </td>
-                  <td className="px-4 py-3 text-white/50">{l.email}</td>
-                  <td className="px-4 py-3 text-white/50">{l.produit ?? "—"}</td>
-                  <td className="px-4 py-3 text-white/50">{l.commune ?? "—"}</td>
-                  {FEATURES.mandataire && (
-                    <td className="px-4 py-3 text-white/40 text-xs">
-                      {(() => {
-                        const raw = (l as { mandataires?: unknown }).mandataires as
-                          | { prenom: string; nom: string }
-                          | { prenom: string; nom: string }[]
-                          | null
-                          | undefined;
-                        const m = Array.isArray(raw) ? raw[0] ?? null : raw;
-                        return m ? `${m.prenom} ${m.nom}` : "—";
-                      })()}
-                    </td>
-                  )}
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUT_AFFECT[l.statut ?? "nouveau"] ?? ""}`}>
-                      {l.statut ?? "nouveau"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${comm.cls}`}>
-                      {comm.label}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-white/30 text-xs">
-                    {new Date(l.created_at).toLocaleDateString("fr-FR")}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/leads/${l.id}`} className="text-[#7469F4] hover:underline text-xs">
-                      Voir →
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
-            {(leads ?? []).length === 0 && (
-              <tr>
-                <td colSpan={9} className="px-4 py-12 text-center text-sm text-white/20">
-                  Aucun lead pour l&apos;instant
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <LeadsVue
+        leads={(data ?? []) as LeadListe[]}
+        vue={vue === "kanban" ? "kanban" : "tableau"}
+      />
     </div>
   );
 }

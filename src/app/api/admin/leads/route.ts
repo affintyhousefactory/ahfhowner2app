@@ -39,12 +39,50 @@ export async function POST(req: NextRequest) {
       plu_lon: (body.plu_lon as number) || null,
       plu_lat: (body.plu_lat as number) || null,
       notes_ahf: (body.notes_ahf as string) || null,
+
+      // ── Suivi CRM (ADR-035 §1 et §2) ────────────────────────────────────
+      responsable: (body.responsable as string) || null,
+      responsable_at: body.responsable ? new Date().toISOString() : null,
+      prochain_rappel_at: (body.prochain_rappel_at as string) || null,
+      statut_commercial: (body.statut_commercial as string) || "nouveau",
+
+      // ── Configuration du configurateur v2 (ADR-035 §4) ──────────────────
+      // Instantané JSON + colonnes plates : le premier pour la fidélité, les
+      // secondes pour le tri et l'agrégation du CRM.
+      config_v2: body.config_v2 ?? null,
+      cfg_version: (body.cfg_version as string) || null,
+      cfg_usage: (body.cfg_usage as string) || null,
+      cfg_quantite: (body.cfg_quantite as number) ?? null,
+      cfg_modele: (body.cfg_modele as string) || null,
+      cfg_ambiance: (body.cfg_ambiance as string) || null,
+      cfg_terrasse: (body.cfg_terrasse as string) || null,
+      cfg_options: (body.cfg_options as string[]) ?? [],
+      cfg_prix_base: (body.cfg_prix_base as number) ?? null,
+      cfg_prix_terrasse: (body.cfg_prix_terrasse as number) ?? null,
+      cfg_prix_options: (body.cfg_prix_options as number) ?? null,
+      cfg_transport: (body.cfg_transport as number) ?? null,
+      cfg_total: (body.cfg_total as number) ?? null,
+      // Numéro de série demandé. Colonne historique, protégée par un index
+      // unique partiel (`20260703_leads_slot_unique.sql`) — d'où le message
+      // dédié ci-dessous. L'état demandé/confirmé relève d'ADR-031.
+      slot: (body.slot as number) || null,
+
       source: "admin",
       statut: "nouveau",
     })
     .select("id")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    // 23505 = violation d'unicité. Le seul cas possible ici est le numéro de
+    // série déjà pris : le dire, plutôt que de servir un message Postgres.
+    if (error.code === "23505") {
+      return NextResponse.json(
+        { error: `Le numéro ${body.slot} est déjà attribué à un autre lead.` },
+        { status: 409 },
+      );
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
   return NextResponse.json({ id: data.id });
 }
