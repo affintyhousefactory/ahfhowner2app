@@ -27,11 +27,16 @@ const DEPOSIT_EUR = Number(
 /** Montant de réservation formaté, pour les textes éditoriaux (FAQ, réassurance). */
 const DEPOT = `${DEPOSIT_EUR.toLocaleString("fr-FR")} €`;
 
-// Pool commun de 12 exemplaires — Arko One + Arko Max confondus, numérotage 1→12 partagé.
-export const SERIE_TOTAL = 12;
+// Pool commun — Arko One + Arko Max confondus, numérotage 1→6 partagé.
+//
+// 6 et non 12 : arbitrage de Richard du 2026-08-04, qui annule celui du
+// 2026-08-02 et remet la Série 01 sur le volume du §5 de la spec. Cette
+// constante est le pool public ET celui du configurateur (`serie.unites`) :
+// les deux se lisent dans le même parcours, ils ne peuvent pas diverger.
+export const SERIE_TOTAL = 6;
 
 // Nombre de séries ouvertes (une par modèle). Le compteur de l'en-tête affiche
-// les deux nombres : « 12 exemplaires » seul laissait croire à une seule série.
+// les deux nombres : le total seul laissait croire à une seule série.
 export const SERIE_COUNT = 2;
 
 // Ligne d'appel — source unique : en-tête du site, en-tête du tunnel et
@@ -68,7 +73,7 @@ export const BRAND = {
   subline:
     "Deux modèles d'architecte, livrés prêts à vivre. Fabriqués au Pays-Basque.",
   series: "Série 01",
-  total: 12, // pool commun = SERIE_TOTAL (One + Max confondus)
+  total: SERIE_TOTAL, // pool commun (One + Max confondus)
   reserved: 3, // placeholder Phase 1 — Supabase Realtime Phase 4 (ADR-009)
   deposit: DEPOSIT_EUR,
   area: "40 m²", // compat héritée (= Arko Max) — préférer PRODUCTS[key].area
@@ -161,7 +166,7 @@ export const PRODUCTS = {
     tagline: "20 m² d'architecte, l'essentiel juste.",
     area: "20 m²",
     footprint: "6,65 × 3,60 m", // ADR-029 — emprise §5 de la spec configurateur v2
-    total: 12, // SERIE_TOTAL — pool partagé One + Max
+    total: SERIE_TOTAL, // pool partagé One + Max
     reserved: 2, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
     series: "Série 01",
     pricing: ONE_PRICING,
@@ -180,7 +185,7 @@ export const PRODUCTS = {
     tagline: "40 m² d'architecte, livrés prêts à vivre.",
     area: BRAND.area,
     footprint: BRAND.footprint,
-    total: 12, // SERIE_TOTAL — pool partagé One + Max
+    total: SERIE_TOTAL, // pool partagé One + Max
     reserved: 1, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
     series: BRAND.series,
     pricing: PRICING,
@@ -403,7 +408,7 @@ export const SPECS = [
   { k: "Vitrages", v: "Triple, angle vitré en retrait" },
   { k: "Isolation", v: "Renforcée, confort 4 saisons" },
   { k: "Terrasse", v: "Bois sur pilotis, intégrée" },
-  { k: "Série", v: "01 — 12 exemplaires numérotés" },
+  { k: "Série", v: `01 — ${SERIE_TOTAL} exemplaires numérotés` },
 ] as const;
 
 export const INCLUDED = [

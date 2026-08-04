@@ -248,16 +248,21 @@ CSS (`--cfg-nav`) : la scène vit dans la page, l'en-tête dans la mise en page,
 et c'est la seule couture qui les relie sans remonter un état partagé jusqu'au
 groupe de routes.
 
-### E. Compteur de rareté — « 2 séries · 12 exemplaires », série maintenue à 12
+### E. Compteur de rareté — « 2 séries · N exemplaires »
 
-L'en-tête public affichait « 12 exemplaires », ce qui laissait croire à une série
+L'en-tête public affichait le seul total, ce qui laissait croire à une série
 unique. Il affiche désormais les deux nombres (constante `SERIE_COUNT`).
 
-**Le volume reste à 12** — arbitrage de Richard du 2026-08-02, qui amende le §5
-de la spec et ADR-029 (lesquels fixaient la Série 01 à 6 unités). `SERIE_TOTAL`
-(`site.ts`) et `serie.unites` (`configurateur/config.ts`) sont alignés à 12 : le
-sélecteur de numéros du récapitulatif en propose donc douze. Sans cet alignement,
-l'en-tête aurait annoncé douze exemplaires et le sélecteur n'en aurait offert six.
+~~**Le volume reste à 12** — arbitrage de Richard du 2026-08-02.~~
+**Annulé le 2026-08-04 : la Série 01 revient à 6 unités**, arbitrage de Richard
+(ADR-029 § Amendement du 2026-08-04). Ce qui ne change pas, et qui était le vrai
+enseignement du 02/08 : **`SERIE_TOTAL` (`site.ts`) et `serie.unites`
+(`configurateur/config.ts`) doivent toujours porter la même valeur**. Elles se
+lisent dans le même parcours — en-tête public puis sélecteur du récapitulatif —
+et une divergence se voit immédiatement. Les littéraux restants du site
+(fiche technique, `/arko-one`, bloc avant-première) ont été interpolés sur
+`SERIE_TOTAL` le 2026-08-04 pour que le prochain changement de volume tienne en
+une constante.
 
 ### F. Vérification — pas de test local
 

@@ -11,6 +11,7 @@
  * rapport ; la seconde n'est pas réactivée par la première.
  */
 
+import type { EtatNumero } from "@/lib/configurateur/numeros";
 import {
   loadConfig,
   optionsPourModele,
@@ -23,13 +24,24 @@ import {
 /* Statuts commerciaux                                                        */
 /* ══════════════════════════════════════════════════════════════════════════ */
 
+/**
+ * L'ordre de ce tableau est l'avancement commercial, du premier contact à la
+ * clôture. Les deux derniers (`actif: false`) sont des affaires closes.
+ *
+ * `paiement_reserve` (ex-`chaud`, renommé le 2026-08-04 — ADR-035 § Amendement)
+ * n'est **pas une appréciation du conseiller** : il constate un fait comptable,
+ * l'encaissement de la réservation du numéro de série. Il a vocation à être
+ * **synchronisé depuis Pennylane** (MCP/API) plutôt que posé à la main ; d'ici
+ * là il reste saisissable dans la fiche. Le connecteur fera l'objet de son
+ * propre ADR — c'est une dépendance externe.
+ */
 export const STATUTS_COMMERCIAUX = [
   { id: "nouveau",       label: "Nouveau",       badge: "bg-white/10 text-white/40",             dot: "bg-white/40",    couleur: "#9ca3af", actif: true  },
   { id: "a_rappeler",    label: "À rappeler",    badge: "bg-blue-500/20 text-blue-400",          dot: "bg-blue-400",    couleur: "#60a5fa", actif: true  },
   { id: "contact_pris",  label: "Contact pris",  badge: "bg-[#7469F4]/20 text-[#7469F4]",        dot: "bg-[#7469F4]",   couleur: "#7469F4", actif: true  },
   { id: "en_discussion", label: "En discussion", badge: "bg-[#e07b28]/20 text-[#e07b28]",        dot: "bg-[#e07b28]",   couleur: "#e07b28", actif: true  },
   { id: "devis_envoye",  label: "Devis envoyé",  badge: "bg-yellow-500/20 text-yellow-400",      dot: "bg-yellow-400",  couleur: "#facc15", actif: true  },
-  { id: "chaud",         label: "Lead chaud",    badge: "bg-orange-500/20 text-orange-400",      dot: "bg-orange-400",  couleur: "#fb923c", actif: true  },
+  { id: "paiement_reserve", label: "Paiement réservé", badge: "bg-teal-500/20 text-teal-300",    dot: "bg-teal-300",    couleur: "#2dd4bf", actif: true  },
   { id: "signe",         label: "Signé",         badge: "bg-green-500/20 text-green-400",        dot: "bg-green-400",   couleur: "#4ade80", actif: false },
   { id: "perdu",         label: "Non retenu",    badge: "bg-red-500/10 text-red-400/60",         dot: "bg-red-400/60",  couleur: "#6b7280", actif: false },
 ] as const;
@@ -44,6 +56,44 @@ export function statutCommercial(id: string | null | undefined): StatutCommercia
 /** `actif: false` = affaire close. Ni relance, ni alerte de silence. */
 export function estClos(id: string | null | undefined): boolean {
   return !statutCommercial(id).actif;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* Numéro de série — deux niveaux de prise (ADR-035 § Amendement 2026-08-04)   */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Ce que le statut commercial dit du numéro de série demandé par le lead.
+ * Règle métier posée par Richard le 2026-08-04, seule source de vérité :
+ *
+ * — avant « Devis envoyé » : le numéro **n'est pas pris**. Un lead qui a coché
+ *   un numéro dans le configurateur ne l'immobilise pas ; plusieurs peuvent
+ *   viser le même. C'est le mode « demandé puis confirmé » d'ADR-030.
+ * — « Devis envoyé » : le numéro est **réservé** — retiré des propositions
+ *   commerciales, mais toujours sélectionnable côté visiteur (`demande`).
+ * — « Paiement réservé » et au-delà : le numéro est **bloqué** pour de bon
+ *   (`confirme`), parce que l'argent est encaissé. C'est le seul état qui
+ *   décrémente le compteur public.
+ * — « Non retenu » relâche le numéro.
+ *
+ * ⚠ Ceci est le **contrat** ; la table des numéros qui l'appliquera arrive avec
+ * ADR-031. Tant qu'elle n'existe pas, rien ne décrémente réellement le stock.
+ */
+export function etatNumeroPourStatut(id: string | null | undefined): EtatNumero {
+  switch (statutCommercial(id).id) {
+    case "devis_envoye":
+      return "demande";
+    case "paiement_reserve":
+    case "signe":
+      return "confirme";
+    default:
+      return "libre";
+  }
+}
+
+/** Le numéro est-il définitivement pris ? (paiement encaissé) */
+export function numeroBloque(id: string | null | undefined): boolean {
+  return etatNumeroPourStatut(id) === "confirme";
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */

@@ -113,6 +113,86 @@ L'espace client (ADR-034) écrira dans cette même table avec `origine = 'client
 
 Les 8 statuts étaient déclarés **trois fois** (liste, sélecteur de fiche, et implicitement au dashboard), avec des libellés et des couleurs déjà divergents. Ils passent dans `src/lib/crm.ts`. Même raison qu'ADR-029 pour le vocabulaire : une valeur dupliquée finit par diverger, et personne ne s'en aperçoit.
 
+## Amendement du 2026-08-04 — « Lead chaud » devient « Paiement réservé »
+
+Arbitrage de Richard, le jour même de la livraison du CRM.
+
+### 1. Le statut cesse d'être une opinion
+
+`chaud` / « Lead chaud » **ne décrivait rien de vérifiable** : deux conseillers ne
+mettaient pas le curseur au même endroit, et le Kanban perdait sa valeur de
+tableau de bord dès que la colonne se remplissait d'appréciations. Il est
+remplacé par **`paiement_reserve` / « Paiement réservé »**, qui constate un fait
+comptable unique : **l'encaissement de la réservation du numéro de série**.
+
+**L'identifiant en base est renommé, pas seulement le libellé.** Migration
+`20260804_statut_paiement_reserve.sql` : la contrainte `CHECK` tombe, les lignes
+en `chaud` passent à `paiement_reserve`, la contrainte est reposée sur la
+nouvelle liste. Garder `chaud` en base pendant que l'écran affiche « Paiement
+réservé » aurait recréé exactement la divergence que le §7 vient de supprimer —
+et le futur connecteur Pennylane écrirait un identifiant qui ment sur son sens.
+✅ **Appliquée sur Preview le 2026-08-04, vérifiée par requête** (contrainte
+relue, 1 ligne migrée). Prod : à la validation `dev` → `main`, comme
+`20260804_crm_leads.sql`.
+
+La teinte passe d'orange à teal : la progression du Kanban se lit désormais
+jaune (devis) → teal (payé) → vert (signé), au lieu d'un orange qui disait
+« urgent » là où il faut lire « acquis ».
+
+### 2. Le numéro de série a deux niveaux de prise
+
+Règle métier posée par Richard, qui n'existait nulle part en code :
+
+| Statut du lead | Numéro de série | Sélectionnable côté visiteur |
+|---|---|---|
+| avant « Devis envoyé » | **rien** — plusieurs leads peuvent viser le même | oui |
+| **Devis envoyé** | **réservé** (`demande`) — retiré des propositions commerciales, mais reprenable tant que rien n'est payé | oui |
+| **Paiement réservé**, Signé | **bloqué** (`confirme`) — définitif, décrémente le compteur public | non |
+| Non retenu | relâché | oui |
+
+C'est la formalisation du mode « demandé puis confirmé » d'ADR-030 § Écarts, qui
+jusqu'ici ne disait pas **ce qui** déclenchait le passage d'un état à l'autre.
+La correspondance vit dans `etatNumeroPourStatut()` (`src/lib/crm.ts`), jamais
+dupliquée dans un écran ni dans `numeros.ts`.
+
+**Rendu** : le numéro apparaît en badge à côté du modèle dans la liste des leads
+et sur les cartes du Kanban (`NumeroSerieBadge`), teinté selon le niveau de
+prise. Un conseiller qui arbitre entre deux leads sur le même numéro voit
+immédiatement lequel a payé.
+
+⚠ **Ceci est le contrat, pas encore l'application.** `chargerNumeros()` renvoie
+toujours des données statiques : tant qu'ADR-031 n'a pas posé la table des
+numéros, **rien ne décrémente réellement le stock**.
+
+### 3. Deux objets de base contredisent la règle — non traités ici
+
+Relevés en écrivant cet amendement, laissés en l'état faute d'arbitrage :
+
+- **`leads_slot_unique`** (`20260703_leads_slot_unique.sql`) — index unique
+  partiel sur `slot` dès qu'il est non nul. Il **bloque le numéro au premier
+  lead qui le choisit**, quel que soit son statut : c'est l'inverse exact de la
+  règle ci-dessus, qui veut qu'un numéro reste libre jusqu'au devis. Tant que
+  la soumission du configurateur n'écrit pas (ADR-031), la contradiction est
+  dormante ; elle deviendra bloquante le jour où deux visiteurs viseront le
+  même numéro — le second verra une erreur d'insertion.
+- **`leads_slot_check`** — `CHECK (slot BETWEEN 1 AND 12)`, encore calé sur
+  l'ancien volume de série. Prod est vide (0 lead), Preview porte **1 ligne de
+  test avec `slot > 6`** : durcir la contrainte à 6 échouerait sur Preview sans
+  purge préalable.
+
+**À trancher avec ADR-031**, qui portera la table des numéros et donc le bon
+endroit pour l'unicité (sur le numéro confirmé, pas sur le souhait du lead).
+
+### 4. Synchronisation Pennylane — intention, pas décision
+
+`paiement_reserve` a vocation à être **posé automatiquement depuis Pennylane**
+(MCP/API), en constatant l'encaissement. D'ici là il reste saisissable à la main
+dans la fiche. **Le connecteur fera l'objet de son propre ADR** : c'est une
+dépendance externe critique (authentification, appariement facture ↔ lead,
+fréquence de synchronisation, comportement en cas de remboursement), donc une
+alerte Albert au sens de `CLAUDE.md`. Rien n'est engagé ici hors le nom du
+statut.
+
 ## Faisabilité
 
 - **Verdict** : ✅ Élevée. Aucune API externe, aucune clé, aucun service nouveau. Une migration additive.
@@ -127,7 +207,7 @@ Les 8 statuts étaient déclarés **trois fois** (liste, sélecteur de fiche, et
 
 ## Conséquences
 
-- **ADR-031 hérite d'un contrat** : la soumission du configurateur v2 écrit `config_v2` + `cfg_*` + `slot`, et n'a plus à inventer de format. Elle reste seule maîtresse de l'état `demandé/confirmé` du numéro.
+- **ADR-031 hérite d'un contrat** : la soumission du configurateur v2 écrit `config_v2` + `cfg_*` + `slot`, et n'a plus à inventer de format. Elle applique désormais une règle explicite pour l'état du numéro (§ Amendement, point 2) au lieu de l'inventer — et **hérite aussi de deux objets de base à corriger** : `leads_slot_unique` et `leads_slot_check` (point 3).
 - **ADR-034 (espace client) hérite d'une GED prête** : `origine = 'client'` existe avant l'écran qui l'alimentera.
 - **ADR-028 n'est pas entamée.** Aucune surface mandataire n'est re-linkée ni ré-exposée ; `responsable` est un champ neuf, sans lien avec `mandataire_id`. Les widgets et sections mandataire restent sous `FEATURES.mandataire`.
 - **ADR-027 est amendée, pas remplacée** : l'organisation de la fiche (terrain et PLU à droite, GED Client à gauche) est celle d'ADR-027 ; ce chantier y ajoute trois blocs et retire une colonne de la liste.

@@ -18,6 +18,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
+import { NumeroSerieBadge } from "@/shared/components/admin/NumeroSerieBadge";
 import {
   STATUTS_COMMERCIAUX,
   statutCommercial,
@@ -46,6 +47,8 @@ export type LeadListe = {
   prochain_rappel_at: string | null;
   cfg_modele: string | null;
   cfg_total: number | null;
+  /** Numéro de série demandé (1→SERIE_TOTAL). Null tant que rien n'est choisi. */
+  slot: number | null;
 };
 
 type Vue = "tableau" | "kanban";
@@ -215,7 +218,10 @@ function Tableau({ leads }: { leads: LeadListe[] }) {
                   <span className="text-white">{l.prenom} {l.nom}</span>
                 </td>
                 <td className="px-4 py-3 text-white/50">{l.email}</td>
-                <td className="px-4 py-3 text-white/50">{modeleLabel(l)}</td>
+                <td className="whitespace-nowrap px-4 py-3 text-white/50">
+                  {modeleLabel(l)}
+                  <NumeroSerieBadge slot={l.slot} statut={l.statut_commercial} />
+                </td>
                 <td className="px-4 py-3 text-white/50">{l.cfg_total ? eur(l.cfg_total) : "—"}</td>
                 <td className="px-4 py-3 text-white/50">{l.commune ?? "—"}</td>
                 <td className="px-4 py-3 text-white/50">
@@ -361,6 +367,7 @@ function Carte({
         <p className="mt-0.5 truncate text-[11px] text-white/35">
           {modeleLabel(lead)}
           {lead.cfg_total ? ` · ${eur(lead.cfg_total)}` : ""}
+          <NumeroSerieBadge slot={lead.slot} statut={lead.statut_commercial} />
         </p>
         {lead.commune && <p className="truncate text-[11px] text-white/25">{lead.commune}</p>}
       </Link>

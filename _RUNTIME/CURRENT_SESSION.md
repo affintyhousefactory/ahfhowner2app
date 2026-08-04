@@ -1,5 +1,12 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-04 (soir — amendement ADR-035 + volume de série)
+- **« Lead chaud » → « Paiement réservé »** (`chaud` → `paiement_reserve`, **identifiant renommé en base**, pas seulement le libellé). Constate un **fait comptable**, plus une appréciation. Migration `20260804_statut_paiement_reserve.sql` ✅ Preview, vérifiée par requête. Prod : 0 lead, à passer avec l'autre.
+- **Numéro de série — deux niveaux** : rien avant devis · **réservé** au devis envoyé (reprenable) · **bloqué** à l'encaissement (seul état qui décrémente le compteur). Codé une fois dans `etatNumeroPourStatut()`. Badge `N° x` à côté du modèle dans la liste et le Kanban.
+- **⚠ `leads_slot_unique` contredit cette règle** — il bloque le numéro dès le premier lead, quel que soit son statut. Dormant tant qu'ADR-031 n'écrit pas ; **bloquant au premier doublon**. Idem `leads_slot_check` (encore 1→12). Non corrigés, à trancher avec ADR-031.
+- **Série 01 = 6 exemplaires** — annule l'arbitrage du 02/08. Appliqué **partout**, pas au seul configurateur : `BRAND.total` et `PRODUCTS.*.total` dérivent de `SERIE_TOTAL`, les 3 derniers littéraux interpolés.
+- **Pennylane** posera ce statut automatiquement — **ADR-036 réservée**, dépendance externe critique, **alerte Albert**.
+
 ## Décisions — 2026-08-04 (ADR-035 — CRM interne, chantier prioritaire)
 Détail : **ADR-035** et « Dernier point » de `PROJECT_STATE.md`. Ici, ce qui doit rester présent à l'esprit.
 
