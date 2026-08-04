@@ -14,7 +14,7 @@ Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², **77 900 �
 4. Faire valider par Albert : charte Affinity (ADR-002) + repositionnement bi-produit (ADR-022) + révision blocklist marque ADR-004 (2026-07-09) + **⚠ bascule « module » → « maison » du 2026-08-03 (ADR-029 amendée) — non remontée à ce jour**. Suspension ADR-028 ✅ remontée verbalement le 2026-07-31. Écarts ADR-030 ✅ assumés verbalement le 2026-08-02.
 5. ~~SPF/DKIM prod~~ ✅ corrigé manuellement (2026-07-10) — n'est plus un bloqueur.
 6. **Test de réversibilité ADR-028** — poser `NEXT_PUBLIC_FEATURE_MANDATAIRE=true` sur une Preview et vérifier que tout revient. Seule preuve que la reprise fonctionne ; non exécuté à ce jour.
-7. **ADR-035 — CRM interne livré sur `feat/adr-035-crm-leads`** (2026-08-04, non poussée). À faire : PR vers `dev` (validation Richard), vérification Preview, puis **migration `20260804_crm_leads.sql`** (additive, non appliquée). Le CRM pose le contrat de données que la soumission d'ADR-031 remplira — `config_v2` + `cfg_*` + `slot`.
+7. **ADR-035 — CRM interne livré, PR #73 → `dev` ouverte** (2026-08-04). À faire : vérification Preview, merge, puis **migration `20260804_crm_leads.sql`** (additive, non appliquée). Le CRM pose le contrat de données que la soumission d'ADR-031 remplira — `config_v2` + `cfg_*` + `slot`.
 8. **Configurateur v2 — ADR-031 devient bloquante.** Tous les CTA « Réserver » du site public mènent à `/configurer/v2`, dont le bouton final n'a pas de handler : **ne pas déployer cet état sur `main`**. Ensuite : bascule sur `/configurer`, levée du `noindex`, retrait du v1, sortie de `/configurer` du sitemap.
 
 ## Contraintes
