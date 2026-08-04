@@ -92,7 +92,19 @@ export type ConfigurateurConfig = {
 };
 
 const CONFIG_V1: ConfigurateurConfig = {
-  version: "v1",
+  /**
+   * Version **de la grille**, pas du configurateur — deux choses différentes
+   * qu'un `"v2"` ici aurait confondues avec le « configurateur v2 » d'ADR-030.
+   * Datée pour être ordonnable et se dater elle-même : elle s'affiche telle
+   * quelle dans la fiche (« grille 2026-08-04 »).
+   *
+   * **À incrémenter dès qu'un prix, un palier ou une option bouge.** C'est ce
+   * qui fait passer `grillePerimee` à vrai sur les leads antérieurs et les
+   * empêche d'être relus avec la grille du jour (ADR-035 §4).
+   *
+   * Historique : `"v1"` jusqu'au 2026-08-04 (retrait du « Pack prêt à louer »).
+   */
+  version: "2026-08-04",
   tva: 20,
 
   usages: [
@@ -213,13 +225,15 @@ const CONFIG_V1: ConfigurateurConfig = {
       modeles: ["one", "max"],
       structurelle: false,
     },
-    {
-      id: "pack_location",
-      nom: "Pack prêt à louer",
-      prixTtc: { one: 1990, max: 1990 },
-      modeles: ["one", "max"],
-      structurelle: false,
-    },
+    // « Pack prêt à louer » (1 990 €) retiré le 2026-08-04 — décision de Richard,
+    // l'offre n'est pas viable après étude. Écart supplémentaire au §5 de la
+    // spec, qui le liste encore ; la spec est une source versionnée, elle n'est
+    // pas réécrite (même traitement que les écarts d'ADR-030).
+    //
+    // Retirer une option ne casse rien pour les leads qui la portaient : elle
+    // se restitue « hors grille » avec son identifiant brut (`resoudreConfigV2`).
+    // C'est le sens du bump de `version` ci-dessus — leur configuration est
+    // signalée périmée au lieu d'être relue avec la grille du jour.
   ],
 
   // 6 : arbitrage Richard du 2026-08-04, qui annule celui du 2026-08-02 et

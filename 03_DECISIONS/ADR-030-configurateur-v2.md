@@ -4,7 +4,7 @@
 - **Date** : 2026-08-01 — **amendé le 2026-08-02** (§ Amendement — mise en œuvre)
 - **Phase** : All
 - **Faisabilité** : 🟠 Moyenne — le parcours et les grilles sont entièrement spécifiés ; les montants d'options restent provisoires (§17.4) et deux points d'arbitrage conditionnent la mise en ligne
-- **Alerte Albert** : **traitée verbalement par Richard le 2026-08-02 — écarts maintenus et assumés.** Quatre écarts par rapport à la spécification (§8 pré-analyse PLU conservée, §6-§7 aucun paiement en ligne, §5 transport au kilomètre, §5 Série 01 maintenue à 12 unités), plus le parti « colonne de sections dépliantes » au lieu du tunnel en 7 écrans. Ce sont des arbitrages produit, pas des impossibilités techniques ; Richard les assume et les reprendra avec Albert si le cas se présente. Deux points ouverts lui reviennent par ailleurs (§ Points ouverts).
+- **Alerte Albert** : **traitée verbalement par Richard le 2026-08-02 — écarts maintenus et assumés.** Quatre écarts par rapport à la spécification (§8 pré-analyse PLU conservée, §6-§7 aucun paiement en ligne, §5 transport au kilomètre, ~~§5 Série 01 maintenue à 12 unités~~ — **annulé le 2026-08-04, la série revient à 6 : cet écart-là n'existe plus**), plus le parti « colonne de sections dépliantes » au lieu du tunnel en 7 écrans. **Écart supplémentaire du 2026-08-04 : le « Pack prêt à louer » du §5 est retiré de la grille** (§ Écarts assumés, point 3 bis) — **à porter à Albert avec les autres**. Ce sont des arbitrages produit, pas des impossibilités techniques ; Richard les assume et les reprendra avec Albert si le cas se présente. Deux points ouverts lui reviennent par ailleurs (§ Points ouverts).
 
 ## Contexte
 
@@ -132,6 +132,31 @@ sur la même distance.
 
 **Conséquence d'interface** : changer de modèle après avoir saisi l'adresse
 recalcule le transport. Le total doit en tenir compte.
+
+### 3 bis. « Pack prêt à louer » retiré — écart au §5 (2026-08-04)
+
+**Décision de Richard : l'offre n'est pas viable après étude.** L'option
+`pack_location` (1 990 € TTC, One et Max) disparaît de la grille. Le §5 et le
+JSON du §17 de la spec la listent encore ; **la spec n'est pas réécrite** —
+c'est une source versionnée d'Albert, traitée ici comme pour les trois écarts
+ci-dessus.
+
+Retirer une option de la grille **ne casse rien pour les leads qui la
+portaient** : `resoudreConfigV2()` la restitue « hors grille » avec son
+identifiant brut plutôt que de la faire disparaître silencieusement
+(ADR-035 §4). Aucun lead n'en portait au moment du retrait — vérifié sur
+Preview, pas supposé.
+
+**La version de grille est incrémentée dans le même geste** (`v1` →
+`2026-08-04`), sans quoi une configuration antérieure serait relue avec la
+grille du jour et paraîtrait n'avoir jamais contenu l'option. C'est
+précisément le service que rend `cfg_version`. Le format devient **daté** :
+un `"v2"` se serait confondu avec le « configurateur v2 » de cet ADR, alors
+qu'il s'agit de la version des *grilles*.
+
+> **Règle qui en découle** : tout mouvement de prix, de palier ou d'option
+> incrémente `version`. Une grille qui bouge sans changer de version rend
+> `grillePerimee` inopérant — le garde-fou existe, encore faut-il l'armer.
 
 ### 4. Écran 6 — réservation sans paiement
 
