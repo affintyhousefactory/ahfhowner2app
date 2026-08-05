@@ -54,7 +54,11 @@ La spec est catégorique et le formule comme une contrainte de développement : 
 
 Arko One **77 900 € TTC**, Arko Max **99 900 € TTC** (TVA 20 %, construction neuve). Réservation **2 000 €**, intégralement remboursable, imputée sur le prix. Acompte de confirmation **30 %**.
 
-> **Amendement du 2026-08-02 — Série 01 reste à 12 unités.** La spec fixait 6 ; **arbitrage de Richard : le volume public ne change pas**. `SERIE_TOTAL = 12` (`site.ts`) et `serie.unites = 12` (`configurateur/config.ts`) sont donc alignés, et le sélecteur de numéros du configurateur v2 en propose douze. La Série 02 sans limite reste prévue. Écart assumé par rapport au §5 de la spec, au même titre que les trois écarts d'ADR-030.
+> **~~Amendement du 2026-08-02 — Série 01 reste à 12 unités.~~** ~~La spec fixait 6 ; arbitrage de Richard : le volume public ne change pas.~~ **Annulé le 2026-08-04** (voir ci-dessous).
+
+> **Amendement du 2026-08-04 — Série 01 revient à 6 unités.** **Arbitrage de Richard**, qui annule celui du 2026-08-02 et **remet le §5 de la spec en vigueur**. `SERIE_TOTAL = 6` (`site.ts`) et `serie.unites = 6` (`configurateur/config.ts`) sont alignés ; le sélecteur de numéros du configurateur v2 en propose six. **Portée : tout le site**, pas le seul configurateur — en-tête (« 2 séries · 6 exemplaires »), Hero, jauge de réservation, fiche technique et `description` SEO d'`/arko-one` dérivent désormais tous de `SERIE_TOTAL`, les trois derniers littéraux codés en dur ayant été interpolés dans le même geste. La Série 02 sans limite reste prévue.
+>
+> Conséquence non traitée ici : la contrainte `leads_slot_check` (1→12) et l'index `leads_slot_unique` restent en l'état — voir ADR-035 § Amendement du 2026-08-04, point 3.
 
 Le §17.1 est explicite : « le site public porte encore d'autres montants que ceux du §5. Un seul jeu de prix doit exister. »
 

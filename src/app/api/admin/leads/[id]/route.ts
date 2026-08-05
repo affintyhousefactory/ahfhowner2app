@@ -20,6 +20,16 @@ const ALLOWED_FIELDS = [
   "delai_projet", "description_projet",
   // Suivi commercial (indépendant du statut d'affectation)
   "statut_commercial",
+  // Suivi CRM — ADR-035 §1 et §2. `responsable` = conseiller AHF, sans rapport
+  // avec `mandataire_id` (domaine suspendu, ADR-028).
+  "responsable", "responsable_at", "prochain_rappel_at",
+  // Configuration issue du configurateur v2 — ADR-035 §4.
+  // `dernier_appel_at` est ABSENT à dessein : il est maintenu par trigger
+  // depuis `lead_appels`, et n'a pas à être écrit par un écran.
+  "config_v2", "cfg_version", "cfg_usage", "cfg_quantite", "cfg_modele",
+  "cfg_ambiance", "cfg_terrasse", "cfg_options",
+  "cfg_prix_base", "cfg_prix_terrasse", "cfg_prix_options",
+  "cfg_transport", "cfg_total", "slot",
 ] as const;
 
 type AllowedField = (typeof ALLOWED_FIELDS)[number];

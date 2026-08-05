@@ -13,6 +13,13 @@
  *                grille crée de l'hésitation et brouille le compteur) ;
  * — `libre`    → sélectionnable.
  *
+ * **Ce qui fait passer un numéro d'un état à l'autre** (règle du 2026-08-04,
+ * ADR-035 § Amendement) : le statut commercial du lead, et rien d'autre.
+ * `devis_envoye` → `demande` ; `paiement_reserve` (encaissement de la
+ * réservation) → `confirme`. La correspondance vit dans
+ * `etatNumeroPourStatut()` (`src/lib/crm.ts`) : elle n'est pas dupliquée ici,
+ * pour la même raison qu'un libellé ne se stocke pas sur un lead.
+ *
  * ⚠ Aujourd'hui les données sont statiques. ADR-031 les remplacera par une
  * lecture de la table des numéros, **projection de la base et jamais une
  * valeur saisie** (§6) : si le compteur affiche 3 restants, il doit exister

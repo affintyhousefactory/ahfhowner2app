@@ -39,6 +39,13 @@ export async function POST(
 
   if (!file) return NextResponse.json({ error: "Fichier requis" }, { status: 400 });
 
+  // ADR-035 §5 — qui a déposé la pièce, et à quelle pièce attendue elle répond.
+  // Défaut 'ahf' : cette route est celle du back-office. L'espace client
+  // (ADR-034) écrira dans la même table avec 'client'.
+  const origine = form.get("origine") === "client" ? "client" : "ahf";
+  const categorieRaw = form.get("categorie");
+  const categorie = typeof categorieRaw === "string" && categorieRaw ? categorieRaw : null;
+
   const supabase = getSupabaseAdmin();
   const safeName = file.name.replace(/[^a-zA-Z0-9._\-àâäéèêëîïôùûüç ]/g, "_");
   const path = `client/${id}/${Date.now()}_${safeName}`;
@@ -58,6 +65,8 @@ export async function POST(
       bucket_path: path,
       type_mime: file.type,
       taille_ko: Math.round(file.size / 1024),
+      origine,
+      categorie,
     })
     .select("id")
     .single();
@@ -68,6 +77,41 @@ export async function POST(
   }
 
   return NextResponse.json({ id: data.id });
+}
+
+/**
+ * Reclassement d'une pièce déjà déposée — ADR-035 §5. Sert surtout aux pièces
+ * arrivées de l'espace client (ADR-034) sans catégorie : le fichier existe,
+ * seule son affectation au dossier manque.
+ */
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const { docId, categorie, origine } = (await req.json()) as {
+    docId?: string;
+    categorie?: string | null;
+    origine?: string;
+  };
+  if (!docId) return NextResponse.json({ error: "docId requis" }, { status: 400 });
+
+  const patch: Record<string, unknown> = {};
+  if (categorie !== undefined) patch.categorie = categorie || null;
+  if (origine === "ahf" || origine === "client") patch.origine = origine;
+
+  if (Object.keys(patch).length === 0) {
+    return NextResponse.json({ error: "Aucun champ à mettre à jour" }, { status: 400 });
+  }
+
+  const { error } = await getSupabaseAdmin()
+    .from("lead_client_documents")
+    .update(patch)
+    .eq("id", docId)
+    .eq("lead_id", id);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
 }
 
 export async function DELETE(
