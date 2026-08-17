@@ -7,6 +7,7 @@
    ============================================================ */
 import {
   SITE_URL,
+  ABOUT,
   BRAND,
   CONTACT,
   PHONE_HOURS_SPEC,
@@ -82,6 +83,24 @@ export function productSchema(product: Product): JsonLdObject {
       url: `${SITE_URL}${product.slug}`,
       seller: { "@type": "Organization", name: BRAND.maker },
     },
+  };
+}
+
+/* À propos — rendu sur /a-propos. `AboutPage` plutôt que `Organization` : le
+   layout public émet déjà l'Organization sitewide, la dupliquer ici enverrait
+   deux entités concurrentes pour la même marque. `mainEntityOfPage` rattache la
+   page à cette Organization sans la redéclarer.
+   Aucun partenaire n'y est nommé — ADR-029 §67 vaut aussi pour les données
+   structurées, qui sont servies au même titre que le texte visible. */
+export function aboutPageSchema(): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: `${ABOUT.kicker} — ${BRAND.maker}`,
+    url: `${SITE_URL}/a-propos`,
+    description: ABOUT.quote,
+    inLanguage: "fr-FR",
+    mainEntity: { "@type": "Organization", name: BRAND.maker, url: SITE_URL },
   };
 }
 

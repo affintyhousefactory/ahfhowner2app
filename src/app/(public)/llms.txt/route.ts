@@ -31,6 +31,7 @@ ${products}
 
 ## Pages clés
 - [Configurer & réserver](${SITE_URL}/configurer) — configuration et réservation d'un exemplaire numéroté.${terrain}
+- [À propos](${SITE_URL}/a-propos) — philosophie de marque, ossature acier léger (LSF), ingénierie et fabrication Hors-Site.
 - [Contact](${SITE_URL}/contact) — questions et accompagnement projet.
 
 ## Informations légales

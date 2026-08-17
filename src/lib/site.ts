@@ -323,6 +323,7 @@ export const FAQ: { q: string; a: string | string[] }[] = [
 // garde un point de vérité unique.
 export const NAV: { label: string; href: string }[] = [
   ...(FEATURES.mandataire ? [{ label: "Terrains", href: "/terrains" }] : []),
+  { label: "À propos", href: "/a-propos" },
   { label: "Contact",  href: "/contact" },
 ];
 
@@ -389,6 +390,108 @@ export const LAND_PREP = [
     d: "Déclaration préalable ou permis de construire, selon votre commune.",
   },
 ] as const;
+
+/* — À propos (page `/a-propos`) —
+   Source éditoriale : `docs/specs/page-about-howner.md` (Albert, 17/08/2026),
+   versée au dépôt depuis le Drive partagé pour que la page cite un chemin
+   stable, comme la spec configurateur (ADR-029).
+
+   Deux écarts au texte source, tous deux imposés par ADR-029 :
+   - le bureau d'études partenaire y était nommé, avec un lien sortant. Le §67
+     d'ADR-029 est sans réserve — « Howner est la seule entité citée côté
+     client. Aucun nom de fournisseur, de sous-traitant ou de partenaire
+     n'apparaît, y compris dans les descriptifs techniques. » L'existence du
+     bureau d'études est conservée (c'est l'argument), son nom retiré.
+   - « habitat » remplace les tournures qui suggéraient un logement autonome :
+     le cadre de vente reste l'annexe sur parcelle bâtie ou l'hébergement
+     professionnel (§1), et cette page n'est pas l'endroit où l'élargir.
+
+   « maison » est le terme imposé depuis l'amendement du 2026-08-03 — accord
+   au féminin partout. */
+export const ABOUT = {
+  /* Pas de numéro de section ici : la numérotation « 001 / 003 / 012 » est
+     celle des sections de l'accueil, la réemployer sur une autre page ferait
+     croire à une suite. */
+  eyebrow: "À propos",
+  kicker: "Quand la haute technologie sublime l'art de vivre",
+  title: "L'ADN Howner.",
+  quote:
+    "L'architecture d'avant-garde au service de votre liberté : un cocon technologique, durable et chaleureux, pensé pour l'essentiel.",
+  sections: [
+    {
+      id: "philosophie",
+      step: "01",
+      eyebrow: "Notre philosophie",
+      title: "Vivre grand dans un espace essentiel.",
+      points: [
+        {
+          k: "Le manifeste",
+          d: "Howner est né d'une conviction : le luxe ne réside pas dans le superflu, mais dans la justesse d'un espace pensé pour soi.",
+        },
+        {
+          k: "Le design",
+          d: "Nos modèles Arko One et Arko Max sont de véritables écrins d'architecte, où chaque ligne invite à la sérénité et à la reconnexion avec l'extérieur.",
+        },
+        {
+          k: "L'expérience",
+          d: "Habiter une maison Howner, c'est savourer la lumière qui traverse des volumes épurés et redécouvrir le confort absolu d'un espace qui va à l'essentiel.",
+        },
+      ],
+    },
+    {
+      id: "acier-leger",
+      step: "02",
+      eyebrow: "L'acier léger",
+      title: "Une armature secrète pour des volumes libres.",
+      intro:
+        "Derrière la poésie de nos intérieurs chaleureux se cache une révolution structurelle : la technologie LSF, Light Steel Frame.",
+      points: [
+        {
+          k: "Une liberté totale",
+          d: "La force de cette ossature en acier léger libère l'espace en supprimant les poteaux porteurs traditionnels. Les fenêtres s'agrandissent, les perspectives s'ouvrent, et la nature s'invite chez vous.",
+        },
+        {
+          k: "La précision millimétrique",
+          d: "Modélisée entièrement en 3D, la structure s'assemble à la perfection, comme une pièce de haute horlogerie — une isolation thermique et acoustique idéale, pour un intérieur qui reste un cocon douillet en toute saison.",
+        },
+      ],
+    },
+    {
+      id: "ingenierie",
+      step: "03",
+      eyebrow: "L'ingénierie invisible",
+      title: "L'excellence du geste technique.",
+      intro:
+        "Pour donner vie à cette vision, Howner conjugue la sensibilité architecturale à la rigueur de l'Usine 4.0, en s'appuyant sur l'expertise d'un bureau d'études structure indépendant.",
+      points: [
+        {
+          k: "Une conception sur-mesure",
+          d: "Chaque courbe, chaque ouverture imaginée par notre architecte intégrée est certifiée par une ingénierie de pointe, assurant à votre maison une robustesse absolue face au temps.",
+        },
+        {
+          k: "La technologie de pointe",
+          d: "Le passage direct de la modélisation intelligente aux robots de fabrication permet de pré-percer chaque gaine technique. Tout est fluide, invisible et parfaitement intégré, pour laisser place à la beauté brute des matériaux.",
+        },
+      ],
+    },
+    {
+      id: "eco-responsabilite",
+      step: "04",
+      eyebrow: "Ancrée dans le futur",
+      title: "Une maison respectueuse.",
+      points: [
+        {
+          k: "Éco-responsabilité",
+          d: "Parce que le respect du paysage est au cœur de notre démarche, la légèreté de l'acier limite l'impact sur les sols et évite les lourdes fondations.",
+        },
+        {
+          k: "Une empreinte durable",
+          d: "L'acier utilisé est indéfiniment recyclable. Fabriquées Hors-Site dans notre atelier avec un objectif zéro déchet, nos structures marient l'amour du design et le respect de la Terre.",
+        },
+      ],
+    },
+  ],
+} as const;
 
 /* — Caractéristiques — */
 export const SPECS = [
