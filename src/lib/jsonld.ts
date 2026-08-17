@@ -9,6 +9,7 @@ import {
   SITE_URL,
   ABOUT,
   BRAND,
+  COMPANY,
   CONTACT,
   PHONE_HOURS_SPEC,
   FAQ,
@@ -24,7 +25,9 @@ export function organizationSchema(): JsonLdObject {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: BRAND.maker,
-    legalName: "Affinity House Factory",
+    // Dérivés de `COMPANY` (site.ts) depuis le 2026-08-17 : le pied de page
+    // affiche désormais le même bloc NAP, et deux copies auraient divergé.
+    legalName: COMPANY.legalName,
     url: SITE_URL,
     // ADR-029 amendée le 2026-08-03 — « maison » remplace « module ».
     description:
@@ -54,10 +57,10 @@ export function organizationSchema(): JsonLdObject {
     },
     address: {
       "@type": "PostalAddress",
-      streetAddress: "28 Chemin de Sabalce OEV",
-      postalCode: "64100",
-      addressLocality: "Bayonne",
-      addressCountry: "FR",
+      streetAddress: COMPANY.street,
+      postalCode: COMPANY.postalCode,
+      addressLocality: COMPANY.city,
+      addressCountry: COMPANY.countryCode,
     },
     areaServed: "FR",
     founder: { "@type": "Person", name: "Puigbo" },

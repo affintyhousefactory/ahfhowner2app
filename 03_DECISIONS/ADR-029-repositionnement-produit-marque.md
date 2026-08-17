@@ -60,6 +60,11 @@ Le §17.1 est explicite : « le site public porte encore d'autres montants que c
 
 ### 4. Une seule identité
 
+> ⚠ **Première phrase amendée** — voir « Amendement du 2026-08-17 » plus bas.
+> Le bloc d'identification du pied de page nomme l'éditeur (« Howner by
+> Affinity House Factory »), par exception bornée à ce bloc. **L'interdiction
+> de nommer un fournisseur, un sous-traitant ou un partenaire est inchangée.**
+
 Howner est la seule entité citée côté client. Aucun nom de fournisseur, de sous-traitant ou de partenaire n'apparaît, y compris dans les descriptifs techniques.
 
 ### 5. Périmètre d'application
@@ -143,6 +148,59 @@ porte sur les mêmes textes.
 
 **À remonter à Albert** — changement de positionnement de marque, au sens du
 protocole d'alerte de `CLAUDE.md`.
+
+## Amendement du 2026-08-17 — l'éditeur est nommé dans le bloc d'identification
+
+**Décision de Richard** : le pied de page porte désormais l'identification et
+les coordonnées de la société — « **Howner by Affinity House Factory** · 28
+Chemin de Sabalce OEV, 64100 Bayonne · Tél. : +33 (0)5 64 37 37 14 » — au titre
+du référencement local.
+
+**Ce que ça amende.** Le §2 interdit « toute raison sociale autre que Howner »
+et le §4 (« Une seule identité ») veut Howner seule citée côté client. Le bloc
+d'identification y déroge, **par exception nommée et bornée**.
+
+**Pourquoi l'exception tient.** Ce n'est pas un relâchement de la règle de
+marque, c'est la limite que l'ADR se connaissait déjà : le **point ouvert §3**
+ci-dessous constate que « une seule identité » se heurte à l'obligation légale
+de nommer l'entité réelle, et conclut que le point « ne peut pas être appliqué à
+la lettre sans validation juridique ». Deux motifs s'ajoutent :
+
+- **SEO** — un bloc NAP (*Name / Address / Phone*) n'a de valeur que s'il est
+  cohérent avec l'entité déclarée partout ailleurs. Le JSON-LD `Organization`
+  émettait déjà `legalName: "Affinity House Factory"` et l'adresse de Bayonne
+  sur **toutes** les pages ; `llms.txt` annonçait déjà « Éditeur : Affinity
+  House Factory ». Afficher Howner seule aurait créé une **incohérence entre le
+  texte visible et les données structurées** — exactement ce que les moteurs
+  sanctionnent.
+- **Ordre de lecture** — « Howner **by** Affinity House Factory » place la
+  marque en premier et l'éditeur en second, comme une mention d'édition. La
+  hiérarchie de marque du §4 est préservée dans sa substance.
+
+**Périmètre de l'exception.** Le bloc d'identification du pied de page, et lui
+seul. Le discours commercial ne change pas : **aucune autre surface client ne
+nomme AHF**, et l'interdiction de nommer un **fournisseur, sous-traitant ou
+partenaire** (§4) reste entière — c'est d'ailleurs elle qui a fait retirer le
+nom du bureau d'études de la page « À propos » (ADR-037, même journée).
+
+**Mise en œuvre.** Constante `COMPANY` dans `src/lib/site.ts`, **source
+unique** : le pied de page l'affiche, `jsonld.ts` en dérive
+`Organization.address` et `legalName`. L'adresse était écrite en dur dans
+`jsonld.ts` — la rendre visible sans la centraliser aurait créé deux vérités.
+Rendu en `<address>`, sur toutes les pages publiques (le pied de page est porté
+par le layout `(public)`) : un NAP présent seulement sur l'accueil affaiblit le
+signal. Casse en Titre et non en CAPITALES — `DESIGN.md` impose la sentence
+case et les pages légales portent déjà cette graphie.
+
+**Ce que ça ne règle pas.** Le point ouvert §3 reste ouvert sur les **pages
+légales** : elles nomment AHF en toutes lettres avec SIRET et forme sociale, ce
+qui relève de l'obligation légale et non de cette exception. Le contrôle
+`check:vocabulaire` **ne teste pas** les raisons sociales (sa blocklist ne porte
+que des termes produit) : cette exception n'est donc gardée par aucun script,
+seulement par cet amendement.
+
+**À remonter à Albert** — le §4 « Une seule identité » est de sa main ;
+l'exception doit être confirmée, ou le bloc retiré. Une constante à changer.
 
 ## Points ouverts — arbitrage Howner requis
 

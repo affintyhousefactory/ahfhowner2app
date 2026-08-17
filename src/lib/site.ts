@@ -54,6 +54,39 @@ export const CONTACT = {
   phoneHours: "9 h–12 h et 14 h–18 h",
 } as const;
 
+/**
+ * Identification de l'entité éditrice — bloc NAP (Name / Address / Phone).
+ *
+ * Source **unique** : le pied de page l'affiche, `jsonld.ts` en dérive
+ * l'`Organization.address`. L'adresse était écrite en dur dans `jsonld.ts` ;
+ * la rendre visible sans la centraliser aurait créé deux vérités, et un NAP
+ * incohérent entre le texte et les données structurées est précisément ce que
+ * les moteurs sanctionnent.
+ *
+ * ⚠ `legalName` nomme une raison sociale autre que Howner, ce qu'ADR-029 §45
+ * interdit côté client. Exception assumée et datée (ADR-029 § Amendement du
+ * 2026-08-17) : identifier l'éditeur réel est une obligation légale, et
+ * l'ADR notait déjà cette règle « inapplicable à la lettre » sur ce point.
+ * Le périmètre de l'exception est ce bloc d'identification, pas le discours
+ * commercial — aucune autre surface ne nomme AHF.
+ *
+ * Casse conservée en Titre et non en CAPITALES : `DESIGN.md` impose la
+ * sentence case, et les pages légales portent déjà cette graphie.
+ */
+export const COMPANY = {
+  /** Ce qui s'affiche : la marque d'abord, l'éditeur ensuite. */
+  displayName: "Howner by Affinity House Factory",
+  legalName: "Affinity House Factory",
+  street: "28 Chemin de Sabalce OEV",
+  postalCode: "64100",
+  city: "Bayonne",
+  country: "France",
+  countryCode: "FR",
+} as const;
+
+/** Adresse sur une ligne — pied de page et méta. */
+export const COMPANY_ADDRESS_LINE = `${COMPANY.street}, ${COMPANY.postalCode} ${COMPANY.city}`;
+
 /* Même plage, au format schema.org (`ContactPoint.hoursAvailable`) : deux
    créneaux, la coupure de midi devant rester visible d'un moteur. */
 export const PHONE_HOURS_SPEC = [
