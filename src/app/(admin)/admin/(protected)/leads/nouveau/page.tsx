@@ -1,15 +1,32 @@
 "use client";
 
-import { useState } from "react";
+/**
+ * Création d'un lead — refaite sur les grilles du configurateur v2 (ADR-035 §6).
+ *
+ * L'écran suit l'appel : on note qui est au bout du fil, ce qu'il veut, où se
+ * trouve son terrain, et quand le rappeler. Les grilles viennent toutes de
+ * `loadConfig()` (ADR-030) — aucun prix, aucun palier, aucune option n'est
+ * écrit ici.
+ *
+ * Le mode « Pack terrain » relève du domaine mandataire suspendu (ADR-028) : il
+ * n'apparaît que si le drapeau est levé.
+ */
+
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CONFIG, PRICING, PRODUCTS } from "@/lib/site";
 import { cn } from "@/shared/lib/cn";
+import { FEATURES } from "@/lib/features";
+import { CONSEILLERS, STATUTS_COMMERCIAUX, eur } from "@/lib/crm";
+import {
+  loadConfig,
+  optionsPourModele,
+  paliersPourModele,
+  prixOption,
+  type ModeleId,
+} from "@/lib/configurateur/config";
 import type { ParcelleData } from "@/shared/types/plu";
 
-/* ── Types ──────────────────────────────────────────────────────── */
-
 type TerrainMode = "none" | "own" | "pack";
-type ProductKey = "one" | "max";
 
 const PACK_LABELS: Record<string, string> = {
   essentiel: "Pack Essentiel · 4 900 €",
@@ -17,10 +34,10 @@ const PACK_LABELS: Record<string, string> = {
   departement: "Pack Département · 11 200 €",
 };
 
-/* ── Composant principal ─────────────────────────────────────────── */
-
 export default function NouveauLeadPage() {
   const router = useRouter();
+  const cfg = useMemo(() => loadConfig(), []);
+
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -30,15 +47,20 @@ export default function NouveauLeadPage() {
   const [email, setEmail] = useState("");
   const [tel, setTel] = useState("");
 
-  // Configuration Arko
-  const [productKey, setProductKey] = useState<ProductKey>("one");
-  const [bardage, setBardage] = useState<string>(CONFIG.cladding[0].id);
-  const [facade, setFacade] = useState<string>(CONFIG.kitchen[0].id);
-  const [bar, setBar] = useState<string>(CONFIG.bar[0].id);
-  const [chambre, setChambre] = useState<string>(CONFIG.bedroom[0].id);
-  const [interieur, setInterieur] = useState<string>(CONFIG.interior[0].id);
-  const [terrasseM2, setTerrasseM2] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  // Suivi
+  const [responsable, setResponsable] = useState("");
+  const [statutCommercial, setStatutCommercial] = useState("nouveau");
+  const [prochainRappel, setProchainRappel] = useState("");
+
+  // Configuration v2
+  const [usage, setUsage] = useState("");
+  const [quantite, setQuantite] = useState("1");
+  const [modele, setModele] = useState<ModeleId>("one");
+  const [ambiance, setAmbiance] = useState(cfg.ambiances[0].id);
+  const [terrasse, setTerrasse] = useState("sans");
+  const [options, setOptions] = useState<string[]>([]);
+  const [transport, setTransport] = useState("");
+  const [slot, setSlot] = useState("");
 
   // Terrain
   const [terrainMode, setTerrainMode] = useState<TerrainMode>("none");
@@ -47,6 +69,7 @@ export default function NouveauLeadPage() {
   const [commune, setCommune] = useState("");
   const [codePostal, setCodePostal] = useState("");
   const [departement, setDepartement] = useState("");
+  const [parcelle, setParcelle] = useState("");
   const [pluData, setPluData] = useState<ParcelleData | null>(null);
   const [pluLoading, setPluLoading] = useState(false);
   const [pluError, setPluError] = useState<string | null>(null);
@@ -54,13 +77,32 @@ export default function NouveauLeadPage() {
   // Notes
   const [notes, setNotes] = useState("");
 
-  const product = PRODUCTS[productKey];
-  const options = product.pricing.options;
+  /* Les prix suivent la grille, jamais la saisie. */
+  const calcul = useMemo(() => {
+    const m = cfg.modeles.find((x) => x.id === modele) ?? cfg.modeles[0];
+    const paliers = paliersPourModele(cfg, m.id);
+    const dispo = optionsPourModele(cfg, m.id);
+    const base = m.prixBaseTtc;
+    const prixTerrasse = paliers.find((p) => p.id === terrasse)?.prixTtc ?? 0;
+    const prixOptions = dispo
+      .filter((o) => options.includes(o.id))
+      .reduce((s, o) => s + prixOption(o, m.id), 0);
+    const t = transport ? Number(transport) : 0;
+    return { m, paliers, dispo, base, prixTerrasse, prixOptions, transport: t, total: base + prixTerrasse + prixOptions + t };
+  }, [cfg, modele, terrasse, options, transport]);
+
+  const usageDef = cfg.usages.find((u) => u.id === usage);
+  const brancheFermee = usageDef ? !usageDef.eligible : false;
+
+  function changerModele(m: ModeleId) {
+    const dispo = optionsPourModele(cfg, m).map((o) => o.id);
+    setModele(m);
+    setOptions((prev) => prev.filter((id) => dispo.includes(id)));
+    if (!paliersPourModele(cfg, m).some((p) => p.id === terrasse)) setTerrasse("sans");
+  }
 
   function toggleOption(id: string) {
-    setSelectedOptions((prev) =>
-      prev.includes(id) ? prev.filter((o) => o !== id) : [...prev, id],
-    );
+    setOptions((prev) => (prev.includes(id) ? prev.filter((o) => o !== id) : [...prev, id]));
   }
 
   async function searchPlu() {
@@ -78,7 +120,7 @@ export default function NouveauLeadPage() {
       if (!res.ok) throw new Error(data.error ?? "Erreur PLU");
       setPluData(data);
       if (data.address_label && !commune) {
-        // Tenter d'extraire commune/CP depuis le label BAN
+        // Extraire commune / code postal du libellé BAN
         const parts = data.address_label.split(",").map((s) => s.trim());
         const last = parts[parts.length - 1] ?? "";
         const cpMatch = last.match(/(\d{5})\s+(.+)/);
@@ -101,25 +143,63 @@ export default function NouveauLeadPage() {
     setLoading(true);
     setSubmitError(null);
 
-    const optionsLabels = selectedOptions
-      .map((id) => options.find((o) => o.id === id)?.label)
-      .filter(Boolean) as string[];
+    const q = Math.max(1, Number(quantite) || 1);
 
-    const configJson = { bardage, facade, bar, chambre, interieur, terrasseM2 };
+    // Instantané fidèle + colonnes plates : voir ADR-035 §4.
+    const config_v2 = {
+      version: cfg.version,
+      usage: usage || null,
+      quantite: q,
+      modele,
+      ambiance,
+      terrasse,
+      options,
+      prix: {
+        base: calcul.base,
+        terrasse: calcul.prixTerrasse,
+        options: calcul.prixOptions,
+        transport: transport ? Number(transport) : null,
+        total: calcul.total,
+      },
+      slot: slot ? Number(slot) : null,
+      saisi_par: "admin",
+    };
 
     const body = {
       prenom, nom, email, tel: tel || null,
-      produit: product.name,
+      produit: calcul.m.nom,
+
+      // Suivi CRM
+      responsable: responsable || null,
+      statut_commercial: statutCommercial,
+      prochain_rappel_at: prochainRappel ? new Date(prochainRappel).toISOString() : null,
+
+      // Configuration v2
+      config_v2,
+      cfg_version: cfg.version,
+      cfg_usage: usage || null,
+      cfg_quantite: q,
+      cfg_modele: modele,
+      cfg_ambiance: ambiance,
+      cfg_terrasse: terrasse,
+      cfg_options: options,
+      cfg_prix_base: calcul.base,
+      cfg_prix_terrasse: calcul.prixTerrasse,
+      cfg_prix_options: calcul.prixOptions,
+      cfg_transport: transport ? Number(transport) : null,
+      cfg_total: calcul.total,
+      slot: slot ? Number(slot) : null,
+
+      // Terrain
       pack_terrain: terrainMode === "pack" ? packTerrain : null,
       terrain_mode: terrainMode === "none" ? null : terrainMode === "own" ? "have" : "pack",
       adresse_recherche: terrainMode !== "none" ? adresseRecherche || null : null,
       commune: commune || null,
       code_postal: codePostal || null,
       departement: departement || null,
-      config_json: configJson,
-      options_labels: optionsLabels,
-      terrasse_m2: terrasseM2 || null,
-      // PLU si dispo
+      parcelle_idu: parcelle || null,
+
+      // PLU
       plu_consent: terrainMode === "own" && !!pluData?.found,
       plu_adresse: pluData?.address_label ?? null,
       plu_zone: pluData?.zone_urba ?? null,
@@ -132,6 +212,7 @@ export default function NouveauLeadPage() {
       plu_servitudes: pluData?.servitudes ?? [],
       plu_lon: pluData?.lon ?? null,
       plu_lat: pluData?.lat ?? null,
+
       notes_ahf: notes || null,
     };
 
@@ -150,14 +231,21 @@ export default function NouveauLeadPage() {
     }
   }
 
+  const modesTerrain: { value: TerrainMode; label: string; desc: string }[] = [
+    { value: "none", label: "Pas encore de terrain", desc: "Le client n'a pas identifié de parcelle" },
+    { value: "own", label: "Terrain identifié — analyse PLU", desc: "Adresse dictée au téléphone : zonage et constructibilité" },
+    ...(FEATURES.mandataire
+      ? [{ value: "pack" as TerrainMode, label: "Proposition de Pack Terrain", desc: "Pack Affinity : Essentiel / Étendu / Département" }]
+      : []),
+  ];
+
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="max-w-3xl p-8">
       <a href="/admin/leads" className="text-sm text-white/30 hover:text-white">← Leads</a>
-      <h1 className="mt-2 text-xl font-semibold text-white mb-6">Pré-qualification lead</h1>
+      <h1 className="mb-6 mt-2 text-xl font-semibold text-white">Pré-qualification lead</h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-
-        {/* ── 1. Identité ── */}
+        {/* ── 1. Identité ─────────────────────────────────────────────── */}
         <Section title="Identité">
           <div className="grid grid-cols-2 gap-4">
             <Field label="Prénom *" value={prenom} onChange={setPrenom} required />
@@ -167,107 +255,188 @@ export default function NouveauLeadPage() {
           </div>
         </Section>
 
-        {/* ── 2. Configuration Arko ── */}
-        <Section title="Configuration Arko">
-          {/* Modèle */}
+        {/* ── 2. Suivi ────────────────────────────────────────────────── */}
+        <Section title="Suivi commercial">
+          <div className="grid grid-cols-3 gap-4">
+            <Select
+              label="Conseiller"
+              value={responsable}
+              onChange={setResponsable}
+              options={[{ value: "", label: "Non attribué" }, ...CONSEILLERS.map((c) => ({ value: c, label: c }))]}
+            />
+            <Select
+              label="Statut"
+              value={statutCommercial}
+              onChange={setStatutCommercial}
+              options={STATUTS_COMMERCIAUX.map((s) => ({ value: s.id, label: s.label }))}
+            />
+            <div>
+              <label className="mb-1.5 block text-xs text-white/40">Prochain rappel</label>
+              <input
+                type="datetime-local"
+                value={prochainRappel}
+                onChange={(e) => setProchainRappel(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[#7469F4] [color-scheme:dark]"
+              />
+            </div>
+          </div>
+        </Section>
+
+        {/* ── 3. Configuration ────────────────────────────────────────── */}
+        <Section title="Configuration">
           <div className="mb-4">
-            <p className="mb-2 text-xs text-white/40">Modèle</p>
+            <Select
+              label="Usage"
+              value={usage}
+              onChange={setUsage}
+              options={[
+                { value: "", label: "—" },
+                ...cfg.usages.map((u) => ({
+                  value: u.id,
+                  label: u.libelle + (u.eligible ? "" : " (hors cadre de vente)"),
+                })),
+              ]}
+            />
+            {brancheFermee && (
+              <p className="mt-2 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-3 py-2 text-xs text-yellow-400/80">
+                Cet usage n&apos;est pas ouvert à la vente (ADR-029) : la configuration ci-dessous
+                est enregistrée pour mémoire, aucun prix ne doit être communiqué au client.
+              </p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <p className="mb-2 text-xs text-white/40">Maison</p>
             <div className="flex gap-2">
-              {(["one", "max"] as ProductKey[]).map((k) => (
+              {cfg.modeles.map((m) => (
                 <button
-                  key={k}
+                  key={m.id}
                   type="button"
-                  onClick={() => setProductKey(k)}
+                  onClick={() => changerModele(m.id)}
                   className={cn(
                     "flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors",
-                    productKey === k
+                    modele === m.id
                       ? "border-[#7469F4] bg-[#7469F4]/15 text-[#7469F4]"
                       : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10",
                   )}
                 >
-                  {PRODUCTS[k].name}
-                  <span className="ml-1.5 text-xs opacity-60">{PRODUCTS[k].area}</span>
+                  {m.nom}
+                  <span className="ml-1.5 text-xs opacity-60">{m.surface} m²</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Sélecteurs config */}
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              label="Bardage"
-              value={bardage}
-              onChange={setBardage}
-              options={CONFIG.cladding.map((c) => ({ value: c.id, label: c.label }))}
-            />
-            <Select
-              label="Façade îlot cuisine"
-              value={facade}
-              onChange={setFacade}
-              options={CONFIG.kitchen.map((c) => ({ value: c.id, label: c.label }))}
-            />
-            <Select
-              label="Îlot barre"
-              value={bar}
-              onChange={setBar}
-              options={CONFIG.bar.map((c) => ({ value: c.id, label: c.label }))}
-            />
-            <Select
-              label="Chambre"
-              value={chambre}
-              onChange={setChambre}
-              options={CONFIG.bedroom.map((c) => ({ value: c.id, label: c.label }))}
-            />
-            <Select
-              label="Intérieur"
-              value={interieur}
-              onChange={setInterieur}
-              options={CONFIG.interior.map((c) => ({ value: c.id, label: c.label }))}
-            />
-            <div>
-              <label className="mb-1.5 block text-xs text-white/40">Terrasse (m²)</label>
-              <input
-                type="number"
-                min={0}
-                max={30}
-                value={terrasseM2 || ""}
-                onChange={(e) => setTerrasseM2(Number(e.target.value))}
-                placeholder="0"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[#7469F4]"
-              />
+          <div className="mb-4">
+            <p className="mb-2 text-xs text-white/40">Ambiance</p>
+            <div className="flex flex-wrap gap-2">
+              {cfg.ambiances.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => setAmbiance(a.id)}
+                  className={cn(
+                    "flex items-center gap-2 rounded-xl border px-3 py-2 text-xs transition-colors",
+                    ambiance === a.id
+                      ? "border-[#7469F4] bg-[#7469F4]/15 text-white"
+                      : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10",
+                  )}
+                >
+                  <span className="h-3 w-3 rounded-full" style={{ background: a.teinte }} />
+                  {a.nom}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Options premium */}
+          <div className="grid grid-cols-3 gap-4">
+            <Select
+              label="Terrasse"
+              value={terrasse}
+              onChange={setTerrasse}
+              options={calcul.paliers.map((p) => ({
+                value: p.id,
+                label: p.prixTtc > 0 ? `${p.nom} — ${eur(p.prixTtc)}` : p.nom,
+              }))}
+            />
+            <div>
+              <label className="mb-1.5 block text-xs text-white/40">Nombre d&apos;unités</label>
+              <input
+                type="number"
+                min={1}
+                value={quantite}
+                onChange={(e) => setQuantite(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[#7469F4]"
+              />
+            </div>
+            <Select
+              label="Numéro de série"
+              value={slot}
+              onChange={setSlot}
+              options={[
+                { value: "", label: "Aucun" },
+                ...Array.from({ length: cfg.serie.unites }, (_, i) => ({
+                  value: String(i + 1),
+                  label: `n° ${i + 1}`,
+                })),
+              ]}
+            />
+          </div>
+
           <div className="mt-4">
-            <p className="mb-2 text-xs text-white/40">Options</p>
+            <p className="mb-2 text-xs text-white/40">
+              Options <span className="text-white/25">— filtrées selon la maison</span>
+            </p>
             <div className="space-y-1.5">
-              {options.map((o) => (
-                <label key={o.id} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/5">
+              {calcul.dispo.map((o) => (
+                <label
+                  key={o.id}
+                  className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/5"
+                >
                   <input
                     type="checkbox"
-                    checked={selectedOptions.includes(o.id)}
+                    checked={options.includes(o.id)}
                     onChange={() => toggleOption(o.id)}
                     className="accent-[#7469F4]"
                   />
-                  <span className="flex-1 text-sm text-white">{o.label}</span>
-                  <span className="text-xs text-white/30">{o.price.toLocaleString("fr-FR")} €</span>
+                  <span className="flex-1 text-sm text-white">
+                    {o.nom}
+                    {o.detail && <span className="text-white/30"> — {o.detail}</span>}
+                    {o.structurelle && (
+                      <span className="ml-2 rounded-full bg-[#e07b28]/15 px-1.5 py-0.5 text-[10px] text-[#e07b28]">
+                        structurelle
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-xs text-white/30">{eur(prixOption(o, modele))}</span>
                 </label>
               ))}
             </div>
           </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1.5 block text-xs text-white/40">Transport (€ TTC)</label>
+              <input
+                type="number"
+                min={0}
+                value={transport}
+                onChange={(e) => setTransport(e.target.value)}
+                placeholder="à estimer"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
+              />
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+              <p className="text-[11px] text-white/30">Total TTC — grille {cfg.version}</p>
+              <p className="mt-0.5 text-lg font-semibold text-white">{eur(calcul.total)}</p>
+            </div>
+          </div>
         </Section>
 
-        {/* ── 3. Terrain ── */}
+        {/* ── 4. Terrain ──────────────────────────────────────────────── */}
         <Section title="Situation terrain">
-          <div className="space-y-2 mb-4">
-            {(
-              [
-                { value: "none", label: "Pas de terrain", desc: "Le client n'a pas encore de terrain" },
-                { value: "own", label: "Possède un terrain — Recherche PLU", desc: "Analyser le zonage et la constructibilité" },
-                { value: "pack", label: "Proposition de Pack Terrain", desc: "Pack Affinity : Essentiel / Étendu / Département" },
-              ] as { value: TerrainMode; label: string; desc: string }[]
-            ).map((opt) => (
+          <div className="mb-4 space-y-2">
+            {modesTerrain.map((opt) => (
               <label
                 key={opt.value}
                 className={cn(
@@ -293,7 +462,6 @@ export default function NouveauLeadPage() {
             ))}
           </div>
 
-          {/* Mode "own" — adresse + PLU */}
           {terrainMode === "own" && (
             <div className="space-y-4">
               <div>
@@ -305,13 +473,13 @@ export default function NouveauLeadPage() {
                     onChange={(e) => { setAdresseRecherche(e.target.value); setPluData(null); }}
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), searchPlu())}
                     placeholder="ex: 12 chemin des Fougères, 64500 Saint-Jean-de-Luz"
-                    className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#7469F4]"
+                    className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
                   />
                   <button
                     type="button"
                     onClick={searchPlu}
                     disabled={pluLoading || !adresseRecherche.trim()}
-                    className="rounded-xl bg-[#7469F4]/20 px-4 py-2.5 text-sm text-[#7469F4] transition-opacity disabled:opacity-40 hover:bg-[#7469F4]/30"
+                    className="rounded-xl bg-[#7469F4]/20 px-4 py-2.5 text-sm text-[#7469F4] transition-opacity hover:bg-[#7469F4]/30 disabled:opacity-40"
                   >
                     {pluLoading ? "…" : "Analyser PLU"}
                   </button>
@@ -319,7 +487,6 @@ export default function NouveauLeadPage() {
                 {pluError && <p className="mt-1 text-xs text-red-400">{pluError}</p>}
               </div>
 
-              {/* Résultat PLU */}
               {pluData && (
                 <div className={cn(
                   "rounded-xl border p-4 text-sm",
@@ -327,14 +494,14 @@ export default function NouveauLeadPage() {
                 )}>
                   {pluData.found ? (
                     <>
-                      <p className="font-medium text-white mb-2">
+                      <p className="mb-2 font-medium text-white">
                         Zone {pluData.typezone} — {pluData.zone_urba}
                       </p>
                       <dl className="space-y-1 text-xs">
                         {pluData.address_label && (
                           <div className="flex justify-between">
                             <dt className="text-white/40">Adresse BAN</dt>
-                            <dd className="text-white text-right max-w-xs truncate">{pluData.address_label}</dd>
+                            <dd className="max-w-xs truncate text-right text-white">{pluData.address_label}</dd>
                           </div>
                         )}
                         {pluData.typedoc && (
@@ -346,7 +513,7 @@ export default function NouveauLeadPage() {
                         {pluData.libelong && (
                           <div className="flex justify-between">
                             <dt className="text-white/40">Destination</dt>
-                            <dd className="text-white text-right max-w-xs">{pluData.libelong}</dd>
+                            <dd className="max-w-xs text-right text-white">{pluData.libelong}</dd>
                           </div>
                         )}
                         {!!pluData.prescriptions?.length && (
@@ -363,17 +530,16 @@ export default function NouveauLeadPage() {
                 </div>
               )}
 
-              {/* Localisation complémentaire */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 <Field label="Code postal" value={codePostal} onChange={setCodePostal} />
                 <Field label="Commune" value={commune} onChange={setCommune} />
                 <Field label="Département" value={departement} onChange={setDepartement} />
+                <Field label="Parcelle (IDU)" value={parcelle} onChange={setParcelle} />
               </div>
             </div>
           )}
 
-          {/* Mode "pack" — sélection pack + localisation */}
-          {terrainMode === "pack" && (
+          {terrainMode === "pack" && FEATURES.mandataire && (
             <div className="space-y-4">
               <Select
                 label="Pack terrain"
@@ -393,14 +559,14 @@ export default function NouveauLeadPage() {
           )}
         </Section>
 
-        {/* ── 4. Notes ── */}
+        {/* ── 5. Notes ────────────────────────────────────────────────── */}
         <Section title="Notes internes AHF">
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Contexte, source, remarques…"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#7469F4] placeholder:text-white/20"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
           />
         </Section>
 
@@ -416,7 +582,7 @@ export default function NouveauLeadPage() {
           </button>
           <a
             href="/admin/leads"
-            className="rounded-xl bg-white/5 px-6 py-2.5 text-sm text-white/40 hover:bg-white/10 transition-colors"
+            className="rounded-xl bg-white/5 px-6 py-2.5 text-sm text-white/40 transition-colors hover:bg-white/10"
           >
             Annuler
           </a>
@@ -426,7 +592,7 @@ export default function NouveauLeadPage() {
   );
 }
 
-/* ── Sous-composants ─────────────────────────────────────────────── */
+/* ── Sous-composants ─────────────────────────────────────────────────────── */
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -452,7 +618,7 @@ function Field({ label, value, onChange, type = "text", required = false }: {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#7469F4]"
+        className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
       />
     </div>
   );

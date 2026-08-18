@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { BRAND, reserverHref } from "@/lib/site";
+import { BRAND, SERIE_TOTAL, reserverHref } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
 
@@ -82,7 +82,7 @@ export function AvantPremiere() {
               <Arrow />
             </Button>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-muted">
-              Arko One · 12 exemplaires
+              Arko One · {SERIE_TOTAL} exemplaires
             </span>
           </div>
         </Reveal>
