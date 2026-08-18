@@ -8,7 +8,9 @@
 
 import Link from "next/link";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { signalerPanne } from "@/shared/lib/panne";
 import LeadsVue, { type LeadListe } from "@/components/admin/LeadsVue";
+import { ErreurRequete } from "@/components/admin/ErreurRequete";
 
 export const dynamic = "force-dynamic";
 
@@ -22,12 +24,19 @@ export default async function LeadsPage({
   // ADR-028/035 — la jointure `mandataires` alimentait la colonne « Mandataire »
   // et la colonne « Affectation » ; les deux sont retirées de la liste. Une
   // seule requête suffit désormais.
-  const { data } = await getSupabaseAdmin()
+  // `error` est lu, et pas seulement `data` : cette requête nomme explicitement
+  // `responsable`, `cfg_*` et `dernier_appel_at`. Tant que la migration
+  // `20260804_crm_leads` n'est pas appliquée sur l'environnement, PostgREST la
+  // rejette en bloc (`42703`) — `data` vaut alors `null`, et `data ?? []`
+  // affichait sereinement « aucun lead ». C'est arrivé en production.
+  const { data, error } = await getSupabaseAdmin()
     .from("leads")
     .select(
       "id, lead_number, prenom, nom, email, tel, statut, statut_commercial, responsable, produit, commune, created_at, dernier_appel_at, prochain_rappel_at, cfg_modele, cfg_total, slot",
     )
     .order("created_at", { ascending: false });
+
+  if (error) signalerPanne("admin/leads", error.message);
 
   return (
     <div className="p-8">
@@ -41,10 +50,14 @@ export default async function LeadsPage({
         </Link>
       </div>
 
-      <LeadsVue
-        leads={(data ?? []) as LeadListe[]}
-        vue={vue === "kanban" ? "kanban" : "tableau"}
-      />
+      {error ? (
+        <ErreurRequete titre="Leads illisibles" message={error.message} />
+      ) : (
+        <LeadsVue
+          leads={(data ?? []) as LeadListe[]}
+          vue={vue === "kanban" ? "kanban" : "tableau"}
+        />
+      )}
     </div>
   );
 }

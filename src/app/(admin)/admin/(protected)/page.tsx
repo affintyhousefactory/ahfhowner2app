@@ -10,6 +10,8 @@
 
 import Link from "next/link";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { signalerPanne } from "@/shared/lib/panne";
+import { ErreurRequete } from "@/components/admin/ErreurRequete";
 import { KpiCard } from "@/shared/components/admin/KpiCard";
 import { AlertBadge } from "@/shared/components/admin/AlertBadge";
 import { LeadsDonut } from "@/shared/components/admin/LeadsDonut";
@@ -65,7 +67,12 @@ const SANS_CONSEILLER = "Non attribué";
 export default async function AdminDashboard() {
   const supabase = getSupabaseAdmin();
 
-  const [{ data: leadsRaw }, { data: dossiers }, { data: mandataires }] = await Promise.all([
+  // `error` lu sur les leads : **tous** les indicateurs de cet écran en
+  // dérivent. Une requête rejetée (migration absente, base en pause) donnait
+  // `leadsRaw = null`, donc `leads = []`, donc un tableau de bord entièrement
+  // à zéro — indiscernable d'un démarrage à vide. Constaté en production le
+  // 2026-08-18.
+  const [{ data: leadsRaw, error: leadsError }, { data: dossiers }, { data: mandataires }] = await Promise.all([
     supabase
       .from("leads")
       .select(
@@ -79,6 +86,19 @@ export default async function AdminDashboard() {
       ? supabase.from("mandataires").select("id, prenom, nom, statut")
       : Promise.resolve({ data: [] as Mandataire[] }),
   ]);
+
+  if (leadsError) {
+    signalerPanne("admin/dashboard", leadsError.message);
+    return (
+      <div className="p-8">
+        <h1 className="mb-6 text-xl font-semibold text-white">Tableau de bord</h1>
+        <ErreurRequete
+          titre="Indicateurs indisponibles"
+          message={leadsError.message}
+        />
+      </div>
+    );
+  }
 
   const leads = (leadsRaw ?? []) as LeadRow[];
 
