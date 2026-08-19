@@ -35,7 +35,7 @@ function Parcours() {
 
   /* La scène est-elle calée en haut de l'écran ? Elle ne change pas de taille
      pour autant (arbitrage Richard, 2026-08-02 : le rétrécissement recadrait
-     la maison et lui coupait le pied) — l'état sert uniquement à lui faire
+     le studio et lui coupait le pied) — l'état sert uniquement à lui faire
      réserver la place de l'en-tête quand celui-ci vient se poser dessus.
      Mesure en rAF, listener passif : rien qui pèse sur le défilement. */
   useEffect(() => {
@@ -122,12 +122,12 @@ function Parcours() {
 }
 
 /**
- * Présélection depuis le CTA « Réserver » du menu Maisons.
+ * Présélection depuis le CTA « Réserver » du menu « Nos Studios ».
  *
  * `?produit=` est lu côté serveur par la page et passé en prop : `useSearchParams`
  * imposerait une frontière Suspense et ferait tomber le parcours entier en rendu
  * client, et la lecture de `window.location` en effet (cf. `ProductSync`) ferait
- * clignoter la maison par défaut avant la présélection.
+ * clignoter le studio par défaut avant la présélection.
  */
 export function ConfigurateurV2({ modeleInitial = "max" }: { modeleInitial?: ModeleId }) {
   return (

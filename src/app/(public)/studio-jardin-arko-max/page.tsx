@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PRODUCTS } from "@/lib/site";
+import { PRODUCTS, SERIE_TOTAL } from "@/lib/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { productSchema } from "@/lib/jsonld";
 import { ProductHero } from "@/components/site/ProductHero";
@@ -11,10 +11,9 @@ import { Price } from "@/components/site/Price";
 import { Included } from "@/components/site/Included";
 
 export const metadata: Metadata = {
-  title: "Arko Max — 40 m² d'architecte | HOWNER",
-  description:
-    "Arko Max : maison d'architecte de 40 m² (T2), livrée prête à vivre. Série 01 — 5 exemplaires numérotés. Fabriquée au Pays-Basque.",
-  alternates: { canonical: "/arko-max" },
+  title: "Studio de jardin 40 m² — Arko Max | HOWNER",
+  description: `Arko Max : studio de jardin d'architecte de 40 m² (T2), livré prêt à vivre. Série 01 — ${SERIE_TOTAL} exemplaires numérotés. Fabriqué au Pays-Basque.`,
+  alternates: { canonical: "/studio-jardin-arko-max" },
 };
 
 export default function ArkoMaxPage() {

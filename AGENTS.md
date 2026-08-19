@@ -25,12 +25,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Vidéos via `useVisible` (sauf Hero) ; bundle 3D `src/components/arko3d/*` isolé à `/viewer` (ADR-006). Lighthouse 100 / LCP < 0.8s.
 
 ## Marque (absolu — ADR-029, remplace ADR-004)
-> **Amendée le 2026-08-03** : « maison » est passé d'interdit à **imposé** et remplace « module » (accord au féminin). « maison individuelle » reste interdit — régime CCMI.
+> **Amendée le 2026-08-19** : « maison » **redevient interdit**. Le terme imposé est **« studio de jardin »** (premium / d'exception), accord au **masculin**. Plus de « construction », « maison à bâtir », « construction de maison individuelle ». Consigne permanente.
 
-Termes interdits : **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner, tout nom de fournisseur — plus modulaire, préfabriqué, tiny house, conteneur, catalogue.
-Vocabulaire imposé : **maison**, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
+Termes interdits : **maison**, **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner (exception : bloc d'identification du pied de page), tout nom de fournisseur — plus modulaire, préfabriqué, tiny house, conteneur, catalogue.
+Vocabulaire imposé : **studio de jardin**, unité, hébergement, annexe, espace supplémentaire, prêt à vivre. **Masculin.**
 « Notre architecte intégrée » (sans prénom). « Puigbo » (sans accent).
 Cadre de vente : annexe sur parcelle bâtie ou hébergement professionnel ; terrain nu **non ouvert**.
+Routes produit : `/studio-jardin-arko-one`, `/studio-jardin-arko-max`. Redirections permanentes depuis `/arko-*` — ne pas les retirer.
 Contrôle : `npm run check:vocabulaire` avant chaque PR.
 
 ## Secrets (ADR-003)

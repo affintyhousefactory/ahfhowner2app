@@ -26,11 +26,11 @@ export function RevealSection() {
     <section id="reveler" className="relative bg-ink text-canvas">
       <div className="container-page py-20 md:py-28">
         <Reveal>
-          <p className="eyebrow text-canvas/60">La maison qui se révèle</p>
+          <p className="eyebrow text-canvas/60">Le studio qui se révèle</p>
         </Reveal>
         <Reveal delay={0.05}>
           <h2 className="mt-4 max-w-4xl text-balance kinetic text-canvas/95 [font-size:var(--text-h1)]">
-            Elle s'ouvre. Tout est déjà là, dedans.
+            Il s'ouvre. Tout est déjà là, dedans.
           </h2>
         </Reveal>
       </div>

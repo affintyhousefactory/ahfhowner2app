@@ -39,7 +39,7 @@ export function Hero() {
         </span>
       </div>
 
-      {/* Média hero — la maison comme focal éditorial (sans wordmark, ADR-022). */}
+      {/* Média hero — le studio comme focal éditorial (sans wordmark, ADR-022). */}
       <div className="relative flex min-h-0 flex-1 flex-col justify-center">
         <div className="relative z-0 mt-8 flex justify-center">
           {/* Parallaxe au scroll : reste en framer-motion (motion values sur le
@@ -84,8 +84,11 @@ export function Hero() {
       >
         <div className="rule grid grid-cols-1 gap-8 pt-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
+            {/* `BRAND.h1` et non `BRAND.baseline` depuis le 2026-08-19 : le
+                titre de page nomme la catégorie et la marque (référencement),
+                la baseline reste la signature éditoriale du pied de page. */}
             <h1 className="editorial max-w-xl text-balance text-[2rem] leading-[1.05] text-ink md:text-[2.9rem]">
-              {BRAND.baseline}
+              {BRAND.h1}
             </h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
               {BRAND.subline}

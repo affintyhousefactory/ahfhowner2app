@@ -347,7 +347,7 @@ function Devis() {
         Votre devis
       </p>
 
-      {/* Couche 1 — la maison */}
+      {/* Couche 1 — le studio */}
       <div className="mt-4 space-y-2 text-sm">
         <Line k={`${c.active.name} ${c.active.area} — prêt à vivre`} v={eur(p.base)} />
         {c.terrasseM2 > 0 && (

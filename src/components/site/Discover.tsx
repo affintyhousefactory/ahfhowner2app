@@ -24,7 +24,7 @@ const PANELS: Panel[] = [
     src: "/assets/arko/video/aerien.mp4",
     poster: "/assets/arko/video/aerien-poster.jpg",
     tag: "L'écrin",
-    title: "Posée dans la forêt.",
+    title: "Posé dans la forêt.",
     text: "Un volume net dans les pins, au petit matin.",
   },
   {

@@ -46,13 +46,24 @@ const EXCLUS = [
 
 // Termes proscrits. `mot` : recherché sur frontière de mot, insensible à la casse.
 const PROSCRITS = [
-  /* « maison » seul n'est plus proscrit — ADR-029 § Amendement du 2026-08-03,
-     décision de Richard : le terme devient le vocabulaire imposé du site.
-     « maison individuelle » reste interdit, et c'est le point dur : c'est
-     l'expression qui qualifie le contrat de construction de maison
-     individuelle (loi du 19 déc. 1990), régime que Howner ne veut pas
-     déclencher. Ne pas relâcher cette ligne sans l'avocat. */
-  { mot: "maisons? individuelles?", libelle: "maison individuelle" },
+  /* « maison » redevient proscrit — ADR-029 § Amendement du 2026-08-19,
+     décision de Richard : le site ne vend plus une maison mais un **studio de
+     jardin premium / d'exception**. Le terme imposé est « studio de jardin »,
+     au masculin. C'est l'inverse exact de l'amendement du 2026-08-03, qui
+     l'avait rendu obligatoire — les deux mouvements sont datés dans l'ADR
+     plutôt qu'effacés.
+
+     Effet de bord favorable : le repositionnement **éloigne** le site du
+     régime CCMI (loi du 19 déc. 1990), risque 🔴 ouvert depuis le 2026-08-03.
+     Un studio de jardin n'est pas une maison individuelle. La question reste
+     posée à l'avocat, mais elle porte désormais sur beaucoup moins.
+
+     Les deux entrées ci-dessous se recouvrent volontairement : « maison »
+     suffirait à attraper « maison individuelle », mais garder la ligne CCMI
+     explicite empêche qu'un futur relâchement de « maison » emporte
+     silencieusement le garde-fou juridique avec lui. */
+  { mot: "maisons?", libelle: "maison (terme proscrit — dire « studio de jardin »)" },
+  { mot: "maisons? individuelles?", libelle: "maison individuelle (régime CCMI)" },
   { mot: "clé[ -]en[ -]main", libelle: "clé en main" },
   { mot: "résidences? principales?", libelle: "résidence principale" },
   // Blocklist historique reprise d'ADR-004.
@@ -125,6 +136,7 @@ for (const { fichier, ligne, terme, texte } of infractions) {
   console.error(`  ${fichier}:${ligne}  « ${terme} »`);
   console.error(`    ${texte}\n`);
 }
-console.error("Vocabulaire imposé : module, unité, studio, hébergement, annexe,");
-console.error("espace supplémentaire, prêt à vivre. Voir ADR-029 et docs/specs/.");
+console.error("Vocabulaire imposé : studio de jardin (premium / d'exception),");
+console.error("unité, hébergement, annexe, espace supplémentaire, prêt à vivre.");
+console.error("Accord au MASCULIN. Voir ADR-029 § Amendement du 2026-08-19.");
 process.exit(1);

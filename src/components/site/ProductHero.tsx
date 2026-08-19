@@ -48,12 +48,18 @@ export function ProductHero({
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col justify-center">
         <div className="container-page relative z-20">
-          <h1
+          {/* Le nom du produit reste l'élément visuel dominant, mais ce n'est
+              plus le `<h1>` : depuis le 2026-08-19 le titre de page porte la
+              catégorie (« Studio de jardin de 20 m² … »), qui est ce qu'un
+              visiteur cherche — « Arko One » ne se tape pas dans un moteur.
+              Rendu en `<p>` comme la baseline du pied de page et les libellés
+              du méga-menu : dominant à l'œil, décoratif dans le plan. */}
+          <p
             className="editorial select-none text-ink"
             style={{ fontSize: "var(--text-display)" }}
           >
             {product.name}
-          </h1>
+          </p>
         </div>
 
         <div className="relative z-10 -mt-[clamp(2rem,6vw,6rem)] flex justify-center">
@@ -100,9 +106,11 @@ export function ProductHero({
       >
         <div className="rule grid grid-cols-1 gap-8 pt-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
-            <h2 className="editorial text-[2rem] leading-[1.05] text-ink md:whitespace-nowrap md:text-[2.9rem]">
-              {product.tagline}
-            </h2>
+            {/* `md:whitespace-nowrap` retiré : il tenait pour une tagline
+                courte, il ferait déborder un titre de 55 caractères. */}
+            <h1 className="editorial text-balance text-[2rem] leading-[1.05] text-ink md:text-[2.9rem]">
+              {product.h1}
+            </h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
               À partir de {product.pricing.base.toLocaleString("fr-FR")} € —
               livré prêt à vivre.

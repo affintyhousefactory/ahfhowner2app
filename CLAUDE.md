@@ -37,12 +37,13 @@ Toute décision structurante (archi, intégration externe, change de marque/desi
 - **Next 16 « non standard »** — lire `node_modules/next/dist/docs/` avant tout code (cf. AGENTS.md).
 
 ## Marque (ADR-029 — absolu, remplace ADR-004)
-> **Amendement du 2026-08-03 (décision de Richard)** : « maison » **n'est plus interdit** — c'est le terme **imposé**, il remplace « module » sur tout le site client (accord au **féminin**). « maison individuelle » reste proscrit : c'est l'expression qui déclenche le régime **CCMI** (loi du 19 déc. 1990). Ne pas relâcher cette ligne sans l'avocat. À remonter à Albert.
+> **Amendement du 2026-08-19 (décision de Richard)** : le site ne vend plus une maison, il vend un **studio de jardin premium / d'exception**. « maison » **redevient interdit** ; le terme imposé est **« studio de jardin »**, accord au **masculin**. Cette consigne vaut pour toutes les demandes à venir. On ne parle plus de **construction**, de **maison à bâtir** ni de **construction de maison individuelle**. Effet favorable : le repositionnement **éloigne** le site du régime **CCMI** — à porter au dossier avocat des CGV.
 
-Termes **interdits** : **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner, tout nom de fournisseur — plus la blocklist historique : modulaire, préfabriqué, tiny house, conteneur, catalogue.
-Vocabulaire **imposé** : **maison**, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
+Termes **interdits** : **maison**, **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner (sauf le bloc d'identification du pied de page, ADR-029 § Amendement du 2026-08-17), tout nom de fournisseur — plus la blocklist historique : modulaire, préfabriqué, tiny house, conteneur, catalogue.
+Vocabulaire **imposé** : **studio de jardin** (premium / d'exception), unité, hébergement, annexe, espace supplémentaire, prêt à vivre. **Accord au masculin.**
 Toujours « notre architecte intégrée » (sans prénom). Fondateur = « Puigbo » (sans accent).
 **Cadre de vente** (ADR-029) : annexe sur parcelle déjà bâtie, ou hébergement professionnel. Le logement indépendant sur terrain nu **n'est pas ouvert** — « prochainement », sans prix ni explication.
+**Routes produit** : `/studio-jardin-arko-one` et `/studio-jardin-arko-max` depuis le 2026-08-19. Les anciennes `/arko-*` sont couvertes par des redirections **permanentes** (`next.config.ts`) — **ne jamais les retirer**, elles sont indexées depuis juin.
 Contrôle avant chaque PR : `npm run check:vocabulaire`. Source : `src/lib/site.ts`, spec `docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md`.
 Exclus du contrôle : pages légales (§17.10 + ADR-015), domaine mandataire suspendu (ADR-028), back-office.
 

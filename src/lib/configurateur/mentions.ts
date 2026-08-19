@@ -64,7 +64,7 @@ export const MENTIONS = {
  * parcelle saisie (§8). Affichée en statique à côté de la pré-analyse.
  */
 export const URBANISME_GENERIQUE =
-  "Une maison de 20 m² relève en général d'une déclaration préalable, une maison de 40 m² d'un permis de construire. Le régime exact dépend de votre commune, du règlement local et de la présence d'un bâtiment existant. Loi littoral, périmètre protégé, zone inondable, recul de voirie : ces points sont vérifiés par notre équipe lors de l'étude de votre terrain.";
+  "Un studio de jardin de 20 m² relève en général d'une déclaration préalable, un studio de 40 m² d'un permis de construire. Le régime exact dépend de votre commune, du règlement local et de la présence d'un bâtiment existant. Loi littoral, périmètre protégé, zone inondable, recul de voirie : ces points sont vérifiés par notre équipe lors de l'étude de votre terrain.";
 
 /** Écran 6 — texte du devis (ADR-030 § Écarts assumés, point 4). */
 export const DEVIS_TEXTE = {

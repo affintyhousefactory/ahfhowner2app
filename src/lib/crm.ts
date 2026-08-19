@@ -232,7 +232,7 @@ export const PIECES_DOSSIER = [
   { id: "photos_terrain",       label: "Photos du terrain",           attenduDe: "client" },
   { id: "financement",          label: "Plan de financement",         attenduDe: "client" },
   { id: "devis",                label: "Devis",                       attenduDe: "ahf" },
-  { id: "plans_maison",         label: "Plans de la maison",          attenduDe: "ahf" },
+  { id: "plans_maison",         label: "Plans du studio",            attenduDe: "ahf" },
   { id: "notice_technique",     label: "Notice technique",            attenduDe: "ahf" },
   { id: "autre",                label: "Autre",                       attenduDe: "ahf" },
 ] as const;

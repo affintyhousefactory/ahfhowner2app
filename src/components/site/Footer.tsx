@@ -45,8 +45,8 @@ export function Footer() {
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-canvas/60">
-              Deux maisons compactes d'architecte, conçues avec notre architecte
-              intégrée et livrées prêtes à vivre. Fabriquées au Pays-Basque.
+              Deux studios de jardin d'architecte, conçus avec notre architecte
+              intégrée et livrés prêts à vivre. Fabriqués au Pays-Basque.
             </p>
           </div>
 
@@ -150,7 +150,7 @@ export function Footer() {
         </address>
 
         <p className="border-t border-canvas/15 py-6 text-center font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/60">
-          {BRAND.maker} · Arko One · Arko Max · {BRAND.madeIn} — Conçue avec
+          {BRAND.maker} · Arko One · Arko Max · {BRAND.madeIn} — Conçu avec
           notre architecte intégrée
         </p>
 

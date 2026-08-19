@@ -82,7 +82,7 @@ export function Nav() {
               onClick={() => setMenu((v) => !v)}
               className="group relative text-sm text-ink/70 transition-colors hover:text-ink"
             >
-              Maisons
+              Nos Studios
               <span
                 className={cn(
                   "absolute -bottom-1 left-0 h-px bg-accent transition-all duration-300",
@@ -204,7 +204,7 @@ export function Nav() {
                 >
                   Découvrir
                 </Button>
-                {/* Entrée dans le tunnel v2 : la maison choisie ici est
+                {/* Entrée dans le tunnel v2 : le studio choisi ici est
                     présélectionné côté serveur (ADR-030). */}
                 <Button
                   href={reserverHref(p.key)}
@@ -231,9 +231,9 @@ export function Nav() {
         )}
       >
         <div className="container-page flex flex-col gap-1 py-6">
-          {/* Maisons — déplié */}
+          {/* Nos Studios — déplié */}
           <p className="pt-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-muted">
-            Maisons
+            Nos Studios
           </p>
           {PRODUCT_LIST.map((p) => (
             <div key={p.key} className="border-b border-line py-4">

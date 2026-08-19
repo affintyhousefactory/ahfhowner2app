@@ -1,7 +1,7 @@
 /* ============================================================
    HOWNER / ARKO — source de contenu
    Règles de marque ABSOLUES — voir ADR-029 (remplace ADR-004).
-   Vocabulaire imposé : maison, unité, studio, hébergement, annexe,
+   Vocabulaire imposé : studio de jardin, unité, hébergement, annexe,
    espace supplémentaire, prêt à vivre.
    « notre architecte intégrée » sans prénom. Fondateur = Puigbo
    (sans accent). Contrôle : node scripts/check-vocabulaire.mjs
@@ -102,6 +102,13 @@ export const PHONE_HOURS_SPEC = [
 export const BRAND = {
   maker: "HOWNER",
   model: "ARKO",
+  /* Titre principal de l'accueil (`<h1>` du Hero) — décidé par Richard le
+     2026-08-19 avec le repositionnement « studio de jardin ».
+     Distinct de `baseline` : le `<h1>` doit nommer la catégorie et la marque
+     pour le référencement, là où la baseline est une signature éditoriale
+     rendue en très grand au pied de page. Les deux ne se déduisent pas l'une
+     de l'autre — la ponctuation même diffère — d'où deux constantes. */
+  h1: "Studios de jardin Howner, un espace supplémentaire dessiné pour vous",
   baseline: "Un espace supplémentaire, dessiné pour vous",
   subline:
     "Deux modèles d'architecte, livrés prêts à vivre. Fabriqués au Pays-Basque.",
@@ -112,16 +119,18 @@ export const BRAND = {
   area: "40 m²", // compat héritée (= Arko Max) — préférer PRODUCTS[key].area
   footprint: "4 × 11 m", // compat héritée (= Arko Max)
   location: "Pays Basque",
-  // Accordé au féminin le 2026-08-03 avec la bascule « module » → « maison »
-  // (ADR-029 § Amendement). Rendu en libellé isolé sur 4 surfaces.
-  madeIn: "Fabriquée au Pays-Basque", // rendu UI (ADR-022)
+  // ADR-029 § Amendement du 2026-08-19 : repassé au MASCULIN, « studio » l'étant.
+  // ADR-029 — il avait été accordé au féminin le 2026-08-03, sous le terme
+  // imposé d'alors. Rendu en libellé isolé sur 4 surfaces : l'accord se décide
+  // donc ici, pas chez l'appelant, qui n'a aucun moyen de le corriger.
+  madeIn: "Fabriqué au Pays-Basque", // rendu UI (ADR-022)
 } as const;
 
 export const MANIFESTO =
   "On a retiré les mètres carrés superflus. Pas la lumière, pas la hauteur, pas le soin. Arko est pensé par notre architecte intégrée comme un lieu de vie entier — simplement plus juste.";
 
 export const PROMISE =
-  "Une maison d'architecte fabriquée Hors-Site dans notre atelier, livrée prête à vivre, en 12 semaines.";
+  "Un studio de jardin d'architecte fabriqué Hors-Site dans notre atelier, livré prêt à vivre, en 12 semaines.";
 
 // Paramètres transport convoi — source de vérité en DB (config_variables namespace 'transport').
 // Fallback env/constante jusqu'à implémentation du chargement DB (Phase 4).
@@ -153,7 +162,7 @@ export const PRICING = {
     { id: "solaire", label: "Pack Solaire", price: 5880 },
     { id: "domotique", label: "Pack Domotique", price: 2640 },
   ],
-  // Couche 3 — frais complémentaires, hors proposition, jamais dans le total de la maison.
+  // Couche 3 — frais complémentaires, hors proposition, jamais dans le total du studio.
   landFees: [
     { label: "Étude de sol G2 si souhaité", value: "Estimé à partir de 2 400 €" },
     { label: "Assainissement (micro-station)", value: "Estimé à 9 000 €" },
@@ -195,8 +204,14 @@ export const PRODUCTS = {
   one: {
     key: "one" as const,
     name: "Arko One",
-    slug: "/arko-one",
+    /* Slug allongé le 2026-08-19 : la requête visée est « studio de jardin »,
+       pas « arko one », que personne ne cherche. L'ancienne URL est indexée
+       depuis juin — une redirection permanente la couvre (`next.config.ts`),
+       sans quoi le référencement acquis serait perdu. */
+    slug: "/studio-jardin-arko-one",
     tagline: "20 m² d'architecte, l'essentiel juste.",
+    /* `<h1>` de la page produit. Porte la catégorie, que `name` ne dit pas. */
+    h1: "Studio de jardin de 20 m² d'architecte, l'essentiel juste",
     area: "20 m²",
     footprint: "6,65 × 3,60 m", // ADR-029 — emprise §5 de la spec configurateur v2
     total: SERIE_TOTAL, // pool partagé One + Max
@@ -214,8 +229,13 @@ export const PRODUCTS = {
   max: {
     key: "max" as const,
     name: "Arko Max",
-    slug: "/arko-max",
+    slug: "/studio-jardin-arko-max",
     tagline: "40 m² d'architecte, livrés prêts à vivre.",
+    /* ⚠ Texte dicté par Richard le 2026-08-19, repris tel quel. Le pluriel
+       « livrés prêts » ne s'accorde pas avec le singulier « Studio » — repli
+       de l'ancien « Deux maisons … livrées prêtes » (ADR-029). Signalé, non corrigé
+       d'autorité : c'est de la copie de marque. */
+    h1: "Studio de jardin de 40 m² d'architecte, livrés prêts à vivre.",
     area: BRAND.area,
     footprint: BRAND.footprint,
     total: SERIE_TOTAL, // pool partagé One + Max
@@ -288,9 +308,9 @@ export const FAQ: { q: string; a: string | string[] }[] = [
   {
     q: "Quel est le délai ?",
     a: [
-      "La fabrication de votre maison ARKO en atelier dure environ **12 semaines**, à compter de la levée des conditions prévues au contrat : autorisation d'urbanisme obtenue, financement confirmé, terrain accessible et fondations ou supports d'accueil réceptionnés.",
+      "La fabrication de votre studio de jardin ARKO en atelier dure environ **12 semaines**, à compter de la levée des conditions prévues au contrat : autorisation d'urbanisme obtenue, financement confirmé, terrain accessible et fondations ou supports d'accueil réceptionnés.",
       "L'installation sur site est ensuite généralement réalisée en **une journée**, sous réserve des conditions d'accès, de météo et de préparation du terrain.",
-      "À chaque étape importante — lancement, structure, finitions, maison prête à livrer, installation — vous êtes informé par email.",
+      "À chaque étape importante — lancement, structure, finitions, studio prêt à livrer, installation — vous êtes informé par email.",
     ],
   },
   {
@@ -299,7 +319,7 @@ export const FAQ: { q: string; a: string | string[] }[] = [
     // mandataires — suspendus (ADR-028). Repli sur le contact direct tant que
     // le dispositif n'est pas réactivé.
     a: FEATURES.mandataire
-      ? "Si vous partez de zéro, nous vous proposons une sélection de terrains dans notre rubrique « Terrains » : des terrains sélectionnés par nos partenaires Mandataires. Sélectionnez-le et nous vous contactons pour faire le point sur sa disponibilité et vos options concernant votre maison ARKO. Aucun ne vous intéresse ? Nous restons à votre écoute, et ferons le nécessaire pour vous mettre en relation avec des partenaires de confiance."
+      ? "Si vous partez de zéro, nous vous proposons une sélection de terrains dans notre rubrique « Terrains » : des terrains sélectionnés par nos partenaires Mandataires. Sélectionnez-le et nous vous contactons pour faire le point sur sa disponibilité et vos options concernant votre studio de jardin ARKO. Aucun ne vous intéresse ? Nous restons à votre écoute, et ferons le nécessaire pour vous mettre en relation avec des partenaires de confiance."
       : "L'acquisition du terrain relève de vous. Si vous n'en avez pas encore, écrivez-nous : nous faisons le point sur votre projet, le modèle ARKO envisagé et les contraintes de la parcelle que vous visez. Vous pouvez aussi vérifier dès maintenant la compatibilité d'une parcelle depuis le configurateur, en renseignant son adresse.",
   },
   {
@@ -308,12 +328,12 @@ export const FAQ: { q: string; a: string | string[] }[] = [
       "Après un premier échange téléphonique, nous vous adressons par email une proposition commerciale comprenant le modèle ARKO retenu, les principales caractéristiques techniques, les options choisies et une estimation du calendrier de fabrication, de livraison et d'installation.",
       `Pour confirmer votre intérêt et réserver votre projet, un versement initial de ${DEPOT} vous est demandé. Il bloque l\u2019un des 12 numéros de la Série 01.`,
       "Ce versement est intégralement remboursable tant que le contrat de fabrication, livraison et installation n'a pas été signé. Vous pouvez donc renoncer à votre projet avant cette signature, sans avoir à justifier votre décision.",
-      `Une fois le contrat signé, ce versement de ${DEPOT} est déduit du prix total de votre maison ARKO et intégré à l\u2019échéancier de paiement.`,
+      `Une fois le contrat signé, ce versement de ${DEPOT} est déduit du prix total de votre studio de jardin ARKO et intégré à l\u2019échéancier de paiement.`,
       "Le règlement s'effectue ensuite en plusieurs étapes, adaptées à la fabrication en atelier :",
       "Étape 0 — Premier échange et proposition commerciale\nNous échangeons avec vous sur votre projet, votre terrain, le modèle ARKO envisagé et vos contraintes techniques. Nous vous envoyons ensuite un devis accompagné du portfolio produit correspondant.",
       `Étape 1 — Réservation du projet\nVous validez le devis de réservation et l\u2019échéancier prévisionnel. Une facture de réservation de ${DEPOT} vous est adressée, réglable par virement bancaire. Aucun paiement n\u2019est encaissé depuis le site : le lien de règlement vous parvient après l\u2019échange de qualification.`,
       `Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d\u2019étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des ${DEPOT} déjà versés.`,
-      "Étape 3 — Sortie d'atelier\nLorsque votre maison ARKO est fabriquée et prête à être livrée, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
+      "Étape 3 — Sortie d'atelier\nLorsque votre studio de jardin ARKO est fabriqué et prêt à être livré, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
       "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
       "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
       "Affinity House Factory n'intervient pas dans l'opération d'achat du terrain, ni dans les formalités juridiques, administratives ou notariales qui y sont attachées.",
@@ -339,8 +359,8 @@ export const FAQ: { q: string; a: string | string[] }[] = [
   {
     q: "Quelles garanties ?",
     a: [
-      "Votre maison ARKO bénéficie des garanties légales applicables aux travaux réalisés : parfait achèvement pendant 1 an, bon fonctionnement des équipements dissociables pendant 2 ans, et garantie décennale pendant 10 ans pour les dommages affectant la solidité de l'ouvrage ou son usage.",
-      "La garantie décennale est attachée à la maison et se transmet en cas de revente pendant sa durée de validité.",
+      "Votre studio de jardin ARKO bénéficie des garanties légales applicables aux travaux réalisés : parfait achèvement pendant 1 an, bon fonctionnement des équipements dissociables pendant 2 ans, et garantie décennale pendant 10 ans pour les dommages affectant la solidité de l'ouvrage ou son usage.",
+      "La garantie décennale est attachée au studio et se transmet en cas de revente pendant sa durée de validité.",
       "L'assurance dommages-ouvrage reste à la charge du client et doit être souscrite avant l'ouverture du chantier lorsque la réglementation l'exige.",
     ],
   },
@@ -348,7 +368,7 @@ export const FAQ: { q: string; a: string | string[] }[] = [
     q: "Et l'après-vente ?",
     a: [
       "Après l'installation, un interlocuteur dédié reste votre référent technique.",
-      "Il vous accompagne dans le suivi de votre maison ARKO, le traitement des éventuelles réserves et les désordres signalés après réception.",
+      "Il vous accompagne dans le suivi de votre studio de jardin ARKO, le traitement des éventuelles réserves et les désordres signalés après réception.",
       "Les désordres relevant de la garantie de parfait achèvement sont traités sans frais dans l'année suivant la réception, sous réserve qu'ils concernent les prestations réalisées par Affinity House Factory ou ses intervenants.",
     ],
   },
@@ -378,7 +398,7 @@ export const PROCESS = [
   {
     step: "01",
     title: "L'atelier",
-    text: "Construite entière, à l'abri, à la précision du millimètre. Pendant que le terrain se prépare, la maison prend forme — sans pluie, sans aléa.",
+    text: "Fabriqué entier, à l'abri, à la précision du millimètre. Pendant que le terrain se prépare, le studio prend forme — sans pluie, sans aléa.",
   },
   {
     step: "02",
@@ -393,7 +413,7 @@ export const PROCESS = [
   {
     step: "04",
     title: "La pose",
-    text: "Le jour J, une grue la dépose sur ses fondations. En quelques heures : posée, de niveau, raccordée. Pas un chantier de plusieurs mois — un lieu de vie.",
+    text: "Le jour J, une grue la dépose sur ses fondations. En quelques heures : posé, de niveau, raccordé. Pas un chantier de plusieurs mois — un lieu de vie.",
   },
   {
     step: "05",
@@ -444,8 +464,8 @@ export const LAND_PREP = [
      le cadre de vente reste l'annexe sur parcelle bâtie ou l'hébergement
      professionnel (§1), et cette page n'est pas l'endroit où l'élargir.
 
-   « maison » est le terme imposé depuis l'amendement du 2026-08-03 — accord
-   au féminin partout. */
+   « studio de jardin » est le terme imposé depuis l'amendement du 2026-08-19,
+   qui remplace « maison » (ADR-029) — accord au **masculin** partout. */
 export const ABOUT = {
   /* Pas de numéro de section ici : la numérotation « 001 / 003 / 012 » est
      celle des sections de l'accueil, la réemployer sur une autre page ferait
@@ -472,7 +492,7 @@ export const ABOUT = {
         },
         {
           k: "L'expérience",
-          d: "Habiter une maison Howner, c'est savourer la lumière qui traverse des volumes épurés et redécouvrir le confort absolu d'un espace qui va à l'essentiel.",
+          d: "Habiter un studio de jardin Howner, c'est savourer la lumière qui traverse des volumes épurés et redécouvrir le confort absolu d'un espace qui va à l'essentiel.",
         },
       ],
     },
@@ -504,7 +524,7 @@ export const ABOUT = {
       points: [
         {
           k: "Une conception sur-mesure",
-          d: "Chaque courbe, chaque ouverture imaginée par notre architecte intégrée est certifiée par une ingénierie de pointe, assurant à votre maison une robustesse absolue face au temps.",
+          d: "Chaque courbe, chaque ouverture imaginée par notre architecte intégrée est certifiée par une ingénierie de pointe, assurant à votre studio une robustesse absolue face au temps.",
         },
         {
           k: "La technologie de pointe",
@@ -516,7 +536,7 @@ export const ABOUT = {
       id: "eco-responsabilite",
       step: "04",
       eyebrow: "Ancrée dans le futur",
-      title: "Une maison respectueuse.",
+      title: "Un studio respectueux.",
       points: [
         {
           k: "Éco-responsabilité",
@@ -536,7 +556,7 @@ export const SPECS = [
   { k: "Surface habitable", v: "40 m²" },
   { k: "Emprise", v: "4 × 11 m — un bloc" },
   { k: "Configuration", v: "T2 — séjour-cuisine, 1 chambre, salle de bain" },
-  { k: "Livraison", v: "Prête à vivre" },
+  { k: "Livraison", v: "Prêt à vivre" },
   { k: "Délai", v: "12 semaines" },
   { k: "Fondations", v: "Technopieux" },
   { k: "Toiture", v: "Plate, étanchéité multicouche" },
@@ -548,7 +568,7 @@ export const SPECS = [
 ] as const;
 
 export const INCLUDED = [
-  "La maison complète, prête à vivre",
+  "Le studio complet, prêt à vivre",
   "Cuisine & salle de bain équipées",
   "Fondations technopieux",
   "Raccordements jusqu'à 20 ml",

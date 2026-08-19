@@ -29,9 +29,9 @@ export function organizationSchema(): JsonLdObject {
     // affiche désormais le même bloc NAP, et deux copies auraient divergé.
     legalName: COMPANY.legalName,
     url: SITE_URL,
-    // ADR-029 amendée le 2026-08-03 — « maison » remplace « module ».
+    // ADR-029 amendée le 2026-08-19 — « studio de jardin » remplace « maison ».
     description:
-      "Maisons compactes d'architecte livrées prêtes à vivre, fabriquées au Pays-Basque.",
+      "Studios de jardin d'exception livrés prêts à vivre, fabriqués au Pays-Basque.",
     email: "contact@affinityhousefactory.com",
     // Numéro au format E.164 — seul format que les moteurs composent
     // correctement (bouton « Appeler » du knowledge panel).
@@ -73,9 +73,9 @@ export function productSchema(product: Product): JsonLdObject {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    // ADR-029 amendée — « maison » remplace « module », accord au féminin.
-    description: `${product.name} — maison compacte d'architecte de ${product.area}, livrée prête à vivre. ${product.series}, série limitée à ${product.total} exemplaires numérotés.`,
-    category: "Maison d'habitation",
+    // ADR-029 amendée — « studio de jardin » remplace « maison », accord au masculin.
+    description: `${product.name} — studio de jardin d'architecte de ${product.area}, livré prêt à vivre. ${product.series}, série limitée à ${product.total} exemplaires numérotés.`,
+    category: "Studio de jardin",
     brand: { "@type": "Brand", name: BRAND.maker },
     url: `${SITE_URL}${product.slug}`,
     offers: {

@@ -37,10 +37,11 @@ La spec est catégorique et le formule comme une contrainte de développement : 
 
 ### 2. Vocabulaire — cette blocklist remplace celle d'ADR-004
 
-> ⚠ **Ce paragraphe est amendé** — voir « Amendement du 2026-08-03 » plus bas.
-> « maison » n'est plus interdit : c'est désormais le terme **imposé**, et il
-> remplace « module ». Seul « maison individuelle » reste proscrit. Le reste de
-> la blocklist ci-dessous est inchangé.
+> ⚠ **Ce paragraphe est amendé deux fois** — voir « Amendement du 2026-08-03 »
+> puis, surtout, « **Amendement du 2026-08-19** » plus bas, qui fait autorité.
+> Le 03/08 « maison » était devenu le terme imposé ; le 19/08 il **redevient
+> interdit** et cède la place à **« studio de jardin »**. Les deux mouvements
+> sont datés plutôt qu'effacés — l'historique explique le code qu'on lit.
 
 **Interdits** : ~~maison, votre maison~~, maison individuelle, résidence principale, clé en main, toute raison sociale autre que Howner, tout nom de fournisseur ou de sous-traitant.
 
@@ -205,6 +206,67 @@ seulement par cet amendement.
 
 **À remonter à Albert** — le §4 « Une seule identité » est de sa main ;
 l'exception doit être confirmée, ou le bloc retiré. Une constante à changer.
+
+## Amendement du 2026-08-19 — « studio de jardin » remplace « maison »
+
+**Décision de Richard**, consigne de portée générale et non ponctuelle : le site
+ne vend plus une maison. Il vend un **studio de jardin premium**, ou **studio de
+jardin d'exception**. La consigne vaut pour toutes les demandes à venir, pas
+seulement pour ce lot.
+
+**Ce qui change.**
+
+- **« maison » redevient interdit** et sort du vocabulaire imposé, où il était
+  entré le 2026-08-03. `maisons?` retourne dans `PROSCRITS`.
+- **Terme imposé : « studio de jardin »**, accord au **masculin**. Tous les
+  accords féminins posés le 03/08 sont repassés au masculin — `BRAND.madeIn`
+  redevient « Fabriqué au Pays-Basque », le pied de page « Conçu », les
+  promesses « livré prêt à vivre ».
+- **« construction », « maison à bâtir », « construction de maison
+  individuelle » sortent du discours.** L'étape 01 du parcours ne dit plus
+  « Construite entière » mais « Fabriqué entier » — le mot évoquait exactement
+  le régime dont la marque se démarque.
+- **Trois `<h1>` dictés par Richard** : accueil, Arko One, Arko Max.
+- **Deux pages renommées** — `/arko-one` → `/studio-jardin-arko-one`,
+  `/arko-max` → `/studio-jardin-arko-max`.
+
+**Effet de bord favorable, à porter au dossier avocat.** Ce repositionnement
+**éloigne** le site du régime **CCMI** (loi du 19 déc. 1990), risque 🔴 ouvert
+depuis le 03/08 et joint au dossier des CGV (ADR-015). Un studio de jardin
+n'est pas une maison individuelle. La question reste posée à l'avocat, mais
+elle porte désormais sur beaucoup moins. **C'est le premier mouvement de ce
+projet qui réduit une exposition juridique au lieu de l'augmenter.**
+
+**Les anciennes URL sont indexées — d'où des redirections permanentes.**
+`/arko-one` et `/arko-max` sont au sitemap depuis juin, avec canonical et
+JSON-LD `Product`. Les renommer sans redirection jetterait le référencement
+acquis et servirait un 404 à tout lien entrant. Deux règles `permanent: true`
+(**308**, traité comme un 301) dans `next.config.ts`. **Elles ne s'enlèvent
+pas** : une ancienne URL peut rester référencée des années.
+
+**Le `<h1>` des pages produit n'est plus le nom du produit.** Il portait
+« Arko One » en très grand ; il porte désormais la catégorie, que le nom ne dit
+pas — personne ne cherche « arko one », on cherche « studio de jardin ». Le nom
+reste l'élément visuel dominant mais passe en `<p>`, comme la baseline du pied
+de page et les libellés du méga-menu : dominant à l'œil, décoratif dans le plan
+des titres. Le plan reste à un seul `<h1>` par page.
+
+**`BRAND.h1` est distinct de `BRAND.baseline`.** Le titre nomme la catégorie et
+la marque pour le référencement ; la baseline reste la signature éditoriale
+rendue en très grand au pied de page. Les deux ne se déduisent pas l'une de
+l'autre — la ponctuation même diffère.
+
+⚠ **Une faute d'accord dans un `<h1>` dicté, signalée et non corrigée.** Le
+titre d'Arko Max — « Studio de jardin de 40 m² d'architecte, **livrés prêts** à
+vivre. » — accorde au pluriel un sujet singulier. C'est un repli de l'ancien
+« Deux maisons … livrées prêtes ». Repris **tel quel** : c'est de la copie de
+marque, elle appartient à Richard. Correction d'une ligne si validée.
+
+**Menu « Maisons » → « Nos Studios ».**
+
+**Périmètre inchangé** : pages légales toujours exclues (§5), domaine mandataire
+suspendu (ADR-028) et back-office hors contrôle. Leur vocabulaire reste
+l'ancien — incohérence assumée, comme depuis le 31/07.
 
 ## Points ouverts — arbitrage Howner requis
 

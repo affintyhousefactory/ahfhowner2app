@@ -21,7 +21,7 @@ export function Specs() {
               004 — Caractéristiques
             </span>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              T2 · prête à vivre
+              T2 · prêt à vivre
             </span>
           </div>
         </Reveal>
@@ -47,7 +47,7 @@ export function Specs() {
           ))}
         </Stagger>
 
-        {/* Du trait à la maison — l'étude au trait mariée au plan technique */}
+        {/* Du trait au studio — l'étude au trait mariée au plan technique */}
         <div className="mt-20 grid gap-6 md:mt-28 md:grid-cols-2 md:gap-8">
           <Reveal>
             <figure className="group">

@@ -41,8 +41,8 @@ const VISUELS = {
   },
   eco: {
     src: "/assets/arko/exterior/arko-forest.jpg",
-    alt: "Une maison Arko posée dans une clairière boisée, empreinte au sol minimale",
-    legende: "Pays Basque — posée sans lourdes fondations",
+    alt: "Un studio de jardin Arko posé dans une clairière boisée, empreinte au sol minimale",
+    legende: "Pays Basque — posé sans lourdes fondations",
   },
 } as const;
 
