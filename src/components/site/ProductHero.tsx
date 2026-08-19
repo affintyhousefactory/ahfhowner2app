@@ -7,6 +7,7 @@ import { Button, Arrow } from "@/components/ui/Button";
 import { Gauge } from "@/components/ui/Gauge";
 import { HeroBackdrop, type HeroBackdropVariant } from "@/components/effects/HeroBackdrop";
 import { useTilt } from "@/components/effects/useTilt";
+import { Reveal } from "@/components/ui/Reveal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -98,11 +99,20 @@ export function ProductHero({
         </div>
       </div>
 
-      <motion.div
+      {/* `Reveal` et NON `motion.div` : ce bloc contient désormais le `<h1>`
+          de la page, et framer-motion sérialise `opacity:0` dans le HTML du
+          serveur — le titre partait donc invisible pour un visiteur sans JS
+          comme pour un crawler. C'est exactement le défaut corrigé sur
+          l'accueil le 2026-07-20, réintroduit ici le 2026-08-19 en déplaçant
+          le `<h1>` dans ce conteneur. `Reveal` porte son état masqué en CSS
+          sous `.js-motion`, posée seulement si JS s'exécute : pas de JS, pas
+          de classe, contenu visible.
+
+          Règle : aucun `<h1>` ne doit jamais se trouver sous un conteneur
+          animé par framer-motion. */}
+      <Reveal
         className="container-page relative z-10 pb-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.1, ease: EASE, delay: 0.4 }}
+        delay={0.4}
       >
         <div className="rule grid grid-cols-1 gap-8 pt-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
@@ -137,7 +147,7 @@ export function ProductHero({
             />
           </div>
         </div>
-      </motion.div>
+      </Reveal>
     </section>
   );
 }
