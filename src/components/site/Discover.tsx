@@ -6,7 +6,7 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import { Reveal } from "@/components/ui/Reveal";
 import { useVisible } from "@/components/arko3d/useVisible";
 
-type Panel = {
+export type Panel = {
   id: string;
   kind: "video" | "photo";
   src: string;
@@ -14,6 +14,12 @@ type Panel = {
   tag: string;
   title: string;
   text: string;
+  /**
+   * Mouvement du panneau. Par défaut une photo zoome (parallax + échelle) et
+   * une vidéo reste fixe — elle bouge déjà par son contenu. `fade` sert quand
+   * l'image doit s'installer sans bouger : elle monte du noir puis se tient.
+   */
+  motion?: "zoom" | "fade" | "none";
 };
 
 /* Séquence curatée : films Higgsfield + photos, une vue plein cadre par écran. */
@@ -80,7 +86,7 @@ const PANELS: Panel[] = [
   },
 ];
 
-export function Discover() {
+export function Discover({ panels = PANELS }: { panels?: readonly Panel[] } = {}) {
   return (
     <section id="decouvrir" className="bg-canvas">
       <div className="container-page py-24 md:py-36">
@@ -90,7 +96,7 @@ export function Discover() {
               002 — Découvrir
             </span>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              {PANELS.length} vues
+              {panels.length} vues
             </span>
           </div>
         </Reveal>
@@ -106,8 +112,8 @@ export function Discover() {
         </Reveal>
       </div>
 
-      {PANELS.map((p, i) => (
-        <GalleryPanel key={p.id} item={p} index={i + 1} total={PANELS.length} />
+      {panels.map((p, i) => (
+        <GalleryPanel key={p.id} item={p} index={i + 1} total={panels.length} />
       ))}
     </section>
   );
@@ -135,7 +141,13 @@ function GalleryPanel({
      Le wrapper photo déborde de 8 % pour qu'aucun bord n'apparaisse au parallax. */
   const y = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
-  const animate = !reduce && item.kind === "photo";
+  /* Fondu : l'image émerge du fond ink pendant le premier tiers de sa
+     traversée, puis reste pleine — pas de sortie en fondu, le panneau suivant
+     la recouvre déjà. */
+  const fade = useTransform(scrollYProgress, [0.02, 0.34], [0, 1]);
+  const move = item.motion ?? (item.kind === "photo" ? "zoom" : "none");
+  const animate = !reduce && move === "zoom";
+  const fading = !reduce && move === "fade";
 
   const media =
     item.kind === "photo" ? (
@@ -175,6 +187,14 @@ function GalleryPanel({
           ref={visRef}
           style={{ y, scale }}
           className="absolute inset-[-8%] will-change-transform"
+        >
+          {media}
+        </motion.div>
+      ) : fading ? (
+        <motion.div
+          ref={visRef}
+          style={{ opacity: fade }}
+          className="absolute inset-0 will-change-[opacity]"
         >
           {media}
         </motion.div>

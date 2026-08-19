@@ -218,8 +218,12 @@ export const PRODUCTS = {
     reserved: 2, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
     series: "Série 01",
     pricing: ONE_PRICING,
-    // Média scroll-zoom propre (TODO ARKO ONE : asset 20 m² absent du repo —
-    // fallback provisoire sur le footage 40 m²). Remplacer dès livraison.
+    /* TODO ARKO ONE : `turntable.mp4` est le rendu **40 m²**, servi ici faute
+       d'asset 20 m². Richard a demandé le 2026-08-19 de le conserver sur
+       l'Arko One ; ça ne le rend pas juste pour autant — d'où
+       `placeholderMedia` maintenu, qui affiche « visuel provisoire » sous la
+       vidéo. L'Arko Max ayant désormais le sien, ce fichier ne sert plus
+       qu'ici. */
     video: "/assets/arko/video/turntable.mp4",
     poster: "/assets/arko/video/turntable-poster.jpg",
     scrub: "/assets/arko/video/film-scrub.mp4",
@@ -242,8 +246,24 @@ export const PRODUCTS = {
     reserved: 1, // démo Phase 1 — persistance Supabase Realtime en Phase 4 (ADR-009)
     series: BRAND.series,
     pricing: PRICING,
-    video: "/assets/arko/video/turntable.mp4",
-    poster: "/assets/arko/video/turntable-poster.jpg",
+    /* Média propre à l'Arko Max depuis le 2026-08-19 : les deux produits
+       servaient jusque-là le même `turntable.mp4`. Monté à partir des quatre
+       rendus extérieurs fournis par Richard (Drive `plans_visuels`).
+
+       ⚠ Ce n'est PAS un turntable, malgré le nom retenu par symétrie : les
+       quatre sources ne couvrent que deux positions de caméra (trois cadrages
+       3/4 quasi identiques, plus une façade frontale). Une rotation en
+       demanderait douze à trente-six. C'est un fondu enchaîné en boucle, avec
+       un léger mouvement d'échelle. Le jour où de vraies vues de rotation
+       existent, remplacer le fichier suffit — rien d'autre à toucher.
+
+       Débit aligné sur celui de l'Arko One (1,49 Mbps) : même budget visuel
+       par seconde, clip simplement plus long (11,8 s contre 8 s). Le premier
+       plan de la vidéo sert d'affiche, pour qu'aucun saut ne se voie au
+       lancement. `preload="none"` sur l'accueil (ADR-006) : les 2,2 Mo ne
+       partent qu'à la lecture. */
+    video: "/assets/arko/video/turntable-max.mp4",
+    poster: "/assets/arko/video/turntable-max-poster.jpg",
     scrub: "/assets/arko/video/film-scrub.mp4",
     scrubPoster: "/assets/arko/video/film-scrub-poster.jpg",
     placeholderMedia: false,

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { PROCESS, PROCESS_CONCLUSION, LAND_PREP } from "@/lib/site";
+import { MAX_CLAIRIERE } from "@/lib/media/arko-max";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/Reveal";
 
 /* Parcours sobre : frise typographique des étapes + une seule image,
@@ -48,12 +49,16 @@ export function Process() {
           <Reveal>
             <figure className="group">
               <div className="relative aspect-[4/5] w-full overflow-hidden border border-line bg-surface">
+                {/* Rendu propre à l'Arko Max depuis le 2026-08-19 (Richard).
+                    Cadrage volontairement serré (`scale-[1.14]`) : la source
+                    est un 16/9 très large, le format 4/5 du cadre en garderait
+                    sinon trop de ciel et de sous-bois autour du studio. */}
                 <Image
-                  src="/assets/arko/exterior/arko-forest.jpg"
+                  src={MAX_CLAIRIERE}
                   alt="Le studio de jardin ARKO installé sur son terrain, dans une clairière boisée"
                   fill
                   sizes="(max-width: 1024px) 92vw, 46vw"
-                  className="object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.03]"
+                  className="scale-[1.14] object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.2]"
                 />
                 <span className="absolute left-3 top-3 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-canvas/85 [text-shadow:0_1px_12px_rgba(10,9,7,0.5)]">
                   Sur votre terrain

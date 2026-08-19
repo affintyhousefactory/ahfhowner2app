@@ -9,6 +9,7 @@ import { Process } from "@/components/site/Process";
 import { Specs } from "@/components/site/Specs";
 import { Price } from "@/components/site/Price";
 import { Included } from "@/components/site/Included";
+import { MAX_PANELS, MAX_REVEAL } from "@/lib/media/arko-max";
 
 export const metadata: Metadata = {
   title: "Studio de jardin 40 m² — Arko Max | HOWNER",
@@ -21,8 +22,8 @@ export default function ArkoMaxPage() {
     <main>
       <JsonLd data={productSchema(PRODUCTS.max)} />
       <ProductHero product={PRODUCTS.max} backdrop="grid" />
-      <RevealScrub scrub={PRODUCTS.max.scrub} poster={PRODUCTS.max.scrubPoster} />
-      <Discover />
+      <RevealScrub frames={MAX_REVEAL} />
+      <Discover panels={MAX_PANELS} />
       <Process />
       <Specs />
       <Price />
