@@ -104,12 +104,12 @@ export function ProductHero({
           serveur — le titre partait donc invisible pour un visiteur sans JS
           comme pour un crawler. C'est exactement le défaut corrigé sur
           l'accueil le 2026-07-20, réintroduit ici le 2026-08-19 en déplaçant
-          le `<h1>` dans ce conteneur. `Reveal` porte son état masqué en CSS
+          le `<h1>` dans ce bloc animé. `Reveal` porte son état masqué en CSS
           sous `.js-motion`, posée seulement si JS s'exécute : pas de JS, pas
           de classe, contenu visible.
 
-          Règle : aucun `<h1>` ne doit jamais se trouver sous un conteneur
-          animé par framer-motion. */}
+          Règle : aucun `<h1>` ne doit jamais naître sous un bloc animé par
+          framer-motion. */}
       <Reveal
         className="container-page relative z-10 pb-8"
         delay={0.4}
