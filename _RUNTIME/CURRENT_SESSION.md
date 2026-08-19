@@ -1,5 +1,13 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-19 (soir — visuels Arko Max en production, PR #76)
+- **`main` = `4b2fb554`, production déployée et vérifiée en ligne.** Trois commits média, **aucune migration**. Détail dans « Dernier point » de `PROJECT_STATE.md`.
+- **Les composants de page produit se paramètrent, ils ne se dupliquent pas.** `RevealScrub` et `Discover` servent les deux produits : leurs médias passent en props (`frames`, `panels`), les données dans `src/lib/media/arko-max.ts`. Sans prop, comportement inchangé — c'est ce qui a permis de refondre l'Arko Max sans toucher l'Arko One, vérifié sur le HTML servi des deux pages.
+- **« La Révélation » de l'Arko Max n'est plus une vidéo** mais une séquence d'images scrubée. La vue extérieure y est jouée **deux fois** (pose, puis zoom d'entrée) avec un raccord continu : `to` du premier plan = `from` du second. **Toucher un `at` sans reprendre le chevauchement voisin casse le fondu.**
+- **`sizes` suit l'échelle maximale du plan**, sinon Next sert une image au format écran et le zoom la rend molle. Une seule source encodée en 3840 px, les sept autres en 2560 px.
+- **« L'heure bleue » retirée** de Découvrir (7 → 6 vues) : le film de crépuscule ne montre pas l'Arko Max.
+- **L'Arko One sert toujours des visuels 40 m²** (vidéo produit + les six médias génériques). Mention « visuel provisoire » maintenue. **Prochain lot naturel** : ses propres rendus, à brancher par les mêmes props.
+
 ## Décisions — 2026-08-04 (soir — amendement ADR-035 + volume de série)
 - **« Pack prêt à louer » (1 990 €) retiré de la grille** — offre non viable après étude (Richard). Contenu à `config.ts`, aucun lead ne la portait (vérifié). **Écart de plus à la spec §5 → à porter à Albert.**
 - **`version` de grille incrémentée** `v1` → **`2026-08-04`** (format daté : la version des *grilles* n'est pas celle du *configurateur*). **Règle : tout mouvement de prix, palier ou option incrémente `version`**, sinon `grillePerimee` ne garde rien.
