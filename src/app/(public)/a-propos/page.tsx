@@ -44,6 +44,16 @@ const VISUELS = {
     alt: "Un studio de jardin Arko posé dans une clairière boisée, empreinte au sol minimale",
     legende: "Pays Basque — posé sans lourdes fondations",
   },
+  /* Photo d'atelier fournie par Richard le 2026-08-19 (Drive `plans_visuels`,
+     dossier déclaré dans `project-access.json` le même jour).
+     ⚠ Renommée en versant : le fichier d'origine portait le nom du bureau
+     d'études dans son intitulé. Un nom de fichier devient une URL publique —
+     ADR-029 §67 s'y applique autant qu'au texte visible. */
+  acier: {
+    src: "/assets/arko/structure/structure-lsf.webp",
+    alt: "Ossature en acier léger galvanisé : profilés minces assemblés et boulonnés, vus en contre-plongée",
+    legende: "Ossature LSF — assemblage boulonné, profilés minces",
+  },
 } as const;
 
 export default function AProposPage() {
@@ -152,29 +162,58 @@ export default function AProposPage() {
               </span>
             </div>
           </Reveal>
-          <Reveal delay={0.05}>
-            <h2 className="editorial mt-10 max-w-3xl text-balance text-[2rem] leading-[1.04] text-canvas md:mt-14 md:text-[3.6rem]">
-              {acier.title}
-            </h2>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <p className="mt-8 max-w-2xl text-base leading-relaxed text-canvas/70 md:text-lg">
-              {acier.intro}
-            </p>
-          </Reveal>
+          {/* Deux colonnes : le propos à gauche, l'ossature à droite. La
+              moitié droite était vide, et c'est la seule section qui montre
+              ce dont elle parle — une structure, pas une ambiance. Les deux
+              points passent en colonne unique : à cette largeur, deux
+              colonnes de texte auraient donné des lignes de six mots. */}
+          <div className="mt-10 grid items-start gap-12 md:mt-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16">
+            <div>
+              <Reveal delay={0.05}>
+                <h2 className="editorial text-balance text-[2rem] leading-[1.04] text-canvas md:text-[3.6rem]">
+                  {acier.title}
+                </h2>
+              </Reveal>
+              <Reveal delay={0.1}>
+                <p className="mt-8 max-w-2xl text-base leading-relaxed text-canvas/70 md:text-lg">
+                  {acier.intro}
+                </p>
+              </Reveal>
 
-          <Stagger className="mt-14 grid gap-x-12 gap-y-10 md:mt-20 md:grid-cols-2">
-            {acier.points.map((p) => (
-              <StaggerItem key={p.k}>
-                <div className="border-t border-canvas/15 pt-4">
-                  <p className="font-medium text-canvas">{p.k}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-canvas/60">
-                    {p.d}
-                  </p>
+              <Stagger className="mt-12 grid gap-y-8">
+                {acier.points.map((p) => (
+                  <StaggerItem key={p.k}>
+                    <div className="border-t border-canvas/15 pt-4">
+                      <p className="font-medium text-canvas">{p.k}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-canvas/60">
+                        {p.d}
+                      </p>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </Stagger>
+            </div>
+
+            <Reveal delay={0.15}>
+              <figure className="group">
+                {/* `aspect-[9/8]` = le format natif du fichier (900 × 800) :
+                    aucun recadrage, donc aucun assemblage coupé. Bordure
+                    claire et non `border-line`, le bloc étant sur fond sombre. */}
+                <div className="relative aspect-[9/8] w-full overflow-hidden border border-canvas/15 bg-ink">
+                  <Image
+                    src={VISUELS.acier.src}
+                    alt={VISUELS.acier.alt}
+                    fill
+                    sizes="(max-width: 768px) 92vw, 44vw"
+                    className="object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.03]"
+                  />
                 </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
+                <figcaption className="mt-3 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-canvas/55">
+                  {VISUELS.acier.legende}
+                </figcaption>
+              </figure>
+            </Reveal>
+          </div>
         </div>
       </section>
 
