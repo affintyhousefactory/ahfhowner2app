@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { BRAND, NAV, INFO_NAV, PRODUCT_LIST } from "@/lib/site";
+import {
+  BRAND,
+  COMPANY,
+  COMPANY_ADDRESS_LINE,
+  CONTACT,
+  NAV,
+  INFO_NAV,
+  PRODUCT_LIST,
+  reserverHref,
+} from "@/lib/site";
 import { FEATURES } from "@/lib/features";
 
 export function Footer() {
@@ -13,7 +22,7 @@ export function Footer() {
               {BRAND.madeIn}
             </span>
             <Link
-              href="/configurer"
+              href={reserverHref()}
               className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-canvas/55 transition-colors hover:text-canvas"
             >
               Réserver →
@@ -36,8 +45,8 @@ export function Footer() {
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-canvas/60">
-              Deux modules compacts d'architecte, conçus avec notre architecte
-              intégrée et livrées prêtes à vivre. Fabriquées au Pays-Basque.
+              Deux studios de jardin d'architecte, conçus avec notre architecte
+              intégrée et livrés prêts à vivre. Fabriqués au Pays-Basque.
             </p>
           </div>
 
@@ -99,9 +108,50 @@ export function Footer() {
           </nav>
         </div>
 
+        {/* Identification & contact (NAP) — nom, adresse, téléphone.
+            <address> et non <div> : l'élément désigne précisément les
+            coordonnées de l'entité à qui appartient le document, ce que
+            lisent les moteurs comme les lecteurs d'écran. Il est en italique
+            par défaut, d'où `not-italic`.
+
+            Rendu sur **toutes** les pages publiques, le pied de page étant
+            porté par le layout `(public)` : c'est aussi la bonne pratique NAP
+            — une adresse qui n'apparaît que sur l'accueil affaiblit le signal.
+
+            Aucune valeur écrite ici : `COMPANY` et `CONTACT` (site.ts) sont
+            les sources, les mêmes que celles dont dérive le JSON-LD
+            `Organization`. Le numéro reste surchargeable par
+            `NEXT_PUBLIC_CONTACT_PHONE`.
+
+            `PhoneLink` n'est pas réutilisé : il est stylé pour fond clair
+            (`text-ink/70`, infobulle sombre) et serait illisible ici. */}
+        <address className="flex flex-col gap-x-3 gap-y-2 border-t border-canvas/15 py-6 text-center not-italic sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
+          <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/75">
+            {COMPANY.displayName}
+          </span>
+          <span aria-hidden="true" className="hidden text-canvas/25 sm:inline">
+            ·
+          </span>
+          <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/60">
+            {COMPANY_ADDRESS_LINE}
+          </span>
+          <span aria-hidden="true" className="hidden text-canvas/25 sm:inline">
+            ·
+          </span>
+          {/* Numéro cliquable : sur mobile c'est le geste le plus court, et un
+              `tel:` est le format que les moteurs rattachent à la fiche. */}
+          <a
+            href={`tel:${CONTACT.phoneTel}`}
+            aria-label={`${CONTACT.phoneLabel} au ${CONTACT.phone}`}
+            className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/75 underline decoration-canvas/25 underline-offset-4 transition-colors hover:text-canvas hover:decoration-canvas/60"
+          >
+            Tél. : {CONTACT.phone}
+          </a>
+        </address>
+
         <p className="border-t border-canvas/15 py-6 text-center font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/60">
-          {BRAND.maker} · Arko One · Arko Max · {BRAND.madeIn} — Conçu avec notre
-          architecte intégrée
+          {BRAND.maker} · Arko One · Arko Max · {BRAND.madeIn} — Conçu avec
+          notre architecte intégrée
         </p>
 
         <div className="flex flex-col gap-3 border-t border-canvas/15 py-7 text-xs text-canvas/60 sm:flex-row sm:items-center sm:justify-between">

@@ -5,7 +5,16 @@
    la charte n'est pas figée (ADR-002). Prix Offer = miroir des prix
    déjà publics sur les pages produit.
    ============================================================ */
-import { SITE_URL, BRAND, FAQ, type Product } from "@/lib/site";
+import {
+  SITE_URL,
+  ABOUT,
+  BRAND,
+  COMPANY,
+  CONTACT,
+  PHONE_HOURS_SPEC,
+  FAQ,
+  type Product,
+} from "@/lib/site";
 
 type JsonLdObject = Record<string, unknown>;
 
@@ -16,18 +25,42 @@ export function organizationSchema(): JsonLdObject {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: BRAND.maker,
-    legalName: "Affinity House Factory",
+    // Dérivés de `COMPANY` (site.ts) depuis le 2026-08-17 : le pied de page
+    // affiche désormais le même bloc NAP, et deux copies auraient divergé.
+    legalName: COMPANY.legalName,
     url: SITE_URL,
-    // ADR-029 — vocabulaire : « maison » est proscrit, « module » imposé.
+    // ADR-029 amendée le 2026-08-19 — « studio de jardin » remplace « maison ».
     description:
-      "Modules compacts d'architecte livrés prêts à vivre, fabriqués au Pays-Basque.",
+      "Studios de jardin d'exception livrés prêts à vivre, fabriqués au Pays-Basque.",
     email: "contact@affinityhousefactory.com",
+    // Numéro au format E.164 — seul format que les moteurs composent
+    // correctement (bouton « Appeler » du knowledge panel).
+    telephone: CONTACT.phoneTel,
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: CONTACT.phoneTel,
+      contactType: "sales",
+      areaServed: "FR",
+      availableLanguage: "French",
+      hoursAvailable: PHONE_HOURS_SPEC.map((h) => ({
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+        ],
+        opens: h.opens,
+        closes: h.closes,
+      })),
+    },
     address: {
       "@type": "PostalAddress",
-      streetAddress: "28 Chemin de Sabalce OEV",
-      postalCode: "64100",
-      addressLocality: "Bayonne",
-      addressCountry: "FR",
+      streetAddress: COMPANY.street,
+      postalCode: COMPANY.postalCode,
+      addressLocality: COMPANY.city,
+      addressCountry: COMPANY.countryCode,
     },
     areaServed: "FR",
     founder: { "@type": "Person", name: "Puigbo" },
@@ -40,9 +73,9 @@ export function productSchema(product: Product): JsonLdObject {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    // ADR-029 — vocabulaire : « module » remplace « maison », accord au masculin.
-    description: `${product.name} — module compact d'architecte de ${product.area}, livré prêt à vivre. ${product.series}, série limitée à ${product.total} exemplaires numérotés.`,
-    category: "Module d'habitation",
+    // ADR-029 amendée — « studio de jardin » remplace « maison », accord au masculin.
+    description: `${product.name} — studio de jardin d'architecte de ${product.area}, livré prêt à vivre. ${product.series}, série limitée à ${product.total} exemplaires numérotés.`,
+    category: "Studio de jardin",
     brand: { "@type": "Brand", name: BRAND.maker },
     url: `${SITE_URL}${product.slug}`,
     offers: {
@@ -53,6 +86,24 @@ export function productSchema(product: Product): JsonLdObject {
       url: `${SITE_URL}${product.slug}`,
       seller: { "@type": "Organization", name: BRAND.maker },
     },
+  };
+}
+
+/* À propos — rendu sur /a-propos. `AboutPage` plutôt que `Organization` : le
+   layout public émet déjà l'Organization sitewide, la dupliquer ici enverrait
+   deux entités concurrentes pour la même marque. `mainEntityOfPage` rattache la
+   page à cette Organization sans la redéclarer.
+   Aucun partenaire n'y est nommé — ADR-029 §67 vaut aussi pour les données
+   structurées, qui sont servies au même titre que le texte visible. */
+export function aboutPageSchema(): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: `${ABOUT.kicker} — ${BRAND.maker}`,
+    url: `${SITE_URL}/a-propos`,
+    description: ABOUT.quote,
+    inLanguage: "fr-FR",
+    mainEntity: { "@type": "Organization", name: BRAND.maker, url: SITE_URL },
   };
 }
 

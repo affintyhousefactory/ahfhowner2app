@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendBrevoTemplate, addBrevoContact } from "@/shared/lib/email";
+import { signalerPanne } from "@/shared/lib/panne";
 
 const PRODUIT_LABELS: Record<string, string> = {
   one: "Arko One (20 m²)",
@@ -60,6 +61,11 @@ export async function POST(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+  // Non bloquant par choix, comme sur `/api/reservation` : l'email Brevo part
+  // même si le stockage échoue. `persisted` porte l'autre moitié de la vérité
+  // jusqu'à la réponse — voir `shared/lib/panne.ts`.
+  let persisted = true;
+
   if (supabaseUrl && serviceRole) {
     const res = await fetch(`${supabaseUrl}/rest/v1/contacts`, {
       method: "POST",
@@ -72,15 +78,24 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ prenom, nom, email, tel, produit, message, turnstile_ok: turnstileOk }),
     });
     if (!res.ok) {
-      console.error("[contact] Supabase error:", await res.text());
+      persisted = false;
+      signalerPanne("contact/supabase", `HTTP ${res.status} — ${await res.text()}`);
     }
   } else {
-    console.warn("[contact] Supabase non configuré — contact non persisté.");
+    // Variables absentes : le contact n'est pas stocké non plus. C'était un
+    // `console.warn`, donc encore plus discret qu'une erreur.
+    persisted = false;
+    signalerPanne("contact/supabase", "variables Supabase absentes de l'environnement");
   }
 
   const templateId = parseInt(process.env.BREVO_TEMPLATE_CONTACT ?? "0");
   const toAhf = process.env.EMAIL_TO_AHF ?? process.env.BREVO_TO_AHF ?? "";
 
+  // L'email est le **second** canal : si le stockage a échoué, c'est le seul
+  // qui reste. Son échec était lui aussi avalé — les deux pouvant tomber
+  // ensemble, le visiteur voyait alors un succès pour une demande qui
+  // n'existait nulle part. `notified` le dit désormais.
+  let notified = true;
   await sendBrevoTemplate({
     templateId,
     to: [
@@ -93,7 +108,10 @@ export async function POST(req: NextRequest) {
       produit_label: produit ? (PRODUIT_LABELS[produit] ?? produit) : null,
       message,
     },
-  }).catch((err) => console.error("[contact] Brevo error:", err));
+  }).catch((err) => {
+    notified = false;
+    signalerPanne("contact/brevo", err);
+  });
 
   // Contact CRM Brevo : toujours créé. Pas de flux double opt-in sur ce formulaire —
   // l'utilisateur est directement inscrit (SUBSCRIBED, liste prospects) si la case est
@@ -105,5 +123,14 @@ export async function POST(req: NextRequest) {
     { emailBlacklisted: !optIn },
   ).catch((err) => console.error("[contact] Brevo contact error:", err));
 
-  return NextResponse.json({ success: true });
+  // Trois faits distincts, trois champs. `success` dit que la demande a été
+  // reçue et traitée ; `persisted` dit si elle est en base ; `notified` si
+  // l'email est parti. Les confondre en un seul booléen est ce qui a rendu
+  // une base en pause invisible pendant des semaines.
+  //
+  // `success` reste vrai même si les deux ont échoué : la requête a bien été
+  // reçue et validée (Turnstile compris), et un `false` ici ferait réessayer
+  // le visiteur sans rien changer au problème. La vérité est dans les deux
+  // autres champs et dans les journaux `[PANNE]`.
+  return NextResponse.json({ success: true, persisted, notified });
 }

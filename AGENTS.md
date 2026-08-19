@@ -21,14 +21,17 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Guardrails (ne pas régresser)
 - **Domaine « Mandataire & Terrain » suspendu** (ADR-028) — masqué derrière `FEATURES.mandataire` (`src/lib/features.ts`). Ne pas re-linker ni ré-exposer une surface suspendue sans lever le flag et amender l'ADR ; toute nouvelle surface du domaine naît gardée (`guardMandataire()` / `mandataireDisabled()`).
-- **Ne pas toucher** `src/components/site/Configurator.tsx` ni `config-store.tsx` (pricing verrouillé — ADR-005 ; seule dérogation actée : retrait UI du sélecteur terrain, ADR-028).
+- **Configurateur : verrou levé** (ADR-030 remplace ADR-005/020). `Configurator.tsx` et `config-store.tsx` sont réécrits. Règle qui remplace l'ancienne : **grilles jamais en dur** — prix, paliers et options éditables sans redéploiement.
 - Vidéos via `useVisible` (sauf Hero) ; bundle 3D `src/components/arko3d/*` isolé à `/viewer` (ADR-006). Lighthouse 100 / LCP < 0.8s.
 
 ## Marque (absolu — ADR-029, remplace ADR-004)
-Termes interdits : **maison**, maison individuelle, résidence principale, **clé en main**, toute raison sociale autre que Howner, tout nom de fournisseur — plus modulaire, préfabriqué, tiny house, conteneur, catalogue.
-Vocabulaire imposé : module, unité, studio, hébergement, annexe, espace supplémentaire, prêt à vivre.
+> **Amendée le 2026-08-19** : « maison » **redevient interdit**. Le terme imposé est **« studio de jardin »** (premium / d'exception), accord au **masculin**. Plus de « construction », « maison à bâtir », « construction de maison individuelle ». Consigne permanente.
+
+Termes interdits : **maison**, **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner (exception : bloc d'identification du pied de page), tout nom de fournisseur — plus modulaire, préfabriqué, tiny house, conteneur, catalogue.
+Vocabulaire imposé : **studio de jardin**, unité, hébergement, annexe, espace supplémentaire, prêt à vivre. **Masculin.**
 « Notre architecte intégrée » (sans prénom). « Puigbo » (sans accent).
 Cadre de vente : annexe sur parcelle bâtie ou hébergement professionnel ; terrain nu **non ouvert**.
+Routes produit : `/studio-jardin-arko-one`, `/studio-jardin-arko-max`. Redirections permanentes depuis `/arko-*` — ne pas les retirer.
 Contrôle : `npm run check:vocabulaire` avant chaque PR.
 
 ## Secrets (ADR-003)

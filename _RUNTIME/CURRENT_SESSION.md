@@ -1,99 +1,79 @@
 # CURRENT_SESSION — Howner / ARKO
 
-## Focus actuel
-**Chantier configurateur v2 ouvert** (spec Albert v1). ADR-029 écrite — repositionnement produit & marque, précondition des ADR-030→034. Aucun code applicatif touché à ce stade.
-Deux risques 🔴 ouverts : **prix publics faux de 18 000 € sur l'Arko One** (ADR-029, à corriger au lot 1) et **CGV non confirmées avocat, live en prod** (ADR-015, depuis le 2026-07-13).
+## Décisions — 2026-08-04 (soir — amendement ADR-035 + volume de série)
+- **« Pack prêt à louer » (1 990 €) retiré de la grille** — offre non viable après étude (Richard). Contenu à `config.ts`, aucun lead ne la portait (vérifié). **Écart de plus à la spec §5 → à porter à Albert.**
+- **`version` de grille incrémentée** `v1` → **`2026-08-04`** (format daté : la version des *grilles* n'est pas celle du *configurateur*). **Règle : tout mouvement de prix, palier ou option incrémente `version`**, sinon `grillePerimee` ne garde rien.
+- **« Lead chaud » → « Paiement réservé »** (`chaud` → `paiement_reserve`, **identifiant renommé en base**, pas seulement le libellé). Constate un **fait comptable**, plus une appréciation. Migration `20260804_statut_paiement_reserve.sql` ✅ Preview, vérifiée par requête. Prod : 0 lead, à passer avec l'autre.
+- **Numéro de série — deux niveaux** : rien avant devis · **réservé** au devis envoyé (reprenable) · **bloqué** à l'encaissement (seul état qui décrémente le compteur). Codé une fois dans `etatNumeroPourStatut()`. Badge `N° x` à côté du modèle dans la liste et le Kanban.
+- **⚠ `leads_slot_unique` contredit cette règle** — il bloque le numéro dès le premier lead, quel que soit son statut. Dormant tant qu'ADR-031 n'écrit pas ; **bloquant au premier doublon**. Idem `leads_slot_check` (encore 1→12). Non corrigés, à trancher avec ADR-031.
+- **Série 01 = 6 exemplaires** — annule l'arbitrage du 02/08. Appliqué **partout**, pas au seul configurateur : `BRAND.total` et `PRODUCTS.*.total` dérivent de `SERIE_TOTAL`, les 3 derniers littéraux interpolés.
+- **Pennylane** posera ce statut automatiquement — **ADR-036 réservée**, dépendance externe critique, **alerte Albert**.
 
-## Décisions prises — 2026-07-31 (ADR-029 — repositionnement produit & marque)
-- **Spec Albert versée au dépôt** (`docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md`, PR #63) — fidélité vérifiée à l'octet près (30 765 o hors en-tête). Accès Drive déclaré dans `project-access.json` (lecture seule, 2 dossiers).
-- **Cadre de vente restreint** : annexe sur parcelle bâtie + hébergement professionnel. **Terrain nu fermé** → « prochainement », sans prix ni explication (critère de recette §16).
-- **Vocabulaire inversé** : « maison » (105 occurrences), « maison individuelle », « résidence principale », « clé en main » interdits → module / unité / studio / hébergement / annexe.
-- **Prix 77 900 / 99 900 €**, réservation **2 000 €** + acompte 30 %, **Série 01 = 6 unités**.
-- **ADR-004 remplacée** par ADR-029. Blocklists **cumulatives** : « module » imposé, « modulaire » toujours interdit.
-- **Périmètre : hors pages légales** (§17.10 + risque ADR-015).
-- **Pas d'alerte Albert** — il est l'auteur de la décision. La règle CLAUDE.md ne s'applique pas quand il en est l'émetteur.
-- **3 arbitrages remontés à Howner** : contradiction « clé en main » dans la spec (§1 vs §2/§12/§16) ; lecture cumulative module/modulaire ; « identité Howner seule » vs obligation de nommer l'éditeur légal (AHF SAS) en mentions légales.
-- **Reste** : ADR-030→034, plan de chantier en affinage à distance.
+## Décisions — 2026-08-04 (ADR-035 — CRM interne, chantier prioritaire)
+Détail : **ADR-035** et « Dernier point » de `PROJECT_STATE.md`. Ici, ce qui doit rester présent à l'esprit.
 
-## Décisions prises — 2026-07-31 (ADR-028 — correctif : le masquage admin ne tenait pas)
-- **Défaut constaté en production** après le merge de la PR #58 : `/admin/{mandataires,affectations,ged,terrains}` renvoyaient **200** et le HTML servi contenait la **vraie page** (titre, boutons Inviter/Nouveau, liens de tri `?sort=zone_activite`, état de table) sous la page 404. Le composant serveur s'exécutait, **requêtes Supabase comprises**.
-- **Cause** : `(admin)/admin/(protected)/layout.tsx` est un composant **client** (garde d'auth). Il streame en premier → statut 200 figé ; le `notFound()` du layout serveur enfant arrive trop tard et n'annule ni le statut ni le payload RSC déjà émis.
-- **Correctif** (PR #59 → `dev`, PR #60 → `main`) : **`src/proxy.ts`** (Middleware renommé **Proxy** en Next 16) intercepte les 4 chemins admin avant tout rendu → 404 sec ; `guardMandataire()` ajouté en première instruction des **7 pages serveur** du périmètre en défense en profondeur. Matcher strictement borné : `/admin` et `/admin/leads` intacts.
-- **Non touché** : surfaces publiques, portail mandataire et 29 routes API étaient **corrects dès #57** — 404 réel, aucun `<h1>`, aucun contenu de corps, aucune donnée. Seul l'objet `metadata` du segment reste évalué (cosmétique).
-- **Vérifié en production** après déploiement : 4 écrans admin + sous-routes en **404 / `h1=0` / corps vide**, aucune fuite ; `/admin` + `/admin/leads` en 200 ; suspendues en 404 ; publiques en 200 ; API en 404 ; sitemap 7 URLs.
-- **Règle actée** : une garde `notFound()` n'est fiable que si **aucun layout client ne la précède** dans l'arbre — sinon couper au proxy. Documentée dans ADR-028 + `docs/feature-flags.md`.
-- **Leçon de méthode** : **un code HTTP 404 ne prouve pas un masquage**. Le contrôle `curl` de `docs/feature-flags.md` compte désormais les `<h1>` et la taille du corps en plus du statut.
-
-## Décisions prises — 2026-07-30 (ADR-028 — suspension du domaine « Mandataire & Terrain »)
-- **Suspension, pas suppression** : aucun fichier supprimé, aucune migration, aucune donnée ni compte touché. Interrupteur unique `FEATURES.mandataire` (`src/lib/features.ts`) piloté par `NEXT_PUBLIC_FEATURE_MANDATAIRE` — **variable absente = suspendu** (défaut sûr, à ne PAS configurer sur Vercel).
-- **Motif** : finalité de marché et cible non mûres. Le site promettait un rappel « sous 48 h par un expert Mandataire Affinity » qu'AHF ne veut pas honorer.
-- **Coupé** : portail mandataire (garde unique dans le layout de groupe), onboarding, écrans admin Mandataires/Affectations/GED/Terrains (layouts de segment), affectation + GED mandataire de la fiche lead, colonne Mandataire de la liste, widgets dashboard dérivés des dossiers, `/terrains` `/rechercheterrain` `/terrain` `/cgu-mandataire`, liens Footer/NAV, sitemap/robots/llms.txt, mode « Je cherche un terrain » du configurateur, **29 routes API / 36 handlers**.
-- **Conservé** : réservation, pricing 3 couches **intact**, analyse PLU « J'ai un terrain », livraison GPS, `/contact`, Leads + fiche lead + **GED Client**, Brevo contact/récap.
-- **Amende ADR-005** (UI configurateur, verrou de pricing tenu), ADR-018, ADR-025, ADR-027.
-- **Vérif** : `tsc` propre ; `eslint` 322 erreurs avant / 322 après (dette préexistante, zéro régression).
-- **Livré** : PR #57 → `dev`, PR #58 → `main` (2026-07-30). ⚠️ Le masquage des écrans admin ne tenait pas — voir la session du 2026-07-31 ci-dessus.
-- **Alerte Albert** ✅ faite verbalement par Richard (retrait d'offre commerciale = changement de positionnement).
-- **Reste** : test de réversibilité (`NEXT_PUBLIC_FEATURE_MANDATAIRE=true` sur une Preview) — non exécuté à ce jour.
-
-## Décisions prises — 2026-07-20 (SEO home — HTML front indexable)
-- **PR #54 mergée** (`fix/homepage-ssr-seo-reveal` → `dev`) puis **PR #55 (`dev`→`main`) mergée le même jour** — **correctif LIVE en production**, `dev` et `main` alignés. 1 commit (`cde0b8c7`), 6 fichiers front, aucune migration.
-- **Diagnostic** : la home était déjà rendue côté serveur, mais servie **invisible** — framer-motion sérialisait `opacity:0` inline dans le HTML SSR (**23 blocs sur `/`, jusqu'à 64 sur `/arko-max`**). Sans JS = page blanche. Hiérarchie Hn cassée (méga-menu `<h3>` avant le `<h1>`, footer `<h2>` dupliquant le `<h1>`).
-- **Correctif** : `Reveal.tsx` réécrit sans framer-motion (`IntersectionObserver` + classes CSS, API publique inchangée → Configurator ADR-005 non touché) ; état masqué déplacé dans `globals.css` sous `.js-motion` (posée sur `<html>` uniquement si JS s'exécute → pas de JS = contenu visible) ; `<script>` inline brut dans `layout.tsx` pose `.js-motion` avant le premier paint (écarte `next/script beforeInteractive` = flash) ; `Hero.tsx` `<h1>` sorti du conteneur `opacity:0` (parallaxe image conservée en framer) ; `Nav.tsx`/`Footer.tsx` titres décoratifs re-balisés `<p>`. **Aucun texte modifié.**
-- **Vérifié sur Preview Vercel** (Googlebot, sans JS) : `opacity:0` inline **23 → 0**, plan des titres **H1 → H2 → H3** imbriqué, script synchrone présent, contenu FAQ visible. `tsc` + `eslint` OK.
-- **Formulaires sans JS** (question Richard) : normal et **non-bloquant SEO** (Googlebot exécute le JS ; un form n'est pas du contenu indexable). `/configurer` rend son form au SSR ; `/contact` affiche un fallback vide car le form lit l'URL (`useSearchParams` → `<Suspense>`) ; `/rechercheterrain` n'a pas de form (page vitrine → CTA `/configurer`). Rendre les forms utilisables sans JS = refonte progressive enhancement (Server Actions + anti-spam sans JS) — non retenu (audience quasi nulle, hors SEO). Amélioration optionnelle repérée : squelette de form au lieu de carte vide sur `/contact` (non fait).
+- **Branche `feat/adr-035-crm-leads` poussée — PR #73 → `dev` ouverte**, en attente de revue. `dev` reste à `96f084f0`.
+- **Le CRM est refait AVANT ADR-031, à dessein** : il pose le contrat de données (`config_v2` + `cfg_*` + `slot`) que la soumission du configurateur remplira. Dans l'autre ordre, ADR-031 aurait improvisé un format.
+- **Numérotation 035** — 031→034 sont réservés et cités dans ADR-030 et dans le code. Priorité ≠ numéro.
+- **« Affectation » = conseiller AHF** (`responsable`), **sans rapport avec `mandataire_id`**. La colonne « Affectation » (champ `statut`) est retirée de la liste ; le champ reste en base.
+- **Deux retards distincts** : rappel daté dépassé (rouge) · silence > 7 j sur lead actif (orange). Un lead **jamais appelé** compte depuis sa **création**.
+- **Journal d'appels manuel** : « Appeler » ouvre `tel:` et pré-ouvre la fiche, mais **rien n'est enregistré sans validation**.
+- **Migration `20260804_crm_leads.sql` ✅ appliquée sur Preview** (`ahfhownerdb-preprod`), structure et **trigger vérifiés fonctionnellement**, données de test retirées. **Toujours PAS sur Prod** — à la validation de la PR `dev` → `main`.
+- **⚠ Défaut de sécurité introduit puis corrigé** : fonctions du trigger en `SECURITY DEFINER` dans `public` = exposées en `/rest/v1/rpc/` au rôle `anon`, donc écriture sur `leads.dernier_appel_at` hors RLS. Corrigé (`security invoker` + `revoke`), audit Supabase propre. **Règle : dans Supabase, une fonction `SECURITY DEFINER` dans `public` est une route API publique tant qu'on ne lui retire pas l'exécution.**
+- **Gate** : `tsc` propre · vocabulaire conforme · eslint admin **21 → 20 erreurs** (pas de régression).
 
 ## Focus actuel
-**Prod à jour** — `dev` et `main` alignés (0 commit d'écart). Aucun chantier de code en cours. Seuls points ouverts : blockers externes (CGV avocat, grille Arko Max, validations Albert) + reliquats non bloquants (SEO P2, placeholders Brevo template 15).
+`dev` est à **`e284cac4`** (2026-08-03) — 6 commits mergés en fast-forward depuis `b7339d44`, aucune migration. **`main` reste à `4d34ed26`.** Contenu : ligne d'appel (site + tunnel + `/contact`) et **bascule « module » → « maison »**. Le configurateur v2 vit toujours sur `/configurer/v2` (`noindex`) ; `/configurer` sert le v1, qu'aucun CTA n'atteint.
 
-## Historique
-**`fix/scrape-annonce-error-logging` mergée sur `dev`** (PR #51, 2026-07-10) — scope réel bien plus large que son nom : ADR-027 (fiche lead — recherche terrain, affectation géo, GED double), refonte CGV (attente confirmation avocat), révision blocklist marque ADR-004, refonte FAQ/hero/promesse/réassurance, fiabilisation import photos terrain, extraction IA Anthropic enrichie, contact Brevo direct.
+Trois risques 🔴 :
+- **CGV non confirmées avocat, live en prod** (ADR-015, depuis le 2026-07-13).
+- **L'entonnoir de réservation entier mène au v2, dont le CTA final n'a pas de handler.** Cet état **ne doit pas atteindre `main`** avant ADR-031.
+- **Vocabulaire « maison » non validé juridiquement** — exposition CCMI, à joindre au dossier avocat des CGV (voir ci-dessous).
 
-**`feat/admin-portal` COMPLET** — Étapes 1→6 mergées sur `dev` via PR #14 (commit 614b5f0c). Portail admin opérationnel : dashboard, leads, mandataires, affectations, carte Leaflet, formulaire lead/mandataire, Pappers, validation/suspension, invitation onboarding.
+## Décisions — 2026-08-02
+Détail et motifs : **ADR-030 § Amendement du 2026-08-02**, ADR-029 § Amendement, et « Dernier point » de `PROJECT_STATE.md`. Ici, seulement ce qui doit rester présent à l'esprit.
 
-## Décisions prises — 2026-06-29 (session brevo-contacts + admin-portal)
-- **Brevo contacts opt-in livré** (PR #12 → dev → PR #13 → main) :
-  - `addBrevoContact()` direct liste 7 (mandataires, base contractuelle)
-  - `addBrevoContactDOI()` DOI liste 8 (prospects — ContactForm + Reservation + RechercheTerrainForm)
-  - Template DOI = **13**, liste prospects = **8**, liste mandataires = **7**
-  - Variables Vercel complétées : `BREVO_TO_AHF`, `EMAIL_TO_AHF` (Preview), listes + DOI template
-- **Migration `20260629_mandataires_documents_bucket.sql` appliquée sur prod** ✅
-- **Migration `20260629_admin_tables.sql` créée** sur `feat/admin-portal` — **PAS encore appliquée** (à appliquer sur preprod au merge dev, puis prod au merge main)
-- **feat/admin-portal démarré** — Étapes 1+2 committées (branche en cours, non pushée) :
-  - Route group `(admin)` : signin, layout sidebar sombre, auth guard rôle `admin`
-  - Dashboard KPIs : CA brut, revenus AHF, rémunérations, alertes 48h, donuts, entonnoir, bar mandataires
-  - Liste + fiche leads, liste + fiche mandataires, page affectations
-  - `recharts` installé
-- **Redéploiement prod** déclenché depuis branche `dev` par erreur (contenu identique à `main` — pas d'impact)
+**Mise en œuvre du configurateur v2**
+- **Colonne de sections dépliantes, pas un stepper** — l'écran 0 est descendu en section 05, le stepper n'avait plus d'avantage.
+- **Coque de tunnel** dans le groupe de routes `(configurateur)` : ni nav ni pied de page. Une mise en page imbriquée ne peut pas retirer la `<Nav>` de sa parente — d'où le groupe.
+- **Grilles, visuels et teintes d'ambiance dans `config.ts`**, jamais dans un composant (règle ADR-030).
+- **Mobile 390 px** : l'en-tête s'efface au défilement, la scène garde 232 px constants (le rétrécissement coupait le pied du module).
+- **`?produit=` lu côté serveur** — `useSearchParams` impose une frontière Suspense et fait échouer le prerender de production.
 
-## Décisions prises — 2026-06-29 (session portail mandataire)
-- **Workflow git 3 niveaux** instauré : `feat/*` → `dev` → `main`.
+**Arbitrages de Richard**
+- **Série 01 reste à 12 unités** — amende ADR-029 et le §5 de la spec (qui fixaient 6). `SERIE_TOTAL` et `serie.unites` alignés.
+- **Réservation à 2 000 €** partout — `DEPOSIT_EUR` 5 000 → 2 000, textes éditoriaux désormais **interpolés** sur la constante. Variable Vercel absente des 3 scopes (vérifié) : le fallback sert en production.
+- **Tous les CTA « Réserver » mènent au v2**, via `reserverHref()` pour que la bascule future tienne en une ligne. « Tester mon terrain » retiré de l'accueil et des pages produit.
+- **Alerte Albert traitée verbalement** — 4 écarts à la spec assumés (§8, §6-§7, §5 transport, §5 série) plus le parti « colonne de sections ».
+- **« Et si je n'ai pas encore de terrain ? » conservée** en FAQ — ⚠ contredit sciemment ADR-029 sur la page la plus lue.
+- **Échéancier 40/50/10 % non tranché**, laissé intact : territoire CGV, non confirmé par l'avocat.
 
-## Décisions prises — 2026-06-27
-- **Supabase 3 scopes Vercel** configurés : Production (`ahfhownerdb`), Preview (`ahfhownerdb-preprod`), Development. `.env.local` resynchronisé via `vercel env pull --environment=development`.
-- **6 migrations appliquées** preprod + prod via MCP Supabase OAuth (`apply_migration`) : `20260618_recherche_terrain.sql`, `20260619_*_modele_budget.sql`, `20260620_contacts.sql`, `20260620_*_source.sql`, `20260622_leads.sql`, `20260622_config_tarifs.sql`.
-- **PR `feat/terrain-address-lookup` mergée** ✅ — analyse PLU adresse/IDU, calcul livraison GPS, schéma Supabase.
-- **`PackTerrainContactForm` submit câblé** ✅ — sessionStorage bridge (`pack_terrain_zones`) → `Reservation.tsx` → `/api/recherche-terrain`.
-- **Fix livraison "À estimer"** ✅ — `ConfigRecap` réactif via `plu_result_updated` DOM event.
-- **Fix `plu_adresse` NULL IDU path** ✅ — `reverseGeocode()` BAN en `Promise.all` avec GPU (Voie B).
-- **Fix champs PLU NULL leads** ✅ — `PluConsentBlock` useEffect + listener + auto-check.
-- **ADR-008 amendé** : Stripe retiré du MVP — paiement hors-ligne. Variables Stripe non à configurer Vercel.
-- **PR `fix/delivery-recap` mergée** ✅.
+**⚠ Un terme proscrit était servi en production**
+« clé en main » s'affichait sur `/arko-one` et `/arko-max` pendant que `check:vocabulaire` annonçait « conforme » : le contrôle lisait le source ligne à ligne, le terme était coupé par un retour à la ligne JSX. Le script lit désormais le **texte rendu**. Seule occurrence du dépôt.
 
-## Décisions prises — 2026-06-30 (portail mandataire + PR #17)
-- **PR #16 mergée sur dev** : landing `/mandataire`, dashboard `/mandataire/dashboard`, signup épuré, forgot/reset-password
-- **Template Brevo 15** (affectation) créé — `BREVO_TEMPLATE_AFFECTATION=15` en `.env.local` + Vercel dev. À ajouter Vercel Prod+Preview avant merge #17.
-- **PR #17 `dev`→`main` mergée** ✅ — migrations prod appliquées (`20260629_admin_tables`, `20260630_mandataires_invitation`). Production à jour.
+## Décisions — 2026-08-03
+- **Ligne d'appel** `+33 (0)5 64 37 37 14` en en-tête du site et du tunnel, encadré « Contacter un conseiller » sur `/contact` (Lu–Ve 9 h–12 h / 14 h–18 h). Source unique `CONTACT` (`site.ts`, surchargeable par `NEXT_PUBLIC_CONTACT_PHONE` — **absente de Vercel, c'est le repli qui sert**), `PhoneLink` sans JS, JSON-LD enrichi. Le numéro a changé en cours de session : une seule ligne à toucher, tout le reste en dérive.
+- **⚠ « module » → « maison »** sur tout le site client — **décision de Richard**, alerte formulée avant exécution et **maintenue**. 70 occurrences, accord au féminin. `maisons?` retiré du contrôle, `maisons? individuelles?` mis à sa place. **ADR-029 amendée**, `CLAUDE.md` / `AGENTS.md` réécrits.
+- **Le cadre de vente ne bouge pas** : annexe sur parcelle bâtie ou hébergement professionnel, terrain nu fermé. Seul le mot change.
+- **Accord au féminin propagé** : `BRAND.madeIn` → « Fabriquée au Pays-Basque » (4 surfaces), bas de page « Conçue ». Reste au masculin, à raison : `/arko-one` où « livré prêt / Fabriqué » s'accorde à **studio**.
+- **Risque non levé** : exposition au régime **CCMI** (loi du 19 déc. 1990). Lecture de Claude, pas d'un avocat — à confirmer avec les CGV (ADR-015). **À remonter à Albert.**
 
-## Questions en suspens
-- Migrations automatiques : GitHub Actions `supabase db push` vs Supabase Branching (Pro) vs manuel. Pas tranché.
-- Supabase local (CLI Docker) vs cloud `ahfhownerdb-dev` pour Development. Pas tranché.
+## Leçons de méthode encore actives
+- **Un garde-fou qui n'observe pas la sortie réelle ne contrôle rien.** Trois occurrences : un 404 ne prouvait pas un masquage (ADR-028, 31/07) ; un contrôle vocabulaire vert ne prouvait pas la conformité du rendu (ADR-029, 02/08) ; une Preview a renvoyé `200` en servant la page de login Vercel, jeton de partage périmé (03/08). **Sonder le corps servi, jamais le seul code HTTP.**
+- **Une garde `notFound()` n'est fiable que si aucun layout client ne la précède** — sinon couper au proxy (`src/proxy.ts`).
+- **Pas de test local** : HMR aveugle sur `/mnt/d`, laptop lent. Gate = `tsc` + `eslint` + `check:vocabulaire`, puis Preview Vercel. Revers assumé — une classe d'erreurs ne se voit qu'au prerender de production.
+
+## Prochaine action
+1. **ADR-035** — **PR #73 ouverte**, migration Preview appliquée et trigger vérifié. Reste : contrôler le **Kanban**, le **journal d'appels** et la **GED double origine** sur la Preview Vercel, puis merger. La migration Prod (correctif de sécurité inclus) part à la validation `dev` → `main`.
+2. **ADR-031** — soumission de la demande de numéro. Toujours bloquante pour `main` : elle conditionne la bascule sur `/configurer`, la levée du `noindex`, le retrait du v1 et la sortie de `/configurer` du sitemap. Elle écrit désormais dans le contrat posé par ADR-035.
 
 ## Blockers / À fournir
-- ~~**SPF/DKIM prod**~~ ✅ corrigé manuellement (2026-07-10), plus de bloqueur.
-- **CGV + légal** — nouvelle version CGV (`f3de62fe`) en attente confirmation avocat (ADR-015, seul point restant bloqué).
-- **Coordonnées atelier** — `transport.usine_lat/lon` dans `config_variables` = placeholder Bayonne (43.4933, −1.4748) — à affiner avec l'adresse réelle.
-- **Albert validation** — charte Affinity (ADR-002) + repositionnement bi-produit (ADR-022).
-- **Arko Max pricing grid** — `perM2/options/terrasse/footprint/reserved` — données métier attendues.
+- **CGV + légal** — version `f3de62fe` en attente confirmation avocat (ADR-015). **Y joindre la question CCMI** ouverte par la bascule « maison » du 03/08 : même texte, même interlocuteur.
+- **Albert** — charte Affinity (ADR-002), repositionnement bi-produit (ADR-022), **bascule « module » → « maison » du 03/08 (non remontée)**. Écarts ADR-030 ✅ traités.
+- **Arko Max pricing grid** — données métier attendues (ne concerne plus que le v1).
+- **Coordonnées atelier** — placeholder Bayonne (43.4933, −1.4748) ; sert le transport du v2.
+- **Asset vidéo Arko One** — absent, fallback provisoire sur le footage Max.
+- **ADR-028** — test de réversibilité (`NEXT_PUBLIC_FEATURE_MANDATAIRE=true` sur une Preview) jamais exécuté.
 
 ## Règle
-Court : 300–1200 tokens. Backlog → `00_INDEX/PROJECT_STATE.md`.
+Court : 300–1200 tokens. Historique complet et backlog → `00_INDEX/PROJECT_STATE.md`.

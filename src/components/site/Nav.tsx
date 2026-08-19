@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { NAV, BRAND, PRODUCT_LIST, SERIE_TOTAL } from "@/lib/site";
+import { NAV, BRAND, PRODUCT_LIST, SERIE_COUNT, SERIE_TOTAL, reserverHref } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
+import { PhoneLink } from "@/components/ui/PhoneLink";
 import { cn } from "@/shared/lib/cn";
 
 export function Nav() {
@@ -81,7 +82,7 @@ export function Nav() {
               onClick={() => setMenu((v) => !v)}
               className="group relative text-sm text-ink/70 transition-colors hover:text-ink"
             >
-              Modules
+              Nos Studios
               <span
                 className={cn(
                   "absolute -bottom-1 left-0 h-px bg-accent transition-all duration-300",
@@ -104,18 +105,26 @@ export function Nav() {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Compteur cumulé 12 + 5 exemplaires */}
+          {/* Ligne d'appel — visible à toutes les largeurs, y compris à côté
+              du burger : sur mobile, appeler est le geste le plus direct. Le
+              numéro n'apparaît qu'à partir de `lg`, où la barre a la place. */}
+          <PhoneLink />
+
+          {/* Compteur de rareté — deux séries, pool commun de 12 numéros */}
           <Link
-            href="/configurer"
-            aria-label={`Série limitée à ${SERIE_TOTAL} exemplaires au total — Arko One + Arko Max`}
+            href={reserverHref()}
+            aria-label={`${SERIE_COUNT} séries, ${SERIE_TOTAL} exemplaires au total — Arko One + Arko Max`}
             className="hidden items-center gap-1.5 font-mono text-xs text-muted transition-colors hover:text-ink sm:flex"
           >
             <span className="h-2 w-2 rounded-full bg-accent" />
+            {SERIE_COUNT}
+            <span className="text-muted/70">séries</span>
+            <span className="text-muted/40">·</span>
             {SERIE_TOTAL}
             <span className="text-muted/70">exemplaires</span>
           </Link>
           <Button
-            href="/configurer"
+            href={reserverHref()}
             variant="accent"
             className="hidden px-5 py-2.5 text-sm sm:inline-flex"
           >
@@ -195,8 +204,10 @@ export function Nav() {
                 >
                   Découvrir
                 </Button>
+                {/* Entrée dans le tunnel v2 : le studio choisi ici est
+                    présélectionné côté serveur (ADR-030). */}
                 <Button
-                  href={`/configurer?produit=${p.key}`}
+                  href={reserverHref(p.key)}
                   variant="accent"
                   className="px-4 py-2 text-sm"
                   magnetic={false}
@@ -220,9 +231,9 @@ export function Nav() {
         )}
       >
         <div className="container-page flex flex-col gap-1 py-6">
-          {/* Modules — déplié */}
+          {/* Nos Studios — déplié */}
           <p className="pt-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-muted">
-            Modules
+            Nos Studios
           </p>
           {PRODUCT_LIST.map((p) => (
             <div key={p.key} className="border-b border-line py-4">
@@ -243,7 +254,7 @@ export function Nav() {
                   Découvrir
                 </Link>
                 <Link
-                  href={`/configurer?produit=${p.key}`}
+                  href={reserverHref(p.key)}
                   onClick={() => setOpen(false)}
                   className="rounded-full bg-accent px-4 py-1.5 text-sm text-white"
                 >
@@ -264,12 +275,17 @@ export function Nav() {
             </Link>
           ))}
 
+          {/* Numéro en clair dans le menu déplié : sur écran tactile
+              l'infobulle ne se déclenche jamais, l'icône seule de la barre ne
+              dit donc pas quel numéro on appelle. */}
+          <PhoneLink full className="mt-5 self-start" />
+
           <div className="mt-4 flex items-center justify-between">
             <span className="font-mono text-xs text-muted">
-              {SERIE_TOTAL} exemplaires
+              {SERIE_COUNT} séries · {SERIE_TOTAL} exemplaires
             </span>
             <Button
-              href="/configurer"
+              href={reserverHref()}
               variant="accent"
               magnetic={false}
               onClick={() => setOpen(false)}

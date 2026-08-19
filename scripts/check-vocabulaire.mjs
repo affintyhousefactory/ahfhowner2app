@@ -2,9 +2,13 @@
 /**
  * Garde-fou vocabulaire de marque — ADR-029.
  *
- * La spec configurateur v2 en fait un critère de recette (§16) :
+ * La spec configurateur v2 en faisait un critère de recette (§16) :
  *   « Aucune occurrence de "maison", "clé en main", "résidence principale"
  *     dans les textes. »
+ * Amendement du 2026-08-03 : « maison » sort de la liste et devient le terme
+ * imposé (ADR-029 § Amendement). Le critère §16 de la spec est caduc sur ce
+ * point ; les deux autres termes restent contrôlés, ainsi que « maison
+ * individuelle » qui, lui, porte un régime contractuel (CCMI).
  *
  * Usage :  node scripts/check-vocabulaire.mjs
  * Sortie :  code 0 si conforme, 1 sinon (utilisable en CI ou pre-commit).
@@ -42,7 +46,24 @@ const EXCLUS = [
 
 // Termes proscrits. `mot` : recherché sur frontière de mot, insensible à la casse.
 const PROSCRITS = [
-  { mot: "maisons?", libelle: "maison" },
+  /* « maison » redevient proscrit — ADR-029 § Amendement du 2026-08-19,
+     décision de Richard : le site ne vend plus une maison mais un **studio de
+     jardin premium / d'exception**. Le terme imposé est « studio de jardin »,
+     au masculin. C'est l'inverse exact de l'amendement du 2026-08-03, qui
+     l'avait rendu obligatoire — les deux mouvements sont datés dans l'ADR
+     plutôt qu'effacés.
+
+     Effet de bord favorable : le repositionnement **éloigne** le site du
+     régime CCMI (loi du 19 déc. 1990), risque 🔴 ouvert depuis le 2026-08-03.
+     Un studio de jardin n'est pas une maison individuelle. La question reste
+     posée à l'avocat, mais elle porte désormais sur beaucoup moins.
+
+     Les deux entrées ci-dessous se recouvrent volontairement : « maison »
+     suffirait à attraper « maison individuelle », mais garder la ligne CCMI
+     explicite empêche qu'un futur relâchement de « maison » emporte
+     silencieusement le garde-fou juridique avec lui. */
+  { mot: "maisons?", libelle: "maison (terme proscrit — dire « studio de jardin »)" },
+  { mot: "maisons? individuelles?", libelle: "maison individuelle (régime CCMI)" },
   { mot: "clé[ -]en[ -]main", libelle: "clé en main" },
   { mot: "résidences? principales?", libelle: "résidence principale" },
   // Blocklist historique reprise d'ADR-004.
@@ -71,15 +92,37 @@ for (const cible of CIBLES) {
     if (EXCLUS.some((e) => rel.startsWith(e))) continue;
 
     const lignes = readFileSync(chemin, "utf-8").split("\n");
+
+    // Le contrôle s'exerce sur le texte **tel que le visiteur le lit**, pas tel
+    // qu'il est écrit. Un terme proscrit coupé par un retour à la ligne JSX
+    // — « … € — clé\n  en main … » — échappait à une lecture ligne à ligne :
+    // le rendu affichait « clé en main » sur /arko-one et /arko-max pendant que
+    // le contrôle annonçait « conforme » (constaté le 2026-08-02).
+    // On aplatit donc les blancs, en gardant de quoi retrouver la ligne.
+    const debuts = [];
+    let plat = "";
     lignes.forEach((ligne, i) => {
       // Les commentaires citant la règle ne sont pas des infractions.
-      if (/ADR-029|ADR-004/.test(ligne)) return;
-      for (const { mot, libelle } of PROSCRITS) {
-        if (new RegExp(`\\b${mot}\\b`, "i").test(ligne)) {
-          infractions.push({ fichier: rel, ligne: i + 1, terme: libelle, texte: ligne.trim().slice(0, 100) });
-        }
-      }
+      const utile = /ADR-029|ADR-004/.test(ligne) ? "" : ligne;
+      debuts.push({ index: plat.length, ligne: i + 1, texte: ligne });
+      plat += utile + " ";
     });
+
+    const ligneDe = (index) => {
+      let trouve = debuts[0];
+      for (const d of debuts) {
+        if (d.index > index) break;
+        trouve = d;
+      }
+      return trouve;
+    };
+
+    for (const { mot, libelle } of PROSCRITS) {
+      for (const m of plat.matchAll(new RegExp(`\\b${mot}\\b`, "gi"))) {
+        const { ligne, texte } = ligneDe(m.index);
+        infractions.push({ fichier: rel, ligne, terme: libelle, texte: texte.trim().slice(0, 100) });
+      }
+    }
   }
 }
 
@@ -93,6 +136,7 @@ for (const { fichier, ligne, terme, texte } of infractions) {
   console.error(`  ${fichier}:${ligne}  « ${terme} »`);
   console.error(`    ${texte}\n`);
 }
-console.error("Vocabulaire imposé : module, unité, studio, hébergement, annexe,");
-console.error("espace supplémentaire, prêt à vivre. Voir ADR-029 et docs/specs/.");
+console.error("Vocabulaire imposé : studio de jardin (premium / d'exception),");
+console.error("unité, hébergement, annexe, espace supplémentaire, prêt à vivre.");
+console.error("Accord au MASCULIN. Voir ADR-029 § Amendement du 2026-08-19.");
 process.exit(1);

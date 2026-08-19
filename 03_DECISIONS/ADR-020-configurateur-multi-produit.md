@@ -24,3 +24,9 @@ Amender ADR-005 : `config-store.tsx` porte désormais un produit actif (`product
 
 ## Sources
 `src/lib/site.ts` (`PRODUCTS`, `ONE_PRICING`), `config-store.tsx`, `Configurator.tsx`, `ProductSync.tsx`, ADR-005, ADR-022.
+
+## Remplacement 2026-08-01 — ADR-030
+
+Le configurateur multi-produit décrit ici est remplacé par le parcours en 7 écrans
+d'ADR-030. Le registre `PRODUCTS` et le paramétrage par produit sont conservés ;
+le sélecteur One/Max devient l'écran 1 du nouveau parcours.

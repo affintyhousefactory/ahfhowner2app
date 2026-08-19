@@ -17,8 +17,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
   }> = [
     { path: "/", priority: 1, changeFrequency: "weekly" },
-    { path: "/arko-one", priority: 0.9, changeFrequency: "weekly" },
-    { path: "/arko-max", priority: 0.9, changeFrequency: "weekly" },
+    { path: "/studio-jardin-arko-one", priority: 0.9, changeFrequency: "weekly" },
+    { path: "/studio-jardin-arko-max", priority: 0.9, changeFrequency: "weekly" },
     { path: "/configurer", priority: 0.8, changeFrequency: "weekly" },
     ...(FEATURES.mandataire
       ? ([
@@ -26,6 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
           { path: "/terrains", priority: 0.6, changeFrequency: "daily" },
         ] as const)
       : []),
+    { path: "/a-propos", priority: 0.7, changeFrequency: "monthly" },
     { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
     { path: "/mentions-legales", priority: 0.3, changeFrequency: "yearly" },
     { path: "/confidentialite", priority: 0.3, changeFrequency: "yearly" },

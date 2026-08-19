@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PRODUCTS } from "@/lib/site";
+import { PRODUCTS, SERIE_TOTAL } from "@/lib/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { productSchema } from "@/lib/jsonld";
 import { ProductHero } from "@/components/site/ProductHero";
@@ -8,10 +8,9 @@ import { Discover } from "@/components/site/Discover";
 import { AvantPremiere } from "@/components/site/AvantPremiere";
 
 export const metadata: Metadata = {
-  title: "Arko One — 20 m² d'architecte | HOWNER",
-  description:
-    "Arko One : studio d'architecte de 20 m², livré prêt à vivre. Série 01 — 12 exemplaires numérotés. Fabriqué au Pays-Basque.",
-  alternates: { canonical: "/arko-one" },
+  title: "Studio de jardin 20 m² — Arko One | HOWNER",
+  description: `Arko One : studio de jardin d'architecte de 20 m², livré prêt à vivre. Série 01 — ${SERIE_TOTAL} exemplaires numérotés. Fabriqué au Pays-Basque.`,
+  alternates: { canonical: "/studio-jardin-arko-one" },
 };
 
 export default function ArkoOnePage() {

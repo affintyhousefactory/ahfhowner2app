@@ -4,17 +4,30 @@
   "github": {
     "owner": "affintyhousefactory",
     "repo": "ahfhowner2app",
-    "allowedRepos": ["affintyhousefactory/ahfhowner2app"]
+    "allowedRepos": [
+      "affintyhousefactory/ahfhowner2app"
+    ]
   },
   "supabase": {
     "supabaseProjectRef": "msrjocrcewvqkcehruny",
     "dbName": "ahfhownerdb",
     "mode": "read-write",
-    "allowedTables": ["leads", "contacts", "recherche_terrain"],
+    "allowedTables": [
+      "leads",
+      "contacts",
+      "recherche_terrain"
+    ],
     "note": "ADR-007 partiel valide (table leads). Stripe/Realtime/waitlist = ADR-008/009/010. Note : en pratique l'usage courant du projet couvre tout le schema fiches_terrain/mandataires/dossiers, cette liste est obsolete et sert d'indication historique seulement.",
     "environments": {
-      "production": { "supabaseProjectRef": "msrjocrcewvqkcehruny", "dbName": "ahfhownerdb" },
-      "preview": { "supabaseProjectRef": "ixozlavseaykxmjtkkrk", "dbName": "ahfhownerdb-preprod", "note": "Base Preview Vercel (NEXT_PUBLIC_SUPABASE_URL scope Preview). Meme organisation Supabase que prod. Declaree le 2026-07-07 suite a un ecart de migrations decouvert en test." }
+      "production": {
+        "supabaseProjectRef": "msrjocrcewvqkcehruny",
+        "dbName": "ahfhownerdb"
+      },
+      "preview": {
+        "supabaseProjectRef": "ixozlavseaykxmjtkkrk",
+        "dbName": "ahfhownerdb-preprod",
+        "note": "Base Preview Vercel (NEXT_PUBLIC_SUPABASE_URL scope Preview). Meme organisation Supabase que prod. Declaree le 2026-07-07 suite a un ecart de migrations decouvert en test."
+      }
     }
   },
   "gmail": {
@@ -24,17 +37,21 @@
   },
   "drive": {
     "mode": "read-only",
-    "allowedSharedDriveIds": ["0ALGUeoTQ2_hdUk9PVA"],
+    "allowedSharedDriveIds": [
+      "0ALGUeoTQ2_hdUk9PVA"
+    ],
     "allowedFolderIds": [
       "1Y5sDCBO3JTbFOuu98ISzL-D5k7Jxv3Dg",
-      "1lGKGXkem4PLFxPwtx5LP_dw_wOSj2RUJ"
+      "1lGKGXkem4PLFxPwtx5LP_dw_wOSj2RUJ",
+      "1llLM1ndyM2m7Z8bPGxJpijRuyG6q0_bw"
     ],
     "folderNames": {
       "0ALGUeoTQ2_hdUk9PVA": "AHF - Plans_SiteWeb_Inspirations (Drive partage)",
       "1Y5sDCBO3JTbFOuu98ISzL-D5k7Jxv3Dg": "Siteaffinity",
-      "1lGKGXkem4PLFxPwtx5LP_dw_wOSj2RUJ": "SpecsConfigurateur"
+      "1lGKGXkem4PLFxPwtx5LP_dw_wOSj2RUJ": "SpecsConfigurateur",
+      "1llLM1ndyM2m7Z8bPGxJpijRuyG6q0_bw": "plans_visuels (Plan2D, visuels 3D, moodboards)"
     },
-    "note": "Autorise par Richard le 2026-07-31 pour recuperer les specifications produites par Albert. Lecture seule, limitee aux dossiers listes : aucune ecriture, aucune recherche globale Drive. Toute specification recuperee est versee dans docs/specs/ pour que les ADR la citent par un chemin stable."
+    "note": "Autorise par Richard le 2026-07-31 pour recuperer les specifications produites par Albert, etendu le 2026-08-19 au dossier plans_visuels (visuels du site, demande explicite de Richard). Lecture seule, limitee aux dossiers listes : aucune ecriture, aucune recherche globale Drive. Toute specification recuperee est versee dans docs/specs/ pour que les ADR la citent par un chemin stable ; tout visuel est verse dans public/assets/ sous un nom neutre — un nom de fichier devient une URL publique, et ADR-029 §67 interdit d'y exposer un nom de fournisseur."
   },
   "outOfScope": [
     "AHF_WEB2 (segments/Brevo/Smart Nano-Max/Villa Arko)",

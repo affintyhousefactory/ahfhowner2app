@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { PRODUCT_LIST, type Product } from "@/lib/site";
+import { PRODUCT_LIST, reserverHref, type Product } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { useTilt } from "@/components/effects/useTilt";
 
@@ -24,7 +24,7 @@ export function ProductsShowcase() {
         </Reveal>
         <Reveal delay={0.05}>
           <h2 className="editorial mt-12 text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:whitespace-nowrap md:text-[4.6rem]">
-            Deux modules, un même soin.
+            Deux studios, un même soin.
           </h2>
         </Reveal>
 
@@ -87,7 +87,7 @@ function ProductCard({ p }: { p: Product }) {
             Découvrir
           </Link>
           <Link
-            href={`/configurer?produit=${p.key}`}
+            href={reserverHref(p.key)}
             className="btn-rl btn-rl-accent px-5 py-2.5 text-sm"
           >
             Réserver

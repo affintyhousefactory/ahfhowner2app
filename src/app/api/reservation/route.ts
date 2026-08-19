@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendBrevoTemplate, addBrevoContact } from "@/shared/lib/email";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { signalerPanne } from "@/shared/lib/panne";
 import type { ParcelleData } from "@/shared/types/plu";
 
 const TEMPLATE_ID = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
@@ -62,6 +63,11 @@ export async function POST(req: NextRequest) {
       : `${houseTotal?.toLocaleString("fr-FR")} €`;
 
   // ── Supabase insert ──────────────────────────────────────────────
+  // Non bloquant **par choix** : si le stockage tombe, l'email Brevo part
+  // quand même et AHF reçoit la demande. Lever ici ferait perdre le lead.
+  // Ce qui était fautif, ce n'est pas de continuer — c'est de continuer en
+  // silence, en renvoyant `{ ok: true }` (cf. `shared/lib/panne.ts`).
+  let persisted = true;
   try {
     await getSupabaseAdmin().from("leads").insert({
       prenom: prenom ?? "",
@@ -94,8 +100,8 @@ export async function POST(req: NextRequest) {
       plu_servitudes: plu?.servitudes ?? [],
     });
   } catch (err) {
-    // Non bloquant — l'email est envoyé même si le stockage échoue
-    console.error("[reservation] Supabase insert error:", err);
+    persisted = false;
+    signalerPanne("reservation/supabase", err);
   }
 
   // ── Email Brevo ──────────────────────────────────────────────────
@@ -156,7 +162,11 @@ export async function POST(req: NextRequest) {
     { emailBlacklisted: !optIn },
   ).catch((err) => console.error("[reservation] Brevo contact error:", err));
 
-  return NextResponse.json({ ok: true });
+  // `ok` reste vrai : du point de vue du visiteur la demande est bien partie,
+  // l'email de récapitulatif l'atteste. `persisted` dit l'autre moitié de la
+  // vérité — le lead est-il en base ? Un `{ ok: true }` seul rendait la panne
+  // indétectable, y compris pour une sonde externe.
+  return NextResponse.json({ ok: true, persisted });
 }
 
 function formatDate(dateStr: string): string {

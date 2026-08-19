@@ -1,3 +1,12 @@
+/**
+ * Fiche lead — organisation d'ADR-027, complétée par ADR-035 §6.
+ *
+ * Colonne de gauche : identification du projet, configuration, journal d'appels,
+ * GED Client. Colonne de droite : zone de recherche terrain, PLU et carte —
+ * conservées à l'identique, ainsi que les sous-sections mandataire, toujours
+ * masquées derrière `FEATURES.mandataire` (ADR-028).
+ */
+
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { notFound } from "next/navigation";
 import AssignMandataire from "@/components/admin/AssignMandataire";
@@ -7,7 +16,10 @@ import LeadEditLocalisation from "@/components/admin/LeadEditLocalisation";
 import LeadDocuments from "@/components/admin/LeadDocuments";
 import LeadClientDocuments from "@/components/admin/LeadClientDocuments";
 import LeadStatutCommercial from "@/components/admin/LeadStatutCommercial";
+import LeadConfiguration from "@/components/admin/LeadConfiguration";
+import LeadAppels from "@/components/admin/LeadAppels";
 import { FEATURES } from "@/lib/features";
+import { etatSuivi, dateHeureFr } from "@/lib/crm";
 
 export const dynamic = "force-dynamic";
 
@@ -55,27 +67,57 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
     : null;
 
   const identifier = `#${lead.lead_number ?? "—"} — ${lead.prenom} ${lead.nom}`;
+  const suivi = etatSuivi(lead);
 
   return (
     <div className="p-8">
-      {/* Header */}
+      {/* ── En-tête — identification du projet ─────────────────────────── */}
       <div className="mb-6">
         <a href="/admin/leads" className="text-sm text-white/30 hover:text-white">← Leads</a>
-        <div className="mt-2 flex items-center gap-3 flex-wrap">
+        <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-semibold text-white">{identifier}</h1>
           <LeadStatutCommercial
             leadId={id}
             current={(lead.statut_commercial as string | null) as Parameters<typeof LeadStatutCommercial>[0]["current"]}
           />
+          {suivi.rappelDepasse && (
+            <span className="rounded-full bg-red-500/15 px-2.5 py-1 text-[11px] font-medium text-red-400">
+              Rappel dépassé de {suivi.joursRetardRappel} j
+            </span>
+          )}
+          {!suivi.rappelDepasse && suivi.silencieux && (
+            <span className="rounded-full bg-orange-500/15 px-2.5 py-1 text-[11px] font-medium text-orange-400">
+              {suivi.joursSansContact} j sans contact
+            </span>
+          )}
         </div>
-        <p className="mt-1 text-sm text-white/40">{lead.email} · {lead.tel}</p>
+        <p className="mt-1 text-sm text-white/40">
+          {lead.email} · {lead.tel}
+          {lead.responsable && <span className="text-white/25"> · suivi par {lead.responsable}</span>}
+          {lead.prochain_rappel_at && (
+            <span className="text-white/25"> · rappel {dateHeureFr(lead.prochain_rappel_at)}</span>
+          )}
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Colonne 1 — Identité & Projet + GED Client */}
+        {/* ── Colonne 1 — projet, configuration, appels, GED Client ─────── */}
         <div className="space-y-6">
           <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
             <LeadEditIdentite lead={lead} />
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+            <LeadConfiguration lead={lead} />
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+            <LeadAppels
+              leadId={id}
+              tel={lead.tel ?? null}
+              responsable={lead.responsable ?? null}
+              statutCommercialActuel={lead.statut_commercial ?? null}
+            />
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
@@ -84,14 +126,14 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
                 GED Client
               </h2>
               <p className="mt-1 text-xs text-white/25">
-                Pièces internes du client (non partagées avec le mandataire), en préparation du devis.
+                Pièces du dossier client — celles que nous déposons et celles que le client dépose.
               </p>
             </div>
             <LeadClientDocuments leadId={id} />
           </div>
         </div>
 
-        {/* Colonne 2 — Zone de recherche terrain (localisation + PLU + affectation + dossier mandataire) */}
+        {/* ── Colonne 2 — zone de recherche terrain (inchangée) ─────────── */}
         <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
           <LeadEditLocalisation lead={lead} />
 

@@ -2,12 +2,12 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { BRAND, type Product } from "@/lib/site";
-import { FEATURES } from "@/lib/features";
+import { BRAND, reserverHref, type Product } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Gauge } from "@/components/ui/Gauge";
 import { HeroBackdrop, type HeroBackdropVariant } from "@/components/effects/HeroBackdrop";
 import { useTilt } from "@/components/effects/useTilt";
+import { Reveal } from "@/components/ui/Reveal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -49,12 +49,18 @@ export function ProductHero({
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col justify-center">
         <div className="container-page relative z-20">
-          <h1
+          {/* Le nom du produit reste l'élément visuel dominant, mais ce n'est
+              plus le `<h1>` : depuis le 2026-08-19 le titre de page porte la
+              catégorie (« Studio de jardin de 20 m² … »), qui est ce qu'un
+              visiteur cherche — « Arko One » ne se tape pas dans un moteur.
+              Rendu en `<p>` comme la baseline du pied de page et les libellés
+              du méga-menu : dominant à l'œil, décoratif dans le plan. */}
+          <p
             className="editorial select-none text-ink"
             style={{ fontSize: "var(--text-display)" }}
           >
             {product.name}
-          </h1>
+          </p>
         </div>
 
         <div className="relative z-10 -mt-[clamp(2rem,6vw,6rem)] flex justify-center">
@@ -93,36 +99,44 @@ export function ProductHero({
         </div>
       </div>
 
-      <motion.div
+      {/* `Reveal` et NON `motion.div` : ce bloc contient désormais le `<h1>`
+          de la page, et framer-motion sérialise `opacity:0` dans le HTML du
+          serveur — le titre partait donc invisible pour un visiteur sans JS
+          comme pour un crawler. C'est exactement le défaut corrigé sur
+          l'accueil le 2026-07-20, réintroduit ici le 2026-08-19 en déplaçant
+          le `<h1>` dans ce bloc animé. `Reveal` porte son état masqué en CSS
+          sous `.js-motion`, posée seulement si JS s'exécute : pas de JS, pas
+          de classe, contenu visible.
+
+          Règle : aucun `<h1>` ne doit jamais naître sous un bloc animé par
+          framer-motion. */}
+      <Reveal
         className="container-page relative z-10 pb-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.1, ease: EASE, delay: 0.4 }}
+        delay={0.4}
       >
         <div className="rule grid grid-cols-1 gap-8 pt-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
-            <h2 className="editorial text-[2rem] leading-[1.05] text-ink md:whitespace-nowrap md:text-[2.9rem]">
-              {product.tagline}
-            </h2>
+            {/* `md:whitespace-nowrap` retiré : il tenait pour une tagline
+                courte, il ferait déborder un titre de 55 caractères. */}
+            <h1 className="editorial text-balance text-[2rem] leading-[1.05] text-ink md:text-[2.9rem]">
+              {product.h1}
+            </h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
-              À partir de {product.pricing.base.toLocaleString("fr-FR")} € — clé
-              en main, prête à vivre.
+              À partir de {product.pricing.base.toLocaleString("fr-FR")} € —
+              livré prêt à vivre.
             </p>
           </div>
 
           <div className="flex flex-col gap-5 md:col-span-5 md:items-end">
+            {/* Un seul CTA, comme sur l'accueil. « Tester mon terrain » retiré
+                le 2026-08-02 : `/terrain` est suspendue (ADR-028) et son repli
+                menait au configurateur v1, que plus aucun autre bouton ne
+                dessert. La vérification de parcelle vit dans le parcours, en
+                section 05. */}
             <div className="flex flex-wrap items-center gap-3 md:justify-end">
-              <Button href={`/configurer?produit=${product.key}`} variant="accent">
+              <Button href={reserverHref(product.key)} variant="accent">
                 Réserver — {BRAND.deposit.toLocaleString("fr-FR")} €
                 <Arrow />
-              </Button>
-              {/* `/terrain` est suspendue (ADR-028) — repli sur le configurateur,
-                  qui porte l'analyse PLU sous « J'ai un terrain ». */}
-              <Button
-                href={FEATURES.mandataire ? "/terrain" : `/configurer?produit=${product.key}`}
-                variant="outline"
-              >
-                Tester mon terrain
               </Button>
             </div>
             <Gauge
@@ -133,7 +147,7 @@ export function ProductHero({
             />
           </div>
         </div>
-      </motion.div>
+      </Reveal>
     </section>
   );
 }

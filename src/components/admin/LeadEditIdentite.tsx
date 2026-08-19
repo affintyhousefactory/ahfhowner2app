@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { loadGooglePlacesScript } from "@/shared/lib/google-places";
+import { CONSEILLERS, dateHeureFr, etatSuivi } from "@/lib/crm";
 
 interface LeadIdentite {
   id: string;
@@ -23,6 +24,46 @@ interface LeadIdentite {
   ville_client: string | null;
   delai_projet: string | null;
   description_projet: string | null;
+  // Suivi CRM — ADR-035 §1 et §2. Édités ici parce que ce sont les champs que
+  // l'on corrige pendant l'appel : les séparer du reste imposerait deux
+  // formulaires pour une seule conversation.
+  responsable?: string | null;
+  prochain_rappel_at?: string | null;
+  dernier_appel_at?: string | null;
+  statut_commercial?: string | null;
+  created_at?: string;
+}
+
+/** `datetime-local` attend une heure locale sans fuseau, pas un ISO UTC. */
+function versChampLocal(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function etatInitial(lead: LeadIdentite) {
+  return {
+    prenom: lead.prenom ?? "",
+    nom: lead.nom ?? "",
+    email: lead.email ?? "",
+    tel: lead.tel ?? "",
+    produit: lead.produit ?? "",
+    source: lead.source ?? "",
+    statut: lead.statut ?? "nouveau",
+    pack_terrain: lead.pack_terrain ?? "",
+    budget_terrain: lead.budget_terrain?.toString() ?? "",
+    total_estime: lead.total_estime?.toString() ?? "",
+    notes_ahf: lead.notes_ahf ?? "",
+    adresse_postale_client: lead.adresse_postale_client ?? "",
+    cp_client: lead.cp_client ?? "",
+    ville_client: lead.ville_client ?? "",
+    delai_projet: lead.delai_projet ?? "",
+    description_projet: lead.description_projet ?? "",
+    responsable: lead.responsable ?? "",
+    prochain_rappel_at: versChampLocal(lead.prochain_rappel_at),
+  };
 }
 
 const DELAIS_PROJET = [
@@ -49,26 +90,16 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
   const containerRef    = useRef<HTMLDivElement>(null);
   const placeElementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
 
-  const [form, setForm] = useState({
-    prenom: lead.prenom ?? "",
-    nom: lead.nom ?? "",
-    email: lead.email ?? "",
-    tel: lead.tel ?? "",
-    produit: lead.produit ?? "",
-    source: lead.source ?? "",
-    statut: lead.statut ?? "nouveau",
-    pack_terrain: lead.pack_terrain ?? "",
-    budget_terrain: lead.budget_terrain?.toString() ?? "",
-    total_estime: lead.total_estime?.toString() ?? "",
-    notes_ahf: lead.notes_ahf ?? "",
-    adresse_postale_client: lead.adresse_postale_client ?? "",
-    cp_client: lead.cp_client ?? "",
-    ville_client: lead.ville_client ?? "",
-    delai_projet: lead.delai_projet ?? "",
-    description_projet: lead.description_projet ?? "",
-  });
+  const [form, setForm] = useState(() => etatInitial(lead));
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY ?? "";
+
+  const suivi = etatSuivi({
+    statut_commercial: lead.statut_commercial,
+    created_at: lead.created_at ?? new Date().toISOString(),
+    dernier_appel_at: lead.dernier_appel_at,
+    prochain_rappel_at: lead.prochain_rappel_at,
+  });
 
   // Init Google Places autocomplete quand on entre en mode édition
   useEffect(() => {
@@ -107,24 +138,7 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
   }, [editing, apiKey]);
 
   const handleCancel = useCallback(() => {
-    setForm({
-      prenom: lead.prenom ?? "",
-      nom: lead.nom ?? "",
-      email: lead.email ?? "",
-      tel: lead.tel ?? "",
-      produit: lead.produit ?? "",
-      source: lead.source ?? "",
-      statut: lead.statut ?? "nouveau",
-      pack_terrain: lead.pack_terrain ?? "",
-      budget_terrain: lead.budget_terrain?.toString() ?? "",
-      total_estime: lead.total_estime?.toString() ?? "",
-      notes_ahf: lead.notes_ahf ?? "",
-      adresse_postale_client: lead.adresse_postale_client ?? "",
-      cp_client: lead.cp_client ?? "",
-      ville_client: lead.ville_client ?? "",
-      delai_projet: lead.delai_projet ?? "",
-      description_projet: lead.description_projet ?? "",
-    });
+    setForm(etatInitial(lead));
     setError(null);
     setEditing(false);
   }, [lead]);
@@ -140,6 +154,15 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
           ...form,
           budget_terrain: form.budget_terrain ? Number(form.budget_terrain) : null,
           total_estime: form.total_estime ? Number(form.total_estime) : null,
+          responsable: form.responsable || null,
+          // Horodate la prise en charge, et seulement quand elle change : sinon
+          // chaque enregistrement rajeunirait une affectation ancienne.
+          ...(form.responsable !== (lead.responsable ?? "")
+            ? { responsable_at: form.responsable ? new Date().toISOString() : null }
+            : {}),
+          prochain_rappel_at: form.prochain_rappel_at
+            ? new Date(form.prochain_rappel_at).toISOString()
+            : null,
         }),
       });
       if (!res.ok) {
@@ -220,6 +243,34 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
             ) : null,
           )}
         </dl>
+
+        {/* Suivi commercial — ADR-035 §1 et §2 */}
+        <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5 text-sm">
+          <div>
+            <p className="text-[11px] text-white/30">Conseiller</p>
+            <p className="mt-0.5 text-white">
+              {lead.responsable ?? <span className="text-white/20">non attribué</span>}
+            </p>
+          </div>
+          <div>
+            <p className="text-[11px] text-white/30">Dernier appel</p>
+            <p className={`mt-0.5 ${suivi.silencieux ? "text-orange-400" : "text-white"}`}>
+              {suivi.jamaisAppele ? "jamais" : dateHeureFr(lead.dernier_appel_at)}
+              <span className="ml-1 text-[11px] text-white/30">
+                {suivi.clos ? "" : `· ${suivi.joursSansContact} j`}
+              </span>
+            </p>
+          </div>
+          <div>
+            <p className="text-[11px] text-white/30">Prochain rappel</p>
+            <p className={`mt-0.5 ${suivi.rappelDepasse ? "text-red-400" : "text-white"}`}>
+              {lead.prochain_rappel_at ? dateHeureFr(lead.prochain_rappel_at) : <span className="text-white/20">—</span>}
+              {suivi.rappelDepasse && (
+                <span className="ml-1 text-[11px]">dépassé de {suivi.joursRetardRappel} j</span>
+              )}
+            </p>
+          </div>
+        </div>
 
         {(lead.adresse_postale_client || lead.cp_client || lead.ville_client) && (
           <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5 text-sm">
@@ -319,6 +370,35 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
               <input className={inputCls} value={form.ville_client} onChange={set("ville_client")} />
             </div>
           </div>
+        </div>
+
+        {/* Suivi commercial — ADR-035. Ce sont les champs que l'on corrige
+            pendant l'appel : ils vivent dans le même formulaire que le reste. */}
+        <div className="pt-1 border-t border-white/5">
+          <p className="text-xs text-white/30 mb-2 uppercase tracking-wider">Suivi commercial</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Conseiller</label>
+              <select className={inputCls} value={form.responsable} onChange={set("responsable")}>
+                <option value="">Non attribué</option>
+                {[...new Set([...CONSEILLERS, form.responsable].filter(Boolean))].map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Prochain rappel</label>
+              <input
+                className={inputCls}
+                type="datetime-local"
+                value={form.prochain_rappel_at}
+                onChange={set("prochain_rappel_at")}
+              />
+            </div>
+          </div>
+          <p className="mt-1 text-[11px] text-white/25">
+            Vider le rappel efface l&apos;alerte. Le dernier appel se met à jour depuis le journal.
+          </p>
         </div>
 
         {/* Projet */}

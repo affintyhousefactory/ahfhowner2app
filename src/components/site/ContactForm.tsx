@@ -21,11 +21,17 @@ export function ContactForm() {
   const searchParams = useSearchParams();
   const numeroAnnonce = searchParams.get("numero");
   const refAnnonce = searchParams.get("ref");
-  const defaultMessage = numeroAnnonce
-    ? `Je suis intéressé également par l'annonce de terrain n° ${numeroAnnonce}` +
-      (refAnnonce ? ` (réf. ${refAnnonce})` : "") +
-      ".\n\n"
-    : "";
+  /* ADR-030 — le configurateur renvoie ici sur la branche « terrain nu », avec
+     le sujet et le message pré-remplis. Le visiteur reste libre de les modifier. */
+  const sujetParam = searchParams.get("sujet");
+  const messageParam = searchParams.get("message");
+  const defaultMessage = messageParam
+    ? messageParam
+    : numeroAnnonce
+      ? `Je suis intéressé également par l'annonce de terrain n° ${numeroAnnonce}` +
+        (refAnnonce ? ` (réf. ${refAnnonce})` : "") +
+        ".\n\n"
+      : "";
 
   const [sent, setSent] = useState(false);
   const [submitError, setSubmitError] = useState(false);
@@ -155,7 +161,7 @@ export function ContactForm() {
 
       <select
         name="produit"
-        defaultValue=""
+        defaultValue={sujetParam === "autre" ? "autre" : ""}
         required
         className="mt-3 w-full rounded-full border border-line bg-surface px-5 py-3.5 text-sm text-ink outline-none transition-colors focus:border-accent"
       >

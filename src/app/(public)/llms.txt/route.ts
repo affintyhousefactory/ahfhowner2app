@@ -24,13 +24,14 @@ export function GET() {
 
 > ${BRAND.baseline}. ${BRAND.subline}
 
-${BRAND.maker} conçoit et livre des modules compacts d'architecte en série limitée, fabriqués au Pays-Basque. Chaque modèle est dessiné et suivi par notre architecte intégrée, livré prêt à vivre. Parcours utilisateur : découvrir un modèle, configurer un devis indicatif, vérifier la compatibilité d'un terrain, réserver un exemplaire numéroté avec un acompte remboursable.
+${BRAND.maker} conçoit et livre des studios de jardin d'exception en série limitée, fabriqués au Pays-Basque. Chaque modèle est dessiné et suivi par notre architecte intégrée, livré prêt à vivre. Parcours utilisateur : découvrir un modèle, configurer un devis indicatif, vérifier la compatibilité d'un terrain, réserver un exemplaire numéroté avec un acompte remboursable.
 
 ## Modèles
 ${products}
 
 ## Pages clés
 - [Configurer & réserver](${SITE_URL}/configurer) — configuration et réservation d'un exemplaire numéroté.${terrain}
+- [À propos](${SITE_URL}/a-propos) — philosophie de marque, ossature acier léger (LSF), ingénierie et fabrication Hors-Site.
 - [Contact](${SITE_URL}/contact) — questions et accompagnement projet.
 
 ## Informations légales

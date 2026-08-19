@@ -2,8 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { BRAND, SERIE_TOTAL } from "@/lib/site";
-import { FEATURES } from "@/lib/features";
+import { BRAND, SERIE_TOTAL, reserverHref } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Ikurrina } from "@/components/ui/Ikurrina";
 
@@ -40,7 +39,7 @@ export function Hero() {
         </span>
       </div>
 
-      {/* Média hero — le module comme focal éditorial (sans wordmark, ADR-022). */}
+      {/* Média hero — le studio comme focal éditorial (sans wordmark, ADR-022). */}
       <div className="relative flex min-h-0 flex-1 flex-col justify-center">
         <div className="relative z-0 mt-8 flex justify-center">
           {/* Parallaxe au scroll : reste en framer-motion (motion values sur le
@@ -85,8 +84,11 @@ export function Hero() {
       >
         <div className="rule grid grid-cols-1 gap-8 pt-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
+            {/* `BRAND.h1` et non `BRAND.baseline` depuis le 2026-08-19 : le
+                titre de page nomme la catégorie et la marque (référencement),
+                la baseline reste la signature éditoriale du pied de page. */}
             <h1 className="editorial max-w-xl text-balance text-[2rem] leading-[1.05] text-ink md:text-[2.9rem]">
-              {BRAND.baseline}
+              {BRAND.h1}
             </h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
               {BRAND.subline}
@@ -94,15 +96,15 @@ export function Hero() {
           </div>
 
           <div className="flex flex-col gap-5 md:col-span-5 md:items-end">
+            {/* Un seul CTA. « Tester mon terrain » a été retiré le 2026-08-02 :
+                `/terrain` est suspendue (ADR-028) et son repli menait au
+                configurateur v1, que plus aucun autre bouton de la page ne
+                dessert. La vérification de parcelle vit désormais dans le
+                parcours lui-même, en section 05. */}
             <div className="flex flex-wrap items-center gap-3 md:justify-end">
-              <Button href="/configurer" variant="accent">
+              <Button href={reserverHref()} variant="accent">
                 Réserver
                 <Arrow />
-              </Button>
-              {/* `/terrain` est suspendue (ADR-028). L'analyse PLU vit dans le
-                  configurateur, sous « J'ai un terrain » — le CTA garde son sens. */}
-              <Button href={FEATURES.mandataire ? "/terrain" : "/configurer"} variant="outline">
-                Tester mon terrain
               </Button>
             </div>
             <p className="font-mono text-xs text-muted md:text-right">
