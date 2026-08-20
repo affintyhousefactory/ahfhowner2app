@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 import { FEATURES } from "@/lib/features";
+import { pagesPubliees } from "@/lib/pages/registry";
 
 // /viewer (Phase 2, disallow), /terrain (redirect stub → /rechercheterrain)
 // et CGV (placeholder noindex, ADR-015) exclus. cgu-mandataire exclue
@@ -30,6 +31,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
     { path: "/mentions-legales", priority: 0.3, changeFrequency: "yearly" },
     { path: "/confidentialite", priority: 0.3, changeFrequency: "yearly" },
+    /* Pages éditoriales du chantier ADR-038 — dérivées du registre, jamais
+       écrites ici. Seules celles marquées `"publiee"` remontent : le chantier
+       se livre en cinq lots, et déclarer une URL qui n'a pas encore de page
+       coûte du budget de crawl pour un 404. */
+    ...pagesPubliees().map((p) => ({
+      path: p.route,
+      priority: p.priorite,
+      changeFrequency: "monthly" as const,
+    })),
   ];
 
   return routes.map(({ path, priority, changeFrequency }) => ({

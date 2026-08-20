@@ -19,8 +19,14 @@ export default function PublicLayout({
       <Analytics />
       <SmoothScroll>
         <ConfigProvider>
-          <CountdownBanner />
-          <Nav />
+          {/* Barre d'en-tête — seul élément fixé. Le bandeau de série et le
+              menu y sont empilés : si le bandeau s'efface (série échue), le
+              menu remonte au bord haut sans qu'aucune valeur ne soit à
+              corriger. */}
+          <div className="fixed inset-x-0 top-0 z-50">
+            <CountdownBanner />
+            <Nav />
+          </div>
           <main id="main-content">{children}</main>
           <Footer />
           <CookieBanner />

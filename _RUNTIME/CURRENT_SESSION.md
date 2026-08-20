@@ -1,5 +1,35 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-20 (ADR-038 — lots 0 à 3 livrés, 15 pages publiées)
+- **PR empilées #77 → #78 → #79 → #80.** ⚠ **#79 ne doit pas partir en production sans #80** : le correctif du libellé « tiny house » vit dans #80, le défaut vient de #79.
+- **Sitemap 8 → 23 URLs.** Reste le lot 4 (4 pages locales, **en attente de matière locale de Richard**).
+- **Ordre non négociable : vérifier le HTML servi, puis publier.** Le `statut` du registre existe pour ça.
+- **⚠ Trois défauts trouvés par la vérification, aucun par le code lui-même** : (1) les 5 pages du lot 2 auraient été **orphelines** sans la colonne « Usages » du pied de page ; (2) la barre de menu restait **transparente sur fond sombre**, rendant les libellés invisibles au chargement ; (3) **« tiny house » s'affichait sur les 10 pages du lot 3** via le pied de page, sans qu'aucun contrôle ne bronche.
+- **Le troisième est le plus instructif : il venait de mon propre garde-fou.** L'exception `sauf` posée sur `registry.ts` pour le `h1` couvrait aussi `libelle` et `resume` — or ceux-là sont **lus sur toutes les pages**. **Règle actée : sous exception, seul un `h1` peut porter le terme.** Une exception se juge sur la **portée du texte**, pas sur le fichier qui l'héberge.
+- **La barre d'en-tête ne réserve plus d'espace au bandeau de série** : les deux sont empilés, le bandeau absent ne pousse rien. Deux composants n'ont plus à s'accorder sur un chiffre.
+- **⚠ Concurrent nommé retiré** de la spec du guide « Prix » (nom + tarif public) : ADR-029 §67, régime de la publicité comparative (L122-1 s. code conso), et péremption d'un prix recopié. **À signaler à Albert** — écart assumé à sa spec.
+- **Prudence réglementaire tenue sur les 9 guides** : formulations au principe, 6 sources officielles affichées et datées, avertissement constant, « sans permis » jamais employé comme argument. Aucun montant Howner.
+
+## Décisions — 2026-08-20 (chantier ADR-038 — lot 2 livré, 5 pages d'usage en ligne)
+- **PR #79** (empilée sur #78 → #77). **5 pages publiées**, sitemap **8 → 13 URLs**, vérifié sur le HTML servi.
+- **Ordre non négociable : vérifier en Preview, puis publier.** Le `statut` du registre existe pour ça — les pages ont d'abord été servies **sans être déclarées** au sitemap.
+- **Le maillage et la colonne « Usages » du pied de page dérivent du registre.** Ils ne rendent rien tant que la famille est vide, et s'étoffent seuls à chaque lot. **Sans ce lien entrant, les 5 pages auraient été orphelines** — au sitemap mais référencées par personne.
+- **Navigation principale non touchée** : 19 entrées ne tiennent pas dans une barre. **Arbitrage de présentation en attente de Richard** (méga-menu « Nos Studios » ?).
+- **Le garde-fou vocabulaire m'a repris 3 fois** pendant l'écriture, dont 2 sur mes propres commentaires. Un contrôle ne vaut que s'il s'applique à celui qui l'écrit.
+- **L'exception « tiny house » a dû être étendue** au fichier de contenu (`src/lib/pages/contenu/`), qu'elle ignorait. ADR-029 amendée : **une exception suit le texte là où il est écrit.**
+- ⚠ **`/bureau-de-jardin` et `/bureau-pour-teletravail` se ressemblent** — partage documenté (l'objet / la situation), section constructive liée et non dupliquée. **À rejuger sur le rendu**, fusion ouverte. Même réserve que les guides 01/04/07 du lot 3.
+- **Visuels Arko One non traités** (demande de Richard : pas de visuels pour l'instant). Les 5 pages servent des assets déjà au dépôt. **Lot média à prévoir.**
+- **Reste** : lot 3 (hub + 9 guides), lot 4 (4 pages locales, **en attente de matière locale de Richard**).
+
+## Décisions — 2026-08-20 (chantier ADR-038 — 19 pages éditoriales)
+- **Lot 0 livré, PR #77 → `dev`** (fondations, aucune page publiée). **Lot 1 livré, empilé dessus** : audit de conformité seul, **visuels non touchés** (demande de Richard).
+- **Quatre arbitrages de Richard** : copy réécrit plutôt que garde-fou assoupli · « tiny house » autorisé sur la seule page qui compare (ADR-029 amendée) · pages locales à 30-40 % de contenu propre · livraison lot par lot.
+- **Le registre `src/lib/pages/registry.ts` est la seule source de routes.** Une page ne passe à `"publiee"` qu'après vérification en Preview — sinon le sitemap annonce des 404.
+- **`sauf` ≠ `EXCLUS`** dans `check-vocabulaire.mjs` : le premier lève **un terme sur un chemin**, le second sort **un fichier entier** du contrôle. N'employer `sauf` que pour une exception écrite dans un ADR. Garde-fou **re-testé** après modification (3 essais).
+- **⚠ Les CGV parlent encore de « maisons légères ARKO » (39 occurrences, terme contractuel défini) et citent le CCMI.** Le repositionnement du 19/08 éloignait le site de ce régime ; **le contrat, lui, l'y ramène** — et c'est le contrat qui est lu en cas de litige. **Non corrigé à dessein** (document contractuel non validé par l'avocat, ADR-015). **Alerte Albert, à joindre au dossier CGV.**
+- **Aucun garde-fou automatique ne surveille le vocabulaire des pages légales** — elles sont hors périmètre de `check:vocabulaire`. L'exclusion est légitime, sa conséquence doit être connue.
+- **Reste du chantier** : lot 2 (5 pages d'usage), lot 3 (hub + 9 guides), lot 4 (4 pages locales, **en attente de matière locale de Richard**).
+
 ## Décisions — 2026-08-19 (soir — visuels Arko Max en production, PR #76)
 - **`main` = `4b2fb554`, production déployée et vérifiée en ligne.** Trois commits média, **aucune migration**. Détail dans « Dernier point » de `PROJECT_STATE.md`.
 - **Les composants de page produit se paramètrent, ils ne se dupliquent pas.** `RevealScrub` et `Discover` servent les deux produits : leurs médias passent en props (`frames`, `panels`), les données dans `src/lib/media/arko-max.ts`. Sans prop, comportement inchangé — c'est ce qui a permis de refondre l'Arko Max sans toucher l'Arko One, vérifié sur le HTML servi des deux pages.
