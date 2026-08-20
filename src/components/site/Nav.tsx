@@ -38,7 +38,23 @@ export function Nav() {
 
   return (
     <header
-      /* Fond clair **en permanence** — décision de Richard, 2026-08-20.
+      /* Positionnement : la barre n'est plus fixée elle-même. Elle est
+         empilée sous le bandeau de compte à rebours dans la barre d'en-tête du
+         layout `(public)`, seule à être `fixed`.
+
+         Motif — la Nav portait `top-8`, une réserve de 2 rem pour le bandeau.
+         Ce bandeau **disparaît quand la série est échue** (`done` →
+         `return null`, échéance du 2026-07-17 dépassée) : la réserve, elle,
+         restait, et laissait défiler le contenu de la page dans une bande vide
+         au-dessus du menu. Deux composants devaient s'accorder sur un chiffre,
+         et l'un des deux pouvait s'effacer sans prévenir l'autre.
+
+         Empilés, ils n'ont plus rien à s'accorder : le bandeau présent pousse
+         le menu, absent il ne pousse rien. Aucune valeur à maintenir, et pas
+         de saut au chargement — ce qu'une correction pilotée par `done` aurait
+         produit, `done` étant faux au rendu serveur.
+
+         Fond clair **en permanence** — décision de Richard, 2026-08-20.
          La barre était transparente tant que la page n'avait pas défilé de
          24 px, et ne prenait son fond clair qu'ensuite. Le parti tenait tant
          que toutes les pages ouvraient sur un fond clair : l'accueil et les
@@ -53,7 +69,7 @@ export function Nav() {
          Corrigé à la source plutôt que page par page : la barre ne dépend plus
          de ce qu'il y a derrière elle. C'est aussi ce qui évite que la prochaine
          page à hero sombre reproduise le défaut. */
-      className="fixed inset-x-0 top-8 z-50 border-b border-line bg-canvas/80 backdrop-blur-md transition-all duration-500"
+      className="relative border-b border-line bg-canvas/80 backdrop-blur-md transition-all duration-500"
     >
       <nav className="container-page flex h-16 items-center justify-between md:h-[4.5rem]">
         <Link href="/" className="flex items-center gap-2">
