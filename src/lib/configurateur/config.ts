@@ -60,10 +60,16 @@ export type Ambiance = {
    * l'aperçu (signalé par Richard). La structure attend désormais un rendu par
    * modèle et par teinte — six au total.
    *
-   * ⚠ Les fichiers servis restent ceux de la v1, qui ne montrent qu'un seul
-   * volume : l'aperçu ne distingue donc **pas encore** les deux gammes. Ce
-   * n'est plus un défaut de code mais un manque de rendus, et il se comble en
-   * remplaçant les chemins ci-dessous — sans toucher à un composant.
+   * L'Arko One garde les rendus v1 (volume compact). L'Arko Max reçoit ses
+   * propres rendus depuis le 2026-08-20, **dérivés par colorisation** du
+   * visuel fourni par Richard : celui-ci montrait un bardage bois clair, qui
+   * n'est pas une option du produit — une prise de vue non conforme. Les trois
+   * teintes en sont tirées par `scripts/coloriser-bardage.mjs`, qui remplace la
+   * chromie sans toucher à la luminance : le relief des lames, les ombres et
+   * les reflets sont conservés.
+   *
+   * ⚠ Ce sont des rendus **dérivés**, pas des rendus 3D dédiés. Le jour où de
+   * vrais rendus par teinte existent, remplacer les chemins suffit.
    */
   visuel: Record<ModeleId, string>;
   /**
@@ -222,9 +228,11 @@ const CONFIG_V1: ConfigurateurConfig = {
       supplementTtc: 0,
       visuel: {
         one: "/assets/arko/skins/skin-gris.jpg",
-        max: "/assets/arko/skins/skin-gris.jpg",
+        max: "/assets/arko/skins/max-skin-gris.avif",
       },
-      teinte: "#9a9c99",
+      /* Teintes alignées sur celles réellement appliquées aux rendus du Max :
+         la pastille et l'aperçu ne peuvent pas raconter deux choses. */
+      teinte: "#9b9b9b",
     },
     {
       id: "gris_anthracite",
@@ -232,9 +240,9 @@ const CONFIG_V1: ConfigurateurConfig = {
       supplementTtc: 0,
       visuel: {
         one: "/assets/arko/skins/skin-anthracite.jpg",
-        max: "/assets/arko/skins/skin-anthracite.jpg",
+        max: "/assets/arko/skins/max-skin-anthracite.avif",
       },
-      teinte: "#3a3f3c",
+      teinte: "#45474a",
     },
     {
       id: "vert",
@@ -242,7 +250,7 @@ const CONFIG_V1: ConfigurateurConfig = {
       supplementTtc: 0,
       visuel: {
         one: "/assets/arko/skins/skin-vert.jpg",
-        max: "/assets/arko/skins/skin-vert.jpg",
+        max: "/assets/arko/skins/max-skin-vert.avif",
       },
       teinte: "#5a6a43",
     },
