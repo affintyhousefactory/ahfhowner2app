@@ -89,7 +89,10 @@ export async function coloriser(cible, sortie, { debug = false } = {}) {
       const dansLaFacade = (() => {
         if (fx < 0.1925 || fx > 0.6775) return false;
         const t = (fx - 0.1925) / (0.6775 - 0.1925);
-        const haut = 0.430 + (0.252 - 0.430) * t;
+        /* -0,005 par rapport au relevé initial : l'arête haute du bardage
+           laissait un liseré cuivré sous l'acrotère. Déborder légèrement est
+           sans risque, l'acrotère étant sombre et hors plage brune. */
+        const haut = 0.425 + (0.247 - 0.425) * t;
         /* Bord bas incliné comme le haut : la terrasse remonte vers la
            droite. Une limite horizontale débordait sur les lames de terrasse
            à gauche. */
@@ -98,9 +101,13 @@ export async function coloriser(cible, sortie, { debug = false } = {}) {
         /* Les baies renvoient le feuillage et la lumière rasante : dans le
            verre, le reflet a exactement la chromie du bardage. Aucun seuil
            colorimétrique ne les sépare — seule leur position le peut. */
+        /* `y1` = haut réel du vitrage, pas du percement. Les premières valeurs
+           remontaient au-dessus du linteau et laissaient une bande de bardage
+           non colorisée au-dessus de chaque baie — visible au premier coup
+           d'œil sur le rendu final, invisible sur le masque non zoomé. */
         const baies = [
-          { x1: 0.243, x2: 0.288, y1: 0.472, y2: 0.705 },
-          { x1: 0.333, x2: 0.443, y1: 0.432, y2: 0.705 },
+          { x1: 0.243, x2: 0.288, y1: 0.492, y2: 0.705 },
+          { x1: 0.333, x2: 0.443, y1: 0.459, y2: 0.705 },
         ];
         return !baies.some((b) => fx > b.x1 && fx < b.x2 && fy > b.y1 && fy < b.y2);
       })();
@@ -121,7 +128,7 @@ export async function coloriser(cible, sortie, { debug = false } = {}) {
     .jpeg({ quality: 86 }).toFile(sortie);
 }
 
-const [, , hex, sortie] = process.argv;
+const [, , hex, sortie, mode] = process.argv;
 const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-await coloriser(rgb, sortie);
+await coloriser(rgb, sortie, { debug: mode === "debug" });
 console.log("écrit :", sortie);
