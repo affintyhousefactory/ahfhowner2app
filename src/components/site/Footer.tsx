@@ -9,9 +9,15 @@ import {
   PRODUCT_LIST,
   reserverHref,
 } from "@/lib/site";
+import { pagesDeFamille } from "@/lib/pages/registry";
 import { FEATURES } from "@/lib/features";
 
 export function Footer() {
+  const usages = pagesDeFamille("usage");
+  /* Le hub des guides est une rubrique de navigation, pas un usage : il rejoint
+     « Modèles & parcours » plutôt que la colonne « Usages ». Comme le reste, il
+     n'apparaît qu'une fois publié. */
+  const [hubGuide] = pagesDeFamille("hub-guide");
   return (
     <footer className="bg-ink text-canvas">
       <div className="container-page">
@@ -72,6 +78,14 @@ export function Footer() {
                 {n.label}
               </Link>
             ))}
+            {hubGuide && (
+              <Link
+                href={hubGuide.route}
+                className="text-sm text-canvas/65 transition-colors hover:text-canvas"
+              >
+                {hubGuide.libelle}
+              </Link>
+            )}
             {/* Recherche terrain + Accès Mandataire — masqués tant que le
                 domaine mandataire est suspendu (ADR-028). */}
             {FEATURES.mandataire && (
@@ -91,6 +105,31 @@ export function Footer() {
               </>
             )}
           </nav>
+
+          {/* Usages — dérivée du registre (ADR-038). Le pied de page est servi
+              sur toutes les pages publiques : c'est ce qui donne à chaque page
+              éditoriale un lien entrant depuis l'ensemble du site. Sans lui,
+              une page au sitemap mais sans lien entrant est orpheline, et un
+              moteur la traite comme telle.
+
+              La colonne ne rend rien tant qu'aucune page d'usage n'est
+              publiée, et s'étoffe d'elle-même à chaque lot mis en ligne. */}
+          {usages.length > 0 && (
+            <nav className="flex flex-col gap-2.5">
+              <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/60">
+                Usages
+              </p>
+              {usages.map((u) => (
+                <Link
+                  key={u.route}
+                  href={u.route}
+                  className="text-sm text-canvas/65 transition-colors hover:text-canvas"
+                >
+                  {u.libelle}
+                </Link>
+              ))}
+            </nav>
+          )}
 
           <nav className="flex flex-col gap-2.5">
             <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/60">

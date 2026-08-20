@@ -52,7 +52,11 @@ export function CountdownBanner({
   return (
     <div
       className={cn(
-        "sticky top-0 z-[60] bg-ink text-canvas",
+        /* Ni `sticky` ni `z` propres : ce bandeau est empilé au-dessus de la
+           Nav dans la barre d'en-tête du layout `(public)`, qui porte seule le
+           positionnement. Quand la série est échue, il rend `null` et le menu
+           remonte de lui-même — plus de réserve d'espace à maintenir ailleurs. */
+        "bg-ink text-canvas",
         "border-b border-canvas/10",
         className,
       )}
