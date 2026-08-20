@@ -90,7 +90,17 @@ const PROSCRITS = [
      le registre, qui porte son titre et son résumé. Le mot y vit pour la même
      raison, et l'exception doit suivre le texte là où il est réellement écrit.
      Sur ces trois fichiers, tout le reste de la blocklist continue de
-     s'appliquer. */
+     s'appliquer.
+
+     ⚠ Ce qu'une exception de chemin ne peut PAS voir : ce que le fichier
+     exempté **diffuse ailleurs**. Le registre porte le `h1` de la page (affiché
+     sur elle seule) mais aussi son `libelle` et son `resume`, repris par le pied
+     de page et le maillage — donc servis sur toutes les pages du site. Avec
+     « Studio ou tiny house » en libellé, le terme est apparu sur les dix pages
+     du lot 3 sans qu'aucun contrôle ne bronche. Corrigé côté registre, où la
+     règle est désormais écrite : sous exception, seul un `h1` peut porter le
+     terme. Une exception se juge donc sur la **portée du texte**, pas
+     seulement sur le fichier qui l'héberge. */
   {
     mot: "tiny[ -]house",
     libelle: "tiny house",

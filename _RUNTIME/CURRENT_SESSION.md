@@ -1,5 +1,15 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-20 (ADR-038 — lots 0 à 3 livrés, 15 pages publiées)
+- **PR empilées #77 → #78 → #79 → #80.** ⚠ **#79 ne doit pas partir en production sans #80** : le correctif du libellé « tiny house » vit dans #80, le défaut vient de #79.
+- **Sitemap 8 → 23 URLs.** Reste le lot 4 (4 pages locales, **en attente de matière locale de Richard**).
+- **Ordre non négociable : vérifier le HTML servi, puis publier.** Le `statut` du registre existe pour ça.
+- **⚠ Trois défauts trouvés par la vérification, aucun par le code lui-même** : (1) les 5 pages du lot 2 auraient été **orphelines** sans la colonne « Usages » du pied de page ; (2) la barre de menu restait **transparente sur fond sombre**, rendant les libellés invisibles au chargement ; (3) **« tiny house » s'affichait sur les 10 pages du lot 3** via le pied de page, sans qu'aucun contrôle ne bronche.
+- **Le troisième est le plus instructif : il venait de mon propre garde-fou.** L'exception `sauf` posée sur `registry.ts` pour le `h1` couvrait aussi `libelle` et `resume` — or ceux-là sont **lus sur toutes les pages**. **Règle actée : sous exception, seul un `h1` peut porter le terme.** Une exception se juge sur la **portée du texte**, pas sur le fichier qui l'héberge.
+- **La barre d'en-tête ne réserve plus d'espace au bandeau de série** : les deux sont empilés, le bandeau absent ne pousse rien. Deux composants n'ont plus à s'accorder sur un chiffre.
+- **⚠ Concurrent nommé retiré** de la spec du guide « Prix » (nom + tarif public) : ADR-029 §67, régime de la publicité comparative (L122-1 s. code conso), et péremption d'un prix recopié. **À signaler à Albert** — écart assumé à sa spec.
+- **Prudence réglementaire tenue sur les 9 guides** : formulations au principe, 6 sources officielles affichées et datées, avertissement constant, « sans permis » jamais employé comme argument. Aucun montant Howner.
+
 ## Décisions — 2026-08-20 (chantier ADR-038 — lot 2 livré, 5 pages d'usage en ligne)
 - **PR #79** (empilée sur #78 → #77). **5 pages publiées**, sitemap **8 → 13 URLs**, vérifié sur le HTML servi.
 - **Ordre non négociable : vérifier en Preview, puis publier.** Le `statut` du registre existe pour ça — les pages ont d'abord été servies **sans être déclarées** au sitemap.

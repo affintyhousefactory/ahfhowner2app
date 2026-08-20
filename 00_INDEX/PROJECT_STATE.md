@@ -171,7 +171,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré sur `feat/adr-035-crm-leads` (2026-08-04)** ; **amendé le 2026-08-04** : « Lead chaud » → « Paiement réservé », règle de blocage du numéro de série, connecteur Pennylane à écrire | ✅ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
-| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lots 0, 1 et 2 livrés : 5 pages d'usage publiées (13 URLs au sitemap)** ; restent le hub + 9 guides (lot 3) et les 4 pages locales (lot 4, **en attente de matière locale**) ; **alertes Albert** : contenus réglementaires à joindre au dossier avocat, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | 🟠 |
+| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lots 0 à 3 livrés : 15 pages publiées (23 URLs au sitemap)** ; reste le lot 4 (4 pages locales, **en attente de matière locale de Richard**) ; **alertes Albert** : contenus réglementaires au dossier avocat, **concurrent nommé retiré de la spec du guide « Prix »**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | 🟠 |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -206,6 +206,24 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-20 (ADR-038 lot 3 — hub `/guide` et neuf guides réglementaires, PR #80)** — Sitemap **13 → 23 URLs**. Vérifiés sur le HTML servi avant publication : un seul `<h1>` par page, 7 à 9 `<h2>` sans saut, **zéro `opacity:0` sérialisé** sur les dix pages. `Article` + `BreadcrumbList` sur les neuf articles, `FAQPage` sur les **deux** qui portent réellement une FAQ, `CollectionPage` sur le hub. Les six sources officielles sont servies sur chaque article. Un slug hors liste répond **404**, pas une page vide (`dynamicParams = false`).
+
+**Un gabarit plutôt que neuf pages jumelles** — route dynamique, `generateStaticParams` pour tout prérendre. Neuf pages écrites à la main auraient divergé sur la hiérarchie des titres, qui est la première chose qu'un moteur lit.
+
+**Trois partis éditoriaux qui ne sont pas cosmétiques** : la réponse courte est **en haut**, encadrée (ces articles répondent à des questions fermées — faire descendre la réponse est un procédé de rétention qui dessert le lecteur) ; les **sources officielles sont affichées et datées**, pas seulement gardées en commentaire (un article réglementaire qui ne montre pas d'où il tient ses règles demande qu'on le croie sur parole) ; l'**avertissement de fin est constant** — ces contenus ne sont pas un avis juridique individualisé.
+
+**⚠ Un concurrent nommé a été retiré du guide « Prix », avec son tarif public.** La spec le citait. Trois motifs : ADR-029 §67 ne cite aucune entité hors Howner (précédent ADR-037) ; une **comparaison publicitaire nommée relève d'un régime encadré** (art. L122-1 et s. du code de la consommation) ; un prix concurrent recopié se périme sans prévenir sur une page qu'on ne rouvrira pas. L'argument — comparer à périmètre équivalent — est conservé entier : il n'avait pas besoin du nom. **À signaler à Albert**, c'est un écart assumé à sa spec.
+
+**⚠ Le défaut le plus instructif du chantier, trouvé par la vérification et venu de mon propre garde-fou.** « tiny house » s'affichait sur **les dix pages du lot**, hub compris — par le **pied de page** : sa colonne « Usages » reprend le `libelle` du registre, et celui de la page de comparaison portait le terme. **Le contrôle n'a rien vu**, ce fichier figurant dans la liste `sauf` : l'exception posée pour le `h1` couvrait du même coup **tout ce que ce fichier diffuse ailleurs**. Corrigé au bon endroit — libellé neutralisé (« Studio ou habitat mobile »), le `h1` gardant le terme puisqu'il n'est affiché que sur sa page. **Règle désormais écrite dans le registre et dans le script : sous exception, seul un `h1` peut porter le terme ; `libelle` et `resume` sont lus partout et restent soumis à la blocklist entière.**
+
+*Leçon, à ranger avec celles du 02/08 et du 18/08 : **une exception de chemin ne voit pas ce que le fichier exempté diffuse ailleurs**. Elle se juge sur la portée du texte, pas sur le fichier qui l'héberge. Troisième fois que le vocabulaire passe par une faille de méthode et non par un oubli de rédaction.*
+
+**⚠ Dépendance d'ordre entre les PR** : le correctif du libellé vit dans #80, mais le défaut est introduit par #79, dont la page de comparaison est publiée. **#79 ne doit pas partir en production sans #80.**
+
+**Prudence réglementaire tenue** : tout est formulé au principe et adossé aux sources ; « sans permis » n'est jamais un argument commercial — le guide 07 est construit pour démonter l'expression. Le point le plus utile du lot est le **guide 05** : la règle des « 40 m² en zone U » vise certaines extensions sur construction existante et **ne se transpose pas** à un studio indépendant. Aucun montant Howner n'apparaît dans les guides : ils renvoient au configurateur, ils ne peuvent donc pas se périmer avec les grilles.
+
+**Gate** : `tsc` propre · `eslint` propre sur les fichiers créés (2 erreurs avant / 2 après sur `Footer.tsx`, dette préexistante) · `check:vocabulaire` conforme.
 
 **2026-08-20 (ADR-038 lot 2 — les cinq pages d'usage, PR #79)** — 107 Ko de copy d'Albert deviennent cinq pages : `/studio-jardin-haut-de-gamme`, `/bureau-de-jardin`, `/dependance-habitable`, `/bureau-pour-teletravail`, `/studio-jardin-tiny-house`. **Vérifiées sur le HTML servi par la Preview avant d'être déclarées au sitemap**, jamais l'inverse.
 
