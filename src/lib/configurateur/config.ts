@@ -65,6 +65,34 @@ export type Ambiance = {
    */
   teinte: string;
 };
+/**
+ * Ambiance intérieure — rubrique ajoutée le 2026-08-20 (demande de Richard).
+ *
+ * Distincte du bardage : l'une habille l'extérieur, l'autre décide de ce qu'on
+ * voit une fois entré. Les deux se choisissent séparément et se combinent
+ * librement.
+ *
+ * `vues` est indexé par modèle parce que les deux gammes n'ont pas le même
+ * programme : l'Arko Max a un salon que l'Arko One n'a pas. Le parcours doit
+ * donc boucler sur ce tableau sans jamais présumer de sa longueur — même règle
+ * que pour les ambiances de bardage.
+ */
+export type VueInterieure = {
+  id: string;
+  /** Libellé affiché sous la scène pendant que la vue est montrée. */
+  nom: string;
+  src: string;
+};
+
+export type AmbianceInterieure = {
+  id: string;
+  nom: string;
+  supplementTtc: number;
+  /** Teinte d'aperçu du sélecteur — dit ce que le libellé ne dit pas. */
+  teinte: string;
+  vues: Record<ModeleId, VueInterieure[]>;
+};
+
 export type Palier = { id: PalierId; nom: string; prixTtc: number };
 
 export type Option = {
@@ -85,6 +113,7 @@ export type ConfigurateurConfig = {
   usages: Usage[];
   modeles: Modele[];
   ambiances: Ambiance[];
+  ambiancesInterieures: AmbianceInterieure[];
   terrasse: Record<ModeleId, Palier[]>;
   options: Option[];
   serie: { id: string; libelle: string; unites: number };
@@ -102,9 +131,12 @@ const CONFIG_V1: ConfigurateurConfig = {
    * qui fait passer `grillePerimee` à vrai sur les leads antérieurs et les
    * empêche d'être relus avec la grille du jour (ADR-035 §4).
    *
-   * Historique : `"v1"` jusqu'au 2026-08-04 (retrait du « Pack prêt à louer »).
+   * Historique : `"v1"` jusqu'au 2026-08-04 (retrait du « Pack prêt à louer »),
+   * puis `"2026-08-04"` jusqu'au 2026-08-20 (renommage du bardage et de ses
+   * teintes, ajout de l'ambiance intérieure — les identifiants ont changé,
+   * une configuration antérieure ne se relit donc pas avec cette grille).
    */
-  version: "2026-08-04",
+  version: "2026-08-20",
   tva: 20,
 
   usages: [
@@ -154,29 +186,93 @@ const CONFIG_V1: ConfigurateurConfig = {
     },
   ],
 
-  // §17.3 — deux ou trois au lancement selon la disponibilité des visuels.
-  // Le parcours doit fonctionner à 2 comme à 3 : ne jamais indexer en dur.
+  /* Bardage extérieur — rubrique renommée le 2026-08-20 (demande de Richard) :
+     « Ambiance » désignait mal une rubrique qui ne porte que la peau extérieure,
+     d'autant qu'une ambiance intérieure existe désormais juste après.
+
+     Les libellés passent de noms d'atmosphère à des noms de couleur — « Basque »
+     ne se devine pas, « Vert » si. **Les identifiants suivent les libellés** :
+     un `cfg_ambiance: "littoral"` en base n'aurait rien dit à un conseiller
+     lisant « Gris clair » à l'écran. C'est la leçon d'ADR-035 § Amendement, où
+     `chaud` avait été renommé en base et pas seulement à l'affichage. Aucun lead
+     ne porte ces valeurs (0 en production), et `version` est incrémentée : une
+     configuration antérieure serait de toute façon signalée périmée.
+
+     ⚠ À vérifier avec Richard : la teinte d'aperçu et le rendu de « Gris clair »
+     sont ceux du **bleu pigeon** de la v1 (`skin-bleu.jpg`, `#5d7d8f`). Le
+     libellé demandé annonce un gris, la pastille montre un bleu. Il manque soit
+     le bon rendu, soit la bonne teinte.
+
+     §17.3 — deux ou trois au lancement selon la disponibilité des visuels. Le
+     parcours doit fonctionner à 2 comme à 3 : ne jamais indexer en dur. */
   ambiances: [
     {
-      id: "littoral",
-      nom: "Littoral",
+      id: "gris_clair",
+      nom: "Gris clair",
       supplementTtc: 0,
       visuel: "/assets/arko/skins/skin-bleu.jpg",
-      teinte: "#5d7d8f", // bleu pigeon — CONFIG.cladding.bleu
+      teinte: "#5d7d8f", // ⚠ bleu pigeon de la v1 — à confirmer, cf. ci-dessus
     },
     {
-      id: "atelier",
-      nom: "Atelier",
+      id: "gris_anthracite",
+      nom: "Gris anthracite",
       supplementTtc: 0,
       visuel: "/assets/arko/skins/skin-anthracite.jpg",
-      teinte: "#3a3f3c", // anthracite — CONFIG.cladding.anthracite
+      teinte: "#3a3f3c",
     },
     {
-      id: "basque",
-      nom: "Basque",
+      id: "vert",
+      nom: "Vert",
       supplementTtc: 0,
       visuel: "/assets/arko/skins/skin-vert.jpg",
-      teinte: "#5a6a43", // vert — CONFIG.cladding.vert
+      teinte: "#5a6a43",
+    },
+  ],
+
+  /* Ambiance intérieure — rubrique créée le 2026-08-20 (demande de Richard).
+     Sans supplément : c'est un choix de finition, pas une option payante.
+
+     Les vues diffèrent d'un modèle à l'autre — l'Arko Max a un salon que l'Arko
+     One n'a pas. D'où l'indexation par modèle, et l'interdiction d'indexer en
+     dur côté composant : la scène boucle sur ce que le modèle actif expose. */
+  ambiancesInterieures: [
+    {
+      id: "bois",
+      nom: "Ambiance bois",
+      supplementTtc: 0,
+      teinte: "#a9784c",
+      vues: {
+        one: [
+          { id: "cuisine", nom: "Séjour-cuisine", src: "/assets/arko/config/one/bois/cuisine.avif" },
+          { id: "lit", nom: "Le couchage", src: "/assets/arko/config/one/bois/lit.avif" },
+          { id: "sdb", nom: "La salle d'eau", src: "/assets/arko/config/one/bois/sdb.avif" },
+        ],
+        max: [
+          { id: "cuisine", nom: "Séjour-cuisine", src: "/assets/arko/config/max/bois/cuisine.avif" },
+          { id: "salon", nom: "Le salon", src: "/assets/arko/config/max/bois/salon.avif" },
+          { id: "lit", nom: "La chambre", src: "/assets/arko/config/max/bois/lit.avif" },
+          { id: "sdb", nom: "La salle de bain", src: "/assets/arko/config/max/bois/sdb.avif" },
+        ],
+      },
+    },
+    {
+      id: "blanc",
+      nom: "Ambiance blanc",
+      supplementTtc: 0,
+      teinte: "#e8e6e1",
+      vues: {
+        one: [
+          { id: "cuisine", nom: "Séjour-cuisine", src: "/assets/arko/config/one/blanc/cuisine.avif" },
+          { id: "lit", nom: "Le couchage", src: "/assets/arko/config/one/blanc/lit.avif" },
+          { id: "sdb", nom: "La salle d'eau", src: "/assets/arko/config/one/blanc/sdb.avif" },
+        ],
+        max: [
+          { id: "cuisine", nom: "Séjour-cuisine", src: "/assets/arko/config/max/blanc/cuisine.avif" },
+          { id: "salon", nom: "Le salon", src: "/assets/arko/config/max/blanc/salon.avif" },
+          { id: "lit", nom: "La chambre", src: "/assets/arko/config/max/blanc/lit.avif" },
+          { id: "sdb", nom: "La salle de bain", src: "/assets/arko/config/max/blanc/sdb.avif" },
+        ],
+      },
     },
   ],
 

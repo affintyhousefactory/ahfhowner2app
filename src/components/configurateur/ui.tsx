@@ -16,7 +16,7 @@ import Image from "next/image";
 import { cn } from "@/shared/lib/cn";
 import { eur } from "./store";
 import type { MentionTexte } from "@/lib/configurateur/mentions";
-import type { Ambiance } from "@/lib/configurateur/config";
+import type { Ambiance, VueInterieure } from "@/lib/configurateur/config";
 
 /* ------------------------------------------------------------------ */
 /* Section dépliante — le résumé remplace le compteur d'étapes         */
@@ -147,6 +147,9 @@ export function Scene({
   cale,
   ambiances,
   ambianceActive,
+  vuesInterieures,
+  interieurs,
+  ambianceInterieureActive,
 }: {
   nom: string;
   sous: string;
@@ -160,7 +163,56 @@ export function Scene({
   /** Toutes les ambiances, pas seulement l'active — cf. empilement ci-dessous. */
   ambiances: Ambiance[];
   ambianceActive: string;
+  /** Vues du modèle courant, pour l'ambiance intérieure sélectionnée. */
+  vuesInterieures: VueInterieure[];
+  /**
+   * Les ambiances intérieures **déjà résolues pour le modèle courant** : la
+   * scène n'a pas à savoir quel studio est sélectionné pour savoir quoi
+   * afficher. C'est le store qui tranche, une fois.
+   */
+  interieurs: { id: string; nom: string; vues: VueInterieure[] }[];
+  ambianceInterieureActive: string;
 }) {
+  /**
+   * Face montrée — extérieur ou intérieur.
+   *
+   * La scène bascule **d'elle-même** vers la face qu'on est en train de
+   * choisir : toucher au bardage ramène l'extérieur, choisir une ambiance
+   * intérieure montre l'intérieur. Sans cela, le visiteur changerait
+   * d'ambiance intérieure sans rien voir changer — le pire retour possible
+   * pour un configurateur. Les deux onglets restent là pour reprendre la main.
+   */
+  const [face, setFace] = useState<"exterieur" | "interieur">("exterieur");
+  const premierRendu = useRef(true);
+  useEffect(() => {
+    if (premierRendu.current) return;
+    setFace("exterieur");
+  }, [ambianceActive]);
+  useEffect(() => {
+    if (premierRendu.current) {
+      premierRendu.current = false;
+      return;
+    }
+    setFace("interieur");
+  }, [ambianceInterieureActive]);
+
+  /* Vue courante du défilement intérieur. Bornée à la longueur réelle : passer
+     de l'Arko Max (4 vues) à l'Arko One (3) ne doit pas laisser un index mort. */
+  const [vue, setVue] = useState(0);
+  const iVue = vuesInterieures.length ? vue % vuesInterieures.length : 0;
+
+  const interieur = face === "interieur" && vuesInterieures.length > 0;
+
+  /* Défilement automatique des vues intérieures — seulement quand l'intérieur
+     est effectivement montré, et jamais sous `prefers-reduced-motion` : un
+     carrousel qui tourne tout seul est précisément ce que ce réglage demande
+     d'éviter. Les points restent alors le seul moyen de naviguer, ce qui suffit. */
+  useEffect(() => {
+    if (!interieur || vuesInterieures.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => setVue((v) => v + 1), 4200);
+    return () => clearInterval(id);
+  }, [interieur, vuesInterieures.length]);
   return (
     /* Hauteur constante (arbitrage Richard, 2026-08-02). Une scène qui rétrécit
        au défilement recadre le rendu : à 132 px sur un visuel 4:3, `object-cover`
@@ -182,15 +234,41 @@ export function Scene({
           absolute/fixed/relative, et la scène est en `sticky`. */}
       <div className="absolute inset-0">
         {ambiances.map((a) => {
-          const actif = a.id === ambianceActive;
+          const actif = a.id === ambianceActive && !interieur;
           return (
             <Image
               key={a.id}
               src={a.visuel}
-              alt={actif ? `${nom} — ambiance ${a.nom}` : ""}
+              alt={actif ? `${nom} — bardage ${a.nom}` : ""}
               aria-hidden={!actif}
               fill
-              priority={actif}
+              priority={a.id === ambianceActive}
+              sizes="(max-width: 1024px) 100vw, 60vw"
+              className={cn(
+                "object-cover transition-opacity duration-500 motion-reduce:transition-none",
+                actif ? "opacity-100" : "opacity-0",
+              )}
+            />
+          );
+        })}
+
+        {/* Calque intérieur — seule la **vue courante** de chaque ambiance est
+            montée, pas les quatre : empiler huit rendus pour n'en montrer un
+            que ferait payer huit téléchargements au visiteur. Les deux
+            ambiances de cette vue restent superposées, elles, parce que c'est
+            exactement le geste attendu ici — comparer bois et blanc sur le
+            même cadrage, sans attendre. */}
+        {interieurs.map((amb) => {
+          const v = amb.vues[Math.min(iVue, Math.max(amb.vues.length - 1, 0))];
+          if (!v) return null;
+          const actif = interieur && amb.id === ambianceInterieureActive;
+          return (
+            <Image
+              key={`${amb.id}-${v.id}`}
+              src={v.src}
+              alt={actif ? `${nom} — ${amb.nom}, ${v.nom}` : ""}
+              aria-hidden={!actif}
+              fill
               sizes="(max-width: 1024px) 100vw, 60vw"
               className={cn(
                 "object-cover transition-opacity duration-500 motion-reduce:transition-none",
@@ -227,16 +305,76 @@ export function Scene({
           {tag}
         </span>
       </div>
-      <div className="relative flex flex-wrap gap-1.5">
-        {pastilles.map((p) => (
-          <span
-            key={p}
-            className="rounded-full border border-white/25 bg-ink/40 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.06em] text-white/85 backdrop-blur"
+      <div className="relative flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap gap-1.5">
+          {pastilles.map((p) => (
+            <span
+              key={p}
+              className="rounded-full border border-white/25 bg-ink/40 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.06em] text-white/85 backdrop-blur"
+            >
+              {p}
+            </span>
+          ))}
+        </div>
+
+        {/* Bascule extérieur / intérieur. Présente même quand la scène montre
+            l'extérieur : c'est ce qui rend le comportement automatique
+            réversible, et ce qui signale au visiteur qu'un intérieur existe. */}
+        {vuesInterieures.length > 0 && (
+          <div
+            role="tablist"
+            aria-label="Face montrée"
+            className="flex shrink-0 gap-1 rounded-full border border-white/25 bg-ink/40 p-0.5 backdrop-blur"
           >
-            {p}
-          </span>
-        ))}
+            {(
+              [
+                ["exterieur", "Extérieur"],
+                ["interieur", "Intérieur"],
+              ] as const
+            ).map(([id, libelle]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={face === id}
+                onClick={() => setFace(id)}
+                className={cn(
+                  "rounded-full px-2.5 py-1 font-mono text-[0.58rem] uppercase tracking-[0.08em] transition-colors",
+                  face === id ? "bg-white text-ink" : "text-white/75 hover:text-white",
+                )}
+              >
+                {libelle}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Points de vue — n'apparaissent qu'en intérieur, et portent le nom de
+          la vue plutôt qu'un numéro : « La salle de bain » situe mieux qu'un
+          rang dans une liste, pour l'œil comme pour un lecteur d'écran. */}
+      {interieur && vuesInterieures.length > 1 && (
+        <div className="relative flex items-center gap-2">
+          <span className="font-mono text-[0.58rem] uppercase tracking-[0.08em] text-white/75">
+            {vuesInterieures[iVue]?.nom}
+          </span>
+          <div className="flex gap-1.5">
+            {vuesInterieures.map((v, i) => (
+              <button
+                key={v.id}
+                type="button"
+                aria-label={`Voir ${v.nom}`}
+                aria-current={i === iVue}
+                onClick={() => setVue(i)}
+                className={cn(
+                  "h-1.5 rounded-full transition-all",
+                  i === iVue ? "w-5 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70",
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

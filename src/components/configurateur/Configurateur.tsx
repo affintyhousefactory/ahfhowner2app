@@ -21,6 +21,7 @@ import { ConfigurateurProvider, useConfigurateur } from "./store";
 import { BarrePrix, Scene } from "./ui";
 import {
   SectionAmbiance,
+  SectionAmbianceInterieure,
   SectionModule,
   SectionOptions,
   SectionReservation,
@@ -68,8 +69,11 @@ function Parcours() {
   const ambiance = c.cfg.ambiances.find((a) => a.id === c.ambiance);
   const palier = c.paliers.find((p) => p.id === c.terrasse);
 
+  const interieur = c.cfg.ambiancesInterieures.find((a) => a.id === c.ambianceInterieure);
+
   const pastilles = [
     ambiance?.nom ?? "",
+    interieur?.nom ?? "",
     ...(palier && palier.prixTtc > 0 ? [`Terrasse ${palier.nom.toLowerCase()}`] : []),
     ...c.optionsDisponibles.filter((o) => c.options.includes(o.id)).map((o) => o.nom),
   ].filter(Boolean);
@@ -84,12 +88,16 @@ function Parcours() {
         cale={cale}
         ambiances={c.cfg.ambiances}
         ambianceActive={c.ambiance}
+        vuesInterieures={c.vuesInterieures}
+        interieurs={c.interieurs}
+        ambianceInterieureActive={c.ambianceInterieure}
       />
 
       <div className="flex min-w-0 flex-col bg-surface">
         <div className="flex-1">
           <SectionModule />
           <SectionAmbiance />
+          <SectionAmbianceInterieure />
           <SectionTerrasse />
           <SectionOptions />
           <SectionTerrain />

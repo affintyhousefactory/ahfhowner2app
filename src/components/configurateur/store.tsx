@@ -30,6 +30,7 @@ import {
   transportEur,
   transportPerKm,
   type ConfigurateurConfig,
+  type VueInterieure,
   type ModeleId,
   type Option,
   type Palier,
@@ -44,11 +45,15 @@ import {
  */
 export const SECTIONS = [
   { n: 1, cle: "module", titre: "Le studio" },
-  { n: 2, cle: "ambiance", titre: "Ambiance" },
-  { n: 3, cle: "terrasse", titre: "Terrasse" },
-  { n: 4, cle: "options", titre: "Options" },
-  { n: 5, cle: "terrain", titre: "Votre situation terrain" },
-  { n: 6, cle: "reservation", titre: "Réserver un numéro" },
+  /* « Ambiance » → « Bardage extérieur » le 2026-08-20 : le libellé désignait
+     mal une rubrique qui ne porte que la peau extérieure, et il devenait
+     ambigu dès lors qu'une ambiance intérieure la suit immédiatement. */
+  { n: 2, cle: "ambiance", titre: "Bardage extérieur" },
+  { n: 3, cle: "interieur", titre: "Ambiance intérieure" },
+  { n: 4, cle: "terrasse", titre: "Terrasse" },
+  { n: 5, cle: "options", titre: "Options" },
+  { n: 6, cle: "terrain", titre: "Votre situation terrain" },
+  { n: 7, cle: "reservation", titre: "Réserver un numéro" },
 ] as const;
 
 export type PreAnalyse = {
@@ -74,6 +79,12 @@ type Ctx = {
   setModele: (m: ModeleId) => void;
   ambiance: string;
   setAmbiance: (a: string) => void;
+  ambianceInterieure: string;
+  setAmbianceInterieure: (a: string) => void;
+  /** Vues intérieures du modèle courant, pour l'ambiance sélectionnée. */
+  vuesInterieures: VueInterieure[];
+  /** Toutes les ambiances intérieures, vues déjà résolues pour ce modèle. */
+  interieurs: { id: string; nom: string; vues: VueInterieure[] }[];
   terrasse: PalierId;
   setTerrasse: (t: PalierId) => void;
   options: string[];
@@ -113,6 +124,9 @@ export function ConfigurateurProvider({
   const [quantite, setQuantite] = useState(1);
   const [modele, setModeleState] = useState<ModeleId>(modeleInitial);
   const [ambiance, setAmbiance] = useState<string>(cfg.ambiances[0].id);
+  const [ambianceInterieure, setAmbianceInterieure] = useState<string>(
+    cfg.ambiancesInterieures[0].id,
+  );
   const [terrasse, setTerrasse] = useState<PalierId>("sans");
   const [options, setOptions] = useState<string[]>([]);
   const [preAnalyse, setPreAnalyse] = useState<PreAnalyse | null>(null);
@@ -160,6 +174,18 @@ export function ConfigurateurProvider({
       setModele,
       ambiance,
       setAmbiance,
+      ambianceInterieure,
+      setAmbianceInterieure,
+      /* Résolu ici et non dans la scène : le modèle décide des vues
+         disponibles (l'Arko Max a un salon, l'Arko One non), et un composant
+         qui irait les chercher lui-même finirait par indexer en dur. */
+      vuesInterieures:
+        cfg.ambiancesInterieures.find((a) => a.id === ambianceInterieure)?.vues[modele] ?? [],
+      interieurs: cfg.ambiancesInterieures.map((a) => ({
+        id: a.id,
+        nom: a.nom,
+        vues: a.vues[modele] ?? [],
+      })),
       terrasse,
       setTerrasse,
       options,
@@ -179,7 +205,7 @@ export function ConfigurateurProvider({
       transportDetailPerKm: transportPerKm(m),
       total: prixBase + prixTerrasse + prixOptions + (transport ?? 0),
     };
-  }, [cfg, usage, quantite, modele, setModele, ambiance, terrasse, options, toggleOption, preAnalyse, numero]);
+  }, [cfg, usage, quantite, modele, setModele, ambiance, ambianceInterieure, terrasse, options, toggleOption, preAnalyse, numero]);
 
   return <ConfigCtx.Provider value={value}>{children}</ConfigCtx.Provider>;
 }

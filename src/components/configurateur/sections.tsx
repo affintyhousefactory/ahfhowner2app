@@ -85,7 +85,7 @@ export function SectionModule() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 02 — ambiance                                                       */
+/* 02 — bardage extérieur                                              */
 /* ------------------------------------------------------------------ */
 
 export function SectionAmbiance() {
@@ -93,13 +93,13 @@ export function SectionAmbiance() {
   const a = c.cfg.ambiances.find((x) => x.id === c.ambiance);
 
   return (
-    <Section n={2} titre="Ambiance" resume={`${a?.nom} · incluse`}>
+    <Section n={2} titre="Bardage extérieur" resume={`${a?.nom} · inclus`}>
       {/* Le tableau `ambiances` doit rester bouclé : la v1 peut sortir à 2
           comme à 3 items (§17.3, arbitrage ouvert). */}
       {/* La sélection est signalée par la teinte de l'ambiance, pas par
           l'accent : trois boutons cerclés du même orange ne diraient pas
           lequel des trois bardages on est en train de regarder. */}
-      <div role="tablist" aria-label="Ambiance" className="grid grid-cols-3 gap-2">
+      <div role="tablist" aria-label="Bardage extérieur" className="grid grid-cols-3 gap-2">
         {c.cfg.ambiances.map((x) => {
           const actif = c.ambiance === x.id;
           return (
@@ -135,6 +135,77 @@ export function SectionAmbiance() {
 }
 
 /* ------------------------------------------------------------------ */
+/* 03 — ambiance intérieure                                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Rubrique créée le 2026-08-20 (demande de Richard).
+ *
+ * Deux ambiances, sans supplément : c'est un choix de finition. Le sélecteur
+ * reprend exactement le motif du bardage — pastille de teinte plutôt qu'accent
+ * de sélection — pour que les deux rubriques voisines se lisent de la même
+ * façon.
+ *
+ * Le nombre de vues n'est jamais présumé : il vient du modèle (l'Arko Max a un
+ * salon que l'Arko One n'a pas), et le compte affiché en dérive.
+ */
+export function SectionAmbianceInterieure() {
+  const c = useConfigurateur();
+  const a = c.cfg.ambiancesInterieures.find((x) => x.id === c.ambianceInterieure);
+
+  return (
+    <Section
+      n={3}
+      titre="Ambiance intérieure"
+      resume={`${a?.nom ?? ""} · incluse`}
+    >
+      <div
+        role="tablist"
+        aria-label="Ambiance intérieure"
+        className="grid grid-cols-2 gap-2"
+      >
+        {c.cfg.ambiancesInterieures.map((x) => {
+          const actif = c.ambianceInterieure === x.id;
+          return (
+            <button
+              key={x.id}
+              role="tab"
+              type="button"
+              aria-selected={actif}
+              onClick={() => c.setAmbianceInterieure(x.id)}
+              style={
+                actif
+                  ? {
+                      borderColor: x.teinte,
+                      backgroundColor: `${x.teinte}14`,
+                      boxShadow: `inset 0 0 0 1px ${x.teinte}`,
+                    }
+                  : undefined
+              }
+              className={cn(
+                "flex min-h-[78px] flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all",
+                actif ? "" : "border-line bg-surface hover:border-accent/45",
+              )}
+            >
+              <span
+                aria-hidden
+                style={{ backgroundColor: x.teinte }}
+                className="h-[30px] w-[30px] rounded-full ring-1 ring-inset ring-ink/15"
+              />
+              <span className="text-[0.74rem] font-semibold text-ink">{x.nom}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-3 text-[0.72rem] text-muted">
+        {c.vuesInterieures.length} vues défilent dans l&apos;aperçu.
+      </p>
+      <Mention texte={MENTIONS.ambianceInterieure} />
+    </Section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* 03 — terrasse, par paliers                                          */
 /* ------------------------------------------------------------------ */
 
@@ -146,7 +217,7 @@ export function SectionTerrasse() {
 
   return (
     <Section
-      n={3}
+      n={4}
       titre="Terrasse"
       resume={p && p.prixTtc > 0 ? `${p.nom} · ${eur(p.prixTtc)}` : "Sans terrasse"}
     >
@@ -197,7 +268,7 @@ export function SectionOptions() {
 
   return (
     <Section
-      n={4}
+      n={5}
       titre="Options"
       resume={n ? `${n} option${n > 1 ? "s" : ""}` : "Aucune"}
     >
@@ -298,7 +369,7 @@ export function SectionTerrain() {
         }`;
 
   return (
-    <Section n={5} titre="Votre situation terrain" resume={resume}>
+    <Section n={6} titre="Votre situation terrain" resume={resume}>
       <Eyebrow>Où votre studio de jardin Arko va-t-il s&apos;implanter ?</Eyebrow>
       {c.cfg.usages.map((u) => (
         <Choix
@@ -369,13 +440,16 @@ export function SectionReservation({ onCgv }: { onCgv: (ok: boolean) => void }) 
 
   const modele = c.cfg.modeles.find((m) => m.id === c.modele)!;
   const ambiance = c.cfg.ambiances.find((a) => a.id === c.ambiance);
+  const interieurRecap = c.cfg.ambiancesInterieures.find(
+    (a) => a.id === c.ambianceInterieure,
+  );
   const palier = c.paliers.find((p) => p.id === c.terrasse);
   const dispo = nbDisponibles(numeros);
   const choisiDemande = c.numero != null && numeros.find((x) => x.n === c.numero)?.etat === "demande";
 
   return (
     <Section
-      n={6}
+      n={7}
       titre="Réserver un numéro"
       resume={`${c.cfg.serie.libelle} · ${dispo} restant${dispo > 1 ? "s" : ""}`}
     >
@@ -435,7 +509,10 @@ export function SectionReservation({ onCgv }: { onCgv: (ok: boolean) => void }) 
       <Eyebrow>Votre configuration</Eyebrow>
       <dl className="flex flex-col gap-1.5">
         <Ligne k={`${modele.nom} — ${modele.surface} m²`} v={eur(c.prixBase)} />
-        {ambiance && <Ligne k={`Ambiance ${ambiance.nom}`} v="incluse" />}
+        {ambiance && <Ligne k={`Bardage ${ambiance.nom.toLowerCase()}`} v="inclus" />}
+        {interieurRecap && (
+          <Ligne k={`${interieurRecap.nom}`} v="incluse" />
+        )}
         {c.prixTerrasse > 0 && <Ligne k={`Terrasse ${palier?.nom.toLowerCase()}`} v={eur(c.prixTerrasse)} />}
         {c.optionsDisponibles
           .filter((o) => c.options.includes(o.id))

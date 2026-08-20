@@ -25,6 +25,16 @@ export const MENTIONS = {
       "Visuel d'ambiance non contractuel. Teintes, matériaux et mobilier présentés sont indicatifs et peuvent varier selon les approvisionnements. Le mobilier et la décoration ne sont pas inclus. Les références exactes sont arrêtées au dossier de personnalisation, après réservation.",
   },
 
+  /* Ajoutée le 2026-08-20 avec la rubrique d'ambiance intérieure. Distincte de
+     `ambiance`, qui porte sur le bardage : les rendus intérieurs montrent du
+     mobilier et des équipements dont l'inclusion dépend de la configuration —
+     la réserve doit donc être plus explicite sur ce point précis. */
+  ambianceInterieure: {
+    courte: "Rendus non contractuels — aménagement selon configuration.",
+    detail:
+      "Rendus intérieurs non contractuels. Finitions, teintes, équipements et aménagements présentés sont indicatifs : ils dépendent de la configuration retenue et peuvent varier selon les approvisionnements. Le mobilier et la décoration ne sont pas inclus. Les références exactes sont arrêtées au dossier de personnalisation, après réservation.",
+  },
+
   option: {
     courte: "Options fournies et posées — hors travaux de terrain.",
     detail:
