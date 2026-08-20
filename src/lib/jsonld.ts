@@ -214,3 +214,26 @@ export function guidesHubSchema(
     },
   };
 }
+
+/**
+ * FAQ d'une page éditoriale — `FAQPage`.
+ *
+ * ⚠ À n'appeler que si les questions et réponses sont **réellement rendues**
+ * dans la page (ADR-038 §6). Le schéma décrit ce que le visiteur voit ; le
+ * poser sur des réponses absentes ou masquées en JS est une déclaration
+ * fausse, que les moteurs sanctionnent. Le `faqSchema()` de l'accueil suit la
+ * même règle depuis ADR-018 — celui-ci ne fait que le rendre paramétrable.
+ */
+export function faqPageSchema(
+  items: readonly { q: string; a: string }[],
+): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+}

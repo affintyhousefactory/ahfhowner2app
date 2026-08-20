@@ -85,13 +85,18 @@ const PROSCRITS = [
      produit — et où il désigne toujours le produit concurrent qu'on écarte,
      jamais un Arko. On ne peut pas se démarquer de ce qu'on refuse de nommer,
      et c'est le mot que le visiteur tape. Partout ailleurs, il reste proscrit.
-     Le registre porte le titre et le résumé de cette page, d'où sa présence
-     dans la liste : le mot y vit pour la même raison. */
+     Trois chemins, pas un : la page, **son fichier de contenu** (le copy vit
+     dans `src/lib/pages/contenu/`, jamais dans le JSX — convention ADR-038) et
+     le registre, qui porte son titre et son résumé. Le mot y vit pour la même
+     raison, et l'exception doit suivre le texte là où il est réellement écrit.
+     Sur ces trois fichiers, tout le reste de la blocklist continue de
+     s'appliquer. */
   {
     mot: "tiny[ -]house",
     libelle: "tiny house",
     sauf: [
       "src/app/(public)/studio-jardin-tiny-house/",
+      "src/lib/pages/contenu/studio-jardin-tiny-house.ts",
       "src/lib/pages/registry.ts",
     ],
   },
