@@ -207,6 +207,26 @@ Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pend
 
 ## Dernier point
 
+**2026-08-20 (configurateur v2 — bardage renommé, rubrique « Ambiance intérieure », PR #84)** — Demande de Richard. Deux mouvements, tous deux pilotés par `config.ts` : **aucun libellé ni visuel en dur dans un composant** (guardrail ADR-030).
+
+**1. « Ambiance » → « Bardage extérieur »**, teintes renommées : Littoral → **Gris clair**, Atelier → **Gris anthracite**, Basque → **Vert**. **Les identifiants suivent les libellés** (`littoral` → `gris_clair`) — un `cfg_ambiance: "littoral"` en base n'aurait rien dit à un conseiller lisant « Gris clair » à l'écran, c'est la leçon d'ADR-035 § Amendement où `chaud` avait été renommé *en base* et pas seulement à l'affichage. Aucun lead ne porte ces valeurs et **`version` passe à `2026-08-20`**, conformément à la règle du 2026-08-04.
+
+**2. Nouvelle rubrique « Ambiance intérieure »** (section 3, les suivantes décalées jusqu'à 7), sans supplément : bois ou blanc. **Les vues sont indexées par modèle** — 4 pour l'Arko Max qui a un salon, 3 pour l'Arko One qui n'en a pas — et le parcours ne présume jamais de leur nombre.
+
+**La scène bascule d'elle-même vers la face qu'on choisit** : toucher au bardage ramène l'extérieur, choisir une ambiance intérieure montre l'intérieur. Sans cela le visiteur changerait d'ambiance **sans rien voir changer**, ce qui est le pire retour possible pour un configurateur ; deux onglets permettent de reprendre la main. Défilement des vues toutes les 4,2 s, **désactivé sous `prefers-reduced-motion`**.
+
+**Poids maîtrisé, et vérifié sur le rendu** : seule la **vue courante** de chaque ambiance est montée — **2 images en vol, pas 8**. Les deux ambiances de cette vue restent superposées, parce que c'est exactement le geste attendu ici : comparer bois et blanc sur le même cadrage, sans attente. 14 rendus versés en AVIF, **680 Ko** au total.
+
+**Le contrat de données suit le parcours** : `cfg_ambiance_interieure` ajouté au type CRM, résolu par `resoudreConfigV2`, affiché dans la fiche lead. Une dimension absente du contrat serait une dimension qu'**ADR-031 oublierait de transmettre**. Aucune migration — la soumission n'écrit encore rien.
+
+**Vérifié sur la Preview** : les deux rubriques portent les bons libellés, aucun ancien libellé ne subsiste, 3 teintes et 2 ambiances servies, **4 vues annoncées sur le Max et 3 sur le One**, onglets présents, numérotation 1→7 continue.
+
+⚠ **À trancher par Richard** : « Gris clair » conserve le rendu et la teinte du **bleu pigeon** de la v1 (`skin-bleu.jpg`, `#5d7d8f`). Le libellé annonce un gris, la pastille montre un bleu — il manque soit le bon rendu extérieur, soit la bonne teinte.
+
+⚠ **ADR-030 doit être amendée** (nouvelle rubrique, identifiants renommés, version de grille) — **non fait : un ADR requiert l'accord de Richard.**
+
+*Au passage, deux libellés du back-office : « Maison » → « Studio », « Ambiance » → « Bardage ». Le back-office est hors périmètre du contrôle vocabulaire, mais un conseiller qui lit « Maison » toute la journée finit par le dire au téléphone.*
+
 **2026-08-20 (mise en production — PR #83, lot 4 : les 4 pages locales — ADR-038 TERMINÉ)** — `main` = **`33cb51bb`**. **Sitemap 23 → 27 URLs : les 19 pages commandées par le classeur sont livrées.** Aucune migration, aucun changement de logique métier.
 
 **Les specs locales révisées par Richard le 2026-08-20 ont levé la réserve du lot 0.** Chaque page porte un angle propre : Bayonne l'**accès** (parcelles enclavées, grutage, plan de sauvegarde du centre ancien), Anglet la **tension logement** (location à l'année contre meublé de tourisme, intimité des bâtiments), Biarritz la **rareté des petites surfaces** (micro-densification, logement étudiant, plusieurs unités), la Côte Basque le **terrain** (littoral contre intérieur, zones A et N, STECAL, absence de PLU unique).
