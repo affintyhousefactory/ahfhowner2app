@@ -9,17 +9,9 @@ import { PhoneLink } from "@/components/ui/PhoneLink";
 import { cn } from "@/shared/lib/cn";
 
 export function Nav() {
-  const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false); // burger mobile
   const [menu, setMenu] = useState(false); // méga-menu Produits (desktop)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -46,12 +38,22 @@ export function Nav() {
 
   return (
     <header
-      className={cn(
-        "fixed inset-x-0 top-8 z-50 transition-all duration-500",
-        solid || open || menu
-          ? "border-b border-line bg-canvas/80 backdrop-blur-md"
-          : "border-b border-transparent",
-      )}
+      /* Fond clair **en permanence** — décision de Richard, 2026-08-20.
+         La barre était transparente tant que la page n'avait pas défilé de
+         24 px, et ne prenait son fond clair qu'ensuite. Le parti tenait tant
+         que toutes les pages ouvraient sur un fond clair : l'accueil et les
+         pages produit posent leur hero sur `canvas`.
+
+         Les pages éditoriales d'ADR-038 ouvrent sur un hero `ink`. Sur fond
+         sombre, une barre transparente laissait ses libellés en `text-ink/70`
+         — du texte sombre sur du sombre : le nom de la marque, « Nos Studios »,
+         « À propos » et « Contact » étaient purement invisibles au chargement,
+         et ne réapparaissaient qu'au défilement.
+
+         Corrigé à la source plutôt que page par page : la barre ne dépend plus
+         de ce qu'il y a derrière elle. C'est aussi ce qui évite que la prochaine
+         page à hero sombre reproduise le défaut. */
+      className="fixed inset-x-0 top-8 z-50 border-b border-line bg-canvas/80 backdrop-blur-md transition-all duration-500"
     >
       <nav className="container-page flex h-16 items-center justify-between md:h-[4.5rem]">
         <Link href="/" className="flex items-center gap-2">
