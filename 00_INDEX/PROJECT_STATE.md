@@ -171,7 +171,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré sur `feat/adr-035-crm-leads` (2026-08-04)** ; **amendé le 2026-08-04** : « Lead chaud » → « Paiement réservé », règle de blocage du numéro de série, connecteur Pennylane à écrire | ✅ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
-| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lots 0 (fondations) et 1 (audit de conformité) livrés, aucune page publiée** ; **alertes Albert** : 8 → 27 URLs indexables, contenus réglementaires à joindre au dossier avocat, et **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | 🟠 |
+| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lots 0, 1 et 2 livrés : 5 pages d'usage publiées (13 URLs au sitemap)** ; restent le hub + 9 guides (lot 3) et les 4 pages locales (lot 4, **en attente de matière locale**) ; **alertes Albert** : contenus réglementaires à joindre au dossier avocat, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | 🟠 |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -206,6 +206,26 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-20 (ADR-038 lot 2 — les cinq pages d'usage, PR #79)** — 107 Ko de copy d'Albert deviennent cinq pages : `/studio-jardin-haut-de-gamme`, `/bureau-de-jardin`, `/dependance-habitable`, `/bureau-pour-teletravail`, `/studio-jardin-tiny-house`. **Vérifiées sur le HTML servi par la Preview avant d'être déclarées au sitemap**, jamais l'inverse.
+
+**Ce que la vérification a montré** : un seul `<h1>` par page et conforme au registre, 9 à 13 `<h2>` sans saut, **zéro `opacity:0` sérialisé** — les cinq pages sont lisibles sans JS, donc indexables. `BreadcrumbList` partout ; `FAQPage` sur les **trois** pages qui portent une FAQ réellement visible, sur aucune autre. Vocabulaire propre sur le texte rendu, « tiny house » cantonné à la page qui compare (24 occurrences, zéro ailleurs). **Le sitemap de cette Preview annonçait encore 8 URLs** : les pages étaient servies sans être déclarées — exactement ce que le champ `statut` doit produire. Elles sont passées à `"publiee"` ensuite : **13 URLs**.
+
+**Les blocs éditoriaux sont nés de la première page, pas devinés avant elle** (ADR-038 §8). Neuf formes couvrent les cinq specs. Tous serveur, `Reveal` seul îlot client, et **aucun `<h1>` sous un bloc animé en JS** — la règle actée le 19/08 tient. La matrice comparative a été **généralisée à N colonnes après la troisième page** : le comparatif One/Max en veut deux, la comparaison « pièce intérieure / extension / studio » en veut trois ; deux composants presque identiques auraient divergé au premier ajustement.
+
+**Un défaut que seule la vérification a rendu visible : les pages auraient été orphelines.** Entrer au sitemap sans aucun lien entrant, c'est demander l'indexation de pages que rien ne référence. Le pied de page reçoit donc une colonne « Usages » **dérivée du registre** — servie sur toutes les pages publiques, elle s'étoffera seule aux lots suivants et ne rend rien tant que la famille est vide. La **navigation principale n'est pas touchée** : 19 entrées ne tiennent pas dans une barre, et le placement dans le méga-menu est un arbitrage de présentation qui revient à Richard.
+
+**Le copy a été réécrit, jamais exempté.** Les 92 termes proscrits des specs sont reformulés : « maison » désignant l'habitation du visiteur devient « votre habitation », le « container habillé » devient « abri de chantier repeint », la « construction modulaire » devient « fabrication hors-site ». **Le garde-fou m'a repris trois fois pendant l'écriture** — deux fois sur mes propres commentaires (je citais les termes que je remplaçais) et une fois sur un « catalogue de surfaces » que j'avais écrit moi-même dans une phrase neuve. *Quatrième illustration de la même leçon : un contrôle n'a de valeur que s'il s'applique aussi à celui qui l'a écrit.*
+
+**Une exception a dû être étendue à un endroit qu'elle ignorait.** « tiny house » était levé sur la page et le registre ; le copy vit dans `src/lib/pages/contenu/`, hors périmètre de l'exception. Chemin ajouté, **ADR-029 amendée** en conséquence : une exception doit suivre le texte là où il est réellement écrit. Sur ces trois fichiers, tout le reste de la blocklist continue de s'appliquer.
+
+**Prudence tenue sur trois fronts, tous exigés par les specs** : aucune performance chiffrée (isolation, acoustique, thermique — rien n'est validé au dépôt) ; **aucun argument « sans permis »**, les pages disent l'inverse ; aucune promesse de valorisation immobilière. Le cadre de vente d'ADR-029 est respecté — la dépendance habitable est une **annexe sur parcelle bâtie**, jamais un logement sur terrain nu.
+
+⚠ **Deux pages traitent un sujet voisin** — `/bureau-de-jardin` (l'objet : ossature, modèles, journée type) et `/bureau-pour-teletravail` (la situation : profils, alternatives, organisation). Le partage est documenté en tête du fichier de contenu et la section constructive n'est pas dupliquée mais liée. **À rejuger sur le rendu** : si elles se recouvrent trop, la fusion reste ouverte — même réserve que pour les guides 01/04/07.
+
+**Aucun média ajouté** : les deux visuels demandés par le classeur étaient déjà au dépôt depuis le 19/08. Budget d'ADR-006 inchangé. **Les visuels Arko One propres à ces pages restent à traiter** dans un lot média séparé, sur demande de Richard.
+
+**Gate** : `tsc` propre · `eslint` propre sur les fichiers créés, **2 erreurs avant / 2 après** sur `Footer.tsx` (dette préexistante) · `check:vocabulaire` conforme.
 
 **2026-08-20 (ADR-038 lot 1 — audit de conformité des pages produit au `contexte-refonte.md`)** — Périmètre **réduit sur demande de Richard** : vérifier la conformité, **ne pas toucher aux visuels**. Vérifié **sur le HTML servi en production**, pas sur le code — la seule lecture qui ait valeur de preuve depuis le 2026-08-02.
 

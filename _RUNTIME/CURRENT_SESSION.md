@@ -1,5 +1,16 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-20 (chantier ADR-038 — lot 2 livré, 5 pages d'usage en ligne)
+- **PR #79** (empilée sur #78 → #77). **5 pages publiées**, sitemap **8 → 13 URLs**, vérifié sur le HTML servi.
+- **Ordre non négociable : vérifier en Preview, puis publier.** Le `statut` du registre existe pour ça — les pages ont d'abord été servies **sans être déclarées** au sitemap.
+- **Le maillage et la colonne « Usages » du pied de page dérivent du registre.** Ils ne rendent rien tant que la famille est vide, et s'étoffent seuls à chaque lot. **Sans ce lien entrant, les 5 pages auraient été orphelines** — au sitemap mais référencées par personne.
+- **Navigation principale non touchée** : 19 entrées ne tiennent pas dans une barre. **Arbitrage de présentation en attente de Richard** (méga-menu « Nos Studios » ?).
+- **Le garde-fou vocabulaire m'a repris 3 fois** pendant l'écriture, dont 2 sur mes propres commentaires. Un contrôle ne vaut que s'il s'applique à celui qui l'écrit.
+- **L'exception « tiny house » a dû être étendue** au fichier de contenu (`src/lib/pages/contenu/`), qu'elle ignorait. ADR-029 amendée : **une exception suit le texte là où il est écrit.**
+- ⚠ **`/bureau-de-jardin` et `/bureau-pour-teletravail` se ressemblent** — partage documenté (l'objet / la situation), section constructive liée et non dupliquée. **À rejuger sur le rendu**, fusion ouverte. Même réserve que les guides 01/04/07 du lot 3.
+- **Visuels Arko One non traités** (demande de Richard : pas de visuels pour l'instant). Les 5 pages servent des assets déjà au dépôt. **Lot média à prévoir.**
+- **Reste** : lot 3 (hub + 9 guides), lot 4 (4 pages locales, **en attente de matière locale de Richard**).
+
 ## Décisions — 2026-08-20 (chantier ADR-038 — 19 pages éditoriales)
 - **Lot 0 livré, PR #77 → `dev`** (fondations, aucune page publiée). **Lot 1 livré, empilé dessus** : audit de conformité seul, **visuels non touchés** (demande de Richard).
 - **Quatre arbitrages de Richard** : copy réécrit plutôt que garde-fou assoupli · « tiny house » autorisé sur la seule page qui compare (ADR-029 amendée) · pages locales à 30-40 % de contenu propre · livraison lot par lot.
