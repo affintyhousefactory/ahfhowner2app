@@ -66,13 +66,19 @@ const CRITERIA_TO_VERIFY = [
 
 type Verdict = "eligible" | "conditioned" | "ineligible";
 
-type Eligibility = {
+export type Eligibility = {
   verdict: Verdict;
   confirmedCriteria: string[];
   flags: { label: string; detail: string }[];
 };
 
-function computeEligibility(result: ParcelleData): Eligibility {
+/**
+ * Exporté depuis le 2026-08-20 : le configurateur doit connaître le verdict
+ * pour proposer une réservation « sous condition » quand le terrain n'est pas
+ * éligible. Le recalculer de son côté aurait fait deux règles là où il en faut
+ * une — et c'est toujours la seconde qui dérive.
+ */
+export function computeEligibility(result: ParcelleData): Eligibility {
   const { typezone, prescriptions = [], servitudes = [] } = result;
   const allText = [...prescriptions, ...servitudes].join(" ").toLowerCase();
 

@@ -401,6 +401,8 @@ export function BarrePrix({
   actionDesactivee,
   motif,
   onAction,
+  manques,
+  note,
 }: {
   total: number;
   mention: string;
@@ -408,6 +410,13 @@ export function BarrePrix({
   actionDesactivee?: boolean;
   motif: string;
   onAction: () => void;
+  /**
+   * Ce qui manque encore pour réserver. Chaque entrée porte le libellé montré
+   * au visiteur et l'identifiant du champ à atteindre.
+   */
+  manques?: readonly { cle: string; libelle: string; ancre: string }[];
+  /** Précision affichée sous le bouton — ex. réservation sous condition. */
+  note?: string;
 }) {
   const [delta, setDelta] = useState<number | null>(null);
   const precedent = useRef<number | null>(null);
@@ -441,6 +450,37 @@ export function BarrePrix({
       <span className="text-[1.3rem] font-semibold tabular-nums tracking-tight text-ink">
         {eur(total)}
       </span>
+      {/* Ce qui manque, nommé et **atteignable**. Un bouton grisé qui ne dit
+          pas pourquoi laisse chercher ; un motif qui le dit sans y emmener
+          laisse deviner où. Chaque manque est donc un bouton qui met le champ
+          au premier plan et lui donne le focus.
+
+          `aria-live="polite"` : la liste change à mesure que le formulaire se
+          remplit, et un lecteur d'écran doit suivre sans être interrompu. */}
+      {manques && manques.length > 0 && (
+        <div
+          aria-live="polite"
+          className="flex flex-col gap-1.5 rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2"
+        >
+          <p className="text-[0.72rem] font-medium text-ink">
+            Il reste {manques.length === 1 ? "une chose" : `${manques.length} choses`} à
+            compléter :
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {manques.map((m) => (
+              <button
+                key={m.cle}
+                type="button"
+                onClick={() => allerAu(m.ancre)}
+                className="rounded-full border border-accent/40 bg-surface px-2.5 py-1 text-[0.7rem] text-accent transition-colors hover:bg-accent hover:text-white"
+              >
+                {m.libelle}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={onAction}
@@ -452,7 +492,28 @@ export function BarrePrix({
       >
         {action}
       </button>
+      {note && (
+        <p className="text-center text-[0.68rem] leading-snug text-[#8a6a2f]">{note}</p>
+      )}
       <p className="text-center font-mono text-[0.6rem] text-muted">{motif}</p>
     </div>
   );
+}
+
+/**
+ * Amène au champ manquant et lui donne le focus.
+ *
+ * `scrollIntoView` seul déplace la page sans dire où regarder ; `focus()` seul
+ * saute sans transition et perd le visiteur sur mobile. Les deux ensemble
+ * donnent le seul comportement lisible — d'où aussi les `scroll-mt-32` posés
+ * sur les cibles, la barre d'en-tête étant fixe.
+ *
+ * Le focus est différé d'une frame : sur mobile, le donner pendant le
+ * défilement l'interrompt et le clavier s'ouvre au mauvais endroit.
+ */
+function allerAu(ancre: string) {
+  const el = document.getElementById(ancre);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => el.focus({ preventScroll: true }), 300);
 }

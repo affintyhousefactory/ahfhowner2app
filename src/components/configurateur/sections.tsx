@@ -12,11 +12,14 @@
  * conseiller) — décision du 2026-08-01.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { cn } from "@/shared/lib/cn";
-import { ParcelleAnalyse } from "@/shared/components/plu/ParcelleAnalyse";
+import {
+  ParcelleAnalyse,
+  computeEligibility,
+} from "@/shared/components/plu/ParcelleAnalyse";
 import { TRANSPORT } from "@/lib/site";
 import {
   DEVIS_TEXTE,
@@ -350,6 +353,9 @@ export function SectionTerrain() {
           parcelle: d.parcelle ?? null,
           distanceKm: d.lat != null && d.lon != null ? distanceDepuisAtelier(d.lat, d.lon) : null,
         });
+        /* Verdict calculé par la pré-analyse elle-même, pas recalculé ici :
+           deux règles pour une même question finissent toujours par diverger. */
+        c.setEligibilite(computeEligibility(d).verdict === "ineligible" ? "ineligible" : "ok");
       } catch {
         /* résultat illisible : on n'écrase pas l'état existant */
       }
@@ -398,7 +404,9 @@ export function SectionTerrain() {
       ) : (
         <div className="flex flex-col gap-2.5">
           <Eyebrow>Adresse du terrain</Eyebrow>
-          <div className="rounded-xl border border-line bg-paper p-3">
+          {/* `cfg-adresse` : cible du focus quand la barre signale que
+              l'adresse manque. */}
+          <div id="cfg-adresse" tabIndex={-1} className="scroll-mt-32 rounded-xl border border-line bg-paper p-3 outline-none">
             <ParcelleAnalyse mode="compact" />
 
             {c.preAnalyse?.distanceKm != null && (
@@ -413,6 +421,19 @@ export function SectionTerrain() {
                   {c.transportDetailPerKm.toFixed(2).replace(".", ",")} €/km
                 </span>
               </dl>
+            )}
+
+            {/* Terrain non éligible : on le dit, mais on ne ferme pas la
+                porte. La pré-analyse lit un zonage, elle ne juge pas un
+                projet — un entretien peut lever ce que la donnée ignore. La
+                réservation reste possible, sous condition (cf. barre de prix). */}
+            {c.eligibilite === "ineligible" && (
+              <p className="mt-3 rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.75rem] leading-relaxed text-[#8a6a2f]">
+                D&apos;après le zonage consulté, cette parcelle ne paraît pas
+                constructible en l&apos;état. Vous pouvez tout de même réserver un
+                numéro : son éligibilité sera vérifiée lors de l&apos;entretien, et la
+                réservation reste sans engagement jusqu&apos;au devis signé.
+              </p>
             )}
 
             {/* Générique, au conditionnel, jamais lié à la parcelle saisie (§8). */}
@@ -431,12 +452,9 @@ export function SectionTerrain() {
 /* 06 — réserver un numéro                                             */
 /* ------------------------------------------------------------------ */
 
-export function SectionReservation({ onCgv }: { onCgv: (ok: boolean) => void }) {
+export function SectionReservation() {
   const c = useConfigurateur();
   const numeros = useMemo(() => chargerNumeros(c.cfg.serie.unites), [c.cfg.serie.unites]);
-  const [tel, setTel] = useState<string | undefined>();
-  const [optin, setOptin] = useState(false);
-  const [cgv, setCgv] = useState(false); // jamais pré-cochée (§7)
 
   const modele = c.cfg.modeles.find((m) => m.id === c.modele)!;
   const ambiance = c.cfg.ambiances.find((a) => a.id === c.ambiance);
@@ -462,7 +480,10 @@ export function SectionReservation({ onCgv }: { onCgv: (ok: boolean) => void }) 
         </span>
       </div>
 
-      <div className="grid grid-cols-6 gap-1.5">
+      {/* `cfg-numeros` : cible du focus quand la barre signale qu'aucun numéro
+          n'est choisi. `tabIndex={-1}` rend le bloc focusable par programme
+          sans l'insérer dans l'ordre de tabulation. */}
+      <div id="cfg-numeros" tabIndex={-1} className="grid grid-cols-6 gap-1.5 scroll-mt-32 outline-none">
         {numeros.map((x) => {
           const libre = estSelectionnable(x);
           const actif = c.numero === x.n;
@@ -497,6 +518,16 @@ export function SectionReservation({ onCgv }: { onCgv: (ok: boolean) => void }) 
           ? `Le n° ${String(c.numero).padStart(2, "0")} vous est attribué à la signature du devis.`
           : "Le numéro choisi vous est attribué à la signature du devis."}
       </p>
+
+      {/* Dit ce qui manque là où le geste se fait, plutôt que d'attendre le bas
+          de page : sans numéro sélectionné, la suite du formulaire n'a pas
+          d'objet. */}
+      {c.numero == null && (
+        <p className="rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2 text-[0.75rem] leading-relaxed text-ink">
+          Choisissez d&apos;abord un numéro ci-dessus : c&apos;est lui qui sera retenu
+          pour votre réservation.
+        </p>
+      )}
 
       {/* « Demandé » n'apparaît qu'après sélection, pour celui qui est concerné. */}
       {choisiDemande && (
@@ -555,33 +586,46 @@ export function SectionReservation({ onCgv }: { onCgv: (ok: boolean) => void }) 
       <Eyebrow>Vos coordonnées — tous requis</Eyebrow>
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
-          <Champ placeholder="Prénom" autoComplete="given-name" />
-          <Champ placeholder="Nom" autoComplete="family-name" />
+          <Champ
+            id="cfg-prenom"
+            placeholder="Prénom"
+            autoComplete="given-name"
+            valeur={c.contact.prenom}
+            onValeur={(v) => c.setContact("prenom", v)}
+          />
+          <Champ
+            id="cfg-nom"
+            placeholder="Nom"
+            autoComplete="family-name"
+            valeur={c.contact.nom}
+            onValeur={(v) => c.setContact("nom", v)}
+          />
         </div>
         {/* Même composant et même habillage que le tunnel actuel. */}
         <PhoneInput
           international
           defaultCountry="FR"
-          value={tel}
-          onChange={setTel}
+          value={c.contact.tel}
+          onChange={(v) => c.setContact("tel", v ?? "")}
           placeholder="Téléphone"
           className="phone-input"
-          numberInputProps={{ required: true }}
+          numberInputProps={{ required: true, id: "cfg-tel" }}
         />
-        <Champ placeholder="Email" type="email" autoComplete="email" />
+        <Champ
+          id="cfg-email"
+          placeholder="Email"
+          type="email"
+          autoComplete="email"
+          valeur={c.contact.email}
+          onValeur={(v) => c.setContact("email", v)}
+        />
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <Case checked={optin} onChange={setOptin}>
+        <Case checked={c.optin} onChange={c.setOptin}>
           {OPTIN_TEXTE}
         </Case>
-        <Case
-          checked={cgv}
-          onChange={(v) => {
-            setCgv(v);
-            onCgv(v);
-          }}
-        >
+        <Case id="cfg-cgv" checked={c.cgv} onChange={c.setCgv}>
           <span className="text-ink">
             J&apos;accepte les{" "}
             <a href="/cgv" className="text-accent underline underline-offset-2">CGV</a> et la{" "}
@@ -608,38 +652,51 @@ function Ligne({ k, v }: { k: string; v: string }) {
 }
 
 function Champ({
+  id,
   placeholder,
   type = "text",
   autoComplete,
+  valeur,
+  onValeur,
 }: {
+  /** Sert de cible au focus depuis la barre de prix. */
+  id: string;
   placeholder: string;
   type?: string;
   autoComplete?: string;
+  valeur: string;
+  onValeur: (v: string) => void;
 }) {
   return (
     <input
       required
+      id={id}
       type={type}
+      value={valeur}
+      onChange={(e) => onValeur(e.target.value)}
       placeholder={placeholder}
       aria-label={placeholder}
       autoComplete={autoComplete}
-      className="min-h-[44px] w-full min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[0.85rem] text-ink outline-none placeholder:text-muted/60 focus:border-accent"
+      className="min-h-[44px] w-full min-w-0 flex-1 scroll-mt-32 rounded-xl border border-line bg-surface px-3 text-[0.85rem] text-ink outline-none placeholder:text-muted/60 focus:border-accent"
     />
   );
 }
 
 function Case({
+  id,
   checked,
   onChange,
   children,
 }: {
+  id?: string;
   checked: boolean;
   onChange: (v: boolean) => void;
   children: React.ReactNode;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-2.5">
+    <label className="flex scroll-mt-32 cursor-pointer items-start gap-2.5">
       <input
+        id={id}
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}

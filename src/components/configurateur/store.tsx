@@ -56,6 +56,27 @@ export const SECTIONS = [
   { n: 7, cle: "reservation", titre: "Réserver un numéro" },
 ] as const;
 
+/** Verdict de la pré-analyse. `null` = aucune adresse analysée. */
+export type Eligibilite = "ok" | "ineligible" | null;
+
+export type Contact = {
+  prenom: string;
+  nom: string;
+  tel: string;
+  email: string;
+};
+
+/**
+ * Un élément manquant : son libellé pour l'utilisateur, et l'identifiant du
+ * champ à mettre au premier plan. `ancre` sert au focus — un avertissement qui
+ * dit ce qui manque sans emmener au bon endroit fait deviner l'utilisateur.
+ */
+export type Manque = {
+  cle: "numero" | "adresse" | "prenom" | "nom" | "tel" | "email" | "cgv";
+  libelle: string;
+  ancre: string;
+};
+
 export type PreAnalyse = {
   adresse: string;
   zone: string | null;
@@ -94,6 +115,30 @@ type Ctx = {
 
   preAnalyse: PreAnalyse | null;
   setPreAnalyse: (p: PreAnalyse | null) => void;
+  /**
+   * Verdict d'éligibilité du terrain, calculé par la pré-analyse.
+   * `null` tant qu'aucune adresse n'a été analysée. `"ineligible"` n'interdit
+   * pas de réserver : il change la nature de la réservation (voir `MANQUES`).
+   */
+  eligibilite: Eligibilite;
+  setEligibilite: (e: Eligibilite) => void;
+
+  contact: Contact;
+  setContact: (champ: keyof Contact, valeur: string) => void;
+  optin: boolean;
+  setOptin: (v: boolean) => void;
+  cgv: boolean;
+  setCgv: (v: boolean) => void;
+
+  /**
+   * Ce qui manque encore pour réserver, dans l'ordre où le parcours le
+   * demande. Vide = la demande peut partir.
+   *
+   * Calculé ici et non dans la barre de prix : c'est une règle métier, pas une
+   * question d'affichage. La barre s'en sert pour son libellé et son motif, la
+   * section pour ses messages — une seule source, deux lectures.
+   */
+  manques: Manque[];
 
   numero: number | null;
   setNumero: (n: number | null) => void;
@@ -133,6 +178,19 @@ export function ConfigurateurProvider({
   const [options, setOptions] = useState<string[]>([]);
   const [preAnalyse, setPreAnalyse] = useState<PreAnalyse | null>(null);
   const [numero, setNumero] = useState<number | null>(null);
+  const [eligibilite, setEligibilite] = useState<Eligibilite>(null);
+  const [contact, setContactState] = useState<Contact>({
+    prenom: "",
+    nom: "",
+    tel: "",
+    email: "",
+  });
+  const [optin, setOptin] = useState(false);
+  const [cgv, setCgv] = useState(false); // jamais pré-cochée (§7)
+
+  const setContact = useCallback((champ: keyof Contact, valeur: string) => {
+    setContactState((prev) => ({ ...prev, [champ]: valeur }));
+  }, []);
 
   /* Changer de studio purge les options devenues incompatibles : le poêle
      n'existe pas sur l'Arko One, et une option fantôme fausserait le total. */
@@ -163,6 +221,24 @@ export function ConfigurateurProvider({
 
     const usageDef = cfg.usages.find((u) => u.id === usage);
     const seuil = usageDef?.seuilDevisDedie;
+
+    /* Un email « valide » se vérifie côté serveur ; ici on ne fait que
+       distinguer une saisie commencée d'une saisie plausible, pour ne pas
+       laisser partir une demande injoignable. Le parcours ne doit pas se
+       transformer en contrôle de conformité. */
+    const emailPlausible = /.+@.+\..{2,}/.test(contact.email.trim());
+    /* Indicatif international compris : `PhoneInput` produit `+33…`. On exige
+       une longueur minimale, pas un format national. */
+    const telPlausible = contact.tel.replace(/\D/g, "").length >= 8;
+
+    const manques: Manque[] = [];
+    if (numero == null) manques.push({ cle: "numero", libelle: "choisir un numéro de série", ancre: "cfg-numeros" });
+    if (!preAnalyse?.adresse) manques.push({ cle: "adresse", libelle: "renseigner l'adresse du terrain", ancre: "cfg-adresse" });
+    if (!contact.prenom.trim()) manques.push({ cle: "prenom", libelle: "votre prénom", ancre: "cfg-prenom" });
+    if (!contact.nom.trim()) manques.push({ cle: "nom", libelle: "votre nom", ancre: "cfg-nom" });
+    if (!telPlausible) manques.push({ cle: "tel", libelle: "votre téléphone", ancre: "cfg-tel" });
+    if (!emailPlausible) manques.push({ cle: "email", libelle: "votre email", ancre: "cfg-email" });
+    if (!cgv) manques.push({ cle: "cgv", libelle: "accepter les CGV", ancre: "cfg-cgv" });
 
     return {
       cfg,
@@ -200,6 +276,15 @@ export function ConfigurateurProvider({
       toggleOption,
       preAnalyse,
       setPreAnalyse,
+      eligibilite,
+      setEligibilite,
+      contact,
+      setContact,
+      optin,
+      setOptin,
+      cgv,
+      setCgv,
+      manques,
       numero,
       setNumero,
       paliers,
@@ -213,7 +298,7 @@ export function ConfigurateurProvider({
       transportDetailPerKm: transportPerKm(m),
       total: prixBase + prixTerrasse + prixOptions + (transport ?? 0),
     };
-  }, [cfg, usage, quantite, modele, setModele, ambiance, ambianceInterieure, terrasse, options, toggleOption, preAnalyse, numero]);
+  }, [cfg, usage, quantite, modele, setModele, ambiance, ambianceInterieure, terrasse, options, toggleOption, preAnalyse, numero, eligibilite, contact, setContact, optin, cgv]);
 
   return <ConfigCtx.Provider value={value}>{children}</ConfigCtx.Provider>;
 }

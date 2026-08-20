@@ -31,7 +31,6 @@ import {
 
 function Parcours() {
   const c = useConfigurateur();
-  const [cgvOk, setCgvOk] = useState(false);
   const [cale, setCale] = useState(false);
 
   /* La scène est-elle calée en haut de l'écran ? Elle ne change pas de taille
@@ -101,7 +100,7 @@ function Parcours() {
           <SectionTerrasse />
           <SectionOptions />
           <SectionTerrain />
-          <SectionReservation onCgv={setCgvOk} />
+          <SectionReservation />
         </div>
 
         {/* §16 n°1 — la branche « terrain nu » ne doit mener ni à un prix ni à
@@ -110,15 +109,26 @@ function Parcours() {
           <BarrePrix
             total={c.total}
             mention={MENTIONS.prix.courte}
-            action={
-              c.devisDedie
-                ? "Demander un devis dédié"
-                : c.numero
-                  ? `Réserver le n° ${String(c.numero).padStart(2, "0")}`
-                  : "Réserver ce numéro"
+            action={libelleAction(c)}
+            /* Le bouton ne s'active que lorsque **tout** ce qui compose une
+               demande exploitable est là : un numéro, une adresse, des
+               coordonnées joignables et les CGV. Il ne dépendait auparavant
+               que des CGV — on pouvait donc « réserver » sans numéro ni
+               contact, et la demande n'aurait mené nulle part. */
+            actionDesactivee={c.manques.length > 0}
+            motif={
+              c.manques.length > 0
+                ? "Complétez les éléments ci-dessus pour continuer"
+                : "Seul le devis signé fait foi."
             }
-            actionDesactivee={!cgvOk}
-            motif={cgvOk ? "Seul le devis signé fait foi." : "Acceptez les CGV pour continuer"}
+            manques={c.manques}
+            /* Terrain non éligible : la réservation reste ouverte, mais elle
+               change de nature — et le bouton le dit avant le clic, pas après. */
+            note={
+              c.manques.length === 0 && c.eligibilite === "ineligible"
+                ? "* Vérification d'éligibilité du terrain après entretien."
+                : undefined
+            }
             onAction={() => {
               /* ADR-031 : soumission de la demande de numéro. */
             }}
@@ -127,6 +137,25 @@ function Parcours() {
       </div>
     </div>
   );
+}
+
+/**
+ * Libellé du bouton de réservation.
+ *
+ * Trois états, dans cet ordre de priorité : devis dédié (au-delà du seuil de
+ * quantité), réservation **sous condition** quand le zonage consulté ne donne
+ * pas la parcelle pour constructible, réservation simple sinon.
+ *
+ * L'astérisque renvoie à la note affichée juste sous le bouton : le visiteur
+ * doit savoir ce qu'il engage avant de cliquer, pas après.
+ */
+function libelleAction(c: ReturnType<typeof useConfigurateur>) {
+  if (c.devisDedie) return "Demander un devis dédié";
+  if (c.numero == null) return "Réserver un numéro";
+  const n = String(c.numero).padStart(2, "0");
+  return c.eligibilite === "ineligible"
+    ? `Réserver le n° ${n} sous condition*`
+    : `Réserver le n° ${n}`;
 }
 
 /**
