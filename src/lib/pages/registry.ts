@@ -255,7 +255,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     famille: "local",
     resume:
       "Parcelles enclavées, passages étroits, grutage et centre ancien : ce qui rend un projet possible — ou non — dans le tissu bayonnais.",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.6,
   },
   {
@@ -266,7 +266,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     famille: "local",
     resume:
       "Tension sur le logement, location à l'année ou meublé de tourisme, intimité entre les deux bâtiments : ce qu'un studio change à Anglet.",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.6,
   },
   {
@@ -277,7 +277,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     famille: "local",
     resume:
       "Foncier rare, micro-densification, logement étudiant et projets de plusieurs unités : l'échelle qui manque à Biarritz.",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.6,
   },
   {
@@ -288,7 +288,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     famille: "local",
     resume:
       "Littoral ou intérieur, zones A et N, STECAL, documents d'urbanisme multiples : où un studio peut réellement s'implanter.",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.65,
   },
 ] as const;
