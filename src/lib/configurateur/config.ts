@@ -60,16 +60,21 @@ export type Ambiance = {
    * l'aperçu (signalé par Richard). La structure attend désormais un rendu par
    * modèle et par teinte — six au total.
    *
-   * L'Arko One garde les rendus v1 (volume compact). L'Arko Max reçoit ses
-   * propres rendus depuis le 2026-08-20, **dérivés par colorisation** du
-   * visuel fourni par Richard : celui-ci montrait un bardage bois clair, qui
-   * n'est pas une option du produit — une prise de vue non conforme. Les trois
-   * teintes en sont tirées par `scripts/coloriser-bardage.mjs`, qui remplace la
-   * chromie sans toucher à la luminance : le relief des lames, les ombres et
-   * les reflets sont conservés.
+   * L'Arko One garde les rendus v1 (volume compact). L'Arko Max a les siens
+   * depuis le 2026-08-20 : **trois rendus produits par Richard**, un par
+   * teinte, livrés le jour même (dossier `RETOUCHES` du Drive).
    *
-   * ⚠ Ce sont des rendus **dérivés**, pas des rendus 3D dédiés. Le jour où de
-   * vrais rendus par teinte existent, remplacer les chemins suffit.
+   * Ils remplacent une colorisation automatique que j'avais dérivée du rendu
+   * d'origine — écartée par Richard, et à raison : ses rendus cadrent plus
+   * près, montrent la terrasse habitée et l'éclairage intérieur, et traitent
+   * le pignon dans la teinte, ce qu'une recoloration par masque ne savait pas
+   * faire.
+   *
+   * ⚠ Les trois ne sortent pas du même calcul d'éclairage : l'anthracite a un
+   * ciel plus sombre et un cadrage légèrement décalé. Au changement de teinte,
+   * l'ambiance lumineuse bouge donc un peu, pas seulement le bardage. C'est
+   * visible mais discret ; le corriger demanderait de refaire les trois dans
+   * une même passe de rendu.
    */
   visuel: Record<ModeleId, string>;
   /**
@@ -230,8 +235,12 @@ const CONFIG_V1: ConfigurateurConfig = {
         one: "/assets/arko/skins/skin-gris.jpg",
         max: "/assets/arko/skins/max-skin-gris.avif",
       },
-      /* Teintes alignées sur celles réellement appliquées aux rendus du Max :
-         la pastille et l'aperçu ne peuvent pas raconter deux choses. */
+      /* ⚠ Les pastilles annoncent une **teinte de matériau**, pas la couleur
+         mesurée sur le rendu : celui-ci est pris à l'heure dorée, où le gris
+         clair relève à `#bca692` — franchement beige. Aligner la pastille sur
+         cette mesure ferait annoncer au sélecteur une couleur qui n'existe
+         qu'à ce moment de la journée. Valeurs à confirmer par Richard, qui
+         connaît celles appliquées à ses rendus. */
       teinte: "#9b9b9b",
     },
     {
