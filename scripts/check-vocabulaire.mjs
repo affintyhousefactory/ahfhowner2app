@@ -44,7 +44,18 @@ const EXCLUS = [
   "src/components/admin/",
 ];
 
-// Termes proscrits. `mot` : recherché sur frontière de mot, insensible à la casse.
+/**
+ * Termes proscrits.
+ *
+ * `mot`    : recherché sur frontière de mot, insensible à la casse.
+ * `sauf`   : préfixes de chemin où CE terme précis est toléré. À n'employer
+ *            que pour une exception écrite dans un ADR, jamais pour faire
+ *            taire un échec. Une exception porte sur **un terme et un
+ *            chemin** — elle ne désarme pas le reste du contrôle sur ce
+ *            fichier, contrairement à `EXCLUS` qui, lui, en sort le fichier
+ *            entier. C'est la différence entre « ce mot-là, ici, a un sens
+ *            précis » et « cette zone n'est pas contrôlée ».
+ */
 const PROSCRITS = [
   /* « maison » redevient proscrit — ADR-029 § Amendement du 2026-08-19,
      décision de Richard : le site ne vend plus une maison mais un **studio de
@@ -69,7 +80,21 @@ const PROSCRITS = [
   // Blocklist historique reprise d'ADR-004.
   { mot: "modulaires?", libelle: "modulaire" },
   { mot: "préfabriquée?s?", libelle: "préfabriqué" },
-  { mot: "tiny[ -]house", libelle: "tiny house" },
+  /* Exception ADR-029 § Amendement du 2026-08-20 (décision de Richard) :
+     « tiny house » est autorisé sur la seule page qui compare le studio à ce
+     produit — et où il désigne toujours le produit concurrent qu'on écarte,
+     jamais un Arko. On ne peut pas se démarquer de ce qu'on refuse de nommer,
+     et c'est le mot que le visiteur tape. Partout ailleurs, il reste proscrit.
+     Le registre porte le titre et le résumé de cette page, d'où sa présence
+     dans la liste : le mot y vit pour la même raison. */
+  {
+    mot: "tiny[ -]house",
+    libelle: "tiny house",
+    sauf: [
+      "src/app/(public)/studio-jardin-tiny-house/",
+      "src/lib/pages/registry.ts",
+    ],
+  },
   { mot: "conteneurs?", libelle: "conteneur" },
   { mot: "catalogues?", libelle: "catalogue" },
 ];
@@ -117,7 +142,8 @@ for (const cible of CIBLES) {
       return trouve;
     };
 
-    for (const { mot, libelle } of PROSCRITS) {
+    for (const { mot, libelle, sauf } of PROSCRITS) {
+      if (sauf?.some((s) => rel.startsWith(s))) continue;
       for (const m of plat.matchAll(new RegExp(`\\b${mot}\\b`, "gi"))) {
         const { ligne, texte } = ligneDe(m.index);
         infractions.push({ fichier: rel, ligne, terme: libelle, texte: texte.trim().slice(0, 100) });

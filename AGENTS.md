@@ -22,12 +22,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Guardrails (ne pas régresser)
 - **Domaine « Mandataire & Terrain » suspendu** (ADR-028) — masqué derrière `FEATURES.mandataire` (`src/lib/features.ts`). Ne pas re-linker ni ré-exposer une surface suspendue sans lever le flag et amender l'ADR ; toute nouvelle surface du domaine naît gardée (`guardMandataire()` / `mandataireDisabled()`).
 - **Configurateur : verrou levé** (ADR-030 remplace ADR-005/020). `Configurator.tsx` et `config-store.tsx` sont réécrits. Règle qui remplace l'ancienne : **grilles jamais en dur** — prix, paliers et options éditables sans redéploiement.
+- **Pages éditoriales (ADR-038)** : routes déclarées dans `src/lib/pages/registry.ts`, jamais ailleurs. `statut: "publiee"` seulement après vérification en Preview — le sitemap n'annonce que ce qui est servi.
 - Vidéos via `useVisible` (sauf Hero) ; bundle 3D `src/components/arko3d/*` isolé à `/viewer` (ADR-006). Lighthouse 100 / LCP < 0.8s.
 
 ## Marque (absolu — ADR-029, remplace ADR-004)
 > **Amendée le 2026-08-19** : « maison » **redevient interdit**. Le terme imposé est **« studio de jardin »** (premium / d'exception), accord au **masculin**. Plus de « construction », « maison à bâtir », « construction de maison individuelle ». Consigne permanente.
 
 Termes interdits : **maison**, **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner (exception : bloc d'identification du pied de page), tout nom de fournisseur — plus modulaire, préfabriqué, tiny house, conteneur, catalogue.
+> Exception unique : « tiny house » sur `/studio-jardin-tiny-house` (ADR-029 § Amendement du 2026-08-20), via le champ `sauf` du contrôle — un terme, un chemin, jamais un fichier entier.
 Vocabulaire imposé : **studio de jardin**, unité, hébergement, annexe, espace supplémentaire, prêt à vivre. **Masculin.**
 « Notre architecte intégrée » (sans prénom). « Puigbo » (sans accent).
 Cadre de vente : annexe sur parcelle bâtie ou hébergement professionnel ; terrain nu **non ouvert**.

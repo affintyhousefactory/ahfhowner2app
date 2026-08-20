@@ -268,6 +268,44 @@ marque, elle appartient à Richard. Correction d'une ligne si validée.
 suspendu (ADR-028) et back-office hors contrôle. Leur vocabulaire reste
 l'ancien — incohérence assumée, comme depuis le 31/07.
 
+## Amendement du 2026-08-20 — « tiny house » autorisé sur la seule page qui compare
+
+**Décision de Richard**, prise sur arbitrage formulé avant exécution (chantier
+ADR-038).
+
+Le chantier des 19 pages éditoriales comporte une page de comparaison,
+`/studio-jardin-tiny-house`, dont l'objet **est** de situer le studio de jardin
+face à la tiny house. La spec d'Albert emploie le terme 34 fois. Or il figure à
+la blocklist héritée d'ADR-004.
+
+**Ce qui change.** « tiny house » devient **autorisé sur cette page seule**, où
+il désigne toujours le **produit concurrent que la marque écarte** — jamais un
+Arko, jamais une catégorie dans laquelle Howner se rangerait. Partout ailleurs
+sur le site, il reste proscrit.
+
+**Pourquoi.** On ne se démarque pas de ce qu'on refuse de nommer. La page existe
+précisément pour dire que ces deux objets répondent à des besoins opposés — l'un
+est fait pour bouger, l'autre pour rester. Et c'est le mot que le visiteur tape :
+l'interdire revient à écrire la page sans la requête qu'elle vise.
+
+**Comment le garde-fou l'implémente.** Un mécanisme d'exception **ciblée** est
+ajouté à `check-vocabulaire.mjs` : le champ `sauf` lève **un terme sur un
+chemin**. À ne pas confondre avec `EXCLUS`, qui sort **un fichier entier** du
+contrôle : sur `/studio-jardin-tiny-house`, « maison », « clé en main » et le
+reste de la blocklist continuent d'être vérifiés normalement. L'exception
+n'ouvre pas une zone franche, elle nomme un mot et un endroit.
+
+⚠ **`sauf` ne s'emploie que pour une exception écrite dans un ADR**, jamais pour
+faire taire un échec de contrôle. Le précédent du 2026-08-02 — « clé en main »
+servi en production pendant que le contrôle annonçait « conforme » — rappelle ce
+que coûte un garde-fou qu'on arrange.
+
+**Le reste de la blocklist ne bouge pas.** « maison », « modulaire »,
+« préfabriqué », « conteneur », « catalogue », « clé en main » et « résidence
+principale » restent interdits partout, y compris sur cette page — et le copy des
+specs, qui les emploie 92 fois au total, est **réécrit** plutôt qu'exempté
+(ADR-038 §4a).
+
 ## Points ouverts — arbitrage Howner requis
 
 Ces trois points sont apparus en croisant la spec avec le code existant. Aucun n'empêche de commencer ; les deux premiers doivent être tranchés avant la réécriture des textes, le troisième avant toute mise en ligne.

@@ -38,7 +38,8 @@
   "drive": {
     "mode": "read-only",
     "allowedSharedDriveIds": [
-      "0ALGUeoTQ2_hdUk9PVA"
+      "0ALGUeoTQ2_hdUk9PVA",
+      "0AAULY7mzIYw1Uk9PVA"
     ],
     "allowedFolderIds": [
       "1Y5sDCBO3JTbFOuu98ISzL-D5k7Jxv3Dg",
@@ -47,11 +48,12 @@
     ],
     "folderNames": {
       "0ALGUeoTQ2_hdUk9PVA": "AHF - Plans_SiteWeb_Inspirations (Drive partage)",
+      "0AAULY7mzIYw1Uk9PVA": "Drive de richard@affinityhousefactory.com — classeur PagesSite_SEO (chantier ADR-038)",
       "1Y5sDCBO3JTbFOuu98ISzL-D5k7Jxv3Dg": "Siteaffinity",
       "1lGKGXkem4PLFxPwtx5LP_dw_wOSj2RUJ": "SpecsConfigurateur",
       "1llLM1ndyM2m7Z8bPGxJpijRuyG6q0_bw": "plans_visuels (Plan2D, visuels 3D, moodboards)"
     },
-    "note": "Autorise par Richard le 2026-07-31 pour recuperer les specifications produites par Albert, etendu le 2026-08-19 au dossier plans_visuels (visuels du site, demande explicite de Richard). Lecture seule, limitee aux dossiers listes : aucune ecriture, aucune recherche globale Drive. Toute specification recuperee est versee dans docs/specs/ pour que les ADR la citent par un chemin stable ; tout visuel est verse dans public/assets/ sous un nom neutre — un nom de fichier devient une URL publique, et ADR-029 §67 interdit d'y exposer un nom de fournisseur."
+    "note": "Etendu le 2026-08-20 au Drive 0AAULY7mzIYw1Uk9PVA, ou vit le classeur PagesSite_SEO (ADR-038) : il n'y etait pas declare, la lecture du 2026-08-20 s'est faite sur designation explicite de Richard, proprietaire du fichier. Lecture seule, limitee a ce classeur. Historique : autorise par Richard le 2026-07-31 pour recuperer les specifications produites par Albert, etendu le 2026-08-19 au dossier plans_visuels (visuels du site, demande explicite de Richard). Lecture seule, limitee aux dossiers listes : aucune ecriture, aucune recherche globale Drive. Toute specification recuperee est versee dans docs/specs/ pour que les ADR la citent par un chemin stable ; tout visuel est verse dans public/assets/ sous un nom neutre — un nom de fichier devient une URL publique, et ADR-029 §67 interdit d'y exposer un nom de fournisseur."
   },
   "outOfScope": [
     "AHF_WEB2 (segments/Brevo/Smart Nano-Max/Villa Arko)",

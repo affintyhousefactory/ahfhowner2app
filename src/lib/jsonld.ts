@@ -15,6 +15,7 @@ import {
   FAQ,
   type Product,
 } from "@/lib/site";
+import type { PageEditoriale } from "@/lib/pages/registry";
 
 type JsonLdObject = Record<string, unknown>;
 
@@ -117,5 +118,99 @@ export function faqSchema(): JsonLdObject {
       name: item.q,
       acceptedAnswer: { "@type": "Answer", text: item.a },
     })),
+  };
+}
+
+/* ============================================================
+   Pages éditoriales — ADR-038.
+   Les trois schémas ci-dessous accompagnent le chantier « PagesSite_SEO ».
+   Ils prennent leurs données du registre (`src/lib/pages/registry.ts`), donc
+   un titre ne s'écrit jamais deux fois : ce qu'affiche la page et ce que lit
+   un moteur sortent de la même ligne.
+   ============================================================ */
+
+/**
+ * Fil d'Ariane — `BreadcrumbList`.
+ *
+ * Attendu par la spec sur **toutes** les pages du chantier. `position` est
+ * 1-indexé et l'ordre compte : c'est lui qui dessine le chemin affiché sous le
+ * résultat de recherche. Le dernier élément porte quand même son `item` :
+ * l'omettre est toléré, mais le garder évite un fil tronqué chez les moteurs
+ * qui le suivent jusqu'au bout.
+ */
+export function breadcrumbSchema(
+  fil: readonly { nom: string; route: string }[],
+): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: fil.map((e, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: e.nom,
+      item: `${SITE_URL}${e.route}`,
+    })),
+  };
+}
+
+/**
+ * Article de guide — `Article`.
+ *
+ * ⚠ Pas de `FAQPage` ici, même quand la spec en suggère une : ce schéma ne se
+ * pose que si les questions et réponses sont **réellement visibles** sur la
+ * page (règle rappelée par le hub, et pratique en vigueur côté moteurs). Il
+ * sera ajouté page par page, à la vue du rendu, jamais par défaut.
+ *
+ * `publisher` reste une simple référence à l'Organization émise sitewide par
+ * le layout `(public)` — la redéclarer enverrait deux entités concurrentes
+ * pour la même marque (même motif qu'`aboutPageSchema`).
+ */
+export function articleSchema(
+  page: PageEditoriale,
+  options: { publieLe: string; modifieLe?: string },
+): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: page.h1,
+    description: page.resume,
+    url: `${SITE_URL}${page.route}`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}${page.route}` },
+    inLanguage: "fr-FR",
+    datePublished: options.publieLe,
+    dateModified: options.modifieLe ?? options.publieLe,
+    author: { "@type": "Organization", name: BRAND.maker, url: SITE_URL },
+    publisher: { "@type": "Organization", name: BRAND.maker, url: SITE_URL },
+  };
+}
+
+/**
+ * Hub `/guide` — `CollectionPage` portant la liste de ses articles.
+ *
+ * `CollectionPage` plutôt qu'un `ItemList` nu : le hub **est** une page, pas
+ * seulement une liste. L'`ItemList` vit à l'intérieur, ce qui dit à la fois ce
+ * qu'est la page et ce qu'elle rassemble.
+ */
+export function guidesHubSchema(
+  hub: PageEditoriale,
+  articles: readonly PageEditoriale[],
+): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: hub.h1,
+    description: hub.resume,
+    url: `${SITE_URL}${hub.route}`,
+    inLanguage: "fr-FR",
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: articles.length,
+      itemListElement: articles.map((a, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: a.h1,
+        url: `${SITE_URL}${a.route}`,
+      })),
+    },
   };
 }

@@ -171,6 +171,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré sur `feat/adr-035-crm-leads` (2026-08-04)** ; **amendé le 2026-08-04** : « Lead chaud » → « Paiement réservé », règle de blocage du numéro de série, connecteur Pennylane à écrire | ✅ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
+| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lot 0 (fondations) livré, aucune page publiée** ; **alerte Albert** : 8 → 27 URLs indexables et contenus réglementaires à joindre au dossier avocat (ADR-015) | 🟠 |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
