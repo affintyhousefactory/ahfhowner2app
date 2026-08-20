@@ -53,12 +53,19 @@ export type Ambiance = {
   nom: string;
   supplementTtc: number;
   /**
-   * Rendu extérieur associé — c'est lui que montre la scène collante. Les
-   * fichiers actuels sont ceux de la v1 (décision Richard, 2026-08-01) ; la
-   * nomenclature cible `{modele}_{vue}_{ambiance}.webp` s'y substituera au fil
-   * des livraisons sans toucher aux composants, puisque le chemin est ici.
+   * Rendu extérieur, **par modèle** — c'est lui que montre la scène collante.
+   *
+   * Indexé depuis le 2026-08-20 : jusque-là un seul rendu servait les deux
+   * gammes, si bien que passer de l'Arko One à l'Arko Max ne changeait rien à
+   * l'aperçu (signalé par Richard). La structure attend désormais un rendu par
+   * modèle et par teinte — six au total.
+   *
+   * ⚠ Les fichiers servis restent ceux de la v1, qui ne montrent qu'un seul
+   * volume : l'aperçu ne distingue donc **pas encore** les deux gammes. Ce
+   * n'est plus un défaut de code mais un manque de rendus, et il se comble en
+   * remplaçant les chemins ci-dessous — sans toucher à un composant.
    */
-  visuel: string;
+  visuel: Record<ModeleId, string>;
   /**
    * Teinte du bardage. Sert l'aperçu du sélecteur : un carré de couleur dit
    * ce que le libellé ne dit pas — « Basque » ne se devine pas.
@@ -208,23 +215,35 @@ const CONFIG_V1: ConfigurateurConfig = {
   ambiances: [
     {
       id: "gris_clair",
+      /* `skin-gris.jpg` remplace `skin-bleu.jpg` le 2026-08-20 : le libellé
+         annonçait un gris et l'aperçu montrait un bleu pigeon. Le bon rendu
+         existait au dépôt depuis l'origine, simplement référencé nulle part. */
       nom: "Gris clair",
       supplementTtc: 0,
-      visuel: "/assets/arko/skins/skin-bleu.jpg",
-      teinte: "#5d7d8f", // ⚠ bleu pigeon de la v1 — à confirmer, cf. ci-dessus
+      visuel: {
+        one: "/assets/arko/skins/skin-gris.jpg",
+        max: "/assets/arko/skins/skin-gris.jpg",
+      },
+      teinte: "#9a9c99",
     },
     {
       id: "gris_anthracite",
       nom: "Gris anthracite",
       supplementTtc: 0,
-      visuel: "/assets/arko/skins/skin-anthracite.jpg",
+      visuel: {
+        one: "/assets/arko/skins/skin-anthracite.jpg",
+        max: "/assets/arko/skins/skin-anthracite.jpg",
+      },
       teinte: "#3a3f3c",
     },
     {
       id: "vert",
       nom: "Vert",
       supplementTtc: 0,
-      visuel: "/assets/arko/skins/skin-vert.jpg",
+      visuel: {
+        one: "/assets/arko/skins/skin-vert.jpg",
+        max: "/assets/arko/skins/skin-vert.jpg",
+      },
       teinte: "#5a6a43",
     },
   ],

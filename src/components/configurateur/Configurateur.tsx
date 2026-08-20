@@ -86,7 +86,7 @@ function Parcours() {
         tag={`${modele.id === "one" ? "arko-one" : "arko-max"} · ${c.ambiance}`}
         pastilles={pastilles}
         cale={cale}
-        ambiances={c.cfg.ambiances}
+        bardages={c.bardages}
         ambianceActive={c.ambiance}
         vuesInterieures={c.vuesInterieures}
         interieurs={c.interieurs}

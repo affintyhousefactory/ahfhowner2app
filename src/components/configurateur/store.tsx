@@ -85,6 +85,8 @@ type Ctx = {
   vuesInterieures: VueInterieure[];
   /** Toutes les ambiances intérieures, vues déjà résolues pour ce modèle. */
   interieurs: { id: string; nom: string; vues: VueInterieure[] }[];
+  /** Bardages, rendu déjà résolu pour ce modèle. */
+  bardages: { id: string; nom: string; teinte: string; visuel: string }[];
   terrasse: PalierId;
   setTerrasse: (t: PalierId) => void;
   options: string[];
@@ -181,6 +183,12 @@ export function ConfigurateurProvider({
          qui irait les chercher lui-même finirait par indexer en dur. */
       vuesInterieures:
         cfg.ambiancesInterieures.find((a) => a.id === ambianceInterieure)?.vues[modele] ?? [],
+      bardages: cfg.ambiances.map((a) => ({
+        id: a.id,
+        nom: a.nom,
+        teinte: a.teinte,
+        visuel: a.visuel[modele],
+      })),
       interieurs: cfg.ambiancesInterieures.map((a) => ({
         id: a.id,
         nom: a.nom,

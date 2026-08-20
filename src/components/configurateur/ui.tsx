@@ -16,7 +16,7 @@ import Image from "next/image";
 import { cn } from "@/shared/lib/cn";
 import { eur } from "./store";
 import type { MentionTexte } from "@/lib/configurateur/mentions";
-import type { Ambiance, VueInterieure } from "@/lib/configurateur/config";
+import type { VueInterieure } from "@/lib/configurateur/config";
 
 /* ------------------------------------------------------------------ */
 /* Section dépliante — le résumé remplace le compteur d'étapes         */
@@ -145,7 +145,7 @@ export function Scene({
   tag,
   pastilles,
   cale,
-  ambiances,
+  bardages,
   ambianceActive,
   vuesInterieures,
   interieurs,
@@ -160,8 +160,13 @@ export function Scene({
    * seulement la place de l'en-tête qui vient se poser dessus.
    */
   cale: boolean;
-  /** Toutes les ambiances, pas seulement l'active — cf. empilement ci-dessous. */
-  ambiances: Ambiance[];
+  /**
+   * Tous les bardages, rendu **déjà résolu pour le modèle courant** — pas
+   * seulement l'actif, cf. empilement ci-dessous. Comme pour les ambiances
+   * intérieures, c'est le store qui choisit le rendu du modèle : la scène ne
+   * sait pas quel studio est sélectionné, et n'a pas à le savoir.
+   */
+  bardages: { id: string; nom: string; teinte: string; visuel: string }[];
   ambianceActive: string;
   /** Vues du modèle courant, pour l'ambiance intérieure sélectionnée. */
   vuesInterieures: VueInterieure[];
@@ -233,7 +238,7 @@ export function Scene({
       {/* Calque `absolute` explicite : `fill` exige un parent en position
           absolute/fixed/relative, et la scène est en `sticky`. */}
       <div className="absolute inset-0">
-        {ambiances.map((a) => {
+        {bardages.map((a) => {
           const actif = a.id === ambianceActive && !interieur;
           return (
             <Image
@@ -305,7 +310,12 @@ export function Scene({
           {tag}
         </span>
       </div>
-      <div className="relative flex flex-wrap items-end justify-between gap-3">
+      {/* Bas de scène — un seul enfant en flux, sinon `justify-between` du
+          parent répartit les blocs et pousse les pastilles au milieu de
+          l'image. C'est ce qui s'est produit en ajoutant les points de vue :
+          trois enfants au lieu de deux, et le bloc du milieu se centre. */}
+      <div className="relative flex flex-col gap-2">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-wrap gap-1.5">
           {pastilles.map((p) => (
             <span
@@ -354,7 +364,7 @@ export function Scene({
           la vue plutôt qu'un numéro : « La salle de bain » situe mieux qu'un
           rang dans une liste, pour l'œil comme pour un lecteur d'écran. */}
       {interieur && vuesInterieures.length > 1 && (
-        <div className="relative flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <span className="font-mono text-[0.58rem] uppercase tracking-[0.08em] text-white/75">
             {vuesInterieures[iVue]?.nom}
           </span>
@@ -375,6 +385,7 @@ export function Scene({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
