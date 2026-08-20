@@ -120,7 +120,7 @@ export default function MentionsPage() {
 
       <h2>6. Description des services</h2>
       <p>
-        Le site howner.fr a pour objet de présenter les maisons compactes
+        Le site howner.fr a pour objet de présenter les studios de jardin
         d'architecte <strong>Arko One</strong> et <strong>Arko Max</strong>,
         conçues et fabriquées au Pays-Basque par Affinity House Factory, et de
         permettre leur réservation. Affinity House Factory s'efforce de fournir

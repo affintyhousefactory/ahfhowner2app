@@ -171,7 +171,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré sur `feat/adr-035-crm-leads` (2026-08-04)** ; **amendé le 2026-08-04** : « Lead chaud » → « Paiement réservé », règle de blocage du numéro de série, connecteur Pennylane à écrire | ✅ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
-| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lot 0 (fondations) livré, aucune page publiée** ; **alerte Albert** : 8 → 27 URLs indexables et contenus réglementaires à joindre au dossier avocat (ADR-015) | 🟠 |
+| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lots 0 (fondations) et 1 (audit de conformité) livrés, aucune page publiée** ; **alertes Albert** : 8 → 27 URLs indexables, contenus réglementaires à joindre au dossier avocat, et **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | 🟠 |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -206,6 +206,20 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-20 (ADR-038 lot 1 — audit de conformité des pages produit au `contexte-refonte.md`)** — Périmètre **réduit sur demande de Richard** : vérifier la conformité, **ne pas toucher aux visuels**. Vérifié **sur le HTML servi en production**, pas sur le code — la seule lecture qui ait valeur de preuve depuis le 2026-08-02.
+
+**Conforme sur six points sur sept.** Les **trois `<h1>` dictés** sont servis au mot près, **un seul par page**, sur l'accueil comme sur les deux pages produit. Les **routes renommées** répondent en **308** depuis `/arko-one` et `/arko-max`. Le menu porte « **Nos Studios** ». Le **texte rendu** des pages commerciales (accueil, deux produits, `/a-propos`, `/contact`, `/configurer`, `/configurer/v2`, `/confidentialite`, `/viewer`) ne contient **aucun terme proscrit**. Les **surfaces invisibles mais servies** — métadonnées, Open Graph, JSON-LD, `llms.txt` — sont propres elles aussi : c'est là que le repositionnement du 19/08 aurait pu laisser des restes, et il n'en a pas laissé.
+
+**Un écart mineur corrigé** : les **mentions légales** présentaient encore « les maisons compactes d'architecte Arko One et Arko Max ». Phrase descriptive, pas une définition contractuelle — corrigée en « studios de jardin d'architecte ». La corriger **réduit** l'exposition CCMI, elle ne l'augmente pas.
+
+**⚠ Un écart majeur relevé et volontairement NON corrigé — les CGV.** Elles emploient **39 fois « maison »**, dont **« Maison ARKO » en terme contractuel défini** (section Définitions, repris dans tout le document), « maisons légères ARKO » au pied de page, et **deux renvois explicites au régime de la construction de maison individuelle**.
+
+**Ce n'est pas un problème de vocabulaire, c'est une contradiction entre le discours et le contrat.** Le repositionnement du 19/08 avait pour effet favorable d'**éloigner le site du régime CCMI** (risque 🔴 ouvert depuis le 03/08). Or le contrat, lui, parle toujours de maisons légères et cite le CCMI. **En cas de litige, c'est le contrat qui est lu, pas la page d'accueil** : le bénéfice juridique du repositionnement est donc, en l'état, largement annulé par les CGV.
+
+**Non corrigé à dessein**, pour trois raisons : c'est un **document contractuel**, « Maison ARKO » y est un **terme défini** dont dépendent 39 occurrences, et la version live **n'est toujours pas validée par l'avocat** (ADR-015). Réécrire un contrat non validé sans son auteur juridique aggraverait le risque au lieu de le réduire. **À porter au dossier avocat avec les CGV — c'est une alerte Albert.**
+
+*Note de méthode : les pages légales sont exclues de `check:vocabulaire` (ADR-029, périmètre §17.10). L'exclusion est légitime, mais elle a une conséquence qu'il faut nommer — **aucun garde-fou automatique ne surveille le vocabulaire du contrat**. Cet écart ne pouvait être trouvé qu'en lisant les pages servies, ce que le lot 1 a fait.*
 
 **2026-08-19 (mise en production — PR #76, `dev` → `main`, 3 commits, visuels Arko Max)** — `main` = **`4b2fb554`**, déploiement production `dpl_Hdsfcbg…` **READY en 54 s**, aliasé sur `howner.fr`, `www.howner.fr`, `affinityhome.fr` et `affinityhousefactory.com`. **Aucune migration Supabase**, aucun changement de logique métier — média et présentation seulement.
 

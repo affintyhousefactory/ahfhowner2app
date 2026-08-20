@@ -1,5 +1,14 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-20 (chantier ADR-038 — 19 pages éditoriales)
+- **Lot 0 livré, PR #77 → `dev`** (fondations, aucune page publiée). **Lot 1 livré, empilé dessus** : audit de conformité seul, **visuels non touchés** (demande de Richard).
+- **Quatre arbitrages de Richard** : copy réécrit plutôt que garde-fou assoupli · « tiny house » autorisé sur la seule page qui compare (ADR-029 amendée) · pages locales à 30-40 % de contenu propre · livraison lot par lot.
+- **Le registre `src/lib/pages/registry.ts` est la seule source de routes.** Une page ne passe à `"publiee"` qu'après vérification en Preview — sinon le sitemap annonce des 404.
+- **`sauf` ≠ `EXCLUS`** dans `check-vocabulaire.mjs` : le premier lève **un terme sur un chemin**, le second sort **un fichier entier** du contrôle. N'employer `sauf` que pour une exception écrite dans un ADR. Garde-fou **re-testé** après modification (3 essais).
+- **⚠ Les CGV parlent encore de « maisons légères ARKO » (39 occurrences, terme contractuel défini) et citent le CCMI.** Le repositionnement du 19/08 éloignait le site de ce régime ; **le contrat, lui, l'y ramène** — et c'est le contrat qui est lu en cas de litige. **Non corrigé à dessein** (document contractuel non validé par l'avocat, ADR-015). **Alerte Albert, à joindre au dossier CGV.**
+- **Aucun garde-fou automatique ne surveille le vocabulaire des pages légales** — elles sont hors périmètre de `check:vocabulaire`. L'exclusion est légitime, sa conséquence doit être connue.
+- **Reste du chantier** : lot 2 (5 pages d'usage), lot 3 (hub + 9 guides), lot 4 (4 pages locales, **en attente de matière locale de Richard**).
+
 ## Décisions — 2026-08-19 (soir — visuels Arko Max en production, PR #76)
 - **`main` = `4b2fb554`, production déployée et vérifiée en ligne.** Trois commits média, **aucune migration**. Détail dans « Dernier point » de `PROJECT_STATE.md`.
 - **Les composants de page produit se paramètrent, ils ne se dupliquent pas.** `RevealScrub` et `Discover` servent les deux produits : leurs médias passent en props (`frames`, `panels`), les données dans `src/lib/media/arko-max.ts`. Sans prop, comportement inchangé — c'est ce qui a permis de refondre l'Arko Max sans toucher l'Arko One, vérifié sur le HTML servi des deux pages.
