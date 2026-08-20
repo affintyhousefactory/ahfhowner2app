@@ -1,5 +1,15 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-20 (ADR-038 TERMINÉ — 19 pages en production, 27 URLs)
+- **`main` = `33cb51bb`.** Lots 0 à 4 livrés et vérifiés en ligne. Sitemap **8 → 27 URLs**.
+- **Les 4 pages locales sont réellement différenciées** : recouvrement lexical **44-48 %** entre elles (une duplication tournerait à 90 %). Socle commun (`SOCLE_LOCAL`) écrit une fois, angle propre par ville.
+- **Méthode qui a tenu tout le chantier** : vérifier le HTML servi en Preview, **puis** publier via le `statut` du registre. Le sitemap n'a jamais annoncé une URL sans page.
+- **⚠ Assumé par Richard le 2026-08-20** : des **faits locaux datés** partent sans vérification indépendante (SRU Biarritz, dispositif meublés, PLUi Côte Basque-Adour et Sud Basse Navarre). Attribués à leur source, **date de vérification affichée sur chaque page**.
+- **⚠ Alerte Albert non traitée** : la section « plusieurs unités » de Biarritz ouvre un **discours B2B** (opérateurs, bailleurs) qu'aucun ADR ne prévoit — incompatible en l'état avec une série limitée à 6 exemplaires.
+- **⚠ Restent au dossier avocat** : les 9 guides réglementaires, et surtout les **CGV toujours rédigées en « maison » avec renvoi au CCMI** (lot 1) — elles annulent en pratique le bénéfice juridique du repositionnement.
+- **Écart à signaler à Albert** : concurrent nommé + tarif retirés de sa spec du guide « Prix » (ADR-029 §67, publicité comparative, péremption).
+- **Les `<h1>` du classeur ont été écartés** sur les 4 pages locales au profit de ceux des specs (les premiers étaient quasi identiques). Arbitrage laissé ouvert à Richard.
+
 ## Décisions — 2026-08-20 (ADR-038 — lots 0 à 3 livrés, 15 pages publiées)
 - **PR empilées #77 → #78 → #79 → #80.** ⚠ **#79 ne doit pas partir en production sans #80** : le correctif du libellé « tiny house » vit dans #80, le défaut vient de #79.
 - **Sitemap 8 → 23 URLs.** Reste le lot 4 (4 pages locales, **en attente de matière locale de Richard**).

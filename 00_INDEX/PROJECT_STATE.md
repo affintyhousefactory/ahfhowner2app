@@ -171,7 +171,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré sur `feat/adr-035-crm-leads` (2026-08-04)** ; **amendé le 2026-08-04** : « Lead chaud » → « Paiement réservé », règle de blocage du numéro de série, connecteur Pennylane à écrire | ✅ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
-| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lots 0 à 3 livrés : 15 pages publiées (23 URLs au sitemap)** ; reste le lot 4 (4 pages locales, **en attente de matière locale de Richard**) ; **alertes Albert** : contenus réglementaires au dossier avocat, **concurrent nommé retiré de la spec du guide « Prix »**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | 🟠 |
+| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — TERMINÉ : lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -206,6 +206,20 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-20 (mise en production — PR #83, lot 4 : les 4 pages locales — ADR-038 TERMINÉ)** — `main` = **`33cb51bb`**. **Sitemap 23 → 27 URLs : les 19 pages commandées par le classeur sont livrées.** Aucune migration, aucun changement de logique métier.
+
+**Les specs locales révisées par Richard le 2026-08-20 ont levé la réserve du lot 0.** Chaque page porte un angle propre : Bayonne l'**accès** (parcelles enclavées, grutage, plan de sauvegarde du centre ancien), Anglet la **tension logement** (location à l'année contre meublé de tourisme, intimité des bâtiments), Biarritz la **rareté des petites surfaces** (micro-densification, logement étudiant, plusieurs unités), la Côte Basque le **terrain** (littoral contre intérieur, zones A et N, STECAL, absence de PLU unique).
+
+**La différenciation a été mesurée, pas supposée** : recouvrement lexical entre les quatre pages, deux à deux, **44 à 48 %**. Plus de la moitié du vocabulaire de chaque page lui est propre ; quatre pages dupliquées tourneraient autour de 90 %. La part commune correspond au socle partagé (`SOCLE_LOCAL` — méthode, hors-site, gamme), **écrit une seule fois et rendu partout**. Identique là où c'est légitime, distinct là où la page se positionne.
+
+**Vérifié en ligne** : les 4 routes répondent 200, sitemap à 27 URLs, un `<h1>` spécifique par page, **zéro `opacity:0` sérialisé**, vocabulaire conforme, et le maillage « Autres communes » sert bien les trois voisines depuis chaque page.
+
+**Les `<h1>` du classeur ont été écartés** au profit de ceux des specs : la colonne donnait quatre titres quasi identiques (« Nos modèles Arko faits pour vous »), les specs en proposent quatre spécifiques. Sur des pages locales, c'est la différence entre quatre URLs indexées et une seule retenue. **Écart signalé à Richard, arbitrage laissé ouvert** (une ligne par page à changer).
+
+**⚠ Deux points signalés avant publication et assumés par Richard.** (1) **Des faits locaux datés partent sans vérification indépendante** — prélèvement SRU de Biarritz, confirmation juridictionnelle du dispositif d'encadrement des meublés, état du PLUi Côte Basque-Adour, date d'approbation du PLUi Sud Basse Navarre. Ils viennent des specs, sont **attribués à leur source dans le texte**, et chaque page **affiche sa date de vérification** — un fait local daté qui se périme sans le dire est pire que pas de fait du tout. (2) **La section « plusieurs unités » de Biarritz ouvre un discours vers les opérateurs et bailleurs**, là où le site vend une série limitée à des particuliers : formulation prudente, refus explicite de l'appellation « logement social », CTA vers `/contact` faute de parcours dédié. **Segment qu'aucun ADR n'a prévu — alerte Albert : nouveau public, nouveau cycle de vente, et une série de 6 exemplaires qui cadre mal avec un programme immobilier.**
+
+**Chantier ADR-038 clos.** Restent ouverts, hors périmètre : les contenus réglementaires et les CGV au dossier avocat (ADR-015), et l'écart à signaler à Albert sur le concurrent nommé retiré du guide « Prix ».
 
 **2026-08-20 (mise en production — PR #81, `dev` → `main`, 16 commits, ADR-038 lots 0 à 3)** — `main` = **`1efc5f53`**, production **READY en 58 s**, aliasée sur `howner.fr`, `www.howner.fr`, `affinityhome.fr` et `affinityhousefactory.com`. **Aucune migration Supabase**, aucun changement de logique métier. Les quatre PR de lots ont été mergées **de la plus profonde à la plus superficielle** (#80 → #79 → #78 → #77), l'empilement imposant l'ordre : le correctif du libellé « tiny house » ne pouvait pas rester en arrière de la page qui l'introduisait.
 
