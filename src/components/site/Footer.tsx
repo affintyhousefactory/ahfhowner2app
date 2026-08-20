@@ -14,6 +14,10 @@ import { FEATURES } from "@/lib/features";
 
 export function Footer() {
   const usages = pagesDeFamille("usage");
+  /* Le hub des guides est une rubrique de navigation, pas un usage : il rejoint
+     « Modèles & parcours » plutôt que la colonne « Usages ». Comme le reste, il
+     n'apparaît qu'une fois publié. */
+  const [hubGuide] = pagesDeFamille("hub-guide");
   return (
     <footer className="bg-ink text-canvas">
       <div className="container-page">
@@ -74,6 +78,14 @@ export function Footer() {
                 {n.label}
               </Link>
             ))}
+            {hubGuide && (
+              <Link
+                href={hubGuide.route}
+                className="text-sm text-canvas/65 transition-colors hover:text-canvas"
+              >
+                {hubGuide.libelle}
+              </Link>
+            )}
             {/* Recherche terrain + Accès Mandataire — masqués tant que le
                 domaine mandataire est suspendu (ADR-028). */}
             {FEATURES.mandataire && (
