@@ -249,41 +249,45 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
        (ADR-038 §4). Sans cette matière, elles ne passent pas en `"publiee"`. */
   {
     route: "/studio-jardin-bayonne",
-    h1: "Studio de jardin à Bayonne — nos modèles Arko faits pour vous",
+    h1:
+      "Studio de jardin à Bayonne : gagner de l'espace quand chaque mètre carré compte",
     libelle: "Studio de jardin — Bayonne",
     famille: "local",
     resume:
-      "Installer un studio de jardin d'architecte à Bayonne : contraintes de parcelle, règles locales et accès chantier en secteur urbain dense.",
+      "Parcelles enclavées, passages étroits, grutage et centre ancien : ce qui rend un projet possible — ou non — dans le tissu bayonnais.",
     statut: "a-venir",
     priorite: 0.6,
   },
   {
     route: "/studio-jardin-anglet",
-    h1: "Studio de jardin à Anglet — nos modèles Arko faits pour vous",
+    h1:
+      "Studio de jardin à Anglet : donner une nouvelle fonction à votre parcelle",
     libelle: "Studio de jardin — Anglet",
     famille: "local",
     resume:
-      "Installer un studio de jardin d'architecte à Anglet : parcelles arborées, recul par rapport aux limites et desserte du terrain.",
+      "Tension sur le logement, location à l'année ou meublé de tourisme, intimité entre les deux bâtiments : ce qu'un studio change à Anglet.",
     statut: "a-venir",
     priorite: 0.6,
   },
   {
     route: "/studio-jardin-biarritz",
-    h1: "Studio de jardin à Biarritz — nos modèles Arko faits pour vous",
+    h1:
+      "Studio de jardin à Biarritz : créer de petites surfaces là où le logement manque",
     libelle: "Studio de jardin — Biarritz",
     famille: "local",
     resume:
-      "Installer un studio de jardin d'architecte à Biarritz : secteurs patrimoniaux, covisibilité et exigences d'insertion architecturale.",
+      "Foncier rare, micro-densification, logement étudiant et projets de plusieurs unités : l'échelle qui manque à Biarritz.",
     statut: "a-venir",
     priorite: 0.6,
   },
   {
     route: "/studio-jardin-cote-basque",
-    h1: "Studio de jardin sur la Côte Basque — nos modèles Arko faits pour vous",
+    h1:
+      "Studio de jardin sur la Côte Basque et au Pays Basque : commencer par le bon terrain",
     libelle: "Studio de jardin — Côte Basque",
     famille: "local",
     resume:
-      "De Bayonne à Biarritz : installer un studio de jardin d'architecte sur la Côte Basque, commune par commune.",
+      "Littoral ou intérieur, zones A et N, STECAL, documents d'urbanisme multiples : où un studio peut réellement s'implanter.",
     statut: "a-venir",
     priorite: 0.65,
   },
