@@ -64,7 +64,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Deux studios de jardin d'architecte, une structure acier léger et une fabrication hors-site : ce que recouvre vraiment le haut de gamme.",
     spec: "page-studio-jardin-haut-de-gamme.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.9,
   },
   {
@@ -75,7 +75,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Un espace de travail à dix mètres de chez vous, conçu pour une journée entière : lumière, acoustique, confort thermique et vraie adresse professionnelle.",
     spec: "page-bureau-de-jardin.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.85,
   },
   {
@@ -86,7 +86,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Recevoir, accueillir un proche, créer un espace autonome dans son jardin : ce qu'une dépendance change au quotidien, et ce qu'elle exige.",
     spec: "page-dependance-habitable.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.85,
   },
   {
@@ -97,7 +97,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Séparer le travail du domicile sans quitter son terrain : pourquoi une pièce dédiée vaut mieux qu'un coin de salon détourné de son usage.",
     spec: "page-bureau-pour-teletravail.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.85,
   },
   {
@@ -108,7 +108,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Deux philosophies opposées : l'une est faite pour bouger, l'autre pour rester. Comparaison honnête avant de choisir ce qui ira dans votre jardin.",
     spec: "page-studio-jardin-tiny-house.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.8,
   },
 
