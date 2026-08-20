@@ -421,6 +421,34 @@ export function BarrePrix({
   const [delta, setDelta] = useState<number | null>(null);
   const precedent = useRef<number | null>(null);
 
+  /* Ce qui manque ne s'affiche **qu'au clic** sur le bouton (demande de
+     Richard, 2026-08-20). Affichée en permanence, la liste occupait le bas de
+     l'écran pendant tout le parcours et devenait un décor qu'on ne lit plus —
+     alors qu'elle n'a de sens qu'au moment où l'on essaie de valider. */
+  const [ouvert, setOuvert] = useState(false);
+  const bloc = useRef<HTMLDivElement>(null);
+  const incomplet = (manques?.length ?? 0) > 0;
+
+  /* Pas d'effet pour refermer quand le formulaire se complète : la liste ne se
+     rend déjà que si `ouvert && incomplet`. Synchroniser un état sur un autre
+     par un effet créerait un rendu en cascade pour un résultat identique. */
+
+  useEffect(() => {
+    if (!ouvert) return;
+    const surEchap = (e: KeyboardEvent) => e.key === "Escape" && setOuvert(false);
+    const surClic = (e: MouseEvent) => {
+      if (!bloc.current?.contains(e.target as Node)) setOuvert(false);
+    };
+    window.addEventListener("keydown", surEchap);
+    /* `capture` : la fermeture doit précéder les gestionnaires du contenu,
+       sinon un clic sur un bouton de la liste la referme avant de l'exécuter. */
+    window.addEventListener("mousedown", surClic, true);
+    return () => {
+      window.removeEventListener("keydown", surEchap);
+      window.removeEventListener("mousedown", surClic, true);
+    };
+  }, [ouvert]);
+
   useEffect(() => {
     if (precedent.current !== null && precedent.current !== total) {
       setDelta(total - precedent.current);
@@ -450,48 +478,73 @@ export function BarrePrix({
       <span className="text-[1.3rem] font-semibold tabular-nums tracking-tight text-ink">
         {eur(total)}
       </span>
-      {/* Ce qui manque, nommé et **atteignable**. Un bouton grisé qui ne dit
-          pas pourquoi laisse chercher ; un motif qui le dit sans y emmener
-          laisse deviner où. Chaque manque est donc un bouton qui met le champ
-          au premier plan et lui donne le focus.
-
-          `aria-live="polite"` : la liste change à mesure que le formulaire se
-          remplit, et un lecteur d'écran doit suivre sans être interrompu. */}
-      {manques && manques.length > 0 && (
-        <div
-          aria-live="polite"
-          className="flex flex-col gap-1.5 rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2"
-        >
-          <p className="text-[0.72rem] font-medium text-ink">
-            Il reste {manques.length === 1 ? "une chose" : `${manques.length} choses`} à
-            compléter :
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {manques.map((m) => (
+      <div ref={bloc} className="relative">
+        {/* Ce qui manque, nommé et **atteignable**, au-dessus du bouton qui
+            vient d'être refusé. Un bouton qui ne dit pas pourquoi il ne part
+            pas laisse chercher ; une liste qui le dit sans y emmener laisse
+            deviner où. Chaque entrée conduit donc au champ et lui donne le
+            focus. */}
+        {ouvert && manques && manques.length > 0 && (
+          <div
+            role="dialog"
+            aria-label="Éléments à compléter"
+            className="absolute bottom-full left-0 right-0 z-30 mb-2 flex flex-col gap-1.5 rounded-xl border border-accent/30 bg-surface px-3 py-2.5 shadow-[0_12px_32px_rgba(10,9,7,0.16)]"
+          >
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-[0.72rem] font-medium text-ink">
+                Il reste {manques.length === 1 ? "une chose" : `${manques.length} choses`} à
+                compléter :
+              </p>
               <button
-                key={m.cle}
                 type="button"
-                onClick={() => allerAu(m.ancre)}
-                className="rounded-full border border-accent/40 bg-surface px-2.5 py-1 text-[0.7rem] text-accent transition-colors hover:bg-accent hover:text-white"
+                onClick={() => setOuvert(false)}
+                aria-label="Fermer"
+                className="-mr-1 shrink-0 px-1 font-mono text-[0.8rem] leading-none text-muted transition-colors hover:text-ink"
               >
-                {m.libelle}
+                ×
               </button>
-            ))}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {manques.map((m) => (
+                <button
+                  key={m.cle}
+                  type="button"
+                  onClick={() => {
+                    setOuvert(false);
+                    allerAu(m.ancre);
+                  }}
+                  className="rounded-full border border-accent/40 bg-surface px-2.5 py-1 text-[0.7rem] text-accent transition-colors hover:bg-accent hover:text-white"
+                >
+                  {m.libelle}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      <button
-        type="button"
-        onClick={onAction}
-        disabled={actionDesactivee}
-        className={cn(
-          "min-h-[46px] w-full rounded-xl bg-accent px-4 text-[0.9rem] font-semibold text-white transition-opacity",
-          actionDesactivee ? "cursor-not-allowed opacity-45" : "hover:bg-accent-ink",
         )}
-      >
-        {action}
-      </button>
+
+        {/* `aria-disabled` plutôt que `disabled` : le bouton doit rester
+            focusable et activable pour pouvoir **expliquer** son refus. Un
+            bouton `disabled` est un cul-de-sac — il ne reçoit ni clic ni
+            focus, et ne dit donc jamais ce qu'il attend. L'atténuation visuelle
+            reste, elle : le parcours doit se lire d'un coup d'œil. */}
+        <button
+          type="button"
+          aria-disabled={actionDesactivee || undefined}
+          onClick={() => {
+            if (incomplet) {
+              setOuvert((v) => !v);
+              return;
+            }
+            onAction();
+          }}
+          className={cn(
+            "min-h-[46px] w-full rounded-xl bg-accent px-4 text-[0.9rem] font-semibold text-white transition-opacity",
+            actionDesactivee ? "opacity-45" : "hover:bg-accent-ink",
+          )}
+        >
+          {action}
+        </button>
+      </div>
       {note && (
         <p className="text-center text-[0.68rem] leading-snug text-[#8a6a2f]">{note}</p>
       )}
