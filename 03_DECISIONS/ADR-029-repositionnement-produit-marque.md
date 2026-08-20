@@ -289,8 +289,10 @@ est fait pour bouger, l'autre pour rester. Et c'est le mot que le visiteur tape 
 l'interdire revient à écrire la page sans la requête qu'elle vise.
 
 **Comment le garde-fou l'implémente.** Un mécanisme d'exception **ciblée** est
-ajouté à `check-vocabulaire.mjs` : le champ `sauf` lève **un terme sur un
-chemin**. À ne pas confondre avec `EXCLUS`, qui sort **un fichier entier** du
+ajouté à `check-vocabulaire.mjs` : le champ `sauf` lève **un terme sur des
+chemins nommés** — ici trois, parce que le texte d'une page vit à trois
+endroits : la page elle-même, son fichier de contenu (`src/lib/pages/contenu/`,
+convention ADR-038) et le registre, qui porte son titre et son résumé. À ne pas confondre avec `EXCLUS`, qui sort **un fichier entier** du
 contrôle : sur `/studio-jardin-tiny-house`, « maison », « clé en main » et le
 reste de la blocklist continuent d'être vérifiés normalement. L'exception
 n'ouvre pas une zone franche, elle nomme un mot et un endroit.
