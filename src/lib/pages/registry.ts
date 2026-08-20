@@ -103,7 +103,24 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
   {
     route: "/studio-jardin-tiny-house",
     h1: "Studio de jardin ou tiny house : que choisir pour créer un véritable espace à vivre ?",
-    libelle: "Studio ou tiny house",
+    /* ⚠ Le libellé ne porte PAS le terme comparé, alors que le `h1` le porte.
+       Ce n'est pas une inconséquence : `libelle` et `resume` sont affichés sur
+       **toutes les pages du site** — colonne « Usages » du pied de page,
+       maillage « À lire aussi » — tandis que le `h1` ne l'est que sur sa propre
+       page. L'exception d'ADR-029 vaut pour la page qui compare, pas pour
+       l'ensemble du site.
+
+       Constaté sur le rendu du lot 3 : avec « Studio ou tiny house » en
+       libellé, le terme proscrit apparaissait sur les dix pages de guides et
+       sur le hub, par le seul pied de page. Le contrôle ne l'a pas vu parce que
+       ce fichier figure dans la liste `sauf` — l'exception que j'avais posée
+       pour le `h1` couvrait aussi, sans que je l'aie voulu, tout ce que ce
+       fichier diffuse ailleurs.
+
+       Règle qui en découle : dans ce fichier, seul `h1` peut porter un terme
+       sous exception. `libelle` et `resume` sont lus partout — ils restent
+       soumis à la blocklist entière. */
+    libelle: "Studio ou habitat mobile",
     famille: "usage",
     resume:
       "Deux philosophies opposées : l'une est faite pour bouger, l'autre pour rester. Comparaison honnête avant de choisir ce qui ira dans votre jardin.",
@@ -121,7 +138,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Permis, prix, surface, implantation, location : les réponses utiles pour transformer une idée de studio de jardin en projet concret.",
     spec: "guide-00-hub.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.8,
   },
   {
@@ -132,7 +149,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Déclaration préalable, PLU, implantation, secteurs protégés : les vérifications essentielles avant d'installer un studio de jardin.",
     spec: "guide-01-reglementation-permis-20m2.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.7,
   },
   {
@@ -143,7 +160,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Structure, équipements, fondations, transport, raccordements : comprendre ce qui compose réellement le budget d'un studio de jardin.",
     spec: "guide-02-prix-studio-jardin-habitable.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.7,
   },
   {
@@ -154,7 +171,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Créer une chambre, un bureau ou un logement indépendant dans son jardin peut être une alternative élégante à un déménagement.",
     spec: "guide-03-agrandir-sans-demenager.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.7,
   },
   {
@@ -167,7 +184,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Pourquoi 20 m² est un seuil clé, ce que permet la déclaration préalable et les cas où les règles locales changent la donne.",
     spec: "guide-04-permis-studio-jardin-20m2.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.65,
   },
   {
@@ -179,7 +196,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Pour une construction nouvelle de 40 m², le permis de construire est en principe la référence. Voici les points à anticiper.",
     spec: "guide-05-permis-studio-jardin-40m2.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.65,
   },
   {
@@ -191,7 +208,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Au-delà du prix affiché : taxes, accès, fondations, raccordements et options à intégrer pour estimer une enveloppe réaliste.",
     spec: "guide-06-prix-reel-studio-jardin-habitable.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.65,
   },
   {
@@ -202,7 +219,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Le seuil de 20 m² est souvent cité, mais « sans permis » ne veut pas dire « sans autorisation ». Comprendre les règles avant d'agir.",
     spec: "guide-07-surface-habitable-sans-permis.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.7,
   },
   {
@@ -213,7 +230,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Pour un proche, un étudiant ou un usage locatif : les points d'attention pour créer un véritable espace autonome dans son jardin.",
     spec: "guide-08-logement-independant-jardin.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.7,
   },
   {
@@ -224,7 +241,7 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     resume:
       "Urbanisme, confort, exploitation et règles des meublés de tourisme : ce qu'il faut vérifier avant de viser la location courte durée.",
     spec: "guide-09-studio-jardin-location-saisonniere.md",
-    statut: "a-venir",
+    statut: "publiee",
     priorite: 0.7,
   },
 
