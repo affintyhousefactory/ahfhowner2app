@@ -53,7 +53,13 @@ export const SECTIONS = [
   { n: 4, cle: "terrasse", titre: "Terrasse" },
   { n: 5, cle: "options", titre: "Options" },
   { n: 6, cle: "terrain", titre: "Votre situation terrain" },
-  { n: 7, cle: "reservation", titre: "Réserver un numéro" },
+  /* L'adresse quitte la section « situation terrain » le 2026-08-20 : la
+     pré-analyse y déployait zonage, distance, transport et avertissements sous
+     le choix d'implantation, et l'ensemble devenait illisible. Deux questions
+     distinctes — où l'on implante, puis où se trouve le terrain — méritent deux
+     sections. */
+  { n: 7, cle: "adresse", titre: "Adresse du terrain" },
+  { n: 8, cle: "reservation", titre: "Réserver un numéro" },
 ] as const;
 
 /** Verdict de la pré-analyse. `null` = aucune adresse analysée. */
@@ -233,7 +239,11 @@ export function ConfigurateurProvider({
 
     const manques: Manque[] = [];
     if (numero == null) manques.push({ cle: "numero", libelle: "choisir un numéro de série", ancre: "cfg-numeros" });
-    if (!preAnalyse?.adresse) manques.push({ cle: "adresse", libelle: "renseigner l'adresse du terrain", ancre: "cfg-adresse" });
+    /* Une parcelle analysée vaut adresse renseignée, même si le libellé
+       d'adresse manque au résultat : c'est le fait d'avoir localisé le terrain
+       qui compte, pas la façon dont il a été saisi (adresse ou n° de parcelle). */
+    if (!preAnalyse?.adresse && !preAnalyse?.parcelle)
+      manques.push({ cle: "adresse", libelle: "renseigner l'adresse du terrain", ancre: "cfg-adresse" });
     if (!contact.prenom.trim()) manques.push({ cle: "prenom", libelle: "votre prénom", ancre: "cfg-prenom" });
     if (!contact.nom.trim()) manques.push({ cle: "nom", libelle: "votre nom", ancre: "cfg-nom" });
     if (!telPlausible) manques.push({ cle: "tel", libelle: "votre téléphone", ancre: "cfg-tel" });

@@ -26,6 +26,7 @@ import {
   SectionOptions,
   SectionReservation,
   SectionTerrain,
+  SectionAdresseTerrain,
   SectionTerrasse,
 } from "./sections";
 
@@ -100,6 +101,7 @@ function Parcours() {
           <SectionTerrasse />
           <SectionOptions />
           <SectionTerrain />
+          <SectionAdresseTerrain />
           <SectionReservation />
         </div>
 

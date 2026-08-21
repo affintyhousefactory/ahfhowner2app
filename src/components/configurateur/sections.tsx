@@ -346,9 +346,13 @@ export function SectionTerrain() {
       try {
         const brut = sessionStorage.getItem("plu_result");
         if (!brut) return;
-        const d = JSON.parse(brut) as ParcelleData & { adresse?: string };
+        const d = JSON.parse(brut) as ParcelleData;
         c.setPreAnalyse({
-          adresse: d.adresse ?? "",
+          /* `address_label` est le nom réel du champ renvoyé par l'analyse.
+             Lire `adresse` donnait toujours `undefined` : le manque « renseigner
+             l'adresse du terrain » restait affiché alors que la parcelle était
+             analysée, distance et transport calculés. */
+          adresse: d.address_label ?? "",
           zone: d.zone_urba ?? null,
           parcelle: d.parcelle ?? null,
           distanceKm: d.lat != null && d.lon != null ? distanceDepuisAtelier(d.lat, d.lon) : null,
@@ -366,13 +370,13 @@ export function SectionTerrain() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* Le résumé ne porte plus la distance : l'adresse a sa propre section depuis
+     le 2026-08-20, et c'est elle qui l'affiche. */
   const resume = !c.usage
     ? "Implantation non précisée"
     : c.brancheFermee
       ? "Terrain nu — prochainement"
-      : `${USAGES[c.usage].titre} · ${
-          c.preAnalyse?.distanceKm != null ? `${c.preAnalyse.distanceKm} km` : "adresse non renseignée"
-        }`;
+      : USAGES[c.usage].titre;
 
   return (
     <Section n={6} titre="Votre situation terrain" resume={resume}>
@@ -401,55 +405,87 @@ export function SectionTerrain() {
             Être informé en priorité
           </a>
         </div>
-      ) : (
-        <div className="flex flex-col gap-2.5">
-          <Eyebrow>Adresse du terrain</Eyebrow>
-          {/* `cfg-adresse` : cible du focus quand la barre signale que
-              l'adresse manque. */}
-          <div id="cfg-adresse" tabIndex={-1} className="scroll-mt-32 rounded-xl border border-line bg-paper p-3 outline-none">
-            <ParcelleAnalyse mode="compact" />
-
-            {c.preAnalyse?.distanceKm != null && (
-              <dl className="mt-3 flex flex-col gap-1.5 border-t border-dashed border-line pt-3 text-[0.76rem]">
-                {c.preAnalyse.zone && (
-                  <Ligne k="Zone d'urbanisme" v={c.preAnalyse.zone} />
-                )}
-                <Ligne k="Distance atelier Bayonne" v={`${c.preAnalyse.distanceKm} km`} />
-                <Ligne k="Transport estimé" v={c.transport != null ? eur(c.transport) : "à estimer"} />
-                <span className="self-start rounded-full border border-blue/40 bg-blue/[0.08] px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.05em] text-blue">
-                  Grutage {eur(TRANSPORT.grutageEur)} + {c.preAnalyse.distanceKm} km ×{" "}
-                  {c.transportDetailPerKm.toFixed(2).replace(".", ",")} €/km
-                </span>
-              </dl>
-            )}
-
-            {/* Terrain non éligible : on le dit, mais on ne ferme pas la
-                porte. La pré-analyse lit un zonage, elle ne juge pas un
-                projet — un entretien peut lever ce que la donnée ignore. La
-                réservation reste possible, sous condition (cf. barre de prix). */}
-            {c.eligibilite === "ineligible" && (
-              <p className="mt-3 rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.75rem] leading-relaxed text-[#8a6a2f]">
-                D&apos;après le zonage consulté, cette parcelle ne paraît pas
-                constructible en l&apos;état. Vous pouvez tout de même réserver un
-                numéro : son éligibilité sera vérifiée lors de l&apos;entretien, et la
-                réservation reste sans engagement jusqu&apos;au devis signé.
-              </p>
-            )}
-
-            {/* Générique, au conditionnel, jamais lié à la parcelle saisie (§8). */}
-            <p className="mt-3 border-t border-dashed border-line pt-3 text-[0.75rem] leading-relaxed text-muted">
-              {URBANISME_GENERIQUE}
-            </p>
-          </div>
-          <Mention texte={MENTIONS.terrain} />
-        </div>
-      )}
+      ) : null}
     </Section>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* 06 — réserver un numéro                                             */
+/* 07 — adresse du terrain                                             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Section détachée de « Votre situation terrain » le 2026-08-20.
+ *
+ * La pré-analyse déploie zonage, distance, transport, avertissement
+ * d'éligibilité et rappel d'urbanisme : empilé sous le choix d'implantation,
+ * l'ensemble devenait illisible. Ce sont deux questions distinctes — où l'on
+ * implante, puis où se trouve le terrain.
+ *
+ * Absente sur la branche « terrain nu », qui ne mène ni à un prix ni à une
+ * réservation (§16 n°1) : demander une adresse y serait sans objet.
+ */
+export function SectionAdresseTerrain() {
+  const c = useConfigurateur();
+  if (c.brancheFermee) return null;
+
+  const resume = c.preAnalyse?.adresse
+    ? c.preAnalyse.adresse
+    : c.preAnalyse?.parcelle
+      ? `Parcelle ${c.preAnalyse.parcelle}`
+      : "Non renseignée";
+
+  return (
+    <Section n={7} titre="Adresse du terrain" resume={resume}>
+      {/* `cfg-adresse` : cible du focus quand la barre signale que l'adresse
+          manque. */}
+      <div
+        id="cfg-adresse"
+        tabIndex={-1}
+        className="scroll-mt-32 rounded-xl border border-line bg-paper p-3 outline-none"
+      >
+        <ParcelleAnalyse mode="compact" />
+
+        {c.preAnalyse?.distanceKm != null && (
+          <dl className="mt-3 flex flex-col gap-1.5 border-t border-dashed border-line pt-3 text-[0.76rem]">
+            {c.preAnalyse.zone && <Ligne k="Zone d'urbanisme" v={c.preAnalyse.zone} />}
+            <Ligne k="Distance atelier Bayonne" v={`${c.preAnalyse.distanceKm} km`} />
+            <Ligne
+              k="Transport estimé"
+              v={c.transport != null ? eur(c.transport) : "à estimer"}
+            />
+            <span className="self-start rounded-full border border-blue/40 bg-blue/[0.08] px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.05em] text-blue">
+              Grutage {eur(TRANSPORT.grutageEur)} + {c.preAnalyse.distanceKm} km ×{" "}
+              {c.transportDetailPerKm.toFixed(2).replace(".", ",")} €/km
+            </span>
+          </dl>
+        )}
+
+        {/* Terrain non éligible : on le dit, mais on ne ferme pas la porte. La
+            pré-analyse lit un zonage, elle ne juge pas un projet — un entretien
+            peut lever ce que la donnée ignore. La réservation reste possible,
+            sous condition (cf. barre de prix). */}
+        {c.eligibilite === "ineligible" && (
+          <p className="mt-3 rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.75rem] leading-relaxed text-[#8a6a2f]">
+            D&apos;après le zonage consulté, cette parcelle ne paraît pas
+            constructible en l&apos;état. Vous pouvez tout de même réserver un
+            numéro : son éligibilité sera vérifiée lors de l&apos;entretien, et la
+            réservation reste sans engagement jusqu&apos;au devis signé.
+          </p>
+        )}
+
+        {/* Générique, au conditionnel, jamais lié à la parcelle saisie (§8). */}
+        <p className="mt-3 border-t border-dashed border-line pt-3 text-[0.75rem] leading-relaxed text-muted">
+          {URBANISME_GENERIQUE}
+        </p>
+      </div>
+      <Mention texte={MENTIONS.terrain} />
+    </Section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 08 — réserver un numéro                                             */
 /* ------------------------------------------------------------------ */
 
 export function SectionReservation() {
@@ -467,7 +503,7 @@ export function SectionReservation() {
 
   return (
     <Section
-      n={7}
+      n={8}
       titre="Réserver un numéro"
       resume={`${c.cfg.serie.libelle} · ${dispo} restant${dispo > 1 ? "s" : ""}`}
     >
