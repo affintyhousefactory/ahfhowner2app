@@ -1,6 +1,6 @@
 # ADR-031 — Soumission de la demande de numéro : du configurateur au lead
 
-- **Statut** : Proposé
+- **Statut** : Accepté
 - **Date** : 2026-08-21
 - **Phase** : 4
 - **Faisabilité** : 🟠 Moyenne — aucune inconnue technique, mais deux objets de base à corriger avant la première écriture.
@@ -193,6 +193,41 @@ signalé pour ne pas être redécouvert.
   liste statique (`chargerNumeros()`), ce qui rejoint ADR-009.
 - **ADR-035 est confirmée dans son pari** : le CRM a été refait avant la
   soumission pour poser le contrat de données. Il n'y a rien à y adapter.
+
+## Application
+
+**Migration `20260821_adr031_soumission_numero.sql` appliquée sur Preview
+(`ahfhownerdb-preprod`) le 2026-08-21**, sur accord de Richard.
+
+**Vérifiée par requête, pas sur `success: true`** (règle du 2026-08-18) :
+colonne `cfg_ambiance_interieure` présente, `leads_slot_check` borné à
+`slot is null or (1..6)`, `leads_slot_unique` disparu,
+`leads_slot_confirme_unique` créé avec sa clause partielle, zéro numéro hors
+bornes.
+
+**Et surtout vérifiée fonctionnellement**, ce qui était l'objet même du §2 —
+la structure ne prouvait rien :
+
+1. deux demandes non confirmées sur le n° 5 → **acceptées**, ce que l'ancien
+   index refusait ;
+2. la première confirmée en `paiement_reserve` → **acceptée** ;
+3. la seconde confirmée en `signe` sur le même numéro → **rejetée**
+   (`23505 duplicate key ... leads_slot_confirme_unique`).
+
+Les lignes d'essai ont été retirées. `get_advisors` security et performance ne
+remontent que des points préexistants et sans rapport (protection des mots de
+passe compromis côté Auth, index inutilisés, politiques RLS du domaine
+mandataire suspendu).
+
+⚠ **Un lead de test de Preview portait le n° 12** et empêchait de resserrer la
+contrainte. Son numéro a été relâché à `NULL` plutôt que la ligne supprimée :
+le lead reste lisible, seul son numéro — devenu impossible — s'efface.
+
+⚠ **Prod non appliquée** : la table y est vide et la règle du projet veut que
+les migrations passent en production à la validation de la PR `dev` → `main`.
+
+**Reste à écrire** : la route `POST /api/configurateur/reservation` et le
+branchement du bouton. Les migrations ne font qu'ouvrir la voie.
 
 ## Sources
 
