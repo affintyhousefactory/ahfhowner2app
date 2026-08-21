@@ -485,19 +485,13 @@ export function SectionAdresseTerrain() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 08 — réserver un numéro                                             */
+/* 08 — choisir son numéro de série                                    */
 /* ------------------------------------------------------------------ */
 
 export function SectionReservation() {
   const c = useConfigurateur();
   const numeros = useMemo(() => chargerNumeros(c.cfg.serie.unites), [c.cfg.serie.unites]);
 
-  const modele = c.cfg.modeles.find((m) => m.id === c.modele)!;
-  const ambiance = c.cfg.ambiances.find((a) => a.id === c.ambiance);
-  const interieurRecap = c.cfg.ambiancesInterieures.find(
-    (a) => a.id === c.ambianceInterieure,
-  );
-  const palier = c.paliers.find((p) => p.id === c.terrasse);
   const dispo = nbDisponibles(numeros);
   const choisiDemande = c.numero != null && numeros.find((x) => x.n === c.numero)?.etat === "demande";
 
@@ -573,52 +567,39 @@ export function SectionReservation() {
         </p>
       )}
 
-      <Eyebrow>Votre configuration</Eyebrow>
-      <dl className="flex flex-col gap-1.5">
-        <Ligne k={`${modele.nom} — ${modele.surface} m²`} v={eur(c.prixBase)} />
-        {ambiance && <Ligne k={`Bardage ${ambiance.nom.toLowerCase()}`} v="inclus" />}
-        {interieurRecap && (
-          <Ligne k={`${interieurRecap.nom}`} v="incluse" />
-        )}
-        {c.prixTerrasse > 0 && <Ligne k={`Terrasse ${palier?.nom.toLowerCase()}`} v={eur(c.prixTerrasse)} />}
-        {c.optionsDisponibles
-          .filter((o) => c.options.includes(o.id))
-          .map((o) => (
-            <Ligne key={o.id} k={o.nom} v={eur(prixOption(o, c.modele))} />
-          ))}
-        <Ligne
-          k={c.preAnalyse?.distanceKm != null ? `Transport — ${c.preAnalyse.distanceKm} km depuis Bayonne` : "Transport"}
-          v={c.transport != null ? eur(c.transport) : "à estimer"}
-        />
-        <div className="mt-1 flex items-baseline justify-between gap-3 border-t border-line pt-2">
-          <dt className="text-[0.92rem] font-semibold text-ink">Estimation TTC</dt>
-          <dd className="font-mono text-[0.92rem] font-semibold tabular-nums text-ink">{eur(c.total)}</dd>
-        </div>
-      </dl>
-      <Mention texte={MENTIONS.prix} />
+    </Section>
+  );
+}
 
-      <Eyebrow>Compris dans le prix</Eyebrow>
-      <p className="text-[0.76rem] leading-relaxed text-muted">{SOCLE.compris}</p>
-      <Eyebrow>À votre charge</Eyebrow>
-      <p className="text-[0.76rem] leading-relaxed text-muted">{SOCLE.charge}</p>
+/* ------------------------------------------------------------------ */
+/* 09 — vos coordonnées                                                */
+/* ------------------------------------------------------------------ */
 
-      <div className="flex flex-col gap-2 rounded-xl border border-line bg-paper p-3">
-        <p className="text-[0.78rem] leading-relaxed text-muted">{DEVIS_TEXTE.intro}</p>
-        <div className="flex items-baseline gap-2 rounded-xl border border-line bg-surface px-3 py-2">
-          <b className="whitespace-nowrap font-mono text-[0.95rem] tabular-nums text-ink">
-            {eur(c.cfg.reservation.montantTtc)}
-          </b>
-          <span className="text-[0.73rem] leading-snug text-muted">{DEVIS_TEXTE.ligne}</span>
-        </div>
-        <p className="text-[0.78rem] text-muted">
-          {DEVIS_TEXTE.conditions}{" "}
-          <a href="/cgv" className="text-accent underline underline-offset-2">
-            CGV
-          </a>
-          .
-        </p>
-      </div>
+/**
+ * Détachée de la réservation le 2026-08-20.
+ *
+ * Choisir un numéro et se présenter sont deux gestes différents : le premier
+ * est un choix, le second une saisie. Les tenir dans un même accordéon
+ * obligeait à traverser tout le récapitulatif de prix pour passer de l'un à
+ * l'autre.
+ *
+ * Les consentements restent ici, avec les coordonnées qu'ils engagent.
+ */
+export function SectionCoordonnees() {
+  const c = useConfigurateur();
 
+  const rempli =
+    c.contact.prenom.trim() &&
+    c.contact.nom.trim() &&
+    c.contact.tel &&
+    c.contact.email.trim();
+
+  return (
+    <Section
+      n={9}
+      titre="Vos coordonnées"
+      resume={rempli ? `${c.contact.prenom} ${c.contact.nom}` : "Tous les champs requis"}
+    >
       <Eyebrow>Vos coordonnées — tous requis</Eyebrow>
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
@@ -673,6 +654,81 @@ export function SectionReservation() {
         </Case>
       </div>
     </Section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Détail de la configuration — panneau du pied de parcours            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Le récapitulatif complet : lignes de configuration, estimation, périmètre,
+ * et conditions de réservation.
+ *
+ * Il ne vit plus dans un accordéon mais dans le pied du parcours, ouvert
+ * depuis la barre de prix (décision du 2026-08-20). Le raisonnement : ce
+ * détail répond à une question posée par le total affiché juste à côté —
+ * « d'où vient ce prix ? ». Le placer ailleurs obligeait à quitter des yeux le
+ * chiffre qu'il explique, et à traverser un long bloc de texte pour atteindre
+ * les champs de contact.
+ */
+export function DetailConfiguration() {
+  const c = useConfigurateur();
+  const modele = c.cfg.modeles.find((m) => m.id === c.modele)!;
+  const ambiance = c.cfg.ambiances.find((a) => a.id === c.ambiance);
+  const interieurRecap = c.cfg.ambiancesInterieures.find(
+    (a) => a.id === c.ambianceInterieure,
+  );
+  const palier = c.paliers.find((p) => p.id === c.terrasse);
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      <Eyebrow>Votre configuration</Eyebrow>
+      <dl className="flex flex-col gap-1.5">
+        <Ligne k={`${modele.nom} — ${modele.surface} m²`} v={eur(c.prixBase)} />
+        {ambiance && <Ligne k={`Bardage ${ambiance.nom.toLowerCase()}`} v="inclus" />}
+        {interieurRecap && (
+          <Ligne k={`${interieurRecap.nom}`} v="incluse" />
+        )}
+        {c.prixTerrasse > 0 && <Ligne k={`Terrasse ${palier?.nom.toLowerCase()}`} v={eur(c.prixTerrasse)} />}
+        {c.optionsDisponibles
+          .filter((o) => c.options.includes(o.id))
+          .map((o) => (
+            <Ligne key={o.id} k={o.nom} v={eur(prixOption(o, c.modele))} />
+          ))}
+        <Ligne
+          k={c.preAnalyse?.distanceKm != null ? `Transport — ${c.preAnalyse.distanceKm} km depuis Bayonne` : "Transport"}
+          v={c.transport != null ? eur(c.transport) : "à estimer"}
+        />
+        <div className="mt-1 flex items-baseline justify-between gap-3 border-t border-line pt-2">
+          <dt className="text-[0.92rem] font-semibold text-ink">Estimation TTC</dt>
+          <dd className="font-mono text-[0.92rem] font-semibold tabular-nums text-ink">{eur(c.total)}</dd>
+        </div>
+      </dl>
+      <Mention texte={MENTIONS.prix} />
+
+      <Eyebrow>Compris dans le prix</Eyebrow>
+      <p className="text-[0.76rem] leading-relaxed text-muted">{SOCLE.compris}</p>
+      <Eyebrow>À votre charge</Eyebrow>
+      <p className="text-[0.76rem] leading-relaxed text-muted">{SOCLE.charge}</p>
+
+      <div className="flex flex-col gap-2 rounded-xl border border-line bg-paper p-3">
+        <p className="text-[0.78rem] leading-relaxed text-muted">{DEVIS_TEXTE.intro}</p>
+        <div className="flex items-baseline gap-2 rounded-xl border border-line bg-surface px-3 py-2">
+          <b className="whitespace-nowrap font-mono text-[0.95rem] tabular-nums text-ink">
+            {eur(c.cfg.reservation.montantTtc)}
+          </b>
+          <span className="text-[0.73rem] leading-snug text-muted">{DEVIS_TEXTE.ligne}</span>
+        </div>
+        <p className="text-[0.78rem] text-muted">
+          {DEVIS_TEXTE.conditions}{" "}
+          <a href="/cgv" className="text-accent underline underline-offset-2">
+            CGV
+          </a>
+          .
+        </p>
+      </div>
+    </div>
   );
 }
 

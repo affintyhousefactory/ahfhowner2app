@@ -25,6 +25,8 @@ import {
   SectionModule,
   SectionOptions,
   SectionReservation,
+  SectionCoordonnees,
+  DetailConfiguration,
   SectionTerrain,
   SectionAdresseTerrain,
   SectionTerrasse,
@@ -103,6 +105,7 @@ function Parcours() {
           <SectionTerrain />
           <SectionAdresseTerrain />
           <SectionReservation />
+          <SectionCoordonnees />
         </div>
 
         {/* §16 n°1 — la branche « terrain nu » ne doit mener ni à un prix ni à
@@ -124,6 +127,7 @@ function Parcours() {
                 : "Seul le devis signé fait foi."
             }
             manques={c.manques}
+            detail={<DetailConfiguration />}
             /* Terrain non éligible : la réservation reste ouverte, mais elle
                change de nature — et le bouton le dit avant le clic, pas après. */
             note={

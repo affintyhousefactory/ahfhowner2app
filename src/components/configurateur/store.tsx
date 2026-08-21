@@ -60,6 +60,12 @@ export const SECTIONS = [
      sections. */
   { n: 7, cle: "adresse", titre: "Adresse du terrain" },
   { n: 8, cle: "reservation", titre: "Réserver un numéro" },
+  /* Les coordonnées quittent la réservation le 2026-08-20 : choisir un numéro
+     et se présenter sont deux gestes différents, et le récapitulatif de prix
+     qui les séparait obligeait à le traverser pour passer de l'un à l'autre.
+     Ce récapitulatif vit désormais au pied du parcours, où il explique le total
+     affiché juste à côté. */
+  { n: 9, cle: "coordonnees", titre: "Vos coordonnées" },
 ] as const;
 
 /** Verdict de la pré-analyse. `null` = aucune adresse analysée. */

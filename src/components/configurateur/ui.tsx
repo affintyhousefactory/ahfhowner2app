@@ -403,6 +403,7 @@ export function BarrePrix({
   onAction,
   manques,
   note,
+  detail,
 }: {
   total: number;
   mention: string;
@@ -417,6 +418,14 @@ export function BarrePrix({
   manques?: readonly { cle: string; libelle: string; ancre: string }[];
   /** Précision affichée sous le bouton — ex. réservation sous condition. */
   note?: string;
+  /**
+   * Récapitulatif complet de la configuration, ouvert depuis la barre.
+   *
+   * Il vit ici plutôt que dans un accordéon parce qu'il répond à la question
+   * que pose le total affiché juste au-dessus — « d'où vient ce prix ? ».
+   * Ailleurs, il aurait fallu quitter des yeux le chiffre qu'il explique.
+   */
+  detail?: ReactNode;
 }) {
   const [delta, setDelta] = useState<number | null>(null);
   const precedent = useRef<number | null>(null);
@@ -425,19 +434,24 @@ export function BarrePrix({
      Richard, 2026-08-20). Affichée en permanence, la liste occupait le bas de
      l'écran pendant tout le parcours et devenait un décor qu'on ne lit plus —
      alors qu'elle n'a de sens qu'au moment où l'on essaie de valider. */
-  const [ouvert, setOuvert] = useState(false);
+  /* Un seul panneau à la fois : deux volets ouverts au-dessus d'une barre
+     collante se recouvriraient, et le second n'aurait nulle part où aller. */
+  const [panneau, setPanneau] = useState<"manques" | "detail" | null>(null);
   const bloc = useRef<HTMLDivElement>(null);
   const incomplet = (manques?.length ?? 0) > 0;
+  const ouvert = panneau === "manques";
+  const setOuvert = (v: boolean | ((p: boolean) => boolean)) =>
+    setPanneau((p) => ((typeof v === "function" ? v(p === "manques") : v) ? "manques" : null));
 
   /* Pas d'effet pour refermer quand le formulaire se complète : la liste ne se
      rend déjà que si `ouvert && incomplet`. Synchroniser un état sur un autre
      par un effet créerait un rendu en cascade pour un résultat identique. */
 
   useEffect(() => {
-    if (!ouvert) return;
-    const surEchap = (e: KeyboardEvent) => e.key === "Escape" && setOuvert(false);
+    if (!panneau) return;
+    const surEchap = (e: KeyboardEvent) => e.key === "Escape" && setPanneau(null);
     const surClic = (e: MouseEvent) => {
-      if (!bloc.current?.contains(e.target as Node)) setOuvert(false);
+      if (!bloc.current?.contains(e.target as Node)) setPanneau(null);
     };
     window.addEventListener("keydown", surEchap);
     /* `capture` : la fermeture doit précéder les gestionnaires du contenu,
@@ -447,7 +461,7 @@ export function BarrePrix({
       window.removeEventListener("keydown", surEchap);
       window.removeEventListener("mousedown", surClic, true);
     };
-  }, [ouvert]);
+  }, [panneau]);
 
   useEffect(() => {
     if (precedent.current !== null && precedent.current !== total) {
@@ -479,6 +493,33 @@ export function BarrePrix({
         {eur(total)}
       </span>
       <div ref={bloc} className="relative">
+        {/* Détail de la configuration — même mécanique que la liste des
+            manques, même endroit : ce qui explique le prix s'ouvre à côté du
+            prix. Le panneau défile s'il dépasse, la barre restant collée en
+            bas d'un écran qui peut être court. */}
+        {panneau === "detail" && detail && (
+          <div
+            role="dialog"
+            aria-label="Votre configuration en détail"
+            className="absolute bottom-full left-0 right-0 z-30 mb-2 max-h-[62svh] overflow-y-auto rounded-xl border border-line bg-surface px-3 py-3 shadow-[0_12px_32px_rgba(10,9,7,0.16)]"
+          >
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <p className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-muted">
+                Votre configuration en détail
+              </p>
+              <button
+                type="button"
+                onClick={() => setPanneau(null)}
+                aria-label="Fermer le détail"
+                className="-mr-1 shrink-0 px-1 font-mono text-[0.8rem] leading-none text-muted transition-colors hover:text-ink"
+              >
+                ×
+              </button>
+            </div>
+            {detail}
+          </div>
+        )}
+
         {/* Ce qui manque, nommé et **atteignable**, au-dessus du bouton qui
             vient d'être refusé. Un bouton qui ne dit pas pourquoi il ne part
             pas laisse chercher ; une liste qui le dit sans y emmener laisse
@@ -520,6 +561,26 @@ export function BarrePrix({
               ))}
             </div>
           </div>
+        )}
+
+        {detail && (
+          <button
+            type="button"
+            aria-expanded={panneau === "detail"}
+            onClick={() => setPanneau((p) => (p === "detail" ? null : "detail"))}
+            className="mb-2 flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-[0.76rem] text-ink transition-colors hover:border-ink/30"
+          >
+            <span>Votre configuration en détail</span>
+            <span
+              aria-hidden
+              className={cn(
+                "font-mono text-[0.7rem] text-muted transition-transform duration-300",
+                panneau === "detail" && "rotate-180",
+              )}
+            >
+              ▲
+            </span>
+          </button>
         )}
 
         {/* `aria-disabled` plutôt que `disabled` : le bouton doit rester
