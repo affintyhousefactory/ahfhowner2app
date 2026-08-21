@@ -562,6 +562,43 @@ export function SectionReservation() {
           : "Le numéro choisi vous est attribué à la signature du devis."}
       </p>
 
+      {/* Retour de la soumission (ADR-031). Placé ici parce que c'est ici que
+          se joue le seul cas qui demande une action : le numéro perdu. */}
+      {c.envoi.phase === "conflit" && (
+        <p className="rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.78rem] leading-relaxed text-[#8a6a2f]">
+          Ce numéro vient d&apos;être confirmé par un autre client — à quelques
+          minutes près. Votre configuration est intacte :{" "}
+          {c.numerosLibres.length > 0
+            ? `choisissez un autre numéro (${c.numerosLibres.map((n) => String(n).padStart(2, "0")).join(", ")} encore libres).`
+            : "choisissez un autre numéro ci-dessus."}
+        </p>
+      )}
+
+      {c.envoi.phase === "envoye" && (
+        <p className="rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2 text-[0.78rem] leading-relaxed text-ink">
+          Demande envoyée. Vous recevez un récapitulatif par email, et nous vous
+          rappelons pour confirmer votre numéro.
+        </p>
+      )}
+
+      {c.envoi.phase === "partiel" && (
+        <p className="rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.78rem] leading-relaxed text-[#8a6a2f]">
+          Votre demande nous est parvenue
+          {c.envoi.notified
+            ? ", mais son enregistrement n'a pas abouti"
+            : c.envoi.persisted
+              ? ", mais l'email de récapitulatif n'a pas pu partir"
+              : ", mais son traitement automatique n'a pas abouti"}
+          . Nous vous rappelons — conservez cette page ou notez votre numéro.
+        </p>
+      )}
+
+      {c.envoi.phase === "erreur" && (
+        <p className="rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.78rem] leading-relaxed text-[#8a6a2f]">
+          {c.envoi.message} Vous pouvez aussi nous appeler directement.
+        </p>
+      )}
+
       {/* Dit ce qui manque là où le geste se fait, plutôt que d'attendre le bas
           de page : sans numéro sélectionné, la suite du formulaire n'a pas
           d'objet. */}

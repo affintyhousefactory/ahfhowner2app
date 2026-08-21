@@ -137,9 +137,13 @@ function Parcours() {
                   : "* Terrain non testé — éligibilité vérifiée lors de l'entretien."
                 : undefined
             }
-            onAction={() => {
-              /* ADR-031 : soumission de la demande de numéro. */
-            }}
+            /* ADR-031 — la demande part réellement. Turnstile est laissé à
+               la charge de la route tant que le widget n'est pas posé dans le
+               parcours : la clé de site n'est pas encore branchée ici, et un
+               jeton absent est refusé côté serveur si le secret est
+               configuré. À poser avec le widget, pas avant. */
+            onAction={() => void c.soumettre()}
+            enCours={c.envoi.phase === "envoi"}
           />
         )}
       </div>

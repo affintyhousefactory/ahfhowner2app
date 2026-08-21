@@ -103,6 +103,22 @@ export type Manque = {
   ancre: string;
 };
 
+/**
+ * État de la soumission (ADR-031).
+ *
+ * `partiel` = la demande est arrivée mais tout n'a pas été enregistré. On le
+ * distingue d'`envoye` plutôt que de l'y fondre : c'est précisément la
+ * confusion qui a rendu une base en pause invisible pendant des semaines
+ * (`shared/lib/panne.ts`).
+ */
+export type EtatEnvoi =
+  | { phase: "repos" }
+  | { phase: "envoi" }
+  | { phase: "envoye" }
+  | { phase: "partiel"; persisted: boolean; notified: boolean }
+  | { phase: "conflit" }
+  | { phase: "erreur"; message: string };
+
 export type PreAnalyse = {
   adresse: string;
   zone: string | null;
@@ -173,6 +189,18 @@ type Ctx = {
    */
   manques: Manque[];
 
+  /**
+   * Où en est la demande.
+   *
+   * `conflit` n'est pas une erreur : c'est une course perdue sur un numéro que
+   * quelqu'un vient de confirmer. Elle a sa propre réponse — rechoisir — et ne
+   * doit ni se confondre avec une panne, ni faire perdre la configuration.
+   */
+  envoi: EtatEnvoi;
+  soumettre: (captchaToken?: string) => Promise<void>;
+  /** Numéros encore libres, renvoyés par le serveur en cas de conflit. */
+  numerosLibres: number[];
+
   numero: number | null;
   setNumero: (n: number | null) => void;
 
@@ -228,6 +256,9 @@ export function ConfigurateurProvider({
     setContactState((prev) => ({ ...prev, [champ]: valeur }));
   }, []);
 
+  const [envoi, setEnvoi] = useState<EtatEnvoi>({ phase: "repos" });
+  const [numerosLibres, setNumerosLibres] = useState<number[]>([]);
+
   /* Changer de studio purge les options devenues incompatibles : le poêle
      n'existe pas sur l'Arko One, et une option fantôme fausserait le total. */
   const setModele = useCallback(
@@ -243,18 +274,109 @@ export function ConfigurateurProvider({
     setOptions((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }, []);
 
-  const value = useMemo<Ctx>(() => {
-    const m = getModele(cfg, modele);
+  /* Prix isolés dans leur propre mémo : l'affichage et la soumission en ont
+     besoin tous les deux, et les recalculer de chaque côté aurait fait deux
+     chemins pour un même nombre. Un mémo dédié plutôt qu'un calcul nu, sinon
+     les valeurs changent d'identité à chaque rendu et emportent avec elles la
+     mémoïsation du contexte entier. */
+  const prix = useMemo(() => {
+    const modeleCourant = getModele(cfg, modele);
     const paliers = paliersPourModele(cfg, modele);
     const optionsDisponibles = optionsPourModele(cfg, modele);
-
-    const prixBase = m.prixBaseTtc;
+    const prixBase = modeleCourant.prixBaseTtc;
     const prixTerrasse = paliers.find((p) => p.id === terrasse)?.prixTtc ?? 0;
     const prixOptions = optionsDisponibles
       .filter((o) => options.includes(o.id))
       .reduce((s, o) => s + prixOption(o, modele), 0);
-    const transport = transportEur(preAnalyse?.distanceKm ?? null, m);
+    const transport = transportEur(preAnalyse?.distanceKm ?? null, modeleCourant);
+    return {
+      modeleCourant,
+      paliers,
+      optionsDisponibles,
+      prixBase,
+      prixTerrasse,
+      prixOptions,
+      transport,
+      total: prixBase + prixTerrasse + prixOptions + (transport ?? 0),
+    };
+  }, [cfg, modele, terrasse, options, preAnalyse]);
 
+  /**
+   * Envoie la demande de numéro (ADR-031).
+   *
+   * Les prix ne sont pas transmis comme vérité : le serveur les recalcule
+   * depuis sa propre grille. `totalAffiche` ne part que pour être comparé —
+   * un désaccord signale une grille qui a bougé pendant la session.
+   *
+   * L'analyse de terrain est relue depuis `sessionStorage` au moment de
+   * l'envoi plutôt que recopiée dans l'état : c'est là qu'elle est complète,
+   * et le store n'en garde que ce dont le parcours a besoin.
+   */
+  const soumettre = useCallback(
+    async (captchaToken?: string) => {
+      setEnvoi({ phase: "envoi" });
+      let pluData: unknown = null;
+      try {
+        const brut = sessionStorage.getItem("plu_result");
+        if (brut) pluData = JSON.parse(brut);
+      } catch {
+        /* résultat illisible : la demande part sans, plutôt que de ne pas partir */
+      }
+
+      try {
+        const res = await fetch("/api/configurateur/reservation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contact,
+            numero,
+            modele,
+            usage,
+            quantite,
+            ambiance,
+            ambianceInterieure,
+            terrasse,
+            options,
+            totalAffiche: prix.total,
+            transport: prix.transport,
+            distanceKm: preAnalyse?.distanceKm ?? null,
+            pluConsent: Boolean(pluData),
+            pluData,
+            optIn: optin,
+            captchaToken,
+          }),
+        });
+
+        if (res.status === 409) {
+          const data = (await res.json()) as { disponibles?: number[] };
+          setNumerosLibres(data.disponibles ?? []);
+          setNumero(null);
+          setEnvoi({ phase: "conflit" });
+          return;
+        }
+        if (!res.ok) {
+          setEnvoi({ phase: "erreur", message: "La demande n'a pas pu être envoyée." });
+          return;
+        }
+
+        const data = (await res.json()) as { persisted: boolean; notified: boolean };
+        /* Tout n'a pas forcément abouti. On le dit plutôt que d'afficher un
+           succès plein : AHF sera prévenu par le journal, le visiteur mérite
+           de savoir que sa demande demande un rappel. */
+        setEnvoi(
+          data.persisted && data.notified
+            ? { phase: "envoye" }
+            : { phase: "partiel", persisted: data.persisted, notified: data.notified },
+        );
+      } catch {
+        setEnvoi({ phase: "erreur", message: "Connexion interrompue — réessayez." });
+      }
+    },
+    [contact, numero, modele, usage, quantite, ambiance, ambianceInterieure, terrasse, options, prix, preAnalyse, optin],
+  );
+
+  const value = useMemo<Ctx>(() => {
+    const { modeleCourant: m, paliers, optionsDisponibles, prixBase, prixTerrasse, prixOptions, transport, total } = prix;
     const usageDef = cfg.usages.find((u) => u.id === usage);
     const seuil = usageDef?.seuilDevisDedie;
 
@@ -331,6 +453,9 @@ export function ConfigurateurProvider({
       cgv,
       setCgv,
       manques,
+      envoi,
+      soumettre,
+      numerosLibres,
       numero,
       setNumero,
       paliers,
@@ -342,9 +467,9 @@ export function ConfigurateurProvider({
       prixOptions,
       transport,
       transportDetailPerKm: transportPerKm(m),
-      total: prixBase + prixTerrasse + prixOptions + (transport ?? 0),
+      total,
     };
-  }, [cfg, usage, quantite, modele, setModele, ambiance, ambianceInterieure, terrasse, options, toggleOption, preAnalyse, numero, eligibilite, contact, setContact, optin, cgv]);
+  }, [cfg, usage, quantite, modele, setModele, ambiance, ambianceInterieure, terrasse, options, toggleOption, preAnalyse, numero, eligibilite, contact, setContact, optin, cgv, envoi, soumettre, numerosLibres, prix]);
 
   return <ConfigCtx.Provider value={value}>{children}</ConfigCtx.Provider>;
 }

@@ -437,6 +437,7 @@ export function BarrePrix({
   manques,
   note,
   detail,
+  enCours,
 }: {
   total: number;
   mention: string;
@@ -459,6 +460,8 @@ export function BarrePrix({
    * Ailleurs, il aurait fallu quitter des yeux le chiffre qu'il explique.
    */
   detail?: ReactNode;
+  /** Demande en cours d'envoi — le bouton se verrouille et le dit. */
+  enCours?: boolean;
 }) {
   const [delta, setDelta] = useState<number | null>(null);
   const precedent = useRef<number | null>(null);
@@ -624,6 +627,10 @@ export function BarrePrix({
         <button
           type="button"
           aria-disabled={actionDesactivee || undefined}
+          aria-busy={enCours || undefined}
+          /* `disabled` **ici** et pas ailleurs : pendant l'envoi, le bouton n'a
+             rien à expliquer — il a besoin qu'on ne le clique pas deux fois. */
+          disabled={enCours}
           onClick={() => {
             if (incomplet) {
               setOuvert((v) => !v);
@@ -633,10 +640,10 @@ export function BarrePrix({
           }}
           className={cn(
             "min-h-[46px] w-full rounded-xl bg-accent px-4 text-[0.9rem] font-semibold text-white transition-opacity",
-            actionDesactivee ? "opacity-45" : "hover:bg-accent-ink",
+            actionDesactivee || enCours ? "opacity-45" : "hover:bg-accent-ink",
           )}
         >
-          {action}
+          {enCours ? "Envoi en cours…" : action}
         </button>
       </div>
       {note && (
