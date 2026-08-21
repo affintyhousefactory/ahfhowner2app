@@ -26,6 +26,7 @@ import {
   MENTIONS,
   OPTIN_TEXTE,
   SOCLE,
+  type PosteSocle,
   URBANISME_GENERIQUE,
   CONTACT_TERRAIN_NU,
 } from "@/lib/configurateur/mentions";
@@ -768,9 +769,9 @@ export function DetailConfiguration() {
       <Mention texte={MENTIONS.prix} />
 
       <Eyebrow>Compris dans le prix</Eyebrow>
-      <p className="text-[0.76rem] leading-relaxed text-muted">{SOCLE.compris}</p>
-      <Eyebrow>À votre charge</Eyebrow>
-      <p className="text-[0.76rem] leading-relaxed text-muted">{SOCLE.charge}</p>
+      <ListeSocle postes={SOCLE.compris} />
+      <Eyebrow>Non inclus</Eyebrow>
+      <ListeSocle postes={SOCLE.nonInclus} />
 
       <div className="flex flex-col gap-2 rounded-xl border border-line bg-paper p-3">
         <p className="text-[0.78rem] leading-relaxed text-muted">{DEVIS_TEXTE.intro}</p>
@@ -885,4 +886,50 @@ function decouperAdresse(libelle: string): { rue: string; cp: string; ville: str
   const m = libelle.match(/^(.*?)\s*(\d{5})\s+(.+)$/);
   if (!m) return { rue: libelle.trim(), cp: "", ville: "" };
   return { rue: m[1].trim(), cp: m[2], ville: m[3].trim() };
+}
+
+/**
+ * Postes du socle, rendus en phrase continue.
+ *
+ * La phrase plutôt que la liste à puces : ce sont des périmètres, pas des
+ * options à cocher — une liste inviterait à les comparer un à un alors qu'ils
+ * se lisent d'un bloc.
+ *
+ * Un poste peut porter un lien et un développé. L'astérisque n'est pas
+ * décorative : elle signale qu'il y a quelque chose à lire derrière, et le
+ * développé est donné en `title` **et** en texte accessible — un sigle expliqué
+ * seulement au survol reste opaque au clavier et au tactile.
+ */
+function ListeSocle({ postes }: { postes: readonly PosteSocle[] }) {
+  return (
+    <p className="text-[0.76rem] leading-relaxed text-muted">
+      {postes.map((poste, i) => (
+        <span key={poste.texte}>
+          {i > 0 && ", "}
+          {poste.href ? (
+            <a
+              href={poste.href}
+              title={poste.note}
+              className="text-accent underline decoration-dotted underline-offset-2 transition-colors hover:decoration-solid"
+            >
+              {poste.texte}
+              <span aria-hidden>*</span>
+              {poste.note && <span className="sr-only"> — {poste.note}</span>}
+            </a>
+          ) : (
+            poste.texte
+          )}
+        </span>
+      ))}
+      .
+      {postes.some((p) => p.note) && (
+        <span className="mt-1 block font-mono text-[0.64rem] text-muted/80">
+          {postes
+            .filter((p) => p.note)
+            .map((p) => `* ${p.note}`)
+            .join(" · ")}
+        </span>
+      )}
+    </p>
+  );
 }

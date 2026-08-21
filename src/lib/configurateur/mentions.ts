@@ -84,12 +84,55 @@ export const DEVIS_TEXTE = {
   conditions: "Conditions précisées dans les",
 } as const;
 
-/** Écran 6 — socle Signature (§4). ⚠ Contenu à valider par Howner (§17.2). */
+/**
+ * Un poste du socle. `href` et `note` sont réservés aux termes qui appellent
+ * une explication : le sigle LSF ne dit rien à qui le lit pour la première
+ * fois, et c'est précisément le poste le plus structurant du prix.
+ */
+export type PosteSocle = {
+  texte: string;
+  href?: string;
+  /** Développé du terme, affiché en exposant au survol et au clavier. */
+  note?: string;
+};
+
+/**
+ * Écran de réservation — ce que le prix couvre, et ce qu'il ne couvre pas.
+ * ⚠ Contenu à valider par Howner (§17.2).
+ *
+ * Structuré en postes plutôt qu'en une phrase depuis le 2026-08-20 : l'un
+ * d'eux porte un lien, et découper une chaîne pour y glisser un lien aurait
+ * mis la mise en forme dans la donnée.
+ */
 export const SOCLE = {
-  compris:
-    "Ossature, isolation biosourcée, bardage, menuiseries triple vitrage, chauffage, électricité, plomberie, cuisine et salle d'eau, fondations sur pieux vissés, fabrication, transport, levage et pose.",
-  charge:
-    "Terrassement, raccordements aux réseaux, étude de sol si exigée, aménagement des accès camion et grue si nécessaire, mobilier et décoration.",
+  compris: [
+    {
+      texte: "ossature LSF",
+      href: "/a-propos#acier-leger",
+      note: "technologie LSF, Light Steel Frame",
+    },
+    { texte: "isolation biosourcée" },
+    { texte: "bardage joint debout" },
+    { texte: "menuiseries double vitrage aluminium" },
+    { texte: "chauffage électrique" },
+    { texte: "électricité" },
+    { texte: "plomberie" },
+    { texte: "cuisine et salle d'eau" },
+    { texte: "fondations sur pieux vissés" },
+    { texte: "fabrication, transport, levage et pose" },
+  ] as readonly PosteSocle[],
+  /* « À votre charge » → « Non inclus » (2026-08-20) : la première formule
+     désignait une dette du client avant même le devis. La seconde dit la même
+     chose sans la faire porter à personne. */
+  nonInclus: [
+    { texte: "terrassement" },
+    { texte: "travaux d'aménagement VRD (voirie et réseaux divers)" },
+    { texte: "raccordements aux réseaux" },
+    { texte: "assainissement non collectif — micro-station" },
+    { texte: "étude de sol si exigée" },
+    { texte: "aménagement des accès camion et grue si nécessaire" },
+    { texte: "mobilier et décoration" },
+  ] as readonly PosteSocle[],
 } as const;
 
 /** Opt-in email — texte repris de `ContactForm.tsx`, inchangé (ADR-026). */
