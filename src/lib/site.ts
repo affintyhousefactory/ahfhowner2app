@@ -226,6 +226,10 @@ export const PRODUCTS = {
        qu'ici. */
     video: "/assets/arko/video/turntable.mp4",
     poster: "/assets/arko/video/turntable-poster.jpg",
+    /* Rendu détouré, servi dans le méga-menu et le menu mobile. Sur fond
+       transparent : le volume se pose sur la carte sans y découper un
+       rectangle, et la même image sert quel que soit le fond. */
+    vignette: "/assets/arko/vignettes/one.avif",
     scrub: "/assets/arko/video/film-scrub.mp4",
     scrubPoster: "/assets/arko/video/film-scrub-poster.jpg",
     placeholderMedia: true, // ⚠ assets provisoires (= Arko Max) — à remplacer
@@ -264,6 +268,7 @@ export const PRODUCTS = {
        partent qu'à la lecture. */
     video: "/assets/arko/video/turntable-max.mp4",
     poster: "/assets/arko/video/turntable-max-poster.jpg",
+    vignette: "/assets/arko/vignettes/max.avif",
     scrub: "/assets/arko/video/film-scrub.mp4",
     scrubPoster: "/assets/arko/video/film-scrub-poster.jpg",
     placeholderMedia: false,
