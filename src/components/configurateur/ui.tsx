@@ -27,6 +27,8 @@ export function Section({
   titre,
   resume,
   ouvertParDefaut,
+  saillant,
+  badge,
   children,
 }: {
   n: number;
@@ -34,16 +36,47 @@ export function Section({
   /** Choix courant, lisible sans déplier. C'est ce qui remplace « étape 3/7 ». */
   resume: string;
   ouvertParDefaut?: boolean;
+  /**
+   * Section mise en avant — fond teinté, filet d'accent et titre appuyé.
+   *
+   * À réserver aux sections qui **offrent** quelque chose plutôt que d'exiger
+   * : la pré-analyse de terrain répond gratuitement à la question qui bloque
+   * le plus les projets. Si toutes les sections ressortaient, plus aucune ne
+   * ressortirait.
+   */
+  saillant?: boolean;
+  /** Court libellé posé à droite du titre — ex. « Gratuit · immédiat ». */
+  badge?: string;
   children: ReactNode;
 }) {
   return (
-    <details open={ouvertParDefaut} className="border-b border-line">
+    <details
+      open={ouvertParDefaut}
+      className={cn(
+        "border-b border-line",
+        saillant && "border-l-2 border-l-accent bg-accent/[0.035]",
+      )}
+    >
       <summary className="flex min-h-[60px] cursor-pointer list-none items-center gap-3 px-4 py-3.5 transition-colors hover:bg-paper [&::-webkit-details-marker]:hidden">
         <span className="w-[18px] shrink-0 font-mono text-[0.66rem] tracking-[0.08em] text-accent">
           {String(n).padStart(2, "0")}
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[0.94rem] font-semibold text-ink">{titre}</span>
+          <span className="flex flex-wrap items-center gap-2">
+            <span
+              className={cn(
+                "text-[0.94rem] font-semibold",
+                saillant ? "text-accent" : "text-ink",
+              )}
+            >
+              {titre}
+            </span>
+            {badge && (
+              <span className="rounded-full border border-accent/35 bg-surface px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-accent">
+                {badge}
+              </span>
+            )}
+          </span>
           <span className="truncate text-[0.76rem] text-muted">{resume}</span>
         </span>
         <svg

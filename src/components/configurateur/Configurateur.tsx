@@ -131,8 +131,10 @@ function Parcours() {
             /* Terrain non éligible : la réservation reste ouverte, mais elle
                change de nature — et le bouton le dit avant le clic, pas après. */
             note={
-              c.manques.length === 0 && c.eligibilite === "ineligible"
-                ? "* Vérification d'éligibilité du terrain après entretien."
+              c.manques.length === 0 && sousCondition(c)
+                ? c.terrainTeste
+                  ? "* Vérification d'éligibilité du terrain après entretien."
+                  : "* Terrain non testé — éligibilité vérifiée lors de l'entretien."
                 : undefined
             }
             onAction={() => {
@@ -146,11 +148,24 @@ function Parcours() {
 }
 
 /**
- * Libellé du bouton de réservation.
+ * La réservation est-elle « sous condition » ?
  *
- * Trois états, dans cet ordre de priorité : devis dédié (au-delà du seuil de
- * quantité), réservation **sous condition** quand le zonage consulté ne donne
- * pas la parcelle pour constructible, réservation simple sinon.
+ * Deux situations y mènent, et elles se valent du point de vue du visiteur :
+ * le terrain n'a **pas** été testé, ou il l'a été et le zonage ne le donne pas
+ * pour constructible. Dans les deux cas, la réservation part et l'éligibilité
+ * se vérifie à l'entretien.
+ *
+ * Ce qui compte est de ne jamais laisser croire que le projet est validé —
+ * pas d'empêcher la demande. Un parcours qui retient un prospect faute de
+ * parcelle connue ne protège personne : il perd un lead que l'on aurait
+ * rappelé.
+ */
+function sousCondition(c: ReturnType<typeof useConfigurateur>) {
+  return !c.terrainTeste || c.eligibilite === "ineligible";
+}
+
+/**
+ * Libellé du bouton de réservation.
  *
  * L'astérisque renvoie à la note affichée juste sous le bouton : le visiteur
  * doit savoir ce qu'il engage avant de cliquer, pas après.
@@ -159,9 +174,7 @@ function libelleAction(c: ReturnType<typeof useConfigurateur>) {
   if (c.devisDedie) return "Demander un devis dédié";
   if (c.numero == null) return "Réserver un numéro";
   const n = String(c.numero).padStart(2, "0");
-  return c.eligibilite === "ineligible"
-    ? `Réserver le n° ${n} sous condition*`
-    : `Réserver le n° ${n}`;
+  return sousCondition(c) ? `Réserver le n° ${n} sous condition*` : `Réserver le n° ${n}`;
 }
 
 /**

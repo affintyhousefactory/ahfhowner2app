@@ -12,7 +12,7 @@
  * conseiller) — décision du 2026-08-01.
  */
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { cn } from "@/shared/lib/cn";
@@ -429,14 +429,26 @@ export function SectionAdresseTerrain() {
   const c = useConfigurateur();
   if (c.brancheFermee) return null;
 
-  const resume = c.preAnalyse?.adresse
-    ? c.preAnalyse.adresse
-    : c.preAnalyse?.parcelle
-      ? `Parcelle ${c.preAnalyse.parcelle}`
-      : "Non renseignée";
+  /* Le résumé porte le **verdict**, pas l'adresse : c'est la réponse qu'on
+     est venu chercher. L'adresse, on la connaît déjà — on vient de la taper. */
+  const testé = Boolean(c.preAnalyse?.adresse || c.preAnalyse?.parcelle);
+  const resume = !testé
+    ? "Vérifiez en 30 secondes si votre projet est possible"
+    : c.eligibilite === "ineligible"
+      ? `${c.preAnalyse?.adresse || "Terrain"} — à vérifier avec nous`
+      : `${c.preAnalyse?.adresse || "Terrain"} — zonage favorable`;
 
   return (
-    <Section n={7} titre="Adresse du terrain" resume={resume}>
+    <Section
+      n={7}
+      /* « Adresse du terrain » nommait un champ ; on nomme désormais ce que la
+         section apporte. C'est la seule du parcours qui répond gratuitement à
+         la question qui bloque le plus les projets — d'où sa mise en avant. */
+      titre="Tester l'éligibilité de mon terrain"
+      badge="Gratuit · immédiat"
+      saillant={!testé}
+      resume={resume}
+    >
       {/* `cfg-adresse` : cible du focus quand la barre signale que l'adresse
           manque. */}
       <div
@@ -587,6 +599,7 @@ export function SectionReservation() {
  */
 export function SectionCoordonnees() {
   const c = useConfigurateur();
+  const [memeAdresse, setMemeAdresse] = useState(false);
 
   const rempli =
     c.contact.prenom.trim() &&
@@ -636,6 +649,53 @@ export function SectionCoordonnees() {
           valeur={c.contact.email}
           onValeur={(v) => c.setContact("email", v)}
         />
+
+        <Champ
+          id="cfg-adresse-postale"
+          placeholder="Adresse"
+          autoComplete="street-address"
+          valeur={c.contact.adresse}
+          onValeur={(v) => c.setContact("adresse", v)}
+        />
+        <div className="flex gap-2">
+          <Champ
+            id="cfg-cp"
+            placeholder="Code postal"
+            autoComplete="postal-code"
+            inputMode="numeric"
+            valeur={c.contact.cp}
+            onValeur={(v) => c.setContact("cp", v.replace(/\D/g, "").slice(0, 5))}
+            className="max-w-[8rem]"
+          />
+          <Champ
+            id="cfg-ville"
+            placeholder="Ville"
+            autoComplete="address-level2"
+            valeur={c.contact.ville}
+            onValeur={(v) => c.setContact("ville", v)}
+          />
+        </div>
+
+        {/* Report en un clic depuis le terrain testé en section 07. La case
+            n'apparaît que si l'analyse a produit une adresse : proposer de
+            recopier ce qui n'existe pas ne ferait qu'ajouter une question. */}
+        {c.preAnalyse?.adresse && (
+          <Case
+            checked={memeAdresse}
+            onChange={(v) => {
+              setMemeAdresse(v);
+              if (!v) return;
+              const { rue, cp, ville } = decouperAdresse(c.preAnalyse!.adresse);
+              c.setContact("adresse", rue);
+              c.setContact("cp", cp);
+              c.setContact("ville", ville);
+            }}
+          >
+            <span className="text-ink">
+              Utiliser l&apos;adresse de mon terrain — {c.preAnalyse.adresse}
+            </span>
+          </Case>
+        )}
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -748,6 +808,8 @@ function Champ({
   placeholder,
   type = "text",
   autoComplete,
+  inputMode,
+  className,
   valeur,
   onValeur,
 }: {
@@ -756,6 +818,9 @@ function Champ({
   placeholder: string;
   type?: string;
   autoComplete?: string;
+  /** `numeric` sur le code postal : le bon clavier au premier coup, sur mobile. */
+  inputMode?: "text" | "numeric";
+  className?: string;
   valeur: string;
   onValeur: (v: string) => void;
 }) {
@@ -769,7 +834,11 @@ function Champ({
       placeholder={placeholder}
       aria-label={placeholder}
       autoComplete={autoComplete}
-      className="min-h-[44px] w-full min-w-0 flex-1 scroll-mt-32 rounded-xl border border-line bg-surface px-3 text-[0.85rem] text-ink outline-none placeholder:text-muted/60 focus:border-accent"
+      inputMode={inputMode}
+      className={cn(
+        "min-h-[44px] w-full min-w-0 flex-1 scroll-mt-32 rounded-xl border border-line bg-surface px-3 text-[0.85rem] text-ink outline-none placeholder:text-muted/60 focus:border-accent",
+        className,
+      )}
     />
   );
 }
@@ -797,4 +866,23 @@ function Case({
       <span className="text-[0.75rem] leading-relaxed text-muted">{children}</span>
     </label>
   );
+}
+
+/**
+ * Découpe une adresse renvoyée par la pré-analyse en rue / code postal / ville.
+ *
+ * Le libellé arrive sous la forme « 12 rue des Pins 64100 Bayonne ». On repère
+ * le code postal — cinq chiffres isolés — et l'on découpe autour : ce qui
+ * précède est la voie, ce qui suit la commune. Aucune bibliothèque pour ça :
+ * le format vient d'une source unique et connue, et un analyseur d'adresses
+ * généraliste échouerait autant sur les cas tordus.
+ *
+ * Si le code postal est introuvable, tout part dans la voie plutôt que d'être
+ * réparti au hasard — le visiteur corrigera, ce qui vaut mieux qu'un champ
+ * rempli faux.
+ */
+function decouperAdresse(libelle: string): { rue: string; cp: string; ville: string } {
+  const m = libelle.match(/^(.*?)\s*(\d{5})\s+(.+)$/);
+  if (!m) return { rue: libelle.trim(), cp: "", ville: "" };
+  return { rue: m[1].trim(), cp: m[2], ville: m[3].trim() };
 }

@@ -76,6 +76,11 @@ export type Contact = {
   nom: string;
   tel: string;
   email: string;
+  /* Adresse postale du contact — celle du devis, pas nécessairement celle du
+     terrain. Les deux coïncident souvent, d'où la case de report. */
+  adresse: string;
+  cp: string;
+  ville: string;
 };
 
 /**
@@ -84,7 +89,16 @@ export type Contact = {
  * dit ce qui manque sans emmener au bon endroit fait deviner l'utilisateur.
  */
 export type Manque = {
-  cle: "numero" | "adresse" | "prenom" | "nom" | "tel" | "email" | "cgv";
+  cle:
+    | "numero"
+    | "prenom"
+    | "nom"
+    | "adresse_postale"
+    | "cp"
+    | "ville"
+    | "tel"
+    | "email"
+    | "cgv";
   libelle: string;
   ancre: string;
 };
@@ -130,9 +144,16 @@ type Ctx = {
   /**
    * Verdict d'éligibilité du terrain, calculé par la pré-analyse.
    * `null` tant qu'aucune adresse n'a été analysée. `"ineligible"` n'interdit
-   * pas de réserver : il change la nature de la réservation (voir `MANQUES`).
+   * pas de réserver : il change la nature de la réservation.
    */
   eligibilite: Eligibilite;
+  /**
+   * `true` dès qu'une parcelle a été analysée, quel que soit le verdict.
+   *
+   * Ne pas l'avoir testée n'interdit rien non plus — la réservation part
+   * « sous condition ». Le parcours qualifie, il ne filtre pas.
+   */
+  terrainTeste: boolean;
   setEligibilite: (e: Eligibilite) => void;
 
   contact: Contact;
@@ -196,6 +217,9 @@ export function ConfigurateurProvider({
     nom: "",
     tel: "",
     email: "",
+    adresse: "",
+    cp: "",
+    ville: "",
   });
   const [optin, setOptin] = useState(false);
   const [cgv, setCgv] = useState(false); // jamais pré-cochée (§7)
@@ -245,13 +269,18 @@ export function ConfigurateurProvider({
 
     const manques: Manque[] = [];
     if (numero == null) manques.push({ cle: "numero", libelle: "choisir un numéro de série", ancre: "cfg-numeros" });
-    /* Une parcelle analysée vaut adresse renseignée, même si le libellé
-       d'adresse manque au résultat : c'est le fait d'avoir localisé le terrain
-       qui compte, pas la façon dont il a été saisi (adresse ou n° de parcelle). */
-    if (!preAnalyse?.adresse && !preAnalyse?.parcelle)
-      manques.push({ cle: "adresse", libelle: "renseigner l'adresse du terrain", ancre: "cfg-adresse" });
+    /* ⚠ Le test d'éligibilité du terrain **ne bloque pas** la réservation
+       (décision de Richard, 2026-08-20). Un visiteur qui ne connaît pas encore
+       sa parcelle, dont le terrain sort du référentiel, ou que la pré-analyse
+       ne sait pas traiter, doit pouvoir réserver et être rappelé — sans quoi
+       le parcours retient un prospect au lieu de le qualifier. Terrain non
+       testé ou jugé non éligible mènent au même endroit : une réservation
+       « sous condition », dont le libellé du bouton dit la nature. */
     if (!contact.prenom.trim()) manques.push({ cle: "prenom", libelle: "votre prénom", ancre: "cfg-prenom" });
     if (!contact.nom.trim()) manques.push({ cle: "nom", libelle: "votre nom", ancre: "cfg-nom" });
+    if (!contact.adresse.trim()) manques.push({ cle: "adresse_postale", libelle: "votre adresse", ancre: "cfg-adresse-postale" });
+    if (!/^\d{5}$/.test(contact.cp.trim())) manques.push({ cle: "cp", libelle: "votre code postal", ancre: "cfg-cp" });
+    if (!contact.ville.trim()) manques.push({ cle: "ville", libelle: "votre ville", ancre: "cfg-ville" });
     if (!telPlausible) manques.push({ cle: "tel", libelle: "votre téléphone", ancre: "cfg-tel" });
     if (!emailPlausible) manques.push({ cle: "email", libelle: "votre email", ancre: "cfg-email" });
     if (!cgv) manques.push({ cle: "cgv", libelle: "accepter les CGV", ancre: "cfg-cgv" });
@@ -292,6 +321,7 @@ export function ConfigurateurProvider({
       toggleOption,
       preAnalyse,
       setPreAnalyse,
+      terrainTeste: Boolean(preAnalyse?.adresse || preAnalyse?.parcelle),
       eligibilite,
       setEligibilite,
       contact,
