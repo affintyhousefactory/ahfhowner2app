@@ -209,40 +209,56 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Emails ───────────────────────────────────────────────────────
-  /* ⚠ Le template `BREVO_TEMPLATE_RECAP` a été écrit pour le tunnel v1 : ses
-     placeholders portent des noms de la v1 (`MAISON_TTC`, `FACADE`, `BAR`,
-     `CHAMBRE`). On les remplit avec les valeurs v2 correspondantes plutôt que
-     de les renommer — renommer ici sans toucher au template viderait l'email.
-     Un template dédié demande une action dans le tableau de bord Brevo, hors
-     périmètre de cet ADR. Les champs sans équivalent restent vides. */
+  /* Paramètres du template `BREVO_TEMPLATE_RECAP`, mis à jour par Richard le
+     2026-08-22 pour le configurateur v2. Un seul template pour les deux
+     tunnels : `/api/reservation` (v1) a été aligné sur les mêmes noms, sans
+     quoi ses emails seraient partis avec des montants vides.
+
+     ⚠ Le template sert **au client et à AHF dans le même envoi** :
+     `sendBrevoTemplate` produit un message unique avec les mêmes paramètres
+     pour les deux destinataires. Aucun paramètre ne doit donc porter une
+     information réservée à AHF. `SOUS_CONDITION` est écrit pour être lu par le
+     client. */
   const nomComplet = `${c.prenom} ${c.nom}`.trim();
+  const cpVille = [c.cp?.trim(), c.ville?.trim()].filter(Boolean).join(" ");
+  const sousCondition = plu
+    ? plu.typezone && !["U", "AU"].includes(plu.typezone.toUpperCase())
+      ? "Éligibilité du terrain à confirmer lors de l'entretien."
+      : ""
+    : "Terrain non testé — éligibilité vérifiée lors de l'entretien.";
+
   const params = {
+    // Contact
     PRENOM: c.prenom,
     NOM: c.nom,
     EMAIL: c.email,
     TEL: c.tel ?? "",
+    ADRESSE: c.adresse ?? "",
+    CP_VILLE: cpVille,
+    // Réservation
     NUMERO: String(body.numero).padStart(2, "0"),
-    PRODUIT: `${modele.nom} ${modele.surface} m²`,
+    RESERVATION_TTC: `${cfg.reservation.montantTtc.toLocaleString("fr-FR")} €`,
+    SOUS_CONDITION: sousCondition,
+    // Configuration
     MODELE: `${modele.nom} ${modele.surface} m²`,
-    MAISON_TTC: `${prixBase.toLocaleString("fr-FR")} €`,
-    LIVRAISON: transport != null ? `${transport.toLocaleString("fr-FR")} €` : "À estimer",
-    TERRAIN: plu ? (plu.address_label ?? "Terrain analysé") : "Terrain non testé",
+    STUDIO_TTC: `${prixBase.toLocaleString("fr-FR")} €`,
     BARDAGE: cfg.ambiances.find((a) => a.id === body.ambiance)?.nom ?? "",
     INTERIEUR: cfg.ambiancesInterieures.find((a) => a.id === body.ambianceInterieure)?.nom ?? "",
-    FACADE: "",
-    BAR: "",
-    CHAMBRE: "",
-    TERRASSE_M2: palier && palier.prixTtc > 0 ? palier.nom : "",
+    TERRASSE: palier && palier.prixTtc > 0 ? palier.nom : "",
+    TERRASSE_TTC: prixTerrasse > 0 ? `${prixTerrasse.toLocaleString("fr-FR")} €` : "",
     OPTIONS_LABELS: optionsRetenues.map((o) => o.nom).join(", "),
+    OPTIONS_TTC: prixOptions > 0 ? `${prixOptions.toLocaleString("fr-FR")} €` : "",
+    LIVRAISON: transport != null ? `${transport.toLocaleString("fr-FR")} €` : "À estimer",
     TOTAL_ESTIME: `${total.toLocaleString("fr-FR")} €`,
-    PLU_PARCELLE: plu?.parcelle ?? "",
+    GRILLE_VERSION: cfg.version,
+    // Terrain — tous vides si le test n'a pas eu lieu
     PLU_ADRESSE: plu?.address_label ?? "",
-    PLU_ZONE: plu?.zone_urba ?? "",
+    PLU_PARCELLE: plu?.parcelle ?? "",
+    PLU_ZONE: plu ? [plu.zone_urba, plu.libelong].filter(Boolean).join(" — ") : "",
     PLU_TYPEDOC: plu ? `${plu.typedoc ?? ""} ${plu.etat_doc ?? ""}`.trim() : "",
-    PLU_DATAPPRO: plu?.datappro ?? "",
+    PLU_DATAPPRO: plu?.datappro ? formatDate(plu.datappro) : "",
     PLU_PRESCRIPTIONS: plu?.prescriptions?.join(" · ") ?? "",
     PLU_SERVITUDES: plu?.servitudes?.join(" · ") ?? "",
-    PLU_LIBELONG: plu?.libelong ?? "",
   };
 
   const destinataires = [{ email: c.email, name: nomComplet }];
@@ -292,5 +308,18 @@ async function numerosLibres(): Promise<number[]> {
     /* On ne sait pas : mieux vaut ne rien proposer que proposer un numéro
        peut-être déjà pris — le visiteur reverrait la même erreur. */
     return [];
+  }
+}
+
+/** Date d'approbation du document d'urbanisme, en format français. */
+function formatDate(brut: string): string {
+  try {
+    return new Date(brut).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return brut;
   }
 }
