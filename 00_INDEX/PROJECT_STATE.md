@@ -163,8 +163,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** | ✅ |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
 | 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** | ✅ |
-| 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — parcours livré sur `/configurer/v2` (`dev`, 2026-08-02) ; amendé (colonne de sections, coque dédiée) ; bascule sur `/configurer` conditionnée à 031** | 🟠 |
-| 031 | Soumission de la demande de numéro (configurateur v2) | **Réservé — à écrire** ; hérite du contrat de données d'ADR-035 | ❓ |
+| 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — livré** ; **amendé les 2026-08-02 puis 2026-08-20/21** (bardage renommé, ambiance intérieure, 9 sections, contrôles de saisie, socle du prix) ; bascule sur `/configurer` conditionnée à 031 | 🟠 |
+| 031 | **Soumission de la demande de numéro** (configurateur v2 → lead CRM) | **Proposé — écrit le 2026-08-21, en attente d'accord** ; tranche l'unicité du numéro (index partiel sur le numéro **confirmé**), 1 colonne à ajouter, 2 objets de base à corriger ; **alerte Albert** : première écriture publique en production | 🟠 |
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |
 | 033 | Back-office des grilles tarifaires (`loadConfig()` → base) | Réservé — à écrire | ❓ |
 | 034 | Espace client (dépôt de pièces) | Réservé — à écrire ; GED prête côté CRM (`origine = 'client'`) | ❓ |
