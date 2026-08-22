@@ -39,6 +39,10 @@ Aucun montant ni secret ne doit être codé en dur. `site.ts` lit déjà les mon
 
 Poser la variable ne change rien le jour même. C'est voulu : la manœuvre doit être vérifiable — si un montant bougeait à l'écran, c'est qu'une valeur aurait été mal saisie.
 
+**Vérifié, et pas seulement constaté.** Un déploiement servant 69 900 € ne prouve rien : le repli du code vaut le même montant, et les deux chemins donnent le même écran. La variable de Preview a donc été passée à **68 900 €** le temps d'un redéploiement : la page produit et son JSON-LD ont suivi, puis la valeur a été rétablie. C'est ce test qui établit que la variable est lue — le premier ne discriminait rien.
+
+**Ce que « sans redéploiement » ne veut pas dire.** Next inline les `NEXT_PUBLIC_*` **au build** : changer un montant impose toujours un redéploiement, simplement plus un commit, une PR et une revue. Le gain est réel — un prix se corrige depuis l'interface Vercel, par quelqu'un qui ne touche pas au code — mais la valeur ne se propage pas à chaud. Toute formulation laissant croire l'inverse serait fausse.
+
 ### Le garde-fou qui manquait
 
 Poser ces variables crée un risque qui n'existait pas tant qu'elles étaient absentes. `Number(process.env.X ?? repli)` a un angle mort : **`??` ne se déclenche que sur `null`/`undefined`**. Une variable définie mais vide — valeur effacée dans l'interface, espace en trop, montant collé avec son séparateur de milliers — traverse la garde, et `Number("")` vaut **0**. Le site afficherait un studio de jardin à **0 €**, sans qu'aucun déploiement n'échoue.

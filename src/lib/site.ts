@@ -48,7 +48,8 @@ export const SITE_URL =
 // le configurateur v2 affichait déjà 2 000 € et la page d'accueil 5 000 €.
 // `NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR` est posée en Preview et en production
 // depuis le 2026-08-22 : c'est elle qui sert, ce littéral n'est plus qu'un
-// repli. Le montant se change désormais sans redéploiement (ADR-003).
+// repli. Le montant se change **sans toucher au code** — mais un redéploiement
+// reste nécessaire, Next inlinant les `NEXT_PUBLIC_*` au build (ADR-003).
 const DEPOSIT_EUR = montantEnv(
   process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR,
   2000,
@@ -228,8 +229,9 @@ export const PRICING = {
 //
 // `NEXT_PUBLIC_ARKO_ONE_BASE_EUR` est posée en Preview et en production depuis
 // le 2026-08-22 (ADR-003 enfin appliqué) : elle prime, ce littéral dépanne.
-// Un prix se corrige donc sans redéploiement — mais une valeur mal saisie ne
-// doit pas pour autant afficher 0 €, d'où `montantEnv`.
+// Un prix se corrige donc sans commit ni PR — un redéploiement suffit, Next
+// inlinant les `NEXT_PUBLIC_*` au build. Une valeur mal saisie ne doit pas
+// pour autant afficher 0 €, d'où `montantEnv`.
 const ONE_PRICING = {
   base: montantEnv(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR, 69900, "NEXT_PUBLIC_ARKO_ONE_BASE_EUR"),
   perM2: 2250, // TODO ARKO ONE : confirmer €/m²
