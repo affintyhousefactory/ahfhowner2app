@@ -21,16 +21,19 @@ import { ConfigurateurProvider, useConfigurateur } from "./store";
 import { BarrePrix, Scene } from "./ui";
 import {
   SectionAmbiance,
+  SectionAmbianceInterieure,
   SectionModule,
   SectionOptions,
   SectionReservation,
+  SectionCoordonnees,
+  DetailConfiguration,
   SectionTerrain,
+  SectionAdresseTerrain,
   SectionTerrasse,
 } from "./sections";
 
 function Parcours() {
   const c = useConfigurateur();
-  const [cgvOk, setCgvOk] = useState(false);
   const [cale, setCale] = useState(false);
 
   /* La scène est-elle calée en haut de l'écran ? Elle ne change pas de taille
@@ -68,8 +71,11 @@ function Parcours() {
   const ambiance = c.cfg.ambiances.find((a) => a.id === c.ambiance);
   const palier = c.paliers.find((p) => p.id === c.terrasse);
 
+  const interieur = c.cfg.ambiancesInterieures.find((a) => a.id === c.ambianceInterieure);
+
   const pastilles = [
     ambiance?.nom ?? "",
+    interieur?.nom ?? "",
     ...(palier && palier.prixTtc > 0 ? [`Terrasse ${palier.nom.toLowerCase()}`] : []),
     ...c.optionsDisponibles.filter((o) => c.options.includes(o.id)).map((o) => o.nom),
   ].filter(Boolean);
@@ -82,18 +88,24 @@ function Parcours() {
         tag={`${modele.id === "one" ? "arko-one" : "arko-max"} · ${c.ambiance}`}
         pastilles={pastilles}
         cale={cale}
-        ambiances={c.cfg.ambiances}
+        bardages={c.bardages}
         ambianceActive={c.ambiance}
+        vuesInterieures={c.vuesInterieures}
+        interieurs={c.interieurs}
+        ambianceInterieureActive={c.ambianceInterieure}
       />
 
       <div className="flex min-w-0 flex-col bg-surface">
         <div className="flex-1">
           <SectionModule />
           <SectionAmbiance />
+          <SectionAmbianceInterieure />
           <SectionTerrasse />
           <SectionOptions />
           <SectionTerrain />
-          <SectionReservation onCgv={setCgvOk} />
+          <SectionAdresseTerrain />
+          <SectionReservation />
+          <SectionCoordonnees />
         </div>
 
         {/* §16 n°1 — la branche « terrain nu » ne doit mener ni à un prix ni à
@@ -102,23 +114,103 @@ function Parcours() {
           <BarrePrix
             total={c.total}
             mention={MENTIONS.prix.courte}
-            action={
-              c.devisDedie
-                ? "Demander un devis dédié"
-                : c.numero
-                  ? `Réserver le n° ${String(c.numero).padStart(2, "0")}`
-                  : "Réserver ce numéro"
+            action={libelleAction(c)}
+            /* Le bouton ne s'active que lorsque **tout** ce qui compose une
+               demande exploitable est là : un numéro, une adresse, des
+               coordonnées joignables et les CGV. Il ne dépendait auparavant
+               que des CGV — on pouvait donc « réserver » sans numéro ni
+               contact, et la demande n'aurait mené nulle part. */
+            actionDesactivee={c.manques.length > 0}
+            motif={
+              c.manques.length > 0
+                ? "Complétez les éléments ci-dessus pour continuer"
+                : "Seul le devis signé fait foi."
             }
-            actionDesactivee={!cgvOk}
-            motif={cgvOk ? "Seul le devis signé fait foi." : "Acceptez les CGV pour continuer"}
-            onAction={() => {
-              /* ADR-031 : soumission de la demande de numéro. */
-            }}
+            manques={c.manques}
+            detail={<DetailConfiguration />}
+            /* Terrain non éligible : la réservation reste ouverte, mais elle
+               change de nature — et le bouton le dit avant le clic, pas après. */
+            note={
+              c.manques.length === 0 && sousCondition(c)
+                ? c.terrainTeste
+                  ? "* Vérification d'éligibilité du terrain après entretien."
+                  : "* Vous n'avez pas testé de terrain — l'éligibilité de votre adresse sera vérifiée lors de l'entretien avec notre conseiller."
+                : undefined
+            }
+            /* ADR-031 — la demande part réellement. Turnstile est laissé à
+               la charge de la route tant que le widget n'est pas posé dans le
+               parcours : la clé de site n'est pas encore branchée ici, et un
+               jeton absent est refusé côté serveur si le secret est
+               configuré. À poser avec le widget, pas avant. */
+            onAction={() => void c.soumettre()}
+            enCours={c.envoi.phase === "envoi"}
+            retour={retourSoumission(c)}
           />
         )}
       </div>
     </div>
   );
+}
+
+/**
+ * Retour de soumission affiché contre le bouton.
+ *
+ * Le conflit de numéro est absent : il a sa place dans la section 08, à côté
+ * de la grille où le visiteur doit rechoisir. Tous les autres retours se
+ * lisent ici, là où le clic vient d'avoir lieu.
+ */
+function retourSoumission(
+  c: ReturnType<typeof useConfigurateur>,
+): { ton: "ok" | "alerte"; texte: string } | undefined {
+  switch (c.envoi.phase) {
+    case "envoye":
+      return {
+        ton: "ok",
+        texte:
+          "Demande envoyée. Vous recevez un récapitulatif par email, et nous vous rappelons pour confirmer votre numéro.",
+      };
+    case "partiel":
+      return {
+        ton: "alerte",
+        texte: c.envoi.notified
+          ? "Votre demande nous est parvenue, mais son enregistrement n'a pas abouti. Nous vous rappelons — conservez cette page ou notez votre numéro."
+          : "Votre demande nous est parvenue, mais l'email de récapitulatif n'a pas pu partir. Nous vous rappelons.",
+      };
+    case "erreur":
+      return { ton: "alerte", texte: `${c.envoi.message} Vous pouvez aussi nous appeler directement.` };
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * La réservation est-elle « sous condition » ?
+ *
+ * Deux situations y mènent, et elles se valent du point de vue du visiteur :
+ * le terrain n'a **pas** été testé, ou il l'a été et le zonage ne le donne pas
+ * pour constructible. Dans les deux cas, la réservation part et l'éligibilité
+ * se vérifie à l'entretien.
+ *
+ * Ce qui compte est de ne jamais laisser croire que le projet est validé —
+ * pas d'empêcher la demande. Un parcours qui retient un prospect faute de
+ * parcelle connue ne protège personne : il perd un lead que l'on aurait
+ * rappelé.
+ */
+function sousCondition(c: ReturnType<typeof useConfigurateur>) {
+  return !c.terrainTeste || c.eligibilite === "ineligible";
+}
+
+/**
+ * Libellé du bouton de réservation.
+ *
+ * L'astérisque renvoie à la note affichée juste sous le bouton : le visiteur
+ * doit savoir ce qu'il engage avant de cliquer, pas après.
+ */
+function libelleAction(c: ReturnType<typeof useConfigurateur>) {
+  if (c.devisDedie) return "Demander un devis dédié";
+  if (c.numero == null) return "Réserver un numéro";
+  const n = String(c.numero).padStart(2, "0");
+  return sousCondition(c) ? `Réserver le n° ${n} sous condition*` : `Réserver le n° ${n}`;
 }
 
 /**

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f0;padding:36px 16px;">
+<tr><td align="center">
+<table cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;width:100%;max-width:560px;">
+<tr><td>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:32px 40px 0;">
+<img src="https://affinityhousefactory.com/images/howner-logo.png" width="34" height="44" alt="Howner" style="display:block;margin-bottom:10px;">
+<p style="margin:0 0 3px;font-family:Georgia,Times New Roman,serif;font-size:18px;font-weight:400;color:#1a1a18;letter-spacing:-0.2px;">Howner</p>
+<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:3px;color:#888;text-transform:uppercase;">By Affinity House Factory</p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 0;">
+<h1 style="font-family:Georgia,Times New Roman,serif;font-size:24px;font-weight:400;color:#1a1a18;margin:0;line-height:1.2;letter-spacing:-0.3px;">R&eacute;capitulatif<br>de votre demande.</h1>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:20px;line-height:20px;font-size:20px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0 0 6px;">Bonjour <strong style="color:#1a1a18;">{{ params.PRENOM }} {{ params.NOM }}</strong>,</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0 0 0px;">Voici le r&eacute;capitulatif de votre demande. Notre conseiller vous rappelle sous 48&nbsp;h ouvr&eacute;es pour confirmer votre configuration et pr&eacute;parer l&rsquo;&eacute;tude de votre terrain.</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:24px;line-height:24px;font-size:24px;">&nbsp;</td></tr></table>
+
+{% if params.NUMERO %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">VOTRE R&Eacute;SERVATION</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">NUM&Eacute;RO R&Eacute;SERV&Eacute;</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">N&deg;&nbsp;{{ params.NUMERO }} &mdash; s&eacute;rie limit&eacute;e &agrave; 6 unit&eacute;s</p>
+</td></tr></table></td></tr></table>
+
+{% if params.RESERVATION_TTC %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ACOMPTE DE R&Eacute;SERVATION</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.RESERVATION_TTC }} &mdash; remboursable</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.SOUS_CONDITION %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">&Agrave; CONFIRMER</p><p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#3a3a38;margin:0;line-height:1.65;">{{ params.SOUS_CONDITION }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+{% endif %}
+
+
+{% if params.MODELE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">VOTRE STUDIO DE JARDIN</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">MOD&Egrave;LE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.MODELE }}</p>
+</td></tr></table></td></tr></table>
+
+{% if params.STUDIO_TTC %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">STUDIO TTC</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.STUDIO_TTC }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">BARDAGE EXT&Eacute;RIEUR</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.BARDAGE }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">AMBIANCE INT&Eacute;RIEURE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.INTERIEUR }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+{% if params.TERRASSE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">TERRASSE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.TERRASSE }}
+{% if params.TERRASSE_TTC %} &mdash; {{ params.TERRASSE_TTC }}{% endif %}
+</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.OPTIONS_LABELS %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">OPTIONS</p><p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#3a3a38;margin:0;line-height:1.65;">{{ params.OPTIONS_LABELS }}
+{% if params.OPTIONS_TTC %} &mdash; {{ params.OPTIONS_TTC }}{% endif %}
+</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.LIVRAISON %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">LIVRAISON ET POSE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.LIVRAISON }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.TERRAIN %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">TERRAIN</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.TERRAIN }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.TOTAL_ESTIME %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:2px solid #1a1a18;padding:18px 22px;background-color:#f8f8f5;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ESTIMATION TOTALE TTC</p>
+<p style="font-family:Georgia,Times New Roman,serif;font-size:22px;font-weight:700;color:#1a1a18;margin:0;">{{ params.TOTAL_ESTIME }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#888;margin:0;line-height:1.6;">Estimation indicative, non contractuelle. Prix TTC, TVA&nbsp;20&nbsp;%. Seul le devis sign&eacute; apr&egrave;s visite technique fait foi. Les raccordements aux r&eacute;seaux, les fondations et les travaux de terrain ne sont pas compris.</p>
+</td></tr></table>{% endif %}
+
+
+{% if params.PLU_ADRESSE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">VOTRE TERRAIN</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+{% if params.PLU_ADRESSE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ADRESSE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_ADRESSE }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.PLU_PARCELLE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">PARCELLE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_PARCELLE }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ZONE PLU</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_ZONE }}</p></td></tr></table></td>
+</tr></table></td></tr></table>{% endif %}
+
+
+{% if params.PLU_TYPEDOC %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">DOCUMENT D&rsquo;URBANISME</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_TYPEDOC }}
+{% if params.PLU_DATAPPRO %} &mdash; {{ params.PLU_DATAPPRO }}{% endif %}
+</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.PLU_PRESCRIPTIONS %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">PRESCRIPTIONS</p><p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#3a3a38;margin:0;line-height:1.65;">{{ params.PLU_PRESCRIPTIONS }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.PLU_SERVITUDES %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">SERVITUDES</p><p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#3a3a38;margin:0;line-height:1.65;">{{ params.PLU_SERVITUDES }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#888;margin:0;line-height:1.6;">Pr&eacute;-analyse indicative. Votre parcelle est &eacute;tudi&eacute;e par nos soins, &agrave; la main, avant la visite technique.</p>
+</td></tr></table>{% endif %}
+
+
+{% if params.PACK_LABEL %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">RECHERCHE DE TERRAIN</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">PACK</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PACK_LABEL }}</p>
+</td></tr></table></td></tr></table>
+
+{% if params.ZONES %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ZONES / COMMUNES</p><p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#3a3a38;margin:0;line-height:1.65;">{{ params.ZONES }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.BUDGET %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">BUDGET TERRAIN</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.BUDGET }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">VOS COORDONN&Eacute;ES</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">NOM</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.NOM }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">EMAIL</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.EMAIL }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+{% if params.TEL %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">T&Eacute;L&Eacute;PHONE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.TEL }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.ADRESSE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ADRESSE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.ADRESSE }}
+{% if params.CP_VILLE %}<br>{{ params.CP_VILLE }}{% endif %}
+</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.GRILLE_VERSION %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#aaa;margin:0;">Grille tarifaire {{ params.GRILLE_VERSION }}</p>
+</td></tr></table>{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 40px;">
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 18px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Affinity House Factory &mdash; <a href="https://affinityhousefactory.com" style="color:#aaa;text-decoration:none;">affinityhousefactory.com</a></p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Howner &mdash; une marque de Affinity House Factory.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 16px;">Cet email r&eacute;capitule votre demande. Il ne vaut pas contrat.</p>
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 14px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#aaa;margin:0;line-height:2;letter-spacing:0.2px;">
+<a href="{{ unsubscribe_link }}" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">Se d&eacute;sinscrire</a>
+<span style="color:#e8e8e4;padding:0 8px;">&middot;</span>
+<a href="{{ update_profile }}" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">G&eacute;rer mes pr&eacute;f&eacute;rences</a>
+<span style="color:#e8e8e4;padding:0 8px;">&middot;</span>
+<a href="https://affinityhousefactory.com/compte/supprimer" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">Supprimer mon compte</a>
+</p>
+</td></tr></table></td></tr>
+</table></td></tr></table>
+</body></html>

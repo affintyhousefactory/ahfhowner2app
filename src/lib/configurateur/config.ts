@@ -53,18 +53,64 @@ export type Ambiance = {
   nom: string;
   supplementTtc: number;
   /**
-   * Rendu extérieur associé — c'est lui que montre la scène collante. Les
-   * fichiers actuels sont ceux de la v1 (décision Richard, 2026-08-01) ; la
-   * nomenclature cible `{modele}_{vue}_{ambiance}.webp` s'y substituera au fil
-   * des livraisons sans toucher aux composants, puisque le chemin est ici.
+   * Rendu extérieur, **par modèle** — c'est lui que montre la scène collante.
+   *
+   * Indexé depuis le 2026-08-20 : jusque-là un seul rendu servait les deux
+   * gammes, si bien que passer de l'Arko One à l'Arko Max ne changeait rien à
+   * l'aperçu (signalé par Richard). La structure attend désormais un rendu par
+   * modèle et par teinte — six au total.
+   *
+   * L'Arko One garde les rendus v1 (volume compact). L'Arko Max a les siens
+   * depuis le 2026-08-20 : **trois rendus produits par Richard**, un par
+   * teinte, livrés le jour même (dossier `RETOUCHES` du Drive).
+   *
+   * Ils remplacent une colorisation automatique que j'avais dérivée du rendu
+   * d'origine — écartée par Richard, et à raison : ses rendus cadrent plus
+   * près, montrent la terrasse habitée et l'éclairage intérieur, et traitent
+   * le pignon dans la teinte, ce qu'une recoloration par masque ne savait pas
+   * faire.
+   *
+   * ⚠ Les trois ne sortent pas du même calcul d'éclairage : l'anthracite a un
+   * ciel plus sombre et un cadrage légèrement décalé. Au changement de teinte,
+   * l'ambiance lumineuse bouge donc un peu, pas seulement le bardage. C'est
+   * visible mais discret ; le corriger demanderait de refaire les trois dans
+   * une même passe de rendu.
    */
-  visuel: string;
+  visuel: Record<ModeleId, string>;
   /**
    * Teinte du bardage. Sert l'aperçu du sélecteur : un carré de couleur dit
    * ce que le libellé ne dit pas — « Basque » ne se devine pas.
    */
   teinte: string;
 };
+/**
+ * Ambiance intérieure — rubrique ajoutée le 2026-08-20 (demande de Richard).
+ *
+ * Distincte du bardage : l'une habille l'extérieur, l'autre décide de ce qu'on
+ * voit une fois entré. Les deux se choisissent séparément et se combinent
+ * librement.
+ *
+ * `vues` est indexé par modèle parce que les deux gammes n'ont pas le même
+ * programme : l'Arko Max a un salon que l'Arko One n'a pas. Le parcours doit
+ * donc boucler sur ce tableau sans jamais présumer de sa longueur — même règle
+ * que pour les ambiances de bardage.
+ */
+export type VueInterieure = {
+  id: string;
+  /** Libellé affiché sous la scène pendant que la vue est montrée. */
+  nom: string;
+  src: string;
+};
+
+export type AmbianceInterieure = {
+  id: string;
+  nom: string;
+  supplementTtc: number;
+  /** Teinte d'aperçu du sélecteur — dit ce que le libellé ne dit pas. */
+  teinte: string;
+  vues: Record<ModeleId, VueInterieure[]>;
+};
+
 export type Palier = { id: PalierId; nom: string; prixTtc: number };
 
 export type Option = {
@@ -85,6 +131,7 @@ export type ConfigurateurConfig = {
   usages: Usage[];
   modeles: Modele[];
   ambiances: Ambiance[];
+  ambiancesInterieures: AmbianceInterieure[];
   terrasse: Record<ModeleId, Palier[]>;
   options: Option[];
   serie: { id: string; libelle: string; unites: number };
@@ -102,9 +149,13 @@ const CONFIG_V1: ConfigurateurConfig = {
    * qui fait passer `grillePerimee` à vrai sur les leads antérieurs et les
    * empêche d'être relus avec la grille du jour (ADR-035 §4).
    *
-   * Historique : `"v1"` jusqu'au 2026-08-04 (retrait du « Pack prêt à louer »).
+   * Historique : `"v1"` jusqu'au 2026-08-04 (retrait du pack locatif),
+   * puis `"2026-08-04"` jusqu'au 2026-08-20 (renommage du bardage et de ses
+   * teintes, ajout de l'ambiance intérieure — les identifiants ont changé,
+   * une configuration antérieure ne se relit donc pas avec cette grille),
+   * puis `"2026-08-20"` jusqu'au 2026-08-22 (Arko One 77 900 → 69 900 € TTC).
    */
-  version: "2026-08-04",
+  version: "2026-08-22",
   tva: 20,
 
   usages: [
@@ -138,7 +189,7 @@ const CONFIG_V1: ConfigurateurConfig = {
       surface: 20,
       emprise: "6,65 × 3,60 m",
       typologie: "studio",
-      prixBaseTtc: 77900,
+      prixBaseTtc: 69900,
       urbanismeGenerique: "En général déclaration préalable",
       poidsTonnes: TRANSPORT.poids.one,
     },
@@ -154,29 +205,111 @@ const CONFIG_V1: ConfigurateurConfig = {
     },
   ],
 
-  // §17.3 — deux ou trois au lancement selon la disponibilité des visuels.
-  // Le parcours doit fonctionner à 2 comme à 3 : ne jamais indexer en dur.
+  /* Bardage extérieur — rubrique renommée le 2026-08-20 (demande de Richard) :
+     « Ambiance » désignait mal une rubrique qui ne porte que la peau extérieure,
+     d'autant qu'une ambiance intérieure existe désormais juste après.
+
+     Les libellés passent de noms d'atmosphère à des noms de couleur — « Basque »
+     ne se devine pas, « Vert » si. **Les identifiants suivent les libellés** :
+     un `cfg_ambiance: "littoral"` en base n'aurait rien dit à un conseiller
+     lisant « Gris clair » à l'écran. C'est la leçon d'ADR-035 § Amendement, où
+     `chaud` avait été renommé en base et pas seulement à l'affichage. Aucun lead
+     ne porte ces valeurs (0 en production), et `version` est incrémentée : une
+     configuration antérieure serait de toute façon signalée périmée.
+
+     ⚠ À vérifier avec Richard : la teinte d'aperçu et le rendu de « Gris clair »
+     sont ceux du **bleu pigeon** de la v1 (`skin-bleu.jpg`, `#5d7d8f`). Le
+     libellé demandé annonce un gris, la pastille montre un bleu. Il manque soit
+     le bon rendu, soit la bonne teinte.
+
+     §17.3 — deux ou trois au lancement selon la disponibilité des visuels. Le
+     parcours doit fonctionner à 2 comme à 3 : ne jamais indexer en dur. */
   ambiances: [
     {
-      id: "littoral",
-      nom: "Littoral",
+      id: "gris_clair",
+      /* `skin-gris.jpg` remplace `skin-bleu.jpg` le 2026-08-20 : le libellé
+         annonçait un gris et l'aperçu montrait un bleu pigeon. Le bon rendu
+         existait au dépôt depuis l'origine, simplement référencé nulle part. */
+      nom: "Gris clair",
       supplementTtc: 0,
-      visuel: "/assets/arko/skins/skin-bleu.jpg",
-      teinte: "#5d7d8f", // bleu pigeon — CONFIG.cladding.bleu
+      visuel: {
+        one: "/assets/arko/skins/skin-gris.jpg",
+        max: "/assets/arko/skins/max-skin-gris.avif",
+      },
+      /* ⚠ Les pastilles annoncent une **teinte de matériau**, pas la couleur
+         mesurée sur le rendu : celui-ci est pris à l'heure dorée, où le gris
+         clair relève à `#bca692` — franchement beige. Aligner la pastille sur
+         cette mesure ferait annoncer au sélecteur une couleur qui n'existe
+         qu'à ce moment de la journée. Valeurs à confirmer par Richard, qui
+         connaît celles appliquées à ses rendus. */
+      teinte: "#9b9b9b",
     },
     {
-      id: "atelier",
-      nom: "Atelier",
+      id: "gris_anthracite",
+      nom: "Gris anthracite",
       supplementTtc: 0,
-      visuel: "/assets/arko/skins/skin-anthracite.jpg",
-      teinte: "#3a3f3c", // anthracite — CONFIG.cladding.anthracite
+      visuel: {
+        one: "/assets/arko/skins/skin-anthracite.jpg",
+        max: "/assets/arko/skins/max-skin-anthracite.avif",
+      },
+      teinte: "#45474a",
     },
     {
-      id: "basque",
-      nom: "Basque",
+      id: "vert",
+      nom: "Vert",
       supplementTtc: 0,
-      visuel: "/assets/arko/skins/skin-vert.jpg",
-      teinte: "#5a6a43", // vert — CONFIG.cladding.vert
+      visuel: {
+        one: "/assets/arko/skins/skin-vert.jpg",
+        max: "/assets/arko/skins/max-skin-vert.avif",
+      },
+      teinte: "#5a6a43",
+    },
+  ],
+
+  /* Ambiance intérieure — rubrique créée le 2026-08-20 (demande de Richard).
+     Sans supplément : c'est un choix de finition, pas une option payante.
+
+     Les vues diffèrent d'un modèle à l'autre — l'Arko Max a un salon que l'Arko
+     One n'a pas. D'où l'indexation par modèle, et l'interdiction d'indexer en
+     dur côté composant : la scène boucle sur ce que le modèle actif expose. */
+  ambiancesInterieures: [
+    {
+      id: "bois",
+      nom: "Ambiance bois",
+      supplementTtc: 0,
+      teinte: "#a9784c",
+      vues: {
+        one: [
+          { id: "cuisine", nom: "Séjour-cuisine", src: "/assets/arko/config/one/bois/cuisine.avif" },
+          { id: "lit", nom: "Le couchage", src: "/assets/arko/config/one/bois/lit.avif" },
+          { id: "sdb", nom: "La salle d'eau", src: "/assets/arko/config/one/bois/sdb.avif" },
+        ],
+        max: [
+          { id: "cuisine", nom: "Séjour-cuisine", src: "/assets/arko/config/max/bois/cuisine.avif" },
+          { id: "salon", nom: "Le salon", src: "/assets/arko/config/max/bois/salon.avif" },
+          { id: "lit", nom: "La chambre", src: "/assets/arko/config/max/bois/lit.avif" },
+          { id: "sdb", nom: "La salle de bain", src: "/assets/arko/config/max/bois/sdb.avif" },
+        ],
+      },
+    },
+    {
+      id: "blanc",
+      nom: "Ambiance blanc",
+      supplementTtc: 0,
+      teinte: "#e8e6e1",
+      vues: {
+        one: [
+          { id: "cuisine", nom: "Séjour-cuisine", src: "/assets/arko/config/one/blanc/cuisine.avif" },
+          { id: "lit", nom: "Le couchage", src: "/assets/arko/config/one/blanc/lit.avif" },
+          { id: "sdb", nom: "La salle d'eau", src: "/assets/arko/config/one/blanc/sdb.avif" },
+        ],
+        max: [
+          { id: "cuisine", nom: "Séjour-cuisine", src: "/assets/arko/config/max/blanc/cuisine.avif" },
+          { id: "salon", nom: "Le salon", src: "/assets/arko/config/max/blanc/salon.avif" },
+          { id: "lit", nom: "La chambre", src: "/assets/arko/config/max/blanc/lit.avif" },
+          { id: "sdb", nom: "La salle de bain", src: "/assets/arko/config/max/blanc/sdb.avif" },
+        ],
+      },
     },
   ],
 
@@ -225,7 +358,7 @@ const CONFIG_V1: ConfigurateurConfig = {
       modeles: ["one", "max"],
       structurelle: false,
     },
-    // « Pack prêt à louer » (1 990 €) retiré le 2026-08-04 — décision de Richard,
+    // Le pack locatif (1 990 €) a été retiré le 2026-08-04 — décision de Richard,
     // l'offre n'est pas viable après étude. Écart supplémentaire au §5 de la
     // spec, qui le liste encore ; la spec est une source versionnée, elle n'est
     // pas réécrite (même traitement que les écarts d'ADR-030).

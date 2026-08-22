@@ -298,6 +298,134 @@ Vercel.** `next build` local reste proscrit (trop lent) — ce qui laisse une
 classe d'erreurs invisible avant le push : le bailout `useSearchParams` du
 2026-08-02 n'est apparu qu'au prerender de production.
 
+## Amendement des 2026-08-20 et 2026-08-21 — bardage, ambiance intérieure, contrôles de saisie
+
+Une session de reprises demandées par Richard, toutes portées par `config.ts`
+et le store : **aucun libellé, aucun visuel, aucune règle de validation n'est
+écrit dans un composant.** Le verrou du §12 tient.
+
+### 1. « Ambiance » devient « Bardage extérieur », et ses teintes changent de nom
+
+Littoral → **Gris clair**, Atelier → **Gris anthracite**, Basque → **Vert**. Le
+libellé précédent désignait mal une rubrique qui ne porte que la peau
+extérieure, et devenait ambigu dès lors qu'une ambiance intérieure la suit.
+
+**Les identifiants suivent les libellés** (`littoral` → `gris_clair`). Un
+`cfg_ambiance: "littoral"` en base n'aurait rien dit à un conseiller lisant
+« Gris clair » à l'écran — c'est la leçon d'ADR-035 § Amendement, où `chaud`
+avait été renommé *en base* et pas seulement à l'affichage. Aucun lead ne
+portait ces valeurs.
+
+### 2. Nouvelle rubrique « Ambiance intérieure »
+
+Bois ou blanc, sans supplément : c'est un choix de finition, pas une option
+payante. **Les vues sont indexées par modèle** — l'Arko Max a un salon que
+l'Arko One n'a pas — et le parcours ne présume jamais de leur nombre, même
+règle que pour les ambiances de bardage (§17.3).
+
+La scène bascule d'elle-même vers la face qu'on est en train de choisir. Sans
+cela, le visiteur changerait d'ambiance intérieure **sans rien voir changer**,
+ce qui est le pire retour possible pour un configurateur. Deux onglets
+permettent de reprendre la main. Défilement des vues coupé sous
+`prefers-reduced-motion`.
+
+**Poids maîtrisé** : seule la vue courante de chaque ambiance est montée, pas
+les quatre. Les deux ambiances de cette vue restent superposées — c'est
+exactement le geste attendu ici, comparer bois et blanc sur le même cadrage
+sans attendre. Le §14 exigeait le préchargement de l'ambiance suivante ; il est
+tenu sur l'axe qui compte.
+
+### 3. Le rendu extérieur est indexé par modèle
+
+Un rendu unique servait les deux gammes : passer de l'Arko One à l'Arko Max ne
+changeait rien à l'aperçu. `visuel` devient `Record<ModeleId, string>`. L'Arko
+Max reçoit trois rendus produits par Richard, un par teinte ; l'Arko One garde
+les rendus v1.
+
+⚠ **Ces trois rendus ne sortent pas du même calcul d'éclairage** : au changement
+de teinte, l'ambiance lumineuse bouge un peu, pas seulement le bardage. Discret,
+mais réel.
+
+### 4. Le parcours passe de six à neuf sections
+
+L'écran 6 concentrait quatre choses de nature différente. Trois s'en détachent :
+
+| | |
+|---|---|
+| **07** | Tester l'éligibilité de mon terrain — détachée de « situation terrain » |
+| **08** | Réserver un numéro — **la grille seule** |
+| **09** | Vos coordonnées — champs et consentements |
+| **pied** | « Votre configuration en détail », ouvert depuis la barre de prix |
+
+La section 07 **nomme ce qu'elle apporte** au lieu de nommer un champ, et
+ressort visuellement tant que le test n'a pas été fait : c'est la seule section
+qui offre quelque chose au lieu d'exiger. Elle s'éteint une fois le terrain
+testé — si toutes les sections ressortaient, plus aucune ne ressortirait.
+
+Le récapitulatif de prix passe **au pied du parcours**, ouvert depuis la barre.
+Il répond à la question que pose le total affiché juste au-dessus ; en faire
+une dixième section l'aurait éloigné du chiffre qu'il explique.
+
+### 5. Le bouton de réservation exige une demande exploitable
+
+Il ne dépendait que de la case CGV : on pouvait « réserver » sans numéro, sans
+adresse et sans coordonnées. Cinq conditions désormais — numéro, adresse
+postale, identité, joignabilité, CGV — **calculées dans le store** (`manques`)
+et non dans la barre de prix : c'est une règle métier, pas une question
+d'affichage.
+
+Les contrôles restent volontairement légers : on distingue une saisie commencée
+d'une saisie plausible, sans transformer le parcours en contrôle de conformité.
+La validation de fond appartient au serveur (ADR-031).
+
+**`aria-disabled` plutôt que `disabled`.** Un bouton `disabled` ne reçoit ni
+clic ni focus : il ne peut donc jamais dire ce qu'il attend. Le bouton reste
+activable, et son clic ouvre la liste de ce qui manque — chaque entrée conduit
+au champ et lui donne le focus.
+
+### 6. Le test de terrain ne bloque pas la réservation
+
+**Arbitrage de Richard.** Un visiteur qui ne connaît pas sa parcelle, dont le
+terrain sort du référentiel, ou que la pré-analyse ne sait pas traiter, doit
+pouvoir réserver et être rappelé. Terrain non testé et terrain jugé non éligible
+mènent au même endroit : **« Réserver le n° XX sous condition* »**, avec la
+nature de l'engagement dite sous le bouton, avant le clic.
+
+Ce qui compte est de ne jamais laisser croire que le projet est validé — pas
+d'empêcher la demande. Un parcours qui retient un prospect faute de parcelle
+connue ne protège personne : il perd un lead qu'on aurait rappelé.
+
+### 7. Socle du prix révisé
+
+« ossature LSF » porte un lien vers la section « L'acier léger » de `/a-propos`
+et le développé du sigle : c'est le poste le plus structurant du prix et le seul
+terme du socle qui ne dise rien à qui le lit pour la première fois. Triple
+vitrage → **double vitrage aluminium**, chauffage → **chauffage électrique**,
+bardage → **bardage joint debout**.
+
+« À votre charge » devient **« Non inclus »** — la première formule désignait
+une dette du client avant même le devis. S'y ajoutent les **travaux VRD** et
+l'**assainissement non collectif par micro-station**, deux postes lourds que
+leur absence laissait imaginer compris.
+
+⚠ **Incohérence non tranchée** : la fiche technique publique (`site.ts`) annonce
+« Vitrages : Triple » quand le configurateur annonce désormais du double. Même
+nature que l'écart terrasse bois / dalle porcelaine. Les deux sont servies au
+même visiteur ; il manque une passe de cohérence sur les caractéristiques
+produit, avec les bonnes valeurs.
+
+### 8. Version de grille
+
+`"2026-08-04"` → **`"2026-08-20"`**. Les identifiants de teinte ont changé et
+une dimension de configuration s'est ajoutée : une configuration antérieure ne
+se relit pas avec cette grille, et `grillePerimee` doit le dire.
+
+### Ce que cet amendement ne fait pas
+
+Le bouton, une fois actif, **ne fait toujours rien** : le handler reste vide.
+Les contrôles empêchent une demande incomplète de partir, ils ne créent pas le
+départ. C'est ADR-031.
+
 ## Points ouverts — arbitrage Howner
 
 1. **Nombre d'ambiances au lancement** (§17.3) : deux ou trois, selon la disponibilité des visuels. Le tableau `ambiances` doit être bouclé, **jamais codé en dur** — la v1 doit fonctionner avec 2 comme avec 3.

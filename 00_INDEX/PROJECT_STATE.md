@@ -4,14 +4,14 @@
 > Mettre à jour la section « Dernier point » en fin de session. Ne pas dupliquer cet état ailleurs.
 
 ## Résumé exécutif
-Site **bi-produit** de réservation — **Arko One** (20 m²) + **Arko Max** (40 m²), ADR-022, sur un **pool commun de 6 exemplaires** numérotés 1→6 (`SERIE_TOTAL`, One et Max confondus — ce n'est pas 6 + 6 ; **ramené de 12 à 6 le 2026-08-04**, arbitrage de Richard). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Portail admin livré et en production ; portail mandataire ⏸ suspendu** (ADR-028). **Configurateur v2 livré sur `/configurer/v2`** (`noindex`), l'entonnoir public y mène entièrement — le CTA final **n'a pas de handler** (ADR-031). **Lancement commercial bloqué par le légal.**
+Site **bi-produit** de réservation — **Arko One** (20 m²) + **Arko Max** (40 m²), ADR-022, sur un **pool commun de 6 exemplaires** numérotés 1→6 (`SERIE_TOTAL`, One et Max confondus — ce n'est pas 6 + 6 ; **ramené de 12 à 6 le 2026-08-04**, arbitrage de Richard). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Portail admin livré et en production ; portail mandataire ⏸ suspendu** (ADR-028). **Configurateur v2 livré sur `/configurer/v2`** (`noindex`), l'entonnoir public y mène entièrement — le CTA final **n'a pas de handler** (ADR-031). **Blocker légal levé le 2026-08-22** (CGV validées, ADR-015) ; l'encaissement reste à brancher (ADR-008).
 
 > ✅ **Réaligné le 2026-08-19** — PR #75 (`dev` → `main`, 33 commits) mergée, `main` = `29a96b4a`, production déployée depuis `main` et vérifiée en ligne. L'anomalie du 2026-08-18 (production promue depuis `feat/adr-035-crm-leads`, `main` figé au 20/07) est **résorbée**. **Leçon conservée : l'état déployé se lit sur les alias Vercel, pas seulement sur les branches git** — un `promote` court-circuite `main` sans laisser de trace côté git.
 >
 > 🟠 **L'entonnoir mène au v2 et son CTA final reste sans handler — assumé par Richard le 2026-08-19.** Ce n'est plus un blocage : c'est une décision. La réservation se fait par la ligne téléphonique en attendant ADR-031. ⚠ **Le guardrail d'ADR-030 (« cet état ne doit pas atteindre `main` ») est de ce fait caduc et doit être amendé.** ⚠️ **Voir « Dernier point » 2026-07-13 — CGV non confirmées avocat déjà live en prod, liées au tunnel de réservation.** Sources de vérité : `src/lib/site.ts` (marque/pricing), `src/lib/configurateur/config.ts` (grilles v2), `DESIGN.md` (charte), `03_DECISIONS/` (ADR).
 
 ## État actuel
-- Phase 1 (front) livrée et validée. **Refonte multi-pages bi-produit** (Arko One + Arko Max) livrée le 2026-06-16 (ADR-020/021/022). Phase 1.5 (SEO) métadonnées par page posées, reste sitemap/robots/JSON-LD. Phase 4 (backend) non démarrée. Légal bloqué.
+- Phase 1 (front) livrée et validée. **Refonte multi-pages bi-produit** (Arko One + Arko Max) livrée le 2026-06-16 (ADR-020/021/022). Phase 1.5 (SEO) métadonnées par page posées, reste sitemap/robots/JSON-LD. Phase 4 (backend) non démarrée. **Légal levé le 2026-08-22** (ADR-015).
 - Charte **Affinity** appliquée le 2026-06-16 (ADR-002) — **à valider par Albert** (contredit le verrou « Argile & Encre » du PASSATION).
 - MCP configurés : `github` (remote officiel), `supabase` (`ahfhownerdb`, read-only), `vercel` (OAuth). CLI Higgsfield + skills installés.
 
@@ -29,7 +29,7 @@ Site **bi-produit** de réservation — **Arko One** (20 m²) + **Arko Max** (40
 
 ## Produit
 **Bi-produit** (ADR-022) — registre `PRODUCTS` (`src/lib/site.ts`) :
-- **Arko One** — 20 m², emprise 6,65 × 3,60 m, **77 900 € TTC** (grille §5 de la spec, ADR-029).
+- **Arko One** — 20 m², emprise 6,65 × 3,60 m, **69 900 € TTC** (ADR-029 § Amendement du 2026-08-22 ; 77 900 € jusque-là).
 - **Arko Max** — 40 m² (= ARKO historique), emprise 4,00 × 11,00 m, **99 900 € TTC** (grille §5 de la spec, ADR-029).
 
 > Prix de base corrigés le 2026-07-31 (ADR-029). Le **reste de la grille** — paliers de terrasse, 6 options dont 3 structurelles, transport par zone — relève d'ADR-030 : le modèle de calcul actuel (`perM2`, `terrassePerM2`, livraison au km) est remplacé, pas ajusté. Le nombre d'exemplaires est à **Série 01 = 6 unités** depuis le 2026-08-04 (arbitrage de Richard, ADR-029 § Amendement) — `SERIE_TOTAL` et `serie.unites` alignés à 6. Les **créneaux en base** restent à ADR-031.
@@ -43,7 +43,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Phase 1 — Front | design, conversion, média, perf | ✅ Livré | 001,005,006 |
 | Phase 1.5 — SEO | sitemap/robots/OG/JSON-LD | 🟢 P0+P1 livrés (2026-06-17) ; **fix HTML front indexable en prod (PR #54 → `dev`, PR #55 → `main`, 2026-07-20)** ; P2 polish restant | 018 |
 | Phase 4 — Backend | Stripe, Supabase, terrain, leads | ⛔ Non démarré — volet terrain/mandataire ⏸ **suspendu** (ADR-028) | 007→013, 028 |
-| Pré-lancement — Légal | acompte/arrhes, CGV | ⛔ Bloqué (avocat) | 015 |
+| Pré-lancement — Légal | versement initial de réservation, CGV | ✅ **Levé le 2026-08-22** — CGV validées, wording aligné | 015 |
 
 ## Carte feature → fichier → état → cible
 
@@ -163,15 +163,15 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** | ✅ |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
 | 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** | ✅ |
-| 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — parcours livré sur `/configurer/v2` (`dev`, 2026-08-02) ; amendé (colonne de sections, coque dédiée) ; bascule sur `/configurer` conditionnée à 031** | 🟠 |
-| 031 | Soumission de la demande de numéro (configurateur v2) | **Réservé — à écrire** ; hérite du contrat de données d'ADR-035 | ❓ |
+| 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — livré** ; **amendé les 2026-08-02 puis 2026-08-20/21** (bardage renommé, ambiance intérieure, 9 sections, contrôles de saisie, socle du prix) ; bascule sur `/configurer` conditionnée à 031 | 🟠 |
+| 031 | **Soumission de la demande de numéro** (configurateur v2 → lead CRM) | **Accepté — migrations appliquées et vérifiées sur Preview (2026-08-21)** ; unicité déplacée sur le numéro **confirmé**, éprouvée par essai réel ; **reste la route et le branchement du bouton** ; Prod à la validation `dev` → `main` | 🟠 |
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |
 | 033 | Back-office des grilles tarifaires (`loadConfig()` → base) | Réservé — à écrire | ❓ |
 | 034 | Espace client (dépôt de pièces) | Réservé — à écrire ; GED prête côté CRM (`origine = 'client'`) | ❓ |
 | 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré sur `feat/adr-035-crm-leads` (2026-08-04)** ; **amendé le 2026-08-04** : « Lead chaud » → « Paiement réservé », règle de blocage du numéro de série, connecteur Pennylane à écrire | ✅ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
-| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lots 0 à 3 livrés : 15 pages publiées (23 URLs au sitemap)** ; reste le lot 4 (4 pages locales, **en attente de matière locale de Richard**) ; **alertes Albert** : contenus réglementaires au dossier avocat, **concurrent nommé retiré de la spec du guide « Prix »**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | 🟠 |
+| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — TERMINÉ : lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -183,7 +183,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 7. ~~**ADR-026 SPF/DKIM prod**~~ ✅ corrigé manuellement (2026-07-10) — n'est plus un bloqueur externe.
 8. ~~**`fix/scrape-annonce-error-logging` → `dev`**~~ ✅ mergée (PR #51) — inclut ADR-027 (fiche lead), refonte CGV (en attente confirmation avocat), révision blocklist marque ADR-004, refonte FAQ/hero/promesse/réassurance, import photos terrain, extraction IA Anthropic enrichie, contact Brevo direct.
 9. ~~**Migration `20260710_lead_client_documents.sql`** (GED Client, ADR-027)~~ — ✅ appliquée Preview (`ixozlavseaykxmjtkkrk`) le 2026-07-10 **et Prod (`msrjocrcewvqkcehruny`) le 2026-07-13** (PR #24 `dev`→`main`). Preview et Prod alignés.
-10. **CGV nouvelle version** (`f3de62fe`) — en attente confirmation avocat avant passage en production (ADR-015 reste bloqué sur ce seul point).
+10. ~~**CGV nouvelle version** (`f3de62fe`) — en attente confirmation avocat.~~ **Levé le 2026-08-22** : CGV du 2026-08-22 réputées relues et valides (décision de Richard), page `/cgv` régénérée depuis `docs/legal/cgv-2026-08-22.md`, wording « acompte » → « versement initial de réservation » aligné sur le §8.3. Voir ADR-015 § Amendement du 2026-08-22 — trois réserves y sont portées (médiateur non nommé, assureurs non nommés, vocabulaire des CGV en écart avec ADR-029).
 11. ~~**Fix HTML front indexable**~~ ✅ livré en prod 2026-07-20 (PR #54 → `dev`, PR #55 → `main`). **ADR-018 SEO reste P2** (polish non bloquant).
     - **Placeholders Brevo `LEAD_DESCRIPTION` / `LEAD_PRODUIT`** à ajouter au template `BREVO_TEMPLATE_AFFECTATION` (15) — reliquat ADR-027.
 12. ~~**Configurateur v2 — parcours et écrans**~~ ✅ livré sur `dev` le 2026-08-02 (`/configurer/v2`, `noindex`). **Suite actionnable** :
@@ -206,6 +206,40 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-20 (configurateur v2 — bardage renommé, rubrique « Ambiance intérieure », PR #84)** — Demande de Richard. Deux mouvements, tous deux pilotés par `config.ts` : **aucun libellé ni visuel en dur dans un composant** (guardrail ADR-030).
+
+**1. « Ambiance » → « Bardage extérieur »**, teintes renommées : Littoral → **Gris clair**, Atelier → **Gris anthracite**, Basque → **Vert**. **Les identifiants suivent les libellés** (`littoral` → `gris_clair`) — un `cfg_ambiance: "littoral"` en base n'aurait rien dit à un conseiller lisant « Gris clair » à l'écran, c'est la leçon d'ADR-035 § Amendement où `chaud` avait été renommé *en base* et pas seulement à l'affichage. Aucun lead ne porte ces valeurs et **`version` passe à `2026-08-20`**, conformément à la règle du 2026-08-04.
+
+**2. Nouvelle rubrique « Ambiance intérieure »** (section 3, les suivantes décalées jusqu'à 7), sans supplément : bois ou blanc. **Les vues sont indexées par modèle** — 4 pour l'Arko Max qui a un salon, 3 pour l'Arko One qui n'en a pas — et le parcours ne présume jamais de leur nombre.
+
+**La scène bascule d'elle-même vers la face qu'on choisit** : toucher au bardage ramène l'extérieur, choisir une ambiance intérieure montre l'intérieur. Sans cela le visiteur changerait d'ambiance **sans rien voir changer**, ce qui est le pire retour possible pour un configurateur ; deux onglets permettent de reprendre la main. Défilement des vues toutes les 4,2 s, **désactivé sous `prefers-reduced-motion`**.
+
+**Poids maîtrisé, et vérifié sur le rendu** : seule la **vue courante** de chaque ambiance est montée — **2 images en vol, pas 8**. Les deux ambiances de cette vue restent superposées, parce que c'est exactement le geste attendu ici : comparer bois et blanc sur le même cadrage, sans attente. 14 rendus versés en AVIF, **680 Ko** au total.
+
+**Le contrat de données suit le parcours** : `cfg_ambiance_interieure` ajouté au type CRM, résolu par `resoudreConfigV2`, affiché dans la fiche lead. Une dimension absente du contrat serait une dimension qu'**ADR-031 oublierait de transmettre**. Aucune migration — la soumission n'écrit encore rien.
+
+**Vérifié sur la Preview** : les deux rubriques portent les bons libellés, aucun ancien libellé ne subsiste, 3 teintes et 2 ambiances servies, **4 vues annoncées sur le Max et 3 sur le One**, onglets présents, numérotation 1→7 continue.
+
+⚠ **À trancher par Richard** : « Gris clair » conserve le rendu et la teinte du **bleu pigeon** de la v1 (`skin-bleu.jpg`, `#5d7d8f`). Le libellé annonce un gris, la pastille montre un bleu — il manque soit le bon rendu extérieur, soit la bonne teinte.
+
+⚠ **ADR-030 doit être amendée** (nouvelle rubrique, identifiants renommés, version de grille) — **non fait : un ADR requiert l'accord de Richard.**
+
+*Au passage, deux libellés du back-office : « Maison » → « Studio », « Ambiance » → « Bardage ». Le back-office est hors périmètre du contrôle vocabulaire, mais un conseiller qui lit « Maison » toute la journée finit par le dire au téléphone.*
+
+**2026-08-20 (mise en production — PR #83, lot 4 : les 4 pages locales — ADR-038 TERMINÉ)** — `main` = **`33cb51bb`**. **Sitemap 23 → 27 URLs : les 19 pages commandées par le classeur sont livrées.** Aucune migration, aucun changement de logique métier.
+
+**Les specs locales révisées par Richard le 2026-08-20 ont levé la réserve du lot 0.** Chaque page porte un angle propre : Bayonne l'**accès** (parcelles enclavées, grutage, plan de sauvegarde du centre ancien), Anglet la **tension logement** (location à l'année contre meublé de tourisme, intimité des bâtiments), Biarritz la **rareté des petites surfaces** (micro-densification, logement étudiant, plusieurs unités), la Côte Basque le **terrain** (littoral contre intérieur, zones A et N, STECAL, absence de PLU unique).
+
+**La différenciation a été mesurée, pas supposée** : recouvrement lexical entre les quatre pages, deux à deux, **44 à 48 %**. Plus de la moitié du vocabulaire de chaque page lui est propre ; quatre pages dupliquées tourneraient autour de 90 %. La part commune correspond au socle partagé (`SOCLE_LOCAL` — méthode, hors-site, gamme), **écrit une seule fois et rendu partout**. Identique là où c'est légitime, distinct là où la page se positionne.
+
+**Vérifié en ligne** : les 4 routes répondent 200, sitemap à 27 URLs, un `<h1>` spécifique par page, **zéro `opacity:0` sérialisé**, vocabulaire conforme, et le maillage « Autres communes » sert bien les trois voisines depuis chaque page.
+
+**Les `<h1>` du classeur ont été écartés** au profit de ceux des specs : la colonne donnait quatre titres quasi identiques (« Nos modèles Arko faits pour vous »), les specs en proposent quatre spécifiques. Sur des pages locales, c'est la différence entre quatre URLs indexées et une seule retenue. **Écart signalé à Richard, arbitrage laissé ouvert** (une ligne par page à changer).
+
+**⚠ Deux points signalés avant publication et assumés par Richard.** (1) **Des faits locaux datés partent sans vérification indépendante** — prélèvement SRU de Biarritz, confirmation juridictionnelle du dispositif d'encadrement des meublés, état du PLUi Côte Basque-Adour, date d'approbation du PLUi Sud Basse Navarre. Ils viennent des specs, sont **attribués à leur source dans le texte**, et chaque page **affiche sa date de vérification** — un fait local daté qui se périme sans le dire est pire que pas de fait du tout. (2) **La section « plusieurs unités » de Biarritz ouvre un discours vers les opérateurs et bailleurs**, là où le site vend une série limitée à des particuliers : formulation prudente, refus explicite de l'appellation « logement social », CTA vers `/contact` faute de parcours dédié. **Segment qu'aucun ADR n'a prévu — alerte Albert : nouveau public, nouveau cycle de vente, et une série de 6 exemplaires qui cadre mal avec un programme immobilier.**
+
+**Chantier ADR-038 clos.** Restent ouverts, hors périmètre : les contenus réglementaires et les CGV au dossier avocat (ADR-015), et l'écart à signaler à Albert sur le concurrent nommé retiré du guide « Prix ».
 
 **2026-08-20 (mise en production — PR #81, `dev` → `main`, 16 commits, ADR-038 lots 0 à 3)** — `main` = **`1efc5f53`**, production **READY en 58 s**, aliasée sur `howner.fr`, `www.howner.fr`, `affinityhome.fr` et `affinityhousefactory.com`. **Aucune migration Supabase**, aucun changement de logique métier. Les quatre PR de lots ont été mergées **de la plus profonde à la plus superficielle** (#80 → #79 → #78 → #77), l'empilement imposant l'ordre : le correctif du libellé « tiny house » ne pouvait pas rester en arrière de la page qui l'introduisait.
 

@@ -199,18 +199,34 @@ export function Nav() {
               key={p.key}
               className="flex flex-col justify-between rounded-2xl border border-line bg-surface p-6"
             >
-              <div>
-                <div className="flex items-baseline justify-between">
-                  {/* Libellé de menu, pas un titre de contenu : un <h3> ici
-                      précèderait le <h1> de la page et casserait le plan. */}
-                  <p className="editorial text-2xl text-ink">{p.name}</p>
-                  <span className="font-mono text-xs text-muted">
-                    {p.area} · {p.total} ex.
-                  </span>
+              <div className="flex items-start gap-4">
+                {/* Vignette détourée : deux volumes qui ne se ressemblent pas
+                    valent mieux que deux noms qui se ressemblent. Le compact et
+                    l'allongé se distinguent d'un regard, avant même la lecture.
+
+                    `aria-hidden` et alt vide : le nom du studio est juste à
+                    côté, l'annoncer deux fois n'apprendrait rien. */}
+                <Image
+                  src={p.vignette}
+                  alt=""
+                  aria-hidden
+                  width={132}
+                  height={72}
+                  className="mt-0.5 h-[52px] w-auto shrink-0 object-contain"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-3">
+                    {/* Libellé de menu, pas un titre de contenu : un <h3> ici
+                        précèderait le <h1> de la page et casserait le plan. */}
+                    <p className="editorial text-2xl text-ink">{p.name}</p>
+                    <span className="shrink-0 font-mono text-xs text-muted">
+                      {p.area} · {p.total} ex.
+                    </span>
+                  </div>
+                  <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
+                    {p.tagline}
+                  </p>
                 </div>
-                <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
-                  {p.tagline}
-                </p>
               </div>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button
@@ -255,13 +271,23 @@ export function Nav() {
           </p>
           {PRODUCT_LIST.map((p) => (
             <div key={p.key} className="border-b border-line py-4">
-              <div className="flex items-baseline justify-between">
-                <span className="text-xl font-medium tracking-tight">
-                  {p.name}
-                </span>
-                <span className="font-mono text-xs text-muted">
-                  {p.area} · {p.total} ex.
-                </span>
+              <div className="flex items-center gap-3">
+                <Image
+                  src={p.vignette}
+                  alt=""
+                  aria-hidden
+                  width={96}
+                  height={52}
+                  className="h-[38px] w-auto shrink-0 object-contain"
+                />
+                <div className="flex min-w-0 flex-1 items-baseline justify-between gap-3">
+                  <span className="text-xl font-medium tracking-tight">
+                    {p.name}
+                  </span>
+                  <span className="shrink-0 font-mono text-xs text-muted">
+                    {p.area} · {p.total} ex.
+                  </span>
+                </div>
               </div>
               <div className="mt-3 flex gap-3">
                 <Link

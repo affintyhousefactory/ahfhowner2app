@@ -5,7 +5,7 @@
 > Coupure : `guardMandataire()` / `mandataireDisabled()` partout, **sauf les 4 écrans admin coupés dans `src/proxy.ts`** — leur layout parent est un composant client, `notFound()` seul n'y annule ni le statut ni le payload. Manœuvre : `docs/feature-flags.md`.
 > Ne pas re-linker une surface suspendue sans lever le flag et amender ADR-028.
 
-Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², **77 900 €**) + **Arko Max** (40 m², **99 900 €**) — grille §5 de la spec, ADR-029. Front livré ; backend Phase 4 en attente ; lancement bloqué par le légal (ADR-015).
+Site **multi-pages bi-produit** (ADR-021/022) : **Arko One** (20 m², **69 900 €**) + **Arko Max** (40 m², **99 900 €**) — grille §5 de la spec, ADR-029. Front livré ; backend Phase 4 en attente ; lancement bloqué par le légal (ADR-015).
 
 ## Priorités actives
 1. ~~**Migration `20260710_lead_client_documents.sql`** (GED Client, ADR-027)~~ ✅ appliquée Preview 2026-07-10 et **Prod 2026-07-13** — Preview/Prod alignés.
