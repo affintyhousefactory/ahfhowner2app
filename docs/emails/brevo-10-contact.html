@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f0;padding:36px 16px;">
+<tr><td align="center">
+<table cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;width:100%;max-width:560px;">
+<tr><td>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:32px 40px 0;">
+<img src="https://affinityhousefactory.com/images/howner-logo.png" width="34" height="44" alt="Howner" style="display:block;margin-bottom:10px;">
+<p style="margin:0 0 3px;font-family:Georgia,Times New Roman,serif;font-size:18px;font-weight:400;color:#1a1a18;letter-spacing:-0.2px;">Howner</p>
+<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:3px;color:#888;text-transform:uppercase;">By Affinity House Factory</p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 0;">
+<h1 style="font-family:Georgia,Times New Roman,serif;font-size:24px;font-weight:400;color:#1a1a18;margin:0;line-height:1.2;letter-spacing:-0.3px;">Votre message<br>a bien &eacute;t&eacute; re&ccedil;u.</h1>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:20px;line-height:20px;font-size:20px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0 0 6px;">Bonjour <strong style="color:#1a1a18;">{{ params.prenom }} {{ params.nom }}</strong>,</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0 0 0px;">Nous avons bien re&ccedil;u votre message et reviendrons vers vous sous 24&nbsp;h ouvr&eacute;es.</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:22px;line-height:22px;font-size:22px;">&nbsp;</td></tr></table>
+
+{% if params.produit_label %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">MOD&Egrave;LE CONCERN&Eacute;</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.produit_label }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">VOTRE MESSAGE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;"><em style="font-family:Georgia,Times New Roman,serif;font-size:14px;color:#3a3a38;line-height:1.7;font-style:italic;">{{ params.message }}</em></p>
+</td></tr></table></td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 40px;">
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 18px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Affinity House Factory &mdash; <a href="https://affinityhousefactory.com" style="color:#aaa;text-decoration:none;">affinityhousefactory.com</a></p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Howner &mdash; une marque de Affinity House Factory.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 16px;">Cet email confirme la r&eacute;ception de votre demande.</p>
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 14px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#aaa;margin:0;line-height:2;letter-spacing:0.2px;">
+<a href="{{ unsubscribe_link }}" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">Se d&eacute;sinscrire</a>
+<span style="color:#e8e8e4;padding:0 8px;">&middot;</span>
+<a href="{{ update_profile }}" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">G&eacute;rer mes pr&eacute;f&eacute;rences</a>
+<span style="color:#e8e8e4;padding:0 8px;">&middot;</span>
+<a href="https://affinityhousefactory.com/compte/supprimer" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">Supprimer mon compte</a>
+</p>
+</td></tr></table></td></tr>
+</table></td></tr></table>
+</body></html>

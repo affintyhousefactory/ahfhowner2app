@@ -58,12 +58,12 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         NOM: lead.nom ?? "",
         EMAIL: lead.email ?? "",
         TEL: lead.tel ?? "",
-        PRODUIT: `${lead.produit ?? ""} ${lead.surface ?? ""}`.trim(),
-        // ADR-029 — `MAISON_TTC` est un nom de paramètre du template Brevo
-        // (BREVO_TEMPLATE_RECAP), configuré dans le dashboard. Le renommer ici
-        // sans renommer le placeholder côté Brevo viderait le montant de l'email :
-        // à traiter en une seule fois, code + template. Invisible du client.
-        MAISON_TTC: lead.house_total ? `${lead.house_total.toLocaleString("fr-FR")} €` : "",
+        /* `MAISON_TTC` → `STUDIO_TTC` et `PRODUIT` retiré le 2026-08-22 : le
+           template Brevo est reconstruit au même moment par
+           `scripts/build-email-brevo.mjs`, ce que le commentaire précédent
+           attendait pour renommer sans vider le montant. `PRODUIT` faisait
+           doublon avec `MODELE`, qui portait déjà la même valeur. */
+        STUDIO_TTC: lead.house_total ? `${lead.house_total.toLocaleString("fr-FR")} €` : "",
         LIVRAISON: livraisonLabel,
         TERRAIN: terrainLabel,
         MODELE: `${lead.produit ?? ""} ${lead.surface ?? ""}`.trim(),
