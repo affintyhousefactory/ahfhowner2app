@@ -126,6 +126,20 @@ const PHONE_DISPLAY =
   process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+33 (0)5 64 37 37 14";
 
 export const CONTACT = {
+  /**
+   * Adresse de contact affichée au public.
+   *
+   * `contact@howner.fr` et non l'adresse de l'éditeur : ADR-029 pose que
+   * Howner est la seule entité citée côté client, et les CGV du 2026-08-22
+   * donnent cette adresse au §1 comme au §21 (réclamations). Les pages légales
+   * en affichaient une autre — un visiteur qui exerce son droit RGPD n'a pas à
+   * découvrir un second nom d'entreprise au moment d'écrire.
+   *
+   * Déclarée ici parce qu'elle était écrite en dur à vingt-cinq endroits. Le
+   * domaine mandataire, suspendu (ADR-028), garde les siennes : y toucher
+   * réveillerait du code que personne ne sert.
+   */
+  email: "contact@howner.fr",
   /** Forme lue par un humain, telle qu'affichée. */
   phone: PHONE_DISPLAY,
   /* Forme composable (E.164), exigée par le protocole `tel:` et par

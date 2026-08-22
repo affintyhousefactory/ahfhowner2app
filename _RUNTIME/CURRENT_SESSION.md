@@ -1,5 +1,21 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-22 (MISE EN PRODUCTION : configurateur branché, prix Arko One, CGV validées)
+- **`main` = `c993ee1c`** (PR #85). PR #84 fusionnée dans `dev` au préalable — 26 commits depuis le 19 août.
+- **Le configurateur crée enfin un lead.** Le CTA final n'avait pas de handler depuis le 19/08. Prix **recalculé côté serveur** ; conflit de numéro en 409 avec les numéros encore libres.
+- **Arko One : 69 900 € TTC.** ⚠ Richard annonçait un départ de 79 900 € ; le montant servi était **77 900 €** (vérifié en production, aucune occurrence de 79 900 dans le dépôt). Version de grille incrémentée dans le même geste.
+- **ADR-015 levé.** CGV du 2026-08-22 réputées relues et valides. Page **générée** depuis `docs/legal/`, fidélité vérifiée mot à mot. Échéancier **5 étapes**. « Acompte » → **« versement initial de réservation »** (art. 1590 C. civ.).
+- **ADR-003 appliqué** : neuf variables `NEXT_PUBLIC_*` posées — aucune n'existait. Prouvé lu en faisant varier la valeur, pas supposé. ⚠ Un montant se change sans commit, **pas sans redéploiement** (Next inline au build).
+- **Migration ADR-031 en production**, table vide, règle éprouvée dans une transaction annulée.
+- **Le contrôle de vocabulaire était partiellement aveugle** (blancs non normalisés, `\b` non-Unicode) : corrigé, trois infractions réelles démasquées.
+
+### ⚠ Alerte Albert ouverte — avant toute communication commerciale
+Le **médiateur de la consommation n'est pas nommé** (art. L.616-1 : coordonnées à publier **sur le site**, pas au devis) ; idem assureurs RC pro et décennale (L.111-1). Les CGV sont publiables, la mention ne l'est pas encore. Second point : **aucun encaissement n'est branché** (ADR-008).
+
+### Reste ouvert des sessions précédentes
+- Section B2B de la page Biarritz — alerte Albert non traitée.
+- `/configurer` v1 toujours servi.
+
 ## Décisions — 2026-08-20 (ADR-038 TERMINÉ — 19 pages en production, 27 URLs)
 - **`main` = `33cb51bb`.** Lots 0 à 4 livrés et vérifiés en ligne. Sitemap **8 → 27 URLs**.
 - **Les 4 pages locales sont réellement différenciées** : recouvrement lexical **44-48 %** entre elles (une duplication tournerait à 90 %). Socle commun (`SOCLE_LOCAL`) écrit une fois, angle propre par ville.
