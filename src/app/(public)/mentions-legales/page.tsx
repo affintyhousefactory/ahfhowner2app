@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalShell } from "@/components/site/LegalShell";
+import { CONTACT } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Mentions légales | HOWNER",
@@ -24,9 +25,7 @@ export default function MentionsPage() {
         Siège social : 28 Chemin de Sabalce OEV, 64100 Bayonne, France
         <br />
         Email :{" "}
-        <a href="mailto:contact@affinityhousefactory.com">
-          contact@affinityhousefactory.com
-        </a>
+        <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
       </p>
       <p>Directeur de la publication : Albert Puigbo</p>
 
@@ -100,9 +99,7 @@ export default function MentionsPage() {
       </p>
       <p>
         Pour exercer vos droits :{" "}
-        <a href="mailto:contact@affinityhousefactory.com">
-          contact@affinityhousefactory.com
-        </a>
+        <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
       </p>
 
       <h2>5. Conditions générales d'utilisation</h2>

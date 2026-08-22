@@ -33,7 +33,7 @@ export function organizationSchema(): JsonLdObject {
     // ADR-029 amendée le 2026-08-19 — « studio de jardin » remplace « maison ».
     description:
       "Studios de jardin d'exception livrés prêts à vivre, fabriqués au Pays-Basque.",
-    email: "contact@affinityhousefactory.com",
+    email: CONTACT.email,
     // Numéro au format E.164 — seul format que les moteurs composent
     // correctement (bouton « Appeler » du knowledge panel).
     telephone: CONTACT.phoneTel,

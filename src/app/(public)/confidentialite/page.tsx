@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalShell } from "@/components/site/LegalShell";
+import { CONTACT } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité | HOWNER",
@@ -327,9 +328,7 @@ export default function ConfidentialitePage() {
       <p>Les droits peuvent être exercés :</p>
       <p>
         <strong>Par email :</strong>{" "}
-        <a href="mailto:contact@affinityhousefactory.com">
-          contact@affinityhousefactory.com
-        </a>
+        <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
       </p>
       <p>
         <strong>Par courrier postal :</strong>
