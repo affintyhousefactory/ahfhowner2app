@@ -55,7 +55,7 @@ La spec est catégorique et le formule comme une contrainte de développement : 
 
 ### 3. Prix et volumes
 
-Arko One ~~**77 900 € TTC**~~ → **69 900 € TTC** (§ Amendement du 2026-08-22), Arko Max **99 900 € TTC** (TVA 20 %, construction neuve). Réservation **2 000 €**, intégralement remboursable, imputée sur le prix. Acompte de confirmation **30 %**.
+Arko One ~~**77 900 € TTC**~~ → **69 900 € TTC** (§ Amendement du 2026-08-22), Arko Max **99 900 € TTC** (TVA 20 %, construction neuve). Réservation **2 000 €**, intégralement remboursable, imputée sur le prix. ~~Acompte de confirmation **30 %**~~ → **échéancier en cinq étapes** (§9.3 des CGV du 2026-08-22 : 40 % au lancement moins la réservation, 20 % au hors d'eau / hors d'air, 35 % à la sortie d'atelier, 5 % à la livraison). Voir ADR-015 § Amendement du 2026-08-22.
 
 > **~~Amendement du 2026-08-02 — Série 01 reste à 12 unités.~~** ~~La spec fixait 6 ; arbitrage de Richard : le volume public ne change pas.~~ **Annulé le 2026-08-04** (voir ci-dessous).
 

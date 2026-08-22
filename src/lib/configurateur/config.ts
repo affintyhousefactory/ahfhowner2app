@@ -149,7 +149,7 @@ const CONFIG_V1: ConfigurateurConfig = {
    * qui fait passer `grillePerimee` à vrai sur les leads antérieurs et les
    * empêche d'être relus avec la grille du jour (ADR-035 §4).
    *
-   * Historique : `"v1"` jusqu'au 2026-08-04 (retrait du « Pack prêt à louer »),
+   * Historique : `"v1"` jusqu'au 2026-08-04 (retrait du pack locatif),
    * puis `"2026-08-04"` jusqu'au 2026-08-20 (renommage du bardage et de ses
    * teintes, ajout de l'ambiance intérieure — les identifiants ont changé,
    * une configuration antérieure ne se relit donc pas avec cette grille),
@@ -358,7 +358,7 @@ const CONFIG_V1: ConfigurateurConfig = {
       modeles: ["one", "max"],
       structurelle: false,
     },
-    // « Pack prêt à louer » (1 990 €) retiré le 2026-08-04 — décision de Richard,
+    // Le pack locatif (1 990 €) a été retiré le 2026-08-04 — décision de Richard,
     // l'offre n'est pas viable après étude. Écart supplémentaire au §5 de la
     // spec, qui le liste encore ; la spec est une source versionnée, elle n'est
     // pas réécrite (même traitement que les écarts d'ADR-030).

@@ -58,11 +58,11 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         NOM: lead.nom ?? "",
         EMAIL: lead.email ?? "",
         TEL: lead.tel ?? "",
-        /* `MAISON_TTC` → `STUDIO_TTC` et `PRODUIT` retiré le 2026-08-22 : le
-           template Brevo est reconstruit au même moment par
-           `scripts/build-email-brevo.mjs`, ce que le commentaire précédent
-           attendait pour renommer sans vider le montant. `PRODUIT` faisait
-           doublon avec `MODELE`, qui portait déjà la même valeur. */
+        /* Le paramètre de montant a été renommé en `STUDIO_TTC` le 2026-08-22
+           et `PRODUIT` retiré : le template Brevo est reconstruit au même
+           moment par `scripts/build-email-brevo.mjs`, ce que le commentaire
+           précédent attendait pour renommer sans vider le montant. `PRODUIT`
+           faisait doublon avec `MODELE`, qui portait déjà la même valeur. */
         STUDIO_TTC: lead.house_total ? `${lead.house_total.toLocaleString("fr-FR")} €` : "",
         LIVRAISON: livraisonLabel,
         TERRAIN: terrainLabel,

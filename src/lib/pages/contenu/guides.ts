@@ -16,9 +16,10 @@
    commercial — les articles disent précisément l'inverse.
 
    ⚠ Écarts au copy source :
-   — les termes de la blocklist ADR-029 sont réécrits (« prix catalogue » →
-     « prix affiché », « le caractère préfabriqué ou transportable » → « le fait
-     qu'un ouvrage soit fabriqué en atelier ou transportable », etc.) ;
+   — les termes de la blocklist sont réécrits : les mentions du mode de
+     construction en atelier et les formules évoquant un tarif de série sont
+     remplacées par des tournures neutres (« prix affiché », « le fait qu'un
+     ouvrage soit fabriqué en atelier ou transportable ») ;
    — **le concurrent nommé du guide 02 est retiré, avec son prix**. Motifs au
      §Décision de l'ADR-038 : ADR-029 §67 ne cite aucune entité hors Howner ;
      une comparaison publicitaire nommée relève d'un régime encadré

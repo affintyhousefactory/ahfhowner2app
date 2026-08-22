@@ -67,6 +67,54 @@ const DEPOT = `${DEPOSIT_EUR.toLocaleString("fr-FR")} €`;
 // les deux se lisent dans le même parcours, ils ne peuvent pas diverger.
 export const SERIE_TOTAL = 6;
 
+/**
+ * Échéancier de paiement — §9.3 des CGV du 2026-08-22.
+ *
+ * Cinq étapes, adaptées à la fabrication hors-site : 40 % au lancement (moins
+ * la réservation déjà versée), 20 % au hors d'eau / hors d'air en atelier,
+ * 35 % à la sortie d'atelier, 5 % à la livraison. Remplace l'échéancier en
+ * quatre temps 40 / 50 / 10, qui ne comportait aucun jalon technique entre le
+ * lancement et la sortie d'atelier.
+ *
+ * **Déclaré ici, et nulle part ailleurs.** Le même échéancier se lit dans la
+ * FAQ, dans les CGV et dans le devis ; l'écrire trois fois garantit qu'un jour
+ * les trois diffèrent. Les CGV le tiennent de leur markdown source
+ * (`docs/legal/`), qui fait foi ; ce tableau en est le reflet éditorial, et
+ * `npm run check:echeancier` vérifie qu'ils concordent.
+ */
+export const ECHEANCIER = [
+  {
+    etape: "Réservation commerciale",
+    part: 0,
+    montant: DEPOT,
+    detail: `Versement initial de ${DEPOT}, intégralement remboursable tant que le contrat n\u2019est pas signé. Il bloque l\u2019un des ${SERIE_TOTAL} numéros de la Série 01 et s\u2019impute sur l\u2019étape suivante.`,
+  },
+  {
+    etape: "Lancement de fabrication",
+    part: 40,
+    montant: "40 % du montant total",
+    detail: `Facture d\u2019étape émise après signature du contrat, validation des prérequis et confirmation du lancement — déduction faite des ${DEPOT} déjà versés.`,
+  },
+  {
+    etape: "Hors d\u2019eau / hors d\u2019air en atelier",
+    part: 20,
+    montant: "20 % du montant total",
+    detail: "Facture d\u2019étape émise lorsque l\u2019avancement technique correspondant est atteint en atelier.",
+  },
+  {
+    etape: "Sortie d\u2019atelier",
+    part: 35,
+    montant: "35 % du montant total",
+    detail: "Facture d\u2019étape émise lorsque votre studio de jardin ARKO est prêt à être livré.",
+  },
+  {
+    etape: "Livraison",
+    part: 5,
+    montant: "5 % du montant total",
+    detail: "Solde facturé à la livraison, selon les conditions prévues au contrat.",
+  },
+] as const;
+
 // Nombre de séries ouvertes (une par modèle). Le compteur de l'en-tête affiche
 // les deux nombres : le total seul laissait croire à une seule série.
 export const SERIE_COUNT = 2;
@@ -403,15 +451,16 @@ export const FAQ: { q: string; a: string | string[] }[] = [
     q: "Comment se passe le paiement ?",
     a: [
       "Après un premier échange téléphonique, nous vous adressons par email une proposition commerciale comprenant le modèle ARKO retenu, les principales caractéristiques techniques, les options choisies et une estimation du calendrier de fabrication, de livraison et d'installation.",
-      `Pour confirmer votre intérêt et réserver votre projet, un versement initial de ${DEPOT} vous est demandé. Il bloque l\u2019un des 12 numéros de la Série 01.`,
+      `Pour confirmer votre intérêt et réserver votre projet, un versement initial de ${DEPOT} vous est demandé. Il bloque l\u2019un des ${SERIE_TOTAL} numéros de la Série 01.`,
       "Ce versement est intégralement remboursable tant que le contrat de fabrication, livraison et installation n'a pas été signé. Vous pouvez donc renoncer à votre projet avant cette signature, sans avoir à justifier votre décision.",
       `Une fois le contrat signé, ce versement de ${DEPOT} est déduit du prix total de votre studio de jardin ARKO et intégré à l\u2019échéancier de paiement.`,
-      "Le règlement s'effectue ensuite en plusieurs étapes, adaptées à la fabrication en atelier :",
-      "Étape 0 — Premier échange et proposition commerciale\nNous échangeons avec vous sur votre projet, votre terrain, le modèle ARKO envisagé et vos contraintes techniques. Nous vous envoyons ensuite un devis accompagné du portfolio produit correspondant.",
-      `Étape 1 — Réservation du projet\nVous validez le devis de réservation et l\u2019échéancier prévisionnel. Une facture de réservation de ${DEPOT} vous est adressée, réglable par virement bancaire. Aucun paiement n\u2019est encaissé depuis le site : le lien de règlement vous parvient après l\u2019échange de qualification.`,
-      `Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d\u2019étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des ${DEPOT} déjà versés.`,
-      "Étape 3 — Sortie d'atelier\nLorsque votre studio de jardin ARKO est fabriqué et prêt à être livré, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
-      "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
+      "Le règlement s'effectue ensuite en cinq étapes, adaptées à la fabrication hors-site (§9.3 des CGV) :",
+      /* Dérivé d'`ECHEANCIER` : la FAQ ne réécrit pas les pourcentages, elle les
+         lit. Une correction des CGV se propage ici sans qu'on y pense. */
+      ...ECHEANCIER.map(
+        (e, n) => `Étape ${n + 1} — ${e.etape}\n${e.detail}`,
+      ),
+      "Aucun paiement n'est encaissé depuis le site : le lien de règlement vous parvient après l'échange de qualification. La réception donne lieu à l'établissement d'un procès-verbal.",
       "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
       "Affinity House Factory n'intervient pas dans l'opération d'achat du terrain, ni dans les formalités juridiques, administratives ou notariales qui y sont attachées.",
       // Mention des mandataires partenaires — retirée tant que le dispositif

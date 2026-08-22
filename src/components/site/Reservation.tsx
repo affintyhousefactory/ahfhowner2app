@@ -275,7 +275,7 @@ export function Reservation() {
                         <span className="font-semibold text-ink">
                           {BRAND.deposit.toLocaleString("fr-FR")} €
                         </span>
-                        {" "}· Acompte de réservation Arko — remboursable, sans engagement de construction
+                        {" "}· Versement initial de réservation Arko — intégralement remboursable avant signature du contrat
                       </li>
                     </ul>
                     <p className="mt-2">
@@ -463,10 +463,17 @@ function Field({
 function LegalNote() {
   return (
     <p className="mt-4 text-[0.68rem] leading-relaxed text-muted">
-      {/* TODO LÉGAL — à valider par l'avocat : nature de la somme
-          (arrhes/acompte), conditions de rétractation et remboursement. */}
-      Acompte de réservation de {BRAND.deposit.toLocaleString("fr-FR")} € —
-      remboursable. Conditions précisées dans les{" "}
+      {/* Nature de la somme tranchée par les CGV du 2026-08-22, §8.3 : un
+          « versement initial de réservation », intégralement remboursable
+          avant signature, qui « ne constitue pas un engagement définitif ».
+          Le mot « acompte » est écarté : il désigne une somme qui engage
+          fermement les deux parties (art. 1590 du Code civil), l'inverse de ce
+          que ce versement produit. « Acompte remboursable sans engagement »
+          était une contradiction dans les termes — c'est ce que signalait
+          ADR-015, désormais levé. */}
+      Versement initial de réservation de{" "}
+      {BRAND.deposit.toLocaleString("fr-FR")} € — intégralement remboursable
+      avant signature du contrat. Conditions précisées dans les{" "}
       <a href="/cgv" className="underline underline-offset-2 hover:text-ink">
         CGV
       </a>
@@ -497,7 +504,8 @@ function Confirmation({ slot }: { slot: number | null }) {
           : ""}
         Configuration : {active.name} {active.area} — votre Arko {eur(houseTotal)} TTC
         {delivery != null ? ` + livraison ${eur(delivery)}` : ""}. En version
-        finale, le paiement sécurisé de l'acompte confirmera votre réservation.
+        finale, le paiement sécurisé du versement initial confirmera votre
+        réservation.
         On vous recontacte sous 24 h.
       </p>
       <p className="mt-4 font-mono text-[0.68rem] text-muted">

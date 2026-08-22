@@ -80,7 +80,14 @@ export const URBANISME_GENERIQUE =
 export const DEVIS_TEXTE = {
   intro:
     "Après votre échange avec notre conseiller, vous recevrez un devis détaillé mentionnant un échéancier et une demande de paiement de réservation validant votre exclusivité.",
-  ligne: "Acompte de réservation Arko — remboursable, sans engagement de construction",
+  /* « Acompte » → « versement initial » le 2026-08-22 : le §8.3 des CGV
+     validées qualifie cette somme de versement initial de réservation,
+     intégralement remboursable, qui « ne constitue pas un engagement
+     définitif ». Un acompte, lui, engage fermement (art. 1590 du Code civil).
+     Le §10 de la spec impose de ne pas reformuler ces textes ; ici la
+     reformulation est imposée par un document opposable, et actée à
+     l'ADR-015 § Amendement du 2026-08-22. */
+  ligne: "Versement initial de réservation Arko — intégralement remboursable avant signature du contrat",
   conditions: "Conditions précisées dans les",
 } as const;
 

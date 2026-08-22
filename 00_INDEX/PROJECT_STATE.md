@@ -4,14 +4,14 @@
 > Mettre à jour la section « Dernier point » en fin de session. Ne pas dupliquer cet état ailleurs.
 
 ## Résumé exécutif
-Site **bi-produit** de réservation — **Arko One** (20 m²) + **Arko Max** (40 m²), ADR-022, sur un **pool commun de 6 exemplaires** numérotés 1→6 (`SERIE_TOTAL`, One et Max confondus — ce n'est pas 6 + 6 ; **ramené de 12 à 6 le 2026-08-04**, arbitrage de Richard). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Portail admin livré et en production ; portail mandataire ⏸ suspendu** (ADR-028). **Configurateur v2 livré sur `/configurer/v2`** (`noindex`), l'entonnoir public y mène entièrement — le CTA final **n'a pas de handler** (ADR-031). **Lancement commercial bloqué par le légal.**
+Site **bi-produit** de réservation — **Arko One** (20 m²) + **Arko Max** (40 m²), ADR-022, sur un **pool commun de 6 exemplaires** numérotés 1→6 (`SERIE_TOTAL`, One et Max confondus — ce n'est pas 6 + 6 ; **ramené de 12 à 6 le 2026-08-04**, arbitrage de Richard). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Portail admin livré et en production ; portail mandataire ⏸ suspendu** (ADR-028). **Configurateur v2 livré sur `/configurer/v2`** (`noindex`), l'entonnoir public y mène entièrement — le CTA final **n'a pas de handler** (ADR-031). **Blocker légal levé le 2026-08-22** (CGV validées, ADR-015) ; l'encaissement reste à brancher (ADR-008).
 
 > ✅ **Réaligné le 2026-08-19** — PR #75 (`dev` → `main`, 33 commits) mergée, `main` = `29a96b4a`, production déployée depuis `main` et vérifiée en ligne. L'anomalie du 2026-08-18 (production promue depuis `feat/adr-035-crm-leads`, `main` figé au 20/07) est **résorbée**. **Leçon conservée : l'état déployé se lit sur les alias Vercel, pas seulement sur les branches git** — un `promote` court-circuite `main` sans laisser de trace côté git.
 >
 > 🟠 **L'entonnoir mène au v2 et son CTA final reste sans handler — assumé par Richard le 2026-08-19.** Ce n'est plus un blocage : c'est une décision. La réservation se fait par la ligne téléphonique en attendant ADR-031. ⚠ **Le guardrail d'ADR-030 (« cet état ne doit pas atteindre `main` ») est de ce fait caduc et doit être amendé.** ⚠️ **Voir « Dernier point » 2026-07-13 — CGV non confirmées avocat déjà live en prod, liées au tunnel de réservation.** Sources de vérité : `src/lib/site.ts` (marque/pricing), `src/lib/configurateur/config.ts` (grilles v2), `DESIGN.md` (charte), `03_DECISIONS/` (ADR).
 
 ## État actuel
-- Phase 1 (front) livrée et validée. **Refonte multi-pages bi-produit** (Arko One + Arko Max) livrée le 2026-06-16 (ADR-020/021/022). Phase 1.5 (SEO) métadonnées par page posées, reste sitemap/robots/JSON-LD. Phase 4 (backend) non démarrée. Légal bloqué.
+- Phase 1 (front) livrée et validée. **Refonte multi-pages bi-produit** (Arko One + Arko Max) livrée le 2026-06-16 (ADR-020/021/022). Phase 1.5 (SEO) métadonnées par page posées, reste sitemap/robots/JSON-LD. Phase 4 (backend) non démarrée. **Légal levé le 2026-08-22** (ADR-015).
 - Charte **Affinity** appliquée le 2026-06-16 (ADR-002) — **à valider par Albert** (contredit le verrou « Argile & Encre » du PASSATION).
 - MCP configurés : `github` (remote officiel), `supabase` (`ahfhownerdb`, read-only), `vercel` (OAuth). CLI Higgsfield + skills installés.
 
@@ -43,7 +43,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Phase 1 — Front | design, conversion, média, perf | ✅ Livré | 001,005,006 |
 | Phase 1.5 — SEO | sitemap/robots/OG/JSON-LD | 🟢 P0+P1 livrés (2026-06-17) ; **fix HTML front indexable en prod (PR #54 → `dev`, PR #55 → `main`, 2026-07-20)** ; P2 polish restant | 018 |
 | Phase 4 — Backend | Stripe, Supabase, terrain, leads | ⛔ Non démarré — volet terrain/mandataire ⏸ **suspendu** (ADR-028) | 007→013, 028 |
-| Pré-lancement — Légal | acompte/arrhes, CGV | ⛔ Bloqué (avocat) | 015 |
+| Pré-lancement — Légal | versement initial de réservation, CGV | ✅ **Levé le 2026-08-22** — CGV validées, wording aligné | 015 |
 
 ## Carte feature → fichier → état → cible
 
@@ -183,7 +183,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 7. ~~**ADR-026 SPF/DKIM prod**~~ ✅ corrigé manuellement (2026-07-10) — n'est plus un bloqueur externe.
 8. ~~**`fix/scrape-annonce-error-logging` → `dev`**~~ ✅ mergée (PR #51) — inclut ADR-027 (fiche lead), refonte CGV (en attente confirmation avocat), révision blocklist marque ADR-004, refonte FAQ/hero/promesse/réassurance, import photos terrain, extraction IA Anthropic enrichie, contact Brevo direct.
 9. ~~**Migration `20260710_lead_client_documents.sql`** (GED Client, ADR-027)~~ — ✅ appliquée Preview (`ixozlavseaykxmjtkkrk`) le 2026-07-10 **et Prod (`msrjocrcewvqkcehruny`) le 2026-07-13** (PR #24 `dev`→`main`). Preview et Prod alignés.
-10. **CGV nouvelle version** (`f3de62fe`) — en attente confirmation avocat avant passage en production (ADR-015 reste bloqué sur ce seul point).
+10. ~~**CGV nouvelle version** (`f3de62fe`) — en attente confirmation avocat.~~ **Levé le 2026-08-22** : CGV du 2026-08-22 réputées relues et valides (décision de Richard), page `/cgv` régénérée depuis `docs/legal/cgv-2026-08-22.md`, wording « acompte » → « versement initial de réservation » aligné sur le §8.3. Voir ADR-015 § Amendement du 2026-08-22 — trois réserves y sont portées (médiateur non nommé, assureurs non nommés, vocabulaire des CGV en écart avec ADR-029).
 11. ~~**Fix HTML front indexable**~~ ✅ livré en prod 2026-07-20 (PR #54 → `dev`, PR #55 → `main`). **ADR-018 SEO reste P2** (polish non bloquant).
     - **Placeholders Brevo `LEAD_DESCRIPTION` / `LEAD_PRODUIT`** à ajouter au template `BREVO_TEMPLATE_AFFECTATION` (15) — reliquat ADR-027.
 12. ~~**Configurateur v2 — parcours et écrans**~~ ✅ livré sur `dev` le 2026-08-02 (`/configurer/v2`, `noindex`). **Suite actionnable** :

@@ -1,10 +1,19 @@
+/* ⚠ FICHIER GÉNÉRÉ — ne pas modifier à la main.
+
+   Source : docs/legal/cgv-2026-08-22.md
+   Généré : node scripts/build-cgv.mjs
+
+   Pour corriger une clause, corriger le markdown et régénérer. Une retouche
+   directe ici serait écrasée au prochain build, et surtout : elle ferait
+   diverger la page publiée du document relu par le conseil. */
+
 import type { Metadata } from "next";
 import { LegalShell } from "@/components/site/LegalShell";
 
 export const metadata: Metadata = {
   title: "Conditions générales de vente | HOWNER",
   description:
-    "Conditions générales de vente HOWNER — réservation, versement initial, échéancier, garanties légales et parcours de fabrication, livraison et installation ARKO.",
+    "Conditions générales de vente HOWNER — réservation, échéancier en cinq étapes, garanties et parcours de fabrication hors-site, livraison et installation des studios de jardin ARKO.",
   alternates: { canonical: "/cgv" },
   robots: { index: false, follow: true },
 };
@@ -15,1204 +24,395 @@ export default function CgvPage() {
       eyebrow="Légal"
       title="Conditions générales de vente"
       pending={false}
-      updated="9 juillet 2026"
+      updated="22 août 2026"
     >
-      {/* 1 */}
-      <h2>1. Identification de l&apos;éditeur et du fabricant-installateur</h2>
-      <p>
-        <strong>HOWNER</strong> est une marque exploitée par{" "}
-        <strong>Affinity House Factory</strong> (ci-après « AHF »), société par
-        actions simplifiée (SAS), immatriculée sous le numéro{" "}
-        <strong>SIRET 982&nbsp;581&nbsp;506&nbsp;00010</strong>, dont le siège
-        social est situé <strong>28 Chemin de Sabalce OEV, 64100 Bayonne, France</strong>.
-      </p>
+      <h2>1. Identification de l’éditeur et du fabricant-installateur</h2>
+      <p><strong>HOWNER</strong> est une marque exploitée par <strong>Affinity House Factory</strong> (ci-après « AHF »), société par actions simplifiée (SAS), immatriculée sous le numéro SIRET <strong>982 581 506 00010</strong>, dont le siège social est situé <strong>28 Chemin de Sabalce OEV, 64100 Bayonne, France</strong>.</p>
       <ul>
         <li>Site internet : <a href="https://howner.fr">https://howner.fr</a></li>
-        <li>Contact commercial : contact@affinityhousefactory.com</li>
+        <li>Contact commercial : contact@howner.fr</li>
         <li>Directeur de la publication : Albert Puigbo</li>
-        <li>Numéro de TVA intracommunautaire : FR[à compléter]</li>
-        <li>Médiateur de la consommation : [à compléter avant publication]</li>
-        <li>Assureur responsabilité civile professionnelle / décennale : [à compléter avant publication]</li>
+        <li>Activité principale déclarée : <strong>fabrication hors-site et installation de studios de jardin modulaires</strong></li>
+        <li>Code APE cible : <strong>16.23Z — Fabrication de charpentes et d’autres menuiseries</strong></li>
+        <li>Numéro de TVA intracommunautaire : FR84982581506</li>
+        <li>Assureur responsabilité civile professionnelle : (Information fournie lors de la remise du contrat après réservation)</li>
+        <li>Assureur responsabilité décennale, si applicable aux prestations réalisées : (Information fournie lors de la remise du contrat après réservation)</li>
+        <li>Médiateur de la consommation, pour les Clients consommateurs : (Information fournie lors de la remise du contrat après réservation)</li>
       </ul>
-      <p>
-        Les présentes Conditions Générales de Vente (ci-après les « CGV »)
-        encadrent le parcours de réservation, de commande, de fabrication, de
-        livraison et d&apos;installation des maisons légères de gamme{" "}
-        <strong>ARKO</strong> proposées par AHF.
-      </p>
-
-      {/* 2 */}
+      <p>Les présentes Conditions Générales de Vente, ci-après les « CGV », encadrent le parcours de présentation, qualification, réservation, devis, commande, fabrication hors-site, livraison et installation des <strong>studios de jardin ARKO</strong> proposés par AHF.</p>
       <h2>2. Définitions</h2>
       <table>
-        <thead>
-          <tr><th>Terme</th><th>Définition</th></tr>
-        </thead>
+        <thead><tr><th>Terme</th><th>Définition</th></tr></thead>
         <tbody>
-          <tr>
-            <td><strong>AHF</strong></td>
-            <td>Affinity House Factory, fabricant et installateur des maisons légères ARKO dans le périmètre expressément prévu au contrat.</td>
-          </tr>
-          <tr>
-            <td><strong>HOWNER</strong></td>
-            <td>Marque, portail ou espace digital exploité par AHF pour présenter les modèles ARKO, qualifier les projets, éditer des devis et accompagner le Client.</td>
-          </tr>
-          <tr>
-            <td><strong>Client</strong></td>
-            <td>Toute personne physique ou morale sollicitant AHF pour un projet de maison légère ARKO. Lorsque le Client agit à des fins non professionnelles, il est considéré comme consommateur au sens du Code de la consommation.</td>
-          </tr>
-          <tr>
-            <td><strong>Maître d&apos;ouvrage</strong></td>
-            <td>Personne pour le compte de laquelle le projet est réalisé et qui assume notamment la responsabilité du terrain, des autorisations administratives et des assurances qui lui incombent.</td>
-          </tr>
-          <tr>
-            <td><strong>Maison ARKO</strong></td>
-            <td>Maison légère, fabriquée en atelier, livrée puis installée sur un terrain choisi par le Client, selon le modèle, les options et les caractéristiques techniques prévues au devis et au contrat.</td>
-          </tr>
-          <tr>
-            <td><strong>Modèle ARKO</strong></td>
-            <td>Modèle standard ou variante proposée par AHF, notamment Arko One, Arko Max ou tout autre modèle figurant dans la proposition commerciale.</td>
-          </tr>
-          <tr>
-            <td><strong>Devis</strong></td>
-            <td>Document commercial et technique présentant le modèle retenu, les options, le prix estimatif ou ferme selon son état de validation, les prestations incluses et exclues, et les conditions de validité.</td>
-          </tr>
-          <tr>
-            <td><strong>Réservation commerciale</strong></td>
-            <td>Étape précontractuelle permettant au Client de confirmer son intérêt pour un projet ARKO par un versement initial de 5&nbsp;000&nbsp;€, remboursable avant signature du contrat de fabrication, livraison et installation.</td>
-          </tr>
-          <tr>
-            <td><strong>Contrat de fabrication, livraison et installation</strong></td>
-            <td>Contrat définitif signé entre AHF et le Client, définissant les obligations des parties, le prix, le calendrier, le périmètre des prestations, les prérequis techniques et les conditions de livraison et d&apos;installation de la maison ARKO.</td>
-          </tr>
-          <tr>
-            <td><strong>Notice technique contractuelle</strong></td>
-            <td>Annexe au contrat décrivant précisément les caractéristiques techniques de la maison ARKO, les matériaux, équipements, finitions, options et limites de prestation.</td>
-          </tr>
-          <tr>
-            <td><strong>Fiches techniques élémentaires</strong></td>
-            <td>Annexes détaillant les composants ou lots techniques : structure, isolation, menuiseries, électricité, plomberie, chauffage, ventilation, finitions, transport, installation, etc.</td>
-          </tr>
-          <tr>
-            <td><strong>Terrain</strong></td>
-            <td>Terrain choisi, réservé ou acquis par le Client, destiné à recevoir la maison ARKO. AHF n&apos;intervient pas dans l&apos;achat du terrain.</td>
-          </tr>
-          <tr>
-            <td><strong>Prérequis terrain</strong></td>
-            <td>Ensemble des conditions nécessaires à la fabrication, livraison et installation : propriété ou droits suffisants, autorisation d&apos;urbanisme, accès chantier, fondations ou supports, étude de sol, raccordements préparatoires, etc.</td>
-          </tr>
-          <tr>
-            <td><strong>Fondations / supports d&apos;accueil</strong></td>
-            <td>Ouvrages destinés à recevoir la maison ARKO : plots, longrines, micropieux, dalle, pieux vissés ou tout autre système validé techniquement. Sauf mention contraire, ces ouvrages sont à la charge du Client.</td>
-          </tr>
-          <tr>
-            <td><strong>Livraison</strong></td>
-            <td>Acheminement de la maison ARKO depuis l&apos;atelier ou le site de fabrication jusqu&apos;au terrain du Client.</td>
-          </tr>
-          <tr>
-            <td><strong>Installation / Pose</strong></td>
-            <td>Opération consistant à positionner et installer la maison ARKO sur les supports d&apos;accueil préalablement réalisés et réceptionnés.</td>
-          </tr>
-          <tr>
-            <td><strong>Réception</strong></td>
-            <td>Acte contradictoire par lequel le Client accepte la maison livrée et installée, avec ou sans réserves, et qui fait l&apos;objet d&apos;un procès-verbal de réception.</td>
-          </tr>
-          <tr>
-            <td><strong>Mandataire partenaire</strong></td>
-            <td>Professionnel indépendant susceptible d&apos;accompagner le Client dans la recherche d&apos;un terrain. Il agit sous sa propre responsabilité et n&apos;est pas partie au contrat de fabrication, livraison et installation conclu avec AHF.</td>
-          </tr>
-          <tr>
-            <td><strong>Conditions suspensives</strong></td>
-            <td>Conditions dont la réalisation est nécessaire pour permettre l&apos;exécution du contrat : obtention du financement, autorisation d&apos;urbanisme, terrain disponible, étude de sol favorable, accès chantier, supports réceptionnés, etc.</td>
-          </tr>
+          <tr><td><strong>AHF</strong></td><td>Affinity House Factory, société exploitant la marque HOWNER et proposant des prestations de fabrication hors-site, livraison et installation de studios de jardin ARKO, dans le périmètre expressément prévu au devis, au contrat et à leurs annexes.</td></tr>
+          <tr><td><strong>HOWNER</strong></td><td>Marque, portail ou espace digital exploité par AHF pour présenter les studios de jardin ARKO, qualifier les projets, éditer des propositions commerciales et accompagner le parcours précontractuel.</td></tr>
+          <tr><td><strong>Studio de jardin ARKO</strong></td><td>Unité modulaire de jardin fabriquée hors-site, livrée et installée sur un terrain choisi et mis à disposition par le Client, selon le modèle, les options et les caractéristiques techniques prévus au devis, au contrat et à leurs annexes.</td></tr>
+          <tr><td><strong>Unité modulaire</strong></td><td>Ensemble fabriqué ou assemblé hors-site, destiné à être livré et installé sur le site du Client, conformément au périmètre contractuel.</td></tr>
+          <tr><td><strong>Modèle ARKO</strong></td><td>Déclinaison proposée par AHF, notamment <strong>ARKO One 20 m²</strong>, <strong>ARKO Max 40 m²</strong>, ou toute autre version figurant dans la proposition commerciale.</td></tr>
+          <tr><td><strong>Client</strong></td><td>Toute personne physique ou morale sollicitant AHF pour un projet de studio de jardin ARKO.</td></tr>
+          <tr><td><strong>Client Professionnel</strong></td><td>Personne morale ou personne physique agissant à des fins entrant dans le cadre de son activité professionnelle, commerciale, institutionnelle, associative, médico-sociale, sanitaire, artisanale, agricole ou libérale.</td></tr>
+          <tr><td><strong>Client Institutionnel ou de soins</strong></td><td>Entreprise, établissement de soins, établissement médico-social, résidence services, clinique, association, collectivité, fondation ou structure assimilée envisageant l’acquisition, l’installation ou l’exploitation d’un studio de jardin ARKO dans le cadre de son activité.</td></tr>
+          <tr><td><strong>Client Investisseur Non Professionnel</strong></td><td>Personne physique agissant à titre patrimonial ou locatif, disposant des ressources nécessaires ou d’un financement déjà sécurisé, et envisageant l’acquisition d’un studio de jardin ARKO à des fins d’investissement locatif.</td></tr>
+          <tr><td><strong>Devis</strong></td><td>Document commercial et technique présentant le modèle retenu, les options, le prix, les prestations incluses et exclues, les conditions de validité et les modalités de paiement proposées.</td></tr>
+          <tr><td><strong>Réservation commerciale</strong></td><td>Étape précontractuelle permettant au Client de confirmer son intérêt par un versement initial de <strong>2 000 €</strong>, remboursable avant signature du contrat définitif, sauf stipulation contraire expresse acceptée par écrit.</td></tr>
+          <tr><td><strong>Contrat de fabrication, livraison et installation</strong></td><td>Contrat définitif signé entre AHF et le Client, définissant les obligations des parties, le prix, le calendrier, le périmètre des prestations, les prérequis techniques, les conditions de fabrication hors-site, livraison, installation et réception du studio de jardin ARKO.</td></tr>
+          <tr><td><strong>Notice technique contractuelle</strong></td><td>Annexe au contrat décrivant les caractéristiques techniques du studio de jardin ARKO, les matériaux, équipements, finitions, options et limites de prestation.</td></tr>
+          <tr><td><strong>Fiches techniques élémentaires</strong></td><td>Annexes détaillant les composants ou lots techniques : structure, isolation, menuiseries, électricité, plomberie, chauffage, ventilation, finitions, transport, installation ou tout autre élément prévu au contrat.</td></tr>
+          <tr><td><strong>Terrain / site d’installation</strong></td><td>Terrain choisi, réservé, acquis ou mis à disposition par le Client, destiné à recevoir le studio de jardin ARKO. AHF n’intervient pas dans l’achat, la vente ou la négociation du terrain.</td></tr>
+          <tr><td><strong>Prérequis terrain</strong></td><td>Conditions nécessaires à la fabrication, à la livraison et à l’installation : droits suffisants du Client sur le terrain, autorisations administratives, accès, supports d’accueil, étude de sol si requise, raccordements préparatoires, sécurité du site et pièces justificatives demandées.</td></tr>
+          <tr><td><strong>Supports d’accueil</strong></td><td>Éléments destinés à recevoir l’unité modulaire : plots, longrines, micropieux, dalle, pieux vissés ou tout autre système validé techniquement. Sauf mention contraire expresse, ces éléments sont à la charge du Client.</td></tr>
+          <tr><td><strong>Intervenant spécialisé indépendant</strong></td><td>Courtier en financement, courtier en crédit-bail, courtier en assurance, professionnel de l’immobilier, bureau d’études, géotechnicien, entreprise de supports d’accueil, prestataire de raccordement, conseil ou tout autre professionnel intervenant auprès du Client dans un périmètre distinct de celui d’AHF, sous sa propre responsabilité et dans le cadre d’un contrat séparé.</td></tr>
+          <tr><td><strong>Financement sécurisé</strong></td><td>Fonds propres disponibles, budget professionnel validé, accord de crédit-bail, location financière, accord de financement professionnel, accord institutionnel, subvention validée ou tout autre mode de financement jugé suffisant par AHF avant lancement du projet.</td></tr>
+          <tr><td><strong>Livraison</strong></td><td>Acheminement du studio de jardin ARKO depuis l’atelier ou le site de production jusqu’au terrain du Client.</td></tr>
+          <tr><td><strong>Installation</strong></td><td>Opération consistant à positionner et installer le studio de jardin ARKO sur les supports d’accueil préalablement réalisés, contrôlés et réceptionnés selon les modalités prévues au contrat.</td></tr>
+          <tr><td><strong>Réception</strong></td><td>Acte contradictoire par lequel le Client accepte le studio de jardin ARKO livré et installé, avec ou sans réserves, matérialisé par un procès-verbal de réception.</td></tr>
+          <tr><td><strong>Conditions préalables</strong></td><td>Conditions dont la réalisation est nécessaire pour permettre l’exécution du contrat : financement, autorisations administratives, terrain disponible, étude technique favorable si requise, accès, supports d’accueil réceptionnés, pièces transmises, assurances ou tout autre prérequis prévu au contrat.</td></tr>
         </tbody>
       </table>
-
-      {/* 3 */}
       <h2>3. Objet des CGV</h2>
       <p>Les présentes CGV ont pour objet de définir les conditions dans lesquelles AHF propose :</p>
-      <ol>
-        <li>la présentation des modèles de maisons légères ARKO ;</li>
-        <li>l&apos;édition d&apos;un devis commercial et technique ;</li>
-        <li>la réservation commerciale d&apos;un projet ARKO ;</li>
-        <li>la signature ultérieure d&apos;un contrat de fabrication, livraison et installation ;</li>
-        <li>la fabrication en atelier de la maison ARKO ;</li>
-        <li>la livraison sur le terrain choisi par le Client ;</li>
-        <li>l&apos;installation sur site, sous réserve de la réunion des prérequis techniques, administratifs et financiers.</li>
-      </ol>
-      <p>
-        Les présentes CGV ne régissent pas l&apos;achat du terrain, l&apos;acte
-        notarié, les frais de notaire, les relations entre le Client et un
-        mandataire immobilier, les taxes d&apos;urbanisme, les travaux réalisés
-        par des prestataires tiers du Client, ni les autorisations
-        administratives qui relèvent de la responsabilité du Client, sauf
-        mission spécifique expressément confiée à AHF.
-      </p>
-
-      {/* 4 */}
-      <h2>4. Nature juridique de l&apos;intervention d&apos;AHF</h2>
-      <p>
-        AHF intervient dans le cadre d&apos;un{" "}
-        <strong>contrat de fabrication, livraison et installation d&apos;une maison légère ARKO</strong>{" "}
-        sur un terrain choisi par le Client.
-      </p>
-      <p>Le contrat définitif n&apos;a pas pour objet :</p>
+      <p>1. la présentation des studios de jardin ARKO ; 2. la qualification commerciale, technique, financière et assurantielle du projet ; 3. l’édition d’une proposition commerciale ou d’un devis ; 4. la réservation commerciale d’un projet ARKO ; 5. la signature ultérieure d’un contrat de fabrication hors-site, livraison et installation ; 6. la fabrication hors-site du studio de jardin ARKO ; 7. la livraison sur le terrain choisi et mis à disposition par le Client ; 8. l’installation sur site, sous réserve de la réunion des prérequis techniques, administratifs, financiers, assurantiels et de sécurité.</p>
+      <p>Les présentes CGV ne régissent pas :</p>
       <ul>
-        <li>la vente d&apos;un terrain ;</li>
-        <li>la vente d&apos;un ensemble « terrain + maison » ;</li>
-        <li>l&apos;acquisition foncière ;</li>
-        <li>la rédaction ou la signature d&apos;un acte notarié ;</li>
-        <li>la garantie de constructibilité du terrain indépendamment des autorisations administratives ;</li>
-        <li>la réalisation de prestations non expressément incluses dans le devis et le contrat.</li>
-      </ul>
-      <p>
-        Le Client reconnaît que le terrain destiné à recevoir la maison ARKO
-        est choisi, négocié, réservé ou acquis par lui, sous sa responsabilité.
-      </p>
-
-      <h3>4.1 Alerte de qualification juridique</h3>
-      <p>
-        Selon la nature exacte du projet, le périmètre d&apos;intervention
-        d&apos;AHF, les prestations incluses, la fourniture éventuelle de
-        plans et l&apos;usage d&apos;habitation de la maison, certaines
-        opérations peuvent être susceptibles de relever d&apos;un régime légal
-        spécifique applicable aux travaux de construction de maison
-        individuelle.
-      </p>
-      <p>
-        Dans une telle hypothèse, les règles légales impératives applicables
-        prévalent sur les présentes CGV. AHF se réserve le droit d&apos;adapter
-        le contrat, les garanties, les modalités de paiement et les documents
-        contractuels afin de respecter le régime juridique applicable au
-        projet.
-      </p>
-      <p>
-        Aucune stipulation des présentes CGV ne peut avoir pour objet ou pour
-        effet d&apos;écarter une disposition légale impérative applicable au
-        Client.
-      </p>
-
-      {/* 5 */}
-      <h2>5. Description des modèles ARKO</h2>
-      <p>
-        Les maisons ARKO sont des maisons légères fabriquées hors site, en
-        atelier, puis livrées et installées sur le terrain du Client.
-      </p>
-      <p>
-        Les modèles, surfaces, prix, finitions et options présentés sur le
-        site sont fournis à titre d&apos;information commerciale. Les
-        caractéristiques contractuelles sont celles figurant dans :
-      </p>
-      <ol>
-        <li>le devis accepté ;</li>
-        <li>le contrat de fabrication, livraison et installation ;</li>
-        <li>la notice technique contractuelle ;</li>
-        <li>les plans validés ;</li>
-        <li>les fiches techniques annexées.</li>
-      </ol>
-
-      <h3>5.1 Modèles présentés</h3>
-      <p>Les modèles disponibles peuvent notamment comprendre :</p>
-      <ul>
-        <li><strong>Arko One</strong> : modèle compact d&apos;environ 20 m², selon configuration retenue ;</li>
-        <li><strong>Arko Max</strong> : modèle d&apos;environ 30 à 40 m², selon configuration retenue ;</li>
-        <li>tout autre modèle, variante ou déclinaison proposée par AHF.</li>
-      </ul>
-      <p>
-        Les surfaces, équipements et prix affichés sur le site peuvent
-        évoluer. Seuls les documents contractuels signés engagent AHF.
-      </p>
-
-      <h3>5.2 Ce qui peut être inclus</h3>
-      <p>
-        Selon la proposition commerciale et le contrat signé, la maison ARKO
-        peut comprendre tout ou partie des éléments suivants :
-      </p>
-      <ul>
-        <li>structure et ossature ;</li>
-        <li>isolation ;</li>
-        <li>menuiseries extérieures ;</li>
-        <li>couverture et enveloppe ;</li>
-        <li>second œuvre intérieur ;</li>
-        <li>équipements sanitaires ;</li>
-        <li>équipements électriques ;</li>
-        <li>plomberie intérieure ;</li>
-        <li>système de ventilation ;</li>
-        <li>chauffage ou solution thermique prévue au devis ;</li>
-        <li>revêtements intérieurs ;</li>
-        <li>cuisine ou mobilier intégré si expressément prévu ;</li>
-        <li>livraison ;</li>
-        <li>installation sur supports d&apos;accueil conformes.</li>
-      </ul>
-      <p>
-        La liste précise des prestations incluses est définie dans le devis et
-        la notice technique contractuelle.
-      </p>
-
-      <h3>5.3 Ce qui est exclu par défaut</h3>
-      <p>Sauf mention contraire expresse dans le devis ou le contrat, sont exclus :</p>
-      <ul>
-        <li>l&apos;achat du terrain ;</li>
+        <li>l’achat du terrain ;</li>
+        <li>la vente du terrain ;</li>
+        <li>l’acte notarié ;</li>
         <li>les frais de notaire ;</li>
-        <li>les frais d&apos;agence immobilière ou de mandataire ;</li>
-        <li>les taxes d&apos;urbanisme ;</li>
+        <li>les frais d’agence immobilière ou de tout professionnel intervenant dans la transaction foncière ;</li>
+        <li>les taxes d’urbanisme ;</li>
+        <li>les travaux réalisés par des prestataires choisis ou contractés directement par le Client ;</li>
+        <li>les autorisations administratives relevant du Client ;</li>
+        <li>les supports d’accueil, terrassements, plateformes, raccordements, réseaux ou aménagements extérieurs, sauf stipulation contraire expresse dans le devis ou le contrat ;</li>
+        <li>la recherche, la négociation, l’octroi ou la mise en place d’un financement ;</li>
+        <li>la souscription d’une assurance DO ou de toute autre assurance du Client, sauf assistance documentaire expressément prévue ;</li>
+        <li>les prestations de conseil juridique, fiscal, bancaire, financier, patrimonial ou immobilier.</li>
+      </ul>
+      <h2>4. Nature de l’intervention d’AHF</h2>
+      <h3>4.1 Périmètre d’intervention</h3>
+      <p>AHF intervient en qualité de <strong>fabricant-installateur de studios de jardin modulaires</strong>, dans le périmètre expressément prévu au devis, au contrat et à leurs annexes.</p>
+      <p>L’intervention d’AHF porte sur la fabrication hors-site, la livraison et l’installation d’un studio de jardin ARKO sur un terrain choisi et mis à disposition par le Client.</p>
+      <p>AHF ne se substitue pas au Client pour l’acquisition foncière, le financement, la souscription de ses assurances, l’obtention des autorisations administratives, la réalisation des supports d’accueil, les raccordements aux réseaux, les études de sol ou les démarches relevant d’autres professionnels, sauf stipulation expresse et écrite dans le contrat.</p>
+      <p>Selon la nature exacte du projet, le profil du Client, l’usage prévu, le périmètre d’intervention d’AHF, les prestations incluses et les documents contractuels signés, certaines opérations peuvent relever d’un régime légal impératif. Dans cette hypothèse, les règles légales applicables prévalent sur les présentes CGV. AHF se réserve le droit de suspendre ou de refuser tout projet dont la qualification juridique, assurantielle ou technique ne serait pas compatible avec son périmètre d’intervention ou ses garanties d’assurance.</p>
+      <h3>4.2 Cibles commerciales prioritaires</h3>
+      <p>Le parcours HOWNER / ARKO s’adresse prioritairement :</p>
+      <p>1. aux Clients Professionnels, entreprises, institutions, établissements de soins, établissements médico-sociaux, associations, collectivités ou structures assimilées, disposant d’une capacité de financement propre ou pouvant mobiliser un financement professionnel adapté ; 2. aux Clients Investisseurs Non Professionnels disposant de fonds propres suffisants ou d’un financement déjà sécurisé, dans une logique d’investissement locatif.</p>
+      <p>AHF peut demander au Client de produire tout justificatif raisonnable permettant d’établir la disponibilité du financement, l’éligibilité du projet, la capacité à régler les factures d’étape et la réunion des prérequis nécessaires au lancement de fabrication.</p>
+      <p>AHF ne s’engage pas à accompagner un Client particulier dans une recherche de financement bancaire immobilier individuel et peut refuser tout projet dont le financement n’est pas confirmé dans un délai compatible avec le calendrier commercial et industriel proposé.</p>
+      <h2>5. Intervenants spécialisés indépendants</h2>
+      <h3>5.1 Principe d’indépendance</h3>
+      <p>AHF peut, lorsque cela est utile au projet, communiquer au Client les coordonnées d’intervenants spécialisés indépendants, notamment pour :</p>
+      <ul>
+        <li>le financement professionnel, le crédit-bail ou la location financière ;</li>
+        <li>l’assurance DO ou les assurances du Client ;</li>
+        <li>l’acquisition ou la mise à disposition du terrain ;</li>
         <li>les études de sol ;</li>
-        <li>les fondations, micropieux, plots, longrines, dalles ou supports d&apos;accueil ;</li>
-        <li>le terrassement ;</li>
-        <li>les voiries et réseaux divers ;</li>
-        <li>les raccordements aux réseaux publics ou privés ;</li>
-        <li>l&apos;assainissement individuel ou collectif ;</li>
-        <li>les autorisations d&apos;urbanisme ;</li>
-        <li>les frais d&apos;architecte ou de bureau d&apos;études non inclus ;</li>
-        <li>l&apos;assurance dommages-ouvrage du Client ;</li>
-        <li>les aménagements extérieurs ;</li>
-        <li>les clôtures, terrasses, plantations, stationnements, accès grue, accès chantier et ouvrages annexes ;</li>
-        <li>toute prestation non expressément mentionnée comme incluse.</li>
+        <li>les supports d’accueil ;</li>
+        <li>les raccordements ;</li>
+        <li>les démarches administratives ou techniques ;</li>
+        <li>les prestations d’exploitation, de gestion locative ou de maintenance non incluses au contrat AHF.</li>
       </ul>
-
-      {/* 6 */}
-      <h2>6. Visuels, simulateurs et configurateurs</h2>
-      <p>
-        Les images, rendus 3D, vidéos, schémas, simulations et configurations
-        présentés sur le site sont fournis à titre illustratif.
-      </p>
-      <p>
-        Ils ne constituent pas des documents contractuels, sauf lorsqu&apos;ils
-        sont expressément annexés au contrat signé et identifiés comme tels.
-      </p>
-      <p>
-        Le configurateur en ligne, lorsqu&apos;il est disponible, permet
-        d&apos;obtenir une estimation ou une préconfiguration du projet. Cette
-        estimation ne constitue pas une offre ferme ni un engagement définitif
-        d&apos;AHF tant qu&apos;un devis validé puis un contrat n&apos;ont pas
-        été signés.
-      </p>
-
-      {/* 7 */}
-      <h2>7. Parcours client</h2>
-
-      <h3>7.1 Étape 0 — Premier échange et proposition commerciale</h3>
-      <p>
-        Après un premier échange téléphonique ou par visioconférence, AHF
-        adresse au Client une proposition commerciale par email.
-      </p>
-      <p>Cette proposition peut comprendre :</p>
+      <p>Ces intervenants agissent sous leur propre responsabilité, dans le cadre de leur propre activité professionnelle, de leurs assurances, de leurs habilitations et de contrats séparés conclus directement avec le Client.</p>
+      <p>AHF n’est pas partie aux contrats conclus entre le Client et ces intervenants, sauf stipulation écrite contraire dans un accord spécifique expressément signé par les parties concernées.</p>
+      <h3>5.2 Absence d’activité réglementée exercée par AHF</h3>
+      <p>AHF n’exerce pas, au titre des présentes CGV :</p>
       <ul>
-        <li>le modèle ARKO envisagé ;</li>
-        <li>les principales caractéristiques techniques ;</li>
-        <li>les options sélectionnées ;</li>
-        <li>les conditions prévisionnelles de fabrication, livraison et installation ;</li>
-        <li>les prestations incluses et exclues ;</li>
-        <li>un échéancier prévisionnel de paiement ;</li>
-        <li>les prérequis terrain connus à ce stade.</li>
+        <li>d’activité d’intermédiation en opérations de banque ou services de paiement ;</li>
+        <li>d’activité de courtage en assurance ;</li>
+        <li>d’activité d’agence immobilière, de transaction immobilière ou de négociation foncière ;</li>
+        <li>d’activité de conseil juridique, fiscal ou patrimonial ;</li>
+        <li>d’activité de gestion locative.</li>
       </ul>
-
-      <h3>7.2 Étape 1 — Réservation commerciale du projet</h3>
-      <p>
-        Pour confirmer son intérêt et réserver son projet, le Client peut être
-        invité à verser un montant initial de <strong>5&nbsp;000&nbsp;€</strong>.
-      </p>
-      <p>
-        Ce versement est une <strong>réservation commerciale précontractuelle</strong>.
-        Il est intégralement remboursable tant que le contrat de fabrication,
-        livraison et installation n&apos;a pas été signé.
-      </p>
-      <p>
-        Le paiement peut être réalisé par virement bancaire ou par paiement
-        sécurisé en ligne, selon les modalités proposées par AHF.
-      </p>
-
-      <h3>7.3 Étape 2 — Validation technique et contractuelle</h3>
-      <p>Avant signature du contrat définitif, AHF et le Client vérifient notamment :</p>
+      <p>Lorsqu’un intervenant exerce une activité réglementée, il lui appartient de justifier de ses immatriculations, habilitations, assurances et autorisations professionnelles, notamment, le cas échéant, ORIAS, carte professionnelle immobilière, habilitation IOBSP, habilitation de courtage en assurance, responsabilité civile professionnelle ou toute autre autorisation requise.</p>
+      <p>Le Client est invité à vérifier directement les informations professionnelles de l’intervenant avant de conclure avec lui.</p>
+      <h3>5.3 Transparence commerciale</h3>
+      <p>Si AHF perçoit une rémunération, commission, avantage ou rétribution au titre d’une mise en relation avec un intervenant spécialisé indépendant, cette information est portée à la connaissance du Client lorsque la réglementation applicable l’exige ou lorsque la transparence de la relation commerciale le commande.</p>
+      <p>Aucune rémunération éventuellement perçue par AHF ne modifie l’indépendance juridique de l’intervenant ni la responsabilité de ce dernier au titre des prestations qu’il réalise pour le Client.</p>
+      <h3>5.4 Prestations hors périmètre assuré AHF</h3>
+      <p>Certaines prestations nécessaires au projet global peuvent ne pas relever du périmètre assuré d’AHF, notamment les assurances du Client, l’assurance DO, le financement, l’acte notarié, la négociation foncière, les études de sol, les supports d’accueil, les raccordements, les aménagements extérieurs ou la gestion locative.</p>
+      <p>Ces prestations ne sont pas couvertes par les garanties d’assurance d’AHF, sauf mention contraire expresse figurant dans l’attestation d’assurance applicable et dans le contrat signé.</p>
+      <h2>6. Description des studios de jardin ARKO</h2>
+      <p>Les caractéristiques principales des studios de jardin ARKO sont présentées sur le site HOWNER, dans les fiches produits, le devis, la notice technique contractuelle et les fiches techniques annexées au contrat.</p>
+      <p>Les surfaces, dimensions, visuels, rendus 3D, images, vidéos, exemples d’implantation, estimations de loyers, projections de rentabilité ou suggestions d’usage sont communiqués à titre indicatif, sauf stipulation contractuelle expresse.</p>
+      <p>Seuls le devis accepté, le contrat signé, la notice technique contractuelle, les plans validés et les annexes techniques ont valeur contractuelle.</p>
+      <p>AHF se réserve le droit de faire évoluer ses modèles, matériaux, fournisseurs, équipements ou procédés, sous réserve de ne pas altérer les caractéristiques essentielles du projet contractualisé sans accord du Client.</p>
+      <h3>6.1 ARKO One — 20 m²</h3>
+      <p>ARKO One est un studio de jardin de 20 m² environ, destiné à un usage défini dans le devis et la notice technique contractuelle.</p>
+      <p>La surface, les dimensions, les équipements, les options, le niveau de finition et les limites de prestation sont ceux indiqués dans les documents contractuels applicables.</p>
+      <h3>6.2 ARKO Max — 40 m²</h3>
+      <p>ARKO Max est un studio de jardin de 40 m² environ, destiné à un usage défini dans le devis et la notice technique contractuelle.</p>
+      <p>La surface, les dimensions, les équipements, les options, le niveau de finition et les limites de prestation sont ceux indiqués dans les documents contractuels applicables.</p>
+      <h3>6.3 Visuels et projections</h3>
+      <p>Les visuels, simulations d’intégration, images de synthèse, photographies d’inspiration, exemples d’implantation, projections de revenu ou exemples d’usage ne sont pas contractuels, sauf mention expresse contraire.</p>
+      <h2>7. Prestations incluses et exclues</h2>
+      <h3>7.1 Prestations incluses</h3>
+      <p>Sauf stipulation contraire dans le devis ou le contrat, les prestations AHF peuvent comprendre :</p>
       <ul>
-        <li>l&apos;identification du terrain ;</li>
-        <li>la situation du Client au regard du terrain : propriétaire, futur propriétaire, compromis, promesse ou autre droit permettant l&apos;installation ;</li>
-        <li>la nature de l&apos;autorisation d&apos;urbanisme requise ;</li>
-        <li>les contraintes d&apos;accès, de transport et d&apos;installation ;</li>
-        <li>les supports d&apos;accueil nécessaires ;</li>
-        <li>les raccordements à prévoir ;</li>
-        <li>les conditions de financement ;</li>
-        <li>les documents techniques à annexer au contrat.</li>
+        <li>la préparation technique du projet sur la base des informations transmises par le Client ;</li>
+        <li>la fabrication hors-site du studio de jardin ARKO ;</li>
+        <li>la fourniture des éléments, équipements et finitions expressément prévus ;</li>
+        <li>les contrôles qualité internes ;</li>
+        <li>la préparation au transport ;</li>
+        <li>la livraison sur le terrain du Client ;</li>
+        <li>l’installation sur les supports d’accueil conformes ;</li>
+        <li>la réception contradictoire avec le Client ;</li>
+        <li>la remise des documents techniques applicables.</li>
       </ul>
-
-      <h3>7.4 Étape 3 — Signature du contrat de fabrication, livraison et installation</h3>
-      <p>
-        La signature du contrat définitif intervient après validation du
-        devis, des conditions techniques et des conditions suspensives.
-      </p>
-      <p>Le contrat précise notamment :</p>
+      <h3>7.2 Prestations exclues par défaut</h3>
+      <p>Sauf stipulation expresse contraire dans le devis ou le contrat, sont exclus :</p>
       <ul>
-        <li>le prix ;</li>
-        <li>le modèle retenu ;</li>
-        <li>les options ;</li>
-        <li>les prestations incluses ;</li>
-        <li>les prestations exclues ;</li>
-        <li>les conditions suspensives ;</li>
-        <li>l&apos;échéancier de paiement ;</li>
-        <li>les délais de fabrication, livraison et installation ;</li>
-        <li>les responsabilités respectives d&apos;AHF et du Client ;</li>
-        <li>les garanties et assurances applicables ;</li>
-        <li>les modalités de réception.</li>
+        <li>l’achat, la vente, la recherche, la négociation ou le financement du terrain ;</li>
+        <li>l’acte notarié, les frais de notaire et les droits d’enregistrement ;</li>
+        <li>les taxes d’urbanisme, taxes locales, redevances ou contributions ;</li>
+        <li>l’obtention des autorisations administratives ;</li>
+        <li>les études de sol ;</li>
+        <li>les supports d’accueil, terrassements, plateformes, accès grue, accès camion, réseaux et raccordements ;</li>
+        <li>l’assainissement individuel ou collectif ;</li>
+        <li>les branchements eau, électricité, télécom, gaz ou tout autre réseau ;</li>
+        <li>l’assurance DO du Client ;</li>
+        <li>les aménagements extérieurs, terrasses non prévues, clôtures, plantations, stationnements, cheminements et annexes ;</li>
+        <li>l’ameublement, les équipements d’exploitation, le linge, les consommables ou éléments de gestion locative, sauf mention contraire ;</li>
+        <li>les démarches de classement, d’autorisation d’exploitation, d’autorisation sanitaire, médico-sociale, ERP, accessibilité ou sécurité incendie propres à l’activité du Client.</li>
       </ul>
-
-      <h3>7.5 Étape 4 — Fabrication en atelier</h3>
-      <p>
-        La fabrication débute après signature du contrat, expiration ou purge
-        des éventuels délais de rétractation applicables, levée des conditions
-        prévues au contrat et paiement des sommes dues à l&apos;étape
-        correspondante.
-      </p>
-      <p>
-        Le Client est informé par email des étapes clés : lancement de
-        fabrication, avancement structurel, finitions, maison prête à livrer.
-      </p>
-
-      <h3>7.6 Étape 5 — Livraison et installation</h3>
-      <p>La livraison et l&apos;installation interviennent lorsque :</p>
+      <h2>8. Parcours commercial et contractuel</h2>
+      <h3>8.1 Qualification du projet</h3>
+      <p>Avant toute réservation ou signature, AHF peut qualifier le projet sur la base des éléments fournis par le Client :</p>
       <ul>
-        <li>la maison ARKO est prête à livrer ;</li>
-        <li>le terrain est accessible ;</li>
-        <li>les supports d&apos;accueil sont réalisés et réceptionnés ;</li>
-        <li>les autorisations nécessaires ont été obtenues ;</li>
-        <li>les conditions de sécurité, de météo, de manutention et d&apos;accès permettent l&apos;intervention ;</li>
-        <li>les factures exigibles ont été réglées.</li>
+        <li>identité et qualité du Client ;</li>
+        <li>usage envisagé ;</li>
+        <li>situation du terrain ;</li>
+        <li>contraintes d’accès ;</li>
+        <li>budget et mode de financement ;</li>
+        <li>calendrier souhaité ;</li>
+        <li>prérequis techniques ;</li>
+        <li>cadre professionnel, institutionnel ou locatif du projet.</li>
       </ul>
-      <p>
-        L&apos;installation est généralement réalisée en une journée, sous
-        réserve des conditions d&apos;accès, de météo, de préparation du
-        terrain et des contraintes propres au site.
-      </p>
-
-      <h3>7.7 Étape 6 — Réception</h3>
-      <p>
-        À l&apos;issue de l&apos;installation, un procès-verbal de réception
-        est établi contradictoirement entre AHF et le Client, avec ou sans
-        réserves.
-      </p>
-      <p>
-        La réception marque le point de départ des garanties légales
-        applicables aux prestations réalisées.
-      </p>
-
-      {/* 8 */}
-      <h2>8. Prix et devis</h2>
-
-      <h3>8.1 Prix affichés</h3>
-      <p>Les prix affichés sur le site sont indicatifs, sauf mention expresse contraire. Ils peuvent varier selon :</p>
-      <ul>
-        <li>le modèle choisi ;</li>
-        <li>les options ;</li>
-        <li>le niveau de finition ;</li>
-        <li>les contraintes de fabrication ;</li>
-        <li>les contraintes de transport ;</li>
-        <li>les contraintes d&apos;installation ;</li>
-        <li>la localisation du terrain ;</li>
-        <li>l&apos;évolution des coûts de matériaux, de transport ou de main-d&apos;œuvre ;</li>
-        <li>les contraintes techniques propres au terrain.</li>
-      </ul>
-
+      <p>AHF peut refuser ou ajourner un projet lorsque les informations communiquées sont insuffisantes, lorsque le terrain paraît incompatible, lorsque le financement n’est pas confirmé, lorsque les assurances nécessaires ne sont pas identifiées ou lorsque le projet excède son périmètre contractuel et assurantiel.</p>
       <h3>8.2 Devis</h3>
-      <p>Le devis précise :</p>
+      <p>Le devis présente le modèle retenu, les options, le prix, les prestations incluses, les exclusions, l’échéancier proposé, les conditions de validité et les prérequis principaux.</p>
+      <p>Le devis ne vaut pas engagement définitif de fabrication tant que le contrat de fabrication hors-site, livraison et installation n’a pas été signé et que les conditions prévues n’ont pas été levées.</p>
+      <h3>8.3 Réservation commerciale</h3>
+      <p>Pour réserver son projet, le Client peut être invité à verser un montant initial de <strong>2 000 €</strong>.</p>
+      <p>Ce montant est intégralement remboursable avant la signature du contrat de fabrication hors-site, livraison et installation, sauf stipulation contraire expresse acceptée par écrit dans le cadre d’une prestation spécifique déjà engagée.</p>
+      <p>Le versement de réservation ne constitue pas un engagement définitif de fabrication, de livraison ou d’installation.</p>
+      <h3>8.4 Signature du contrat</h3>
+      <p>La relation contractuelle principale est formalisée par la signature d’un <strong>contrat de fabrication hors-site, livraison et installation d’un studio de jardin ARKO</strong>.</p>
+      <p>Ce contrat précise notamment :</p>
       <ul>
-        <li>l&apos;identité d&apos;AHF ;</li>
-        <li>l&apos;identité du Client ;</li>
-        <li>la date d&apos;émission ;</li>
-        <li>la durée de validité ;</li>
+        <li>l’identité du Client ;</li>
+        <li>la qualité du Client : professionnel, institutionnel, investisseur non professionnel ou autre ;</li>
+        <li>l’usage envisagé ;</li>
+        <li>la désignation du terrain ;</li>
         <li>le modèle retenu ;</li>
-        <li>les options ;</li>
-        <li>les prestations incluses ;</li>
-        <li>les prestations exclues ;</li>
-        <li>le prix HT, la TVA applicable et le prix TTC ;</li>
-        <li>les frais de livraison ou leur méthode de calcul ;</li>
-        <li>les conditions de paiement ;</li>
-        <li>les conditions particulières éventuelles.</li>
+        <li>les prestations incluses et exclues ;</li>
+        <li>le prix ;</li>
+        <li>l’échéancier ;</li>
+        <li>les conditions préalables ;</li>
+        <li>le calendrier ;</li>
+        <li>les prérequis techniques ;</li>
+        <li>les responsabilités du Client ;</li>
+        <li>les garanties applicables ;</li>
+        <li>les documents annexés.</li>
       </ul>
-      <p>
-        Le devis n&apos;a de valeur contractuelle qu&apos;après acceptation
-        par le Client et confirmation par AHF, sous réserve de la signature du
-        contrat définitif lorsque celui-ci est requis.
-      </p>
-
-      <h3>8.3 Frais propres au terrain</h3>
-      <p>
-        Les frais propres au terrain sont en principe à la charge du Client,
-        sauf stipulation contraire expresse. Ils peuvent notamment comprendre :
-      </p>
+      <h2>9. Prix, financement et modalités de paiement</h2>
+      <h3>9.1 Prix</h3>
+      <p>Les prix sont indiqués en euros, hors taxes et/ou toutes taxes comprises selon la qualité du Client et les informations présentées dans le devis.</p>
+      <p>Le prix applicable est celui figurant dans le devis accepté et le contrat signé. Les prix affichés sur le site sont indicatifs et peuvent évoluer à tout moment, sans effet sur les contrats déjà signés.</p>
+      <p>Les prix ne comprennent pas les prestations exclues, notamment terrain, notaire, taxes, études de sol, supports d’accueil, raccordements, assurances du Client, financement, démarches administratives, aménagements extérieurs ou frais d’intervenants spécialisés indépendants, sauf stipulation contraire expresse.</p>
+      <h3>9.2 Financement du Client</h3>
+      <p>Le Client demeure seul responsable de l’obtention et de la disponibilité de son financement.</p>
+      <p>Pour les Clients Professionnels ou Institutionnels, le financement peut notamment prendre la forme de fonds propres, budget interne, subvention, crédit professionnel, crédit-bail, location financière ou tout autre dispositif adapté.</p>
+      <p>Pour les Clients Investisseurs Non Professionnels, AHF peut demander une attestation de fonds disponibles, une preuve de financement déjà obtenu ou tout élément permettant d’établir la capacité à régler les factures d’étape.</p>
+      <p>AHF ne garantit pas l’obtention d’un financement. Toute intervention d’un courtier, crédit-bailleur, établissement financier ou intervenant spécialisé relève d’un contrat séparé conclu entre ce professionnel et le Client.</p>
+      <h3>9.3 Échéancier de paiement</h3>
+      <p>Sauf stipulation contraire prévue au contrat, l’échéancier indicatif de paiement est organisé en cinq étapes, adaptées à la fabrication hors-site en atelier :</p>
       <table>
-        <thead><tr><th>Poste</th><th>Commentaire</th></tr></thead>
+        <thead><tr><th>Numéro d’étape</th><th>Étape</th><th>Pourcentage / règle de calcul</th><th>Modalité indicative</th></tr></thead>
         <tbody>
-          <tr><td>Étude de sol</td><td>À prévoir selon nature du terrain et prescriptions techniques.</td></tr>
-          <tr><td>Fondations / supports</td><td>Plots, micropieux, dalle, longrines ou autre système validé.</td></tr>
-          <tr><td>Terrassement</td><td>Préparation du site, nivellement, accès.</td></tr>
-          <tr><td>Raccordements</td><td>Eau, électricité, assainissement, télécom, réseaux divers.</td></tr>
-          <tr><td>Assainissement</td><td>Assainissement collectif ou individuel selon situation.</td></tr>
-          <tr><td>Autorisations</td><td>Déclaration préalable, permis de construire ou autre autorisation.</td></tr>
-          <tr><td>Taxes</td><td>Taxe d&apos;aménagement, PFAC ou autres taxes éventuelles.</td></tr>
-          <tr><td>Accès chantier</td><td>Cheminement, grutage, stationnement, portance, dégagements.</td></tr>
-          <tr><td>Assurance dommages-ouvrage</td><td>À souscrire par le Client lorsque la réglementation l&apos;exige.</td></tr>
+          <tr><td>Étape 1</td><td>Réservation commerciale</td><td>0 % du prix total</td><td>Versement initial de <strong>2 000 €</strong>, intégralement remboursable avant signature du contrat de fabrication hors-site, livraison et installation, sauf stipulation contraire expresse acceptée par écrit.</td></tr>
+          <tr><td>Étape 2</td><td>Lancement de fabrication</td><td><strong>40 % du montant total</strong>, déduction faite de la réservation commerciale déjà versée</td><td>Facture d’étape émise après signature du contrat, validation des prérequis applicables et confirmation du lancement de fabrication.</td></tr>
+          <tr><td>Étape 3</td><td>Étape technique — hors d’eau / hors d’air en atelier</td><td><strong>20 % du montant total</strong></td><td>Facture d’étape émise lorsque l’avancement technique correspondant est atteint en atelier, selon les modalités prévues au contrat et à la notice technique.</td></tr>
+          <tr><td>Étape 4</td><td>Sortie d’atelier</td><td><strong>35 % du montant total</strong></td><td>Facture d’étape émise lorsque le studio de jardin ARKO est prêt à être livré, sous réserve des contrôles internes et des conditions de livraison prévues.</td></tr>
+          <tr><td>Étape 5</td><td>Livraison</td><td><strong>5 % du montant total</strong></td><td>Solde facturé à la livraison, selon les conditions prévues au contrat.</td></tr>
         </tbody>
       </table>
-      <p>
-        Les montants éventuellement indiqués par AHF pour ces postes sont
-        donnés à titre indicatif et ne constituent pas un engagement de prix,
-        sauf stipulation contraire expresse.
-      </p>
-
-      {/* 9 */}
-      <h2>9. Échéancier de paiement</h2>
-      <p>Le paiement de la maison ARKO s&apos;effectue progressivement selon l&apos;avancement du projet.</p>
-
-      <h3>9.1 Versement initial de réservation</h3>
-      <p>
-        Après envoi de la proposition commerciale, un versement initial de{" "}
-        <strong>5&nbsp;000&nbsp;€</strong> peut être demandé au Client afin de
-        confirmer la réservation commerciale du projet.
-      </p>
-      <p>
-        Ce versement est intégralement remboursable tant que le contrat de
-        fabrication, livraison et installation n&apos;a pas été signé.
-      </p>
-
-      <h3>9.2 Imputation du versement initial</h3>
-      <p>
-        Une fois le contrat signé, le versement initial de 5&nbsp;000&nbsp;€
-        est déduit du prix total de la maison ARKO et intégré à
-        l&apos;échéancier de paiement.
-      </p>
-
-      <h3>9.3 Factures d&apos;étape</h3>
-      <p>Sauf conditions particulières différentes, l&apos;échéancier peut être structuré comme suit :</p>
+      <p>À titre d’exemple, pour une commande d’un montant total de <strong>117 280,00 € TTC</strong>, l’échéancier indicatif serait le suivant :</p>
       <table>
-        <thead><tr><th>Étape</th><th>Moment</th><th>Montant</th></tr></thead>
+        <thead><tr><th>Numéro d’étape</th><th>Montant</th><th>Étape</th><th>Pourcentage / règle de calcul</th></tr></thead>
         <tbody>
-          <tr>
-            <td>Réservation commerciale</td>
-            <td>Avant signature du contrat définitif</td>
-            <td>5&nbsp;000&nbsp;€, remboursables avant signature</td>
-          </tr>
-          <tr>
-            <td>Lancement de fabrication</td>
-            <td>Après signature du contrat et levée des prérequis de lancement</td>
-            <td>40&nbsp;% du montant total TTC, déduction faite des 5&nbsp;000&nbsp;€ déjà versés</td>
-          </tr>
-          <tr>
-            <td>Sortie d&apos;atelier</td>
-            <td>Maison fabriquée et prête à livrer</td>
-            <td>50&nbsp;% du montant total TTC</td>
-          </tr>
-          <tr>
-            <td>Livraison, installation et réception</td>
-            <td>Livraison et installation sur site, procès-verbal de réception</td>
-            <td>10&nbsp;% du montant total TTC</td>
-          </tr>
+          <tr><td>Étape 1</td><td><strong>2 000,00 €</strong></td><td>Réservation commerciale</td><td>0 % du prix total — versement imputable sur l’étape suivante</td></tr>
+          <tr><td>Étape 2</td><td><strong>44 912,00 €</strong></td><td>Lancement de fabrication</td><td>40 % du montant total, déduction faite de la réservation commerciale déjà versée</td></tr>
+          <tr><td>Étape 3</td><td><strong>23 456,00 €</strong></td><td>Étape technique — hors d’eau / hors d’air en atelier</td><td>20 % du montant total</td></tr>
+          <tr><td>Étape 4</td><td><strong>41 048,00 €</strong></td><td>Sortie d’atelier</td><td>35 % du montant total</td></tr>
+          <tr><td>Étape 5</td><td><strong>5 864,00 €</strong></td><td>Livraison</td><td>5 % du montant total</td></tr>
+          <tr><td><strong>Total</strong></td><td><strong>117 280,00 €</strong></td><td></td><td></td></tr>
         </tbody>
       </table>
-      <p>
-        Cet échéancier peut être adapté dans le contrat selon la nature du
-        projet, le modèle retenu, le niveau de finition, le financement, les
-        conditions particulières ou toute règle légale impérative applicable.
-      </p>
-
-      <h3>9.4 Retard de paiement</h3>
-      <p>
-        Tout retard de paiement peut entraîner la suspension de la
-        fabrication, de la livraison ou de l&apos;installation, sans que cette
-        suspension puisse être imputée à AHF.
-      </p>
-      <p>
-        Les éventuels frais, retards, coûts de stockage, reports de transport
-        ou pertes liés à un retard de paiement pourront être facturés au
-        Client, dans les conditions prévues au contrat.
-      </p>
-
-      <h3>9.5 Paiement sécurisé</h3>
-      <p>
-        Les paiements peuvent être effectués par virement bancaire ou par
-        paiement sécurisé en ligne via un prestataire de paiement. AHF ne
-        conserve pas les données bancaires complètes du Client lorsque le
-        paiement est réalisé via un prestataire externe sécurisé.
-      </p>
-
-      {/* 10 */}
-      <h2>10. Remboursement du versement de réservation</h2>
-
-      <h3>10.1 Remboursement avant signature du contrat</h3>
-      <p>
-        Le versement initial de <strong>5&nbsp;000&nbsp;€</strong> est
-        intégralement remboursable à la demande du Client, sans frais ni
-        justification, tant que le contrat de fabrication, livraison et
-        installation n&apos;a pas été signé.
-      </p>
-      <p>
-        La demande de remboursement doit être adressée par email à :
-        contact@affinityhousefactory.com
-      </p>
-      <p>Le Client doit préciser :</p>
+      <p>Les factures d’étape sont émises par AHF selon l’avancement du projet et les modalités prévues au contrat.</p>
+      <p>Tout retard de paiement peut entraîner la suspension de la fabrication, de la livraison ou de l’installation, sans que cette suspension puisse être imputée à AHF.</p>
+      <h3>9.4 Paiement par crédit-bail ou financeur professionnel</h3>
+      <p>Lorsque le projet est financé par crédit-bail, location financière ou financeur professionnel, les modalités de paiement peuvent être adaptées dans un contrat spécifique, sous réserve d’accord écrit entre AHF, le Client et le financeur concerné.</p>
+      <p>AHF n’est pas responsable des décisions du financeur, des délais d’instruction, des conditions de financement, des garanties demandées, des refus, des frais ou des obligations imposées par le financeur au Client.</p>
+      <h2>10. Conditions préalables et prérequis</h2>
+      <p>L’exécution du contrat peut être subordonnée à la réalisation des conditions suivantes, selon les cas :</p>
       <ul>
-        <li>son nom ;</li>
-        <li>ses coordonnées ;</li>
-        <li>la référence de réservation ;</li>
-        <li>le modèle ARKO concerné ;</li>
-        <li>le moyen de paiement utilisé.</li>
-      </ul>
-      <p>
-        Le remboursement intervient dans un délai raisonnable et, sauf
-        difficulté technique ou bancaire, dans un délai cible de{" "}
-        <strong>14 jours calendaires</strong> à compter de la confirmation de
-        la demande.
-      </p>
-
-      <h3>10.2 Après signature du contrat</h3>
-      <p>
-        Après signature du contrat de fabrication, livraison et installation,
-        le versement initial est imputé sur le prix total.
-      </p>
-      <p>
-        Les conditions d&apos;annulation, de résiliation, de remboursement ou
-        d&apos;indemnisation sont alors celles prévues au contrat, aux
-        présentes CGV et aux règles légales applicables.
-      </p>
-
-      <h3>10.3 Conditions suspensives</h3>
-      <p>
-        Si le contrat prévoit des conditions suspensives et que l&apos;une
-        d&apos;elles ne se réalise pas dans le délai prévu, les conséquences
-        financières sont déterminées par le contrat.
-      </p>
-      <p>
-        Sauf stipulation contraire conforme au droit applicable, les sommes
-        versées au titre d&apos;une opération devenue impossible du fait de la
-        non-réalisation d&apos;une condition suspensive sont restituées selon
-        les modalités prévues au contrat.
-      </p>
-
-      {/* 11 */}
-      <h2>11. Terrain, acquisition foncière et mandataires partenaires</h2>
-
-      <h3>11.1 Terrain choisi par le Client</h3>
-      <p>Le terrain destiné à recevoir la maison ARKO est choisi, réservé ou acquis par le Client.</p>
-      <p>Le Client est seul responsable :</p>
-      <ul>
-        <li>de l&apos;identification du terrain ;</li>
-        <li>de son acquisition éventuelle ;</li>
-        <li>de la vérification de ses droits à construire ;</li>
-        <li>de la vérification des servitudes ;</li>
-        <li>de la conformité administrative du terrain ;</li>
-        <li>de la transmission à AHF des informations nécessaires à l&apos;étude du projet.</li>
-      </ul>
-
-      <h3>11.2 Acquisition du terrain et acte notarié</h3>
-      <p>
-        L&apos;acquisition éventuelle du terrain relève exclusivement du
-        Client et donne lieu, le cas échéant, à la signature d&apos;un acte
-        notarié établi en bonne et due forme.
-      </p>
-      <p>
-        AHF n&apos;intervient pas dans l&apos;opération d&apos;achat du
-        terrain, ni dans les formalités juridiques, administratives ou
-        notariales qui y sont attachées.
-      </p>
-      <p>
-        AHF ne perçoit pas de prix de vente du terrain et n&apos;agit pas
-        comme vendeur, agent immobilier, notaire ou intermédiaire foncier,
-        sauf habilitation spécifique expressément prévue, ce qui n&apos;est
-        pas l&apos;objet des présentes CGV.
-      </p>
-
-      <h3>11.3 Mandataires partenaires</h3>
-      <p>
-        Les mandataires ou partenaires susceptibles d&apos;accompagner le
-        Client dans sa recherche de terrain interviennent sous leur seule
-        responsabilité, dans le cadre de leur propre activité professionnelle.
-      </p>
-      <p>Leur intervention est distincte de celle d&apos;AHF.</p>
-      <p>AHF ne saurait être tenue responsable :</p>
-      <ul>
-        <li>de la disponibilité réelle d&apos;un terrain ;</li>
-        <li>de son prix ;</li>
-        <li>de sa constructibilité définitive ;</li>
-        <li>de la régularité de la vente ;</li>
-        <li>des honoraires du mandataire ;</li>
-        <li>des informations transmises par un tiers ;</li>
-        <li>de l&apos;issue de la négociation foncière ;</li>
-        <li>de la signature ou non de l&apos;acte notarié.</li>
-      </ul>
-
-      {/* 12 */}
-      <h2>12. Urbanisme et autorisations administratives</h2>
-
-      <h3>12.1 Responsabilité du Client</h3>
-      <p>
-        Sauf mission spécifique expressément confiée à AHF, le Client est
-        responsable de l&apos;obtention des autorisations administratives
-        nécessaires à l&apos;installation de la maison ARKO.
-      </p>
-      <p>
-        Selon la surface, la localisation, l&apos;usage, le secteur
-        d&apos;implantation et les règles d&apos;urbanisme applicables, le
-        projet peut nécessiter notamment :
-      </p>
-      <ul>
-        <li>une déclaration préalable ;</li>
-        <li>un permis de construire ;</li>
-        <li>une autorisation spécifique en secteur protégé ;</li>
-        <li>un accord relatif à l&apos;assainissement ;</li>
-        <li>une autorisation de voirie ;</li>
-        <li>toute autre autorisation requise par la réglementation applicable.</li>
-      </ul>
-
-      <h3>12.2 Assistance éventuelle d&apos;AHF</h3>
-      <p>
-        AHF peut assister le Client dans l&apos;identification des démarches à
-        prévoir ou dans la constitution de certains éléments techniques,
-        uniquement si cette mission est prévue au devis ou au contrat.
-      </p>
-      <p>Cette assistance ne constitue pas une garantie d&apos;obtention de l&apos;autorisation administrative.</p>
-      <p>
-        AHF ne peut être tenue responsable du refus, du retrait, du recours ou
-        du délai d&apos;instruction d&apos;une autorisation administrative,
-        sauf faute directement imputable à une prestation expressément confiée
-        à AHF.
-      </p>
-
-      <h3>12.3 Vérification de compatibilité</h3>
-      <p>
-        AHF peut vérifier la compatibilité technique apparente du terrain avec
-        une maison ARKO sur la base des informations transmises par le Client.
-      </p>
-      <p>Cette vérification ne remplace pas :</p>
-      <ul>
-        <li>une étude d&apos;urbanisme complète ;</li>
-        <li>une étude notariale ;</li>
-        <li>une étude géotechnique ;</li>
-        <li>une étude de structure ;</li>
-        <li>une analyse de servitudes ;</li>
-        <li>une vérification exhaustive des règles locales.</li>
-      </ul>
-
-      {/* 13 */}
-      <h2>13. Prérequis techniques du terrain</h2>
-      <p>Avant toute livraison et installation, le Client doit s&apos;assurer que le terrain est prêt à recevoir la maison ARKO.</p>
-      <p>Les prérequis peuvent notamment comprendre :</p>
-      <ul>
-        <li>terrain accessible aux véhicules de livraison et engins de manutention ;</li>
-        <li>portance suffisante des accès ;</li>
-        <li>absence d&apos;obstacle empêchant la livraison ou l&apos;installation ;</li>
-        <li>supports d&apos;accueil réalisés selon les prescriptions techniques ;</li>
-        <li>supports réceptionnés par le Client ou son prestataire ;</li>
-        <li>raccordements préparés ou en attente selon le périmètre prévu ;</li>
-        <li>autorisations administratives obtenues et purgées si nécessaire ;</li>
-        <li>conditions de sécurité réunies.</li>
-      </ul>
-      <p>
-        AHF se réserve le droit de reporter la livraison ou l&apos;installation
-        si les prérequis ne sont pas réunis, sans que ce report puisse lui
-        être imputé.
-      </p>
-      <p>
-        Les frais supplémentaires résultant d&apos;un terrain non prêt, non
-        conforme, inaccessible ou insuffisamment préparé peuvent être facturés
-        au Client.
-      </p>
-
-      {/* 14 */}
-      <h2>14. Étude de sol, fondations et supports d&apos;accueil</h2>
-      <p>Sauf mention contraire expresse, les études de sol, fondations et supports d&apos;accueil sont à la charge du Client.</p>
-      <p>Le Client doit faire réaliser les études et travaux nécessaires par des professionnels qualifiés et assurés.</p>
-      <p>
-        AHF communique, lorsque cela est nécessaire, les charges, tolérances
-        et spécifications techniques utiles à la conception des supports
-        d&apos;accueil.
-      </p>
-      <p>Le Client doit transmettre à AHF les justificatifs demandés, notamment :</p>
-      <ul>
-        <li>étude géotechnique ;</li>
-        <li>plans d&apos;exécution des supports ;</li>
-        <li>attestation de conformité ou procès-verbal de réception des supports ;</li>
-        <li>coordonnées et assurances des entreprises intervenantes ;</li>
-        <li>photographies ou contrôles demandés par AHF.</li>
-      </ul>
-      <p>
-        AHF peut refuser ou reporter l&apos;installation si les supports
-        d&apos;accueil ne sont pas conformes aux prescriptions techniques ou
-        si les justificatifs nécessaires ne sont pas fournis.
-      </p>
-
-      {/* 15 */}
-      <h2>15. Fabrication en atelier</h2>
-      <p>
-        Les maisons ARKO sont fabriquées hors site, en atelier ou dans un
-        environnement de production contrôlé, selon les plans, options et
-        spécifications validés.
-      </p>
-      <p>AHF organise la fabrication selon son planning de production et informe le Client des étapes significatives.</p>
-      <p>Le Client reconnaît que toute modification demandée après validation du contrat peut entraîner :</p>
-      <ul>
-        <li>un surcoût ;</li>
-        <li>un délai supplémentaire ;</li>
-        <li>une impossibilité technique ;</li>
-        <li>la nécessité d&apos;un avenant.</li>
-      </ul>
-      <p>
-        AHF se réserve le droit de remplacer un matériau, équipement ou
-        composant par un équivalent de qualité comparable ou supérieure,
-        notamment en cas d&apos;indisponibilité fournisseur, sous réserve de ne
-        pas dégrader les caractéristiques essentielles de la maison ARKO.
-      </p>
-
-      {/* 16 */}
-      <h2>16. Délais</h2>
-
-      <h3>16.1 Délai de fabrication</h3>
-      <p>
-        Le délai de fabrication en atelier est estimé à{" "}
-        <strong>12 semaines</strong> à compter de la levée des conditions
-        prévues au contrat.
-      </p>
-      <p>Ce délai ne commence notamment à courir qu&apos;après :</p>
-      <ul>
-        <li>signature du contrat ;</li>
-        <li>expiration ou purge du délai de rétractation applicable ;</li>
-        <li>obtention des autorisations nécessaires ;</li>
+        <li>disponibilité du terrain ;</li>
+        <li>justification par le Client de droits suffisants sur le terrain ;</li>
         <li>confirmation du financement ;</li>
-        <li>validation technique définitive ;</li>
-        <li>paiement des factures exigibles ;</li>
-        <li>validation des prérequis de fabrication ;</li>
-        <li>transmission complète des pièces demandées.</li>
+        <li>versement des sommes dues selon l’échéancier ;</li>
+        <li>autorisations administratives nécessaires ;</li>
+        <li>étude de sol ou étude technique favorable lorsqu’elle est requise ;</li>
+        <li>réalisation et réception des supports d’accueil ;</li>
+        <li>conformité de l’accès au site ;</li>
+        <li>confirmation des conditions de livraison, stationnement, manutention et grutage ;</li>
+        <li>souscription par le Client des assurances nécessaires ;</li>
+        <li>transmission des documents demandés ;</li>
+        <li>absence de contrainte technique, juridique ou assurantielle rendant le projet impossible ou incompatible avec le périmètre AHF.</li>
       </ul>
-
-      <h3>16.2 Délai de livraison et d&apos;installation</h3>
-      <p>La livraison et l&apos;installation sont planifiées après confirmation de la sortie d&apos;atelier et vérification des prérequis terrain.</p>
-      <p>
-        L&apos;installation sur site est généralement réalisée en une journée,
-        sous réserve des conditions d&apos;accès, de météo, de préparation du
-        terrain et des contraintes techniques propres au site.
-      </p>
-
-      <h3>16.3 Causes de report</h3>
-      <p>Les délais peuvent être prorogés en cas de :</p>
-      <ul>
-        <li>retard dans l&apos;obtention d&apos;une autorisation administrative ;</li>
-        <li>recours, retrait ou opposition administrative ;</li>
-        <li>retard de financement ;</li>
-        <li>retard de paiement ;</li>
-        <li>modification demandée par le Client ;</li>
-        <li>terrain non accessible ;</li>
-        <li>supports d&apos;accueil non conformes ;</li>
-        <li>intempéries ;</li>
-        <li>impossibilité de transport ;</li>
-        <li>retard fournisseur ;</li>
-        <li>force majeure ;</li>
-        <li>intervention d&apos;un tiers non coordonné par AHF ;</li>
-        <li>toute cause extérieure empêchant raisonnablement l&apos;exécution dans les délais prévus.</li>
-      </ul>
-
-      {/* 17 */}
-      <h2>17. Livraison, transport et installation</h2>
-      <p>La livraison est organisée selon les conditions prévues au devis et au contrat.</p>
-      <p>Le Client doit garantir l&apos;accès au terrain et communiquer à AHF toute information utile, notamment :</p>
-      <ul>
-        <li>largeur et état des voies d&apos;accès ;</li>
-        <li>présence de lignes aériennes ;</li>
-        <li>contraintes de stationnement ;</li>
-        <li>pente ;</li>
-        <li>portance ;</li>
-        <li>arbres, clôtures, murs ou obstacles ;</li>
-        <li>autorisations de voirie nécessaires ;</li>
-        <li>disponibilité des zones de manœuvre ;</li>
-        <li>contraintes de voisinage.</li>
-      </ul>
-      <p>
-        Lorsque l&apos;installation nécessite un engin de levage, une
-        autorisation de voirie, une interruption de circulation ou une
-        prestation spécifique, ces éléments sont inclus uniquement s&apos;ils
-        sont expressément prévus au devis ou au contrat.
-      </p>
-      <p>À défaut, ils sont à la charge du Client.</p>
-
-      {/* 18 */}
-      <h2>18. Réception</h2>
-      <p>La réception intervient après installation de la maison ARKO sur site.</p>
-      <p>Elle donne lieu à l&apos;établissement d&apos;un procès-verbal signé par le Client et AHF, avec ou sans réserves.</p>
-      <p>
-        En cas de réserves, celles-ci sont listées précisément dans le
-        procès-verbal. Les délais et modalités de levée des réserves sont
-        convenus entre les parties.
-      </p>
-      <p>La réception marque le point de départ des garanties légales applicables aux prestations réalisées.</p>
-      <p>
-        Si le Client refuse de signer le procès-verbal sans motif légitime ou
-        ne se présente pas à la réception régulièrement organisée, AHF pourra
-        constater la situation par tout moyen utile et appliquer les
-        conséquences prévues au contrat.
-      </p>
-
-      {/* 19 */}
-      <h2>19. Garanties légales applicables</h2>
-      <p>
-        Les garanties légales applicables dépendent de la nature des
-        prestations réalisées, du périmètre contractuel et des règles
-        d&apos;ordre public applicables.
-      </p>
-      <p>
-        À compter de la réception, les prestations relevant de travaux de
-        construction peuvent notamment être couvertes par les garanties
-        suivantes.
-      </p>
-
-      <h3>19.1 Garantie de parfait achèvement</h3>
-      <p>
-        La garantie de parfait achèvement couvre, pendant un délai d&apos;un
-        an à compter de la réception, les désordres signalés par le Client
-        lors de la réception ou notifiés par écrit dans l&apos;année suivant
-        celle-ci, lorsqu&apos;ils relèvent des prestations réalisées par AHF
-        ou ses intervenants.
-      </p>
-
-      <h3>19.2 Garantie de bon fonctionnement</h3>
-      <p>
-        La garantie de bon fonctionnement couvre, pendant deux ans à compter
-        de la réception, les éléments d&apos;équipement dissociables de
-        l&apos;ouvrage, lorsqu&apos;ils relèvent du périmètre des prestations
-        réalisées et des garanties applicables.
-      </p>
-
-      <h3>19.3 Garantie décennale</h3>
-      <p>
-        La garantie décennale couvre, pendant dix ans à compter de la
-        réception, les dommages relevant des articles 1792 et suivants du
-        Code civil, notamment ceux qui compromettent la solidité de
-        l&apos;ouvrage ou le rendent impropre à sa destination.
-      </p>
-      <p>Cette garantie est attachée à l&apos;ouvrage et bénéficie aux propriétaires successifs pendant sa durée légale.</p>
-
-      <h3>19.4 Limites</h3>
-      <p>Les garanties ne couvrent pas les désordres résultant notamment :</p>
-      <ul>
-        <li>d&apos;une utilisation anormale ;</li>
-        <li>d&apos;un défaut d&apos;entretien ;</li>
-        <li>d&apos;une modification réalisée sans accord d&apos;AHF ;</li>
-        <li>d&apos;une intervention d&apos;un tiers ;</li>
-        <li>d&apos;un défaut affectant les travaux réalisés par le Client ou ses prestataires ;</li>
-        <li>d&apos;un défaut du terrain ou des supports non imputable à AHF ;</li>
-        <li>d&apos;un sinistre extérieur ;</li>
-        <li>d&apos;une cause étrangère.</li>
-      </ul>
-
-      {/* 20 */}
-      <h2>20. Assurances</h2>
-      <p>
-        AHF déclare être ou devoir être assurée pour les activités
-        effectivement exercées et les prestations réalisées, conformément aux
-        obligations légales applicables.
-      </p>
-      <p>
-        Les attestations d&apos;assurance pertinentes sont remises au Client
-        au plus tard à la signature du contrat ou avant le démarrage des
-        prestations concernées, selon le cas.
-      </p>
-      <p>
-        Le Client reconnaît avoir été informé de la nécessité de souscrire,
-        lorsque la réglementation l&apos;exige, une assurance
-        dommages-ouvrage avant l&apos;ouverture du chantier ou le démarrage des
-        travaux concernés.
-      </p>
-      <p>
-        AHF peut accompagner le Client dans l&apos;identification de cette
-        obligation, mais ne se substitue pas au Client dans sa qualité de
-        maître d&apos;ouvrage, sauf convention contraire expresse.
-      </p>
-
-      {/* 21 */}
-      <h2>21. Après-vente et suivi technique</h2>
-      <p>
-        Après l&apos;installation de la maison ARKO, un interlocuteur dédié
-        peut rester le référent du Client pour le suivi technique du projet.
-      </p>
-      <p>Il accompagne le Client pour les questions liées :</p>
-      <ul>
-        <li>à la maison livrée ;</li>
-        <li>à son installation ;</li>
-        <li>à ses équipements ;</li>
-        <li>au traitement des réserves ;</li>
-        <li>aux désordres signalés après réception.</li>
-      </ul>
-      <p>
-        Les désordres relevant de la garantie de parfait achèvement et
-        signalés dans l&apos;année suivant la réception sont traités dans ce
-        cadre, sans frais pour le Client, sous réserve qu&apos;ils relèvent
-        bien des prestations réalisées par AHF ou ses intervenants.
-      </p>
-      <p>
-        Le suivi après-vente ne constitue pas une mission générale
-        d&apos;urbanisme, d&apos;administration foncière, de gestion locative,
-        de maintenance permanente ou de contrôle technique du terrain.
-      </p>
-
-      {/* 22 */}
-      <h2>22. Responsabilité d&apos;AHF</h2>
-      <p>
-        AHF est responsable de la bonne exécution des prestations expressément
-        mises à sa charge par le devis, le contrat et leurs annexes.
-      </p>
+      <p>En cas de non-réalisation d’une condition essentielle dans le délai prévu au contrat, les parties peuvent convenir d’un report, d’une adaptation du projet ou d’une résolution du contrat selon les modalités contractuelles.</p>
+      <h2>11. Terrain, situation foncière et autorisations</h2>
+      <h3>11.1 Terrain</h3>
+      <p>Le terrain destiné à recevoir le studio de jardin ARKO est choisi, acquis, réservé ou mis à disposition par le Client.</p>
+      <p>AHF n’intervient pas dans l’achat du terrain, la vente du terrain, la négociation du terrain, l’acte notarié, la purge des droits ou recours, la vérification juridique de propriété, les servitudes, l’existence de droits réels, la fiscalité foncière ou les frais afférents.</p>
+      <p>L’acquisition éventuelle du terrain relève exclusivement du Client et donne lieu, le cas échéant, à la signature d’un acte notarié établi en bonne et due forme.</p>
+      <h3>11.2 Compatibilité du terrain</h3>
+      <p>AHF peut procéder à une vérification technique et commerciale de compatibilité du terrain sur la base des informations transmises par le Client.</p>
+      <p>Cette vérification ne constitue pas une garantie de faisabilité administrative, une étude juridique, une étude d’urbanisme, une étude géotechnique complète ou une garantie d’obtention des autorisations administratives.</p>
+      <p>Le Client demeure responsable de la conformité administrative, foncière et urbanistique du terrain, sauf mission spécifique expressément confiée à un professionnel compétent dans le cadre d’un contrat distinct.</p>
+      <h3>11.3 Autorisations administratives</h3>
+      <p>Le Client est responsable de l’obtention des autorisations administratives nécessaires à son projet, notamment déclaration préalable, permis ou toute autre autorisation requise selon la surface, l’emprise, l’usage, la localisation, la réglementation locale et la destination du projet.</p>
+      <p>AHF peut fournir au Client certains éléments techniques nécessaires à la constitution des dossiers, dans la limite des informations relatives au studio de jardin ARKO.</p>
+      <p>AHF ne garantit pas l’obtention des autorisations administratives.</p>
+      <h2>12. Supports d’accueil, raccordements, assurances du Client et prestations hors périmètre</h2>
+      <h3>12.1 Supports d’accueil</h3>
+      <p>Sauf stipulation contraire, les supports d’accueil sont à la charge du Client.</p>
+      <p>Le Client doit faire réaliser les études et travaux nécessaires par des professionnels compétents, assurés et habilités. Les supports d’accueil doivent respecter les spécifications communiquées par AHF.</p>
+      <p>AHF peut reporter ou refuser l’installation si les supports d’accueil ne sont pas réalisés, non conformes, non réceptionnés ou incompatibles avec la sécurité de la livraison et de l’installation.</p>
+      <h3>12.2 Raccordements et réseaux</h3>
+      <p>Sauf stipulation contraire, les raccordements aux réseaux d’eau, électricité, assainissement, télécommunication ou autres fluides sont à la charge du Client.</p>
+      <p>AHF n’est pas responsable des délais, refus, coûts, contraintes ou prescriptions imposés par les gestionnaires de réseaux, collectivités, services publics ou prestataires du Client.</p>
+      <h3>12.3 Assurance DO et assurances du Client</h3>
+      <p>Lorsque la réglementation l’exige, l’assurance DO est souscrite par le Client ou par toute personne légalement tenue de la souscrire.</p>
+      <p>AHF peut communiquer au Client les coordonnées de courtiers ou assureurs spécialisés indépendants. Cette mise en relation ne constitue pas une garantie d’obtention de l’assurance, ni une activité de courtage exercée par AHF.</p>
+      <p>Le Client demeure seul responsable de la souscription, du paiement, de la validité, de l’adéquation et de la mise en œuvre de ses assurances.</p>
+      <h2>13. Fabrication hors-site, livraison et installation</h2>
+      <h3>13.1 Fabrication hors-site</h3>
+      <p>La fabrication démarre après signature du contrat, paiement des sommes dues et levée des conditions prévues au contrat.</p>
+      <p>Le délai indicatif de fabrication est précisé au devis ou au contrat. À titre indicatif, certains modèles peuvent être fabriqués en environ <strong>12 semaines</strong> à compter de la réunion complète des prérequis.</p>
+      <p>Ce délai peut être adapté selon le modèle, les options, les contraintes fournisseurs, les validations techniques, les conditions de financement, les autorisations administratives et les prérequis terrain.</p>
+      <h3>13.2 Information du Client</h3>
+      <p>Le Client peut être informé par email ou via son espace client des principales étapes du projet : validation, lancement de fabrication, avancement, sortie d’atelier, préparation de livraison, installation et réception.</p>
+      <h3>13.3 Livraison et installation</h3>
+      <p>La livraison et l’installation interviennent sur le terrain du Client, sous réserve de la conformité des accès, des supports d’accueil, des conditions de sécurité, des autorisations et du paiement des sommes dues.</p>
+      <p>L’installation sur site peut être réalisée en une journée lorsque les conditions techniques, logistiques, météorologiques et d’accès le permettent. Cette durée est indicative et peut varier selon le projet.</p>
+      <h2>14. Réception, réserves et transfert des risques</h2>
+      <p>À l’issue de l’installation, les parties procèdent à une réception contradictoire.</p>
+      <p>Un procès-verbal de réception est établi, avec ou sans réserves.</p>
+      <p>Les réserves éventuelles doivent être décrites précisément. AHF s’engage à traiter les réserves relevant de son périmètre contractuel dans les délais convenus ou, à défaut, dans un délai raisonnable tenant compte de leur nature.</p>
+      <p>La réception marque le point de départ des garanties applicables aux prestations réalisées, sous réserve des dispositions légales impératives.</p>
+      <p>Le transfert des risques intervient selon les modalités prévues au contrat, en tenant compte de la livraison, de l’installation, de la réception et de la qualité du Client.</p>
+      <h2>15. Garanties et assurances AHF</h2>
+      <h3>15.1 Principe</h3>
+      <p>Les garanties applicables dépendent de la nature des prestations réalisées, du périmètre contractuel, de la qualité du Client, de l’usage prévu et des assurances effectivement souscrites.</p>
+      <p>AHF remet au Client, lorsque cela est applicable, les attestations d’assurance correspondant aux prestations réalisées.</p>
+      <h3>15.2 Réserves et suivi après réception</h3>
+      <p>Les désordres, non-conformités ou réserves signalés lors de la réception ou après réception sont traités selon leur nature, leur origine, les stipulations contractuelles, les notices d’usage, les garanties fabricants et les règles légales impératives applicables.</p>
+      <p>AHF intervient uniquement pour les désordres relevant des prestations qu’elle a effectivement réalisées ou fait réaliser dans son périmètre contractuel.</p>
+      <h3>15.3 Équipements et garanties fournisseurs</h3>
+      <p>Certains équipements peuvent bénéficier de garanties commerciales ou garanties fournisseurs. Ces garanties sont celles accordées par les fabricants ou fournisseurs concernés et s’appliquent selon leurs propres conditions.</p>
+      <h3>15.4 Limites liées aux prestations tierces</h3>
+      <p>Le Client reconnaît que les prestations non réalisées par AHF ou non couvertes par son assurance, notamment les supports d’accueil, raccordements, aménagements extérieurs, études de sol, actes fonciers, financement, assurances du Client ou exploitation locative, relèvent de la responsabilité des personnes ou prestataires concernés.</p>
+      <h2>16. Responsabilité d’AHF</h2>
+      <p>AHF est responsable de la bonne exécution des prestations expressément mises à sa charge dans le devis, le contrat et leurs annexes.</p>
       <p>AHF ne saurait être tenue responsable :</p>
       <ul>
-        <li>de l&apos;acquisition du terrain ;</li>
-        <li>des informations erronées ou incomplètes transmises par le Client ;</li>
-        <li>du refus ou du délai d&apos;une autorisation administrative ;</li>
-        <li>de la non-constructibilité du terrain ;</li>
-        <li>des servitudes ou contraintes non communiquées ;</li>
-        <li>des travaux réalisés par le Client ou par ses prestataires ;</li>
-        <li>des fondations ou supports réalisés hors périmètre AHF ;</li>
-        <li>des raccordements non inclus ;</li>
-        <li>du défaut d&apos;accès au terrain ;</li>
-        <li>des retards causés par le Client ou des tiers ;</li>
-        <li>des modifications demandées après validation ;</li>
-        <li>des événements de force majeure ;</li>
-        <li>des dommages causés par une utilisation non conforme ou un défaut d&apos;entretien.</li>
+        <li>des informations inexactes ou incomplètes transmises par le Client ;</li>
+        <li>de l’absence ou de l’insuffisance de financement du Client ;</li>
+        <li>des décisions ou refus d’un financeur ;</li>
+        <li>des décisions ou refus d’un assureur ;</li>
+        <li>des décisions administratives défavorables ;</li>
+        <li>de la non-conformité du terrain ;</li>
+        <li>des défauts liés aux supports d’accueil réalisés par des tiers ;</li>
+        <li>des défauts liés aux raccordements ou réseaux ;</li>
+        <li>des interventions d’intervenants spécialisés indépendants ;</li>
+        <li>des retards liés au Client ou à ses prestataires ;</li>
+        <li>des cas de force majeure ;</li>
+        <li>de l’usage non conforme du studio de jardin ARKO ;</li>
+        <li>de l’exploitation locative, commerciale, médico-sociale ou institutionnelle du studio de jardin ARKO par le Client.</li>
       </ul>
-
-      {/* 23 */}
-      <h2>23. Responsabilité du Client</h2>
-      <p>Le Client est responsable :</p>
+      <h2>17. Obligations du Client</h2>
+      <p>Le Client s’engage à :</p>
       <ul>
-        <li>de la sincérité et de l&apos;exactitude des informations communiquées ;</li>
-        <li>du choix et de l&apos;acquisition éventuelle du terrain ;</li>
-        <li>de l&apos;obtention des droits permettant l&apos;installation ;</li>
-        <li>de l&apos;obtention des autorisations administratives ;</li>
-        <li>de la réalisation des travaux préparatoires à sa charge ;</li>
-        <li>de la souscription des assurances qui lui incombent ;</li>
-        <li>de l&apos;accès au terrain ;</li>
-        <li>du paiement des sommes dues ;</li>
-        <li>du respect des conditions de sécurité et de préparation du site ;</li>
-        <li>de la conservation et de l&apos;entretien normal de la maison après réception.</li>
+        <li>fournir des informations exactes, complètes et à jour ;</li>
+        <li>préciser sa qualité : professionnel, institutionnel, investisseur non professionnel ou consommateur ;</li>
+        <li>transmettre les pièces demandées ;</li>
+        <li>justifier de la disponibilité du terrain ou des droits suffisants pour l’installation ;</li>
+        <li>obtenir les autorisations administratives nécessaires ;</li>
+        <li>assurer le financement du projet ;</li>
+        <li>régler les factures selon l’échéancier ;</li>
+        <li>souscrire les assurances nécessaires ;</li>
+        <li>faire réaliser les supports d’accueil, études, raccordements et aménagements à sa charge ;</li>
+        <li>garantir l’accès au site pour la livraison et l’installation ;</li>
+        <li>respecter les notices d’utilisation et d’entretien ;</li>
+        <li>utiliser le studio de jardin ARKO conformément à sa destination contractuelle et aux règles applicables.</li>
       </ul>
-
-      {/* 24 */}
-      <h2>24. Modifications du projet</h2>
-      <p>
-        Toute modification demandée par le Client après acceptation du devis
-        ou signature du contrat doit faire l&apos;objet d&apos;une validation
-        écrite d&apos;AHF.
-      </p>
-      <p>
-        Lorsque la modification affecte le prix, le délai, les
-        caractéristiques techniques ou le périmètre des prestations, elle
-        donne lieu à un avenant.
-      </p>
-      <p>
-        AHF peut refuser une modification devenue techniquement impossible,
-        incompatible avec la fabrication engagée, non conforme aux règles
-        applicables ou disproportionnée.
-      </p>
-
-      {/* 25 */}
-      <h2>25. Droit de rétractation</h2>
-      <p>
-        Lorsque le Client agit en qualité de consommateur, il bénéficie des
-        droits de rétractation prévus par les dispositions légales
-        applicables selon la nature du contrat, le mode de conclusion et le
-        régime juridique applicable au projet.
-      </p>
-      <p>
-        Lorsque le contrat est conclu à distance ou hors établissement, les
-        règles du Code de la consommation peuvent prévoir un délai de
-        rétractation.
-      </p>
-      <p>
-        Lorsque le projet relève d&apos;un régime juridique spécifique
-        applicable à la construction d&apos;une maison individuelle, les
-        règles de rétractation propres à ce régime s&apos;appliquent.
-      </p>
-      <p>
-        Les modalités précises de rétractation sont communiquées au Client
-        dans le contrat et, le cas échéant, au moyen d&apos;un formulaire de
-        rétractation.
-      </p>
-      <p>
-        Aucun démarrage de fabrication ne peut intervenir avant
-        l&apos;expiration ou la renonciation régulière au délai applicable
-        lorsque la réglementation l&apos;exige.
-      </p>
-
-      {/* 26 */}
+      <h2>18. Clients Professionnels et Institutionnels</h2>
+      <p>Pour les Clients Professionnels et Institutionnels, le projet peut nécessiter des vérifications spécifiques selon l’usage envisagé : ERP, accessibilité, sécurité incendie, normes sanitaires, normes médico-sociales, autorisations d’exploitation, règles d’accueil du public, contraintes d’assurance, contraintes d’employeur, règles d’hygiène, règles d’hébergement ou toute autre exigence sectorielle.</p>
+      <p>Sauf stipulation expresse, AHF ne garantit pas la conformité du projet à l’ensemble des règles propres à l’activité professionnelle, sanitaire, médico-sociale, institutionnelle ou locative du Client.</p>
+      <p>Il appartient au Client Professionnel ou Institutionnel de se faire assister par ses conseils, bureaux d’études, assureurs, financeurs ou autorités compétentes pour vérifier l’adéquation du studio de jardin ARKO à l’usage envisagé.</p>
+      <h2>19. Clients Investisseurs Non Professionnels</h2>
+      <p>Lorsqu’un Client Investisseur Non Professionnel envisage un projet locatif, il demeure seul responsable :</p>
+      <ul>
+        <li>de l’analyse de rentabilité ;</li>
+        <li>de la fiscalité applicable ;</li>
+        <li>de l’obtention des autorisations de location ;</li>
+        <li>de la conformité du studio aux règles locatives ;</li>
+        <li>de la gestion locative ;</li>
+        <li>des assurances propriétaire non occupant ou assurances locatives ;</li>
+        <li>de la déclaration de l’activité locative ;</li>
+        <li>du respect des règles locales d’urbanisme, de location courte ou longue durée, de tourisme ou de location meublée, selon le cas.</li>
+      </ul>
+      <p>Les simulations, exemples de loyers, projections d’occupation, rendements ou cas d’usage présentés par AHF sont fournis à titre indicatif et ne constituent pas une garantie de rentabilité, de revenus locatifs ou d’éligibilité fiscale.</p>
+      <h2>20. Droit de rétractation et droit de la consommation</h2>
+      <p>Lorsque le Client agit en qualité de consommateur au sens du Code de la consommation, il bénéficie des droits impératifs qui lui sont reconnus par la réglementation applicable, notamment en matière d’information précontractuelle, de rétractation, de médiation et de clauses abusives.</p>
+      <p>Les modalités précises de rétractation applicables sont communiquées au Client dans les documents contractuels, selon la nature du contrat signé, le canal de conclusion et la qualité du Client.</p>
+      <p>Lorsque le Client agit à des fins professionnelles ou dans le cadre direct de son activité, les règles applicables aux consommateurs peuvent ne pas s’appliquer.</p>
+      <p>Toute clause contraire aux droits impératifs du consommateur est réputée non écrite.</p>
+      <h2>21. Réclamations et service après-vente</h2>
+      <p>Après l’installation, AHF met à disposition du Client un interlocuteur référent pour le suivi technique relevant de son périmètre contractuel.</p>
+      <p>Les réclamations doivent être adressées par email à contact@howner.fr ou par courrier au siège d’AHF.</p>
+      <p>Le Client doit décrire précisément la difficulté rencontrée et fournir tout élément utile : photos, vidéos, numéro de contrat, date de réception, localisation, description du désordre, conditions d’apparition et urgence éventuelle.</p>
+      <p>AHF analyse la demande et indique si elle relève de son périmètre contractuel, d’une garantie applicable, d’un équipement fournisseur ou d’un prestataire tiers.</p>
+      <h2>22. Médiation de la consommation</h2>
+      <p>Conformément aux articles L.616-1 et suivants du Code de la consommation, le Client consommateur est informé qu’il peut recourir gratuitement à un médiateur de la consommation en vue de la résolution amiable d’un litige l’opposant à AHF, après avoir préalablement adressé une réclamation écrite à AHF.</p>
+      <p>Le médiateur de la consommation désigné par AHF est :</p>
+      <p><strong>[Nom du médiateur à compléter]</strong> <strong>Adresse :</strong> [adresse complète à compléter] <strong>Site internet :</strong> [URL de saisine à compléter]</p>
+      <p>Le Client consommateur peut saisir le médiateur dans un délai d’un an à compter de sa réclamation écrite auprès d’AHF, sous réserve que le litige n’ait pas déjà été examiné par un autre médiateur ou par une juridiction.</p>
+      <p>Cette clause doit être complétée avant toute publication définitive des CGV.</p>
+      <h2>23. Données personnelles</h2>
+      <p>AHF traite les données personnelles du Client pour les besoins de la qualification du projet, de la relation commerciale, de l’édition du devis, de la réservation, de la conclusion et de l’exécution du contrat, du suivi client, du service après-vente, de la facturation, de la comptabilité et du respect de ses obligations légales.</p>
+      <p>Le Client dispose des droits d’accès, de rectification, d’opposition, d’effacement, de limitation et de portabilité dans les conditions prévues par la réglementation applicable.</p>
+      <p>Le Client peut exercer ses droits en écrivant à : contact@howner.fr.</p>
+      <p>Lorsque des intervenants spécialisés indépendants interviennent, ils traitent les données du Client sous leur propre responsabilité, selon leurs propres politiques de confidentialité.</p>
+      <h2>24. Propriété intellectuelle</h2>
+      <p>Les marques, noms, logos, visuels, plans, modèles, designs, textes, images, vidéos, fichiers techniques, supports commerciaux et éléments distinctifs relatifs à HOWNER, AHF et ARKO demeurent la propriété exclusive d’AHF ou de ses ayants droit.</p>
+      <p>Toute reproduction, utilisation, adaptation, diffusion ou exploitation non autorisée est interdite.</p>
+      <p>Le Client ne peut utiliser les plans, notices, visuels ou documents transmis que pour les besoins de son projet contractuel.</p>
+      <h2>25. Force majeure</h2>
+      <p>AHF ne pourra être tenue responsable d’un retard ou d’une inexécution résultant d’un événement de force majeure ou d’un événement extérieur, imprévisible et irrésistible au sens de l’article 1218 du Code civil.</p>
+      <p>Sont notamment susceptibles de constituer des causes de suspension ou de report : catastrophes naturelles, intempéries exceptionnelles, crise sanitaire, pénurie majeure, grève, interruption de transport, décision administrative, sinistre, indisponibilité fournisseur critique, impossibilité d’accès au site ou événement affectant la sécurité de la livraison ou de l’installation.</p>
       <h2>26. Résiliation</h2>
-      <p>Le contrat peut être résilié dans les conditions prévues aux conditions particulières, notamment en cas :</p>
-      <ul>
-        <li>de non-réalisation d&apos;une condition suspensive ;</li>
-        <li>d&apos;impossibilité technique définitive ;</li>
-        <li>de refus définitif d&apos;autorisation administrative ;</li>
-        <li>de défaut de paiement ;</li>
-        <li>de manquement grave d&apos;une partie ;</li>
-        <li>de force majeure prolongée ;</li>
-        <li>d&apos;accord écrit entre les parties.</li>
-      </ul>
-      <p>Les conséquences financières de la résiliation sont déterminées par le contrat, les présentes CGV et le droit applicable.</p>
-
-      {/* 27 */}
-      <h2>27. Force majeure</h2>
-      <p>
-        Aucune des parties ne pourra être tenue responsable d&apos;un retard
-        ou d&apos;une inexécution résultant d&apos;un événement de force
-        majeure au sens de l&apos;article 1218 du Code civil.
-      </p>
-      <p>
-        Sont notamment susceptibles de constituer des événements de force
-        majeure, selon les circonstances : catastrophe naturelle, événement
-        climatique exceptionnel, incendie, inondation, grève externe, blocage
-        de transport, décision administrative, pandémie, pénurie majeure,
-        impossibilité d&apos;approvisionnement ou tout événement
-        imprévisible, irrésistible et extérieur empêchant l&apos;exécution
-        normale du contrat.
-      </p>
-
-      {/* 28 */}
-      <h2>28. Propriété intellectuelle</h2>
-      <p>
-        Les marques, noms, logos, plans, modèles, visuels, configurations,
-        notices, fiches techniques, designs et contenus relatifs à HOWNER, AHF
-        et ARKO sont protégés par les droits de propriété intellectuelle.
-      </p>
-      <p>Toute reproduction, représentation, adaptation, diffusion ou exploitation non autorisée est interdite.</p>
-      <p>
-        Le Client s&apos;interdit de reproduire, faire reproduire ou exploiter
-        les plans, modèles ou documents techniques transmis par AHF en dehors
-        de son projet personnel, sauf accord écrit préalable.
-      </p>
-
-      {/* 29 */}
-      <h2>29. Données personnelles</h2>
-      <p>AHF traite les données personnelles du Client pour les besoins :</p>
-      <ul>
-        <li>de la qualification du projet ;</li>
-        <li>de l&apos;édition du devis ;</li>
-        <li>de la gestion de la réservation ;</li>
-        <li>de la préparation du contrat ;</li>
-        <li>de l&apos;exécution des prestations ;</li>
-        <li>du suivi client ;</li>
-        <li>de la facturation ;</li>
-        <li>du service après-vente ;</li>
-        <li>du respect des obligations légales.</li>
-      </ul>
-      <p>
-        Les données traitées peuvent comprendre : identité, coordonnées,
-        informations relatives au projet, informations relatives au terrain,
-        documents techniques, documents administratifs, échanges commerciaux
-        et contractuels.
-      </p>
-      <p>
-        Le Client dispose des droits prévus par la réglementation applicable
-        en matière de protection des données personnelles, notamment les
-        droits d&apos;accès, de rectification, d&apos;opposition,
-        d&apos;effacement, de limitation et de portabilité lorsque ceux-ci
-        sont applicables.
-      </p>
-      <p>Pour exercer ses droits, le Client peut écrire à : contact@affinityhousefactory.com</p>
-      <p>La politique de confidentialité applicable est disponible sur le site ou communiquée sur demande.</p>
-
-      {/* 30 */}
-      <h2>30. Réclamations</h2>
-      <p>Toute réclamation doit être adressée prioritairement à AHF :</p>
-      <ul>
-        <li>par email : contact@affinityhousefactory.com</li>
-        <li>ou par courrier : Affinity House Factory, 28 Chemin de Sabalce OEV, 64100 Bayonne, France</li>
-      </ul>
-      <p>La réclamation doit préciser :</p>
-      <ul>
-        <li>l&apos;identité du Client ;</li>
-        <li>la référence du projet ;</li>
-        <li>l&apos;objet de la réclamation ;</li>
-        <li>les éléments justificatifs utiles ;</li>
-        <li>les coordonnées de contact.</li>
-      </ul>
-      <p>AHF s&apos;efforce de répondre dans un délai raisonnable à compter de la réception d&apos;une réclamation complète.</p>
-
-      {/* 31 */}
-      <h2>31. Médiation de la consommation</h2>
-      <p>
-        Lorsque le Client agit en qualité de consommateur, il peut recourir
-        gratuitement à un médiateur de la consommation en cas de litige non
-        résolu amiablement avec AHF.
-      </p>
-      <p>
-        Les coordonnées du médiateur compétent seront communiquées au Client
-        et doivent être complétées avant publication des présentes CGV :
-      </p>
-      <ul>
-        <li>Médiateur désigné : [à compléter]</li>
-        <li>Adresse : [à compléter]</li>
-        <li>Site internet : [à compléter]</li>
-      </ul>
-      <p>
-        Le Client peut également consulter la plateforme européenne de
-        règlement en ligne des litiges :{" "}
-        <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">
-          ec.europa.eu/consumers/odr
-        </a>
-      </p>
-
-      {/* 32 */}
-      <h2>32. Droit applicable et juridiction compétente</h2>
+      <p>Les conditions de résiliation sont précisées dans le contrat.</p>
+      <p>En cas de non-réalisation d’une condition essentielle, d’impossibilité technique, administrative, financière ou assurantielle, les parties peuvent convenir d’un report, d’un avenant ou d’une résiliation selon les modalités prévues.</p>
+      <p>En cas de résiliation imputable au Client après lancement de fabrication, AHF pourra facturer les sommes correspondant aux prestations réalisées, aux approvisionnements engagés, aux frais irréversibles, aux coûts industriels, aux frais de stockage ou à tout préjudice justifié, sous réserve des droits impératifs applicables.</p>
+      <h2>27. Droit applicable et juridiction compétente</h2>
       <p>Les présentes CGV sont soumises au droit français.</p>
-      <p>En cas de litige, les parties recherchent prioritairement une solution amiable.</p>
-      <p>
-        À défaut d&apos;accord amiable, le litige est porté devant les
-        juridictions compétentes conformément aux règles de droit commun et
-        aux dispositions impératives applicables, notamment lorsque le Client
-        agit en qualité de consommateur.
-      </p>
-
-      {/* 33 */}
-      <h2>33. Hiérarchie contractuelle</h2>
-      <p>
-        En cas de contradiction entre plusieurs documents, l&apos;ordre de
-        priorité suivant s&apos;applique, sauf stipulation contraire expresse :
-      </p>
-      <ol>
-        <li>les conditions particulières du contrat signé ;</li>
-        <li>le contrat de fabrication, livraison et installation ;</li>
-        <li>le devis accepté ;</li>
-        <li>la notice technique contractuelle ;</li>
-        <li>les plans validés ;</li>
-        <li>les fiches techniques annexées ;</li>
-        <li>les présentes CGV ;</li>
-        <li>les documents commerciaux ou supports de présentation.</li>
-      </ol>
-      <p>
-        Les documents commerciaux, visuels, rendus, simulations et contenus du
-        site ne prévalent jamais sur les documents contractuels signés.
-      </p>
-
-      {/* 34 */}
-      <h2>34. Nullité partielle</h2>
-      <p>Si une clause des présentes CGV est déclarée nulle, illégale ou réputée non écrite, les autres clauses demeurent applicables.</p>
-      <p>
-        La clause concernée est remplacée, dans la mesure du possible, par une
-        clause valable reflétant l&apos;intention économique et juridique
-        initiale des parties, dans le respect du droit applicable.
-      </p>
-
-      {/* 35 */}
-      <h2>35. Évolution des CGV</h2>
-      <p>AHF se réserve le droit de modifier les présentes CGV à tout moment.</p>
-      <p>
-        Les CGV applicables sont celles en vigueur à la date de la réservation
-        ou de la signature du devis, sauf stipulation contraire ou obligation
-        légale impérative.
-      </p>
-      <p>
-        Les modifications postérieures ne s&apos;appliquent pas aux contrats
-        déjà signés, sauf accord des parties ou nécessité de mise en
-        conformité légale.
-      </p>
-
-      <p>
-        <em>
-          © 2026 HOWNER / Affinity House Factory — Maisons légères ARKO —
-          Fabriquées hors site et installées sur terrain client. Visuels,
-          rendus et simulations non contractuels, sauf mention contraire dans
-          les documents signés.
-        </em>
-      </p>
+      <p>En cas de litige, les parties rechercheront prioritairement une solution amiable.</p>
+      <p>Pour les Clients Professionnels, à défaut d’accord amiable, les tribunaux compétents seront ceux du ressort du siège d’AHF, sauf disposition impérative contraire.</p>
+      <p>Pour les Clients consommateurs, les règles légales de compétence juridictionnelle s’appliquent.</p>
+      <h2>28. Dispositions finales</h2>
+      <p>Si une clause des présentes CGV est déclarée nulle, inopposable ou réputée non écrite, les autres clauses demeurent applicables.</p>
+      <p>En cas de contradiction entre les présentes CGV et le contrat signé, le contrat signé prévaut, sous réserve des dispositions légales impératives.</p>
+      <p>AHF se réserve le droit de modifier les présentes CGV à tout moment. La version applicable est celle en vigueur à la date de signature du devis ou du contrat, selon les cas.</p>
     </LegalShell>
   );
 }
