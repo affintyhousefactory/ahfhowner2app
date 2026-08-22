@@ -9,6 +9,35 @@
 
 import { FEATURES } from "@/lib/features";
 
+/**
+ * Montant lu dans l'environnement, avec repli sûr.
+ *
+ * `Number(process.env.X ?? repli)` a un angle mort : `??` ne se déclenche que
+ * sur `null`/`undefined`. Une variable **définie mais vide** — une valeur
+ * effacée dans l'interface Vercel, un espace, un « 69 900 » saisi avec son
+ * séparateur — passe la garde et `Number("")` vaut **0**. Le site afficherait
+ * un studio de jardin à 0 €, sans rien casser qui se voie au déploiement.
+ *
+ * Le risque est né le 2026-08-22 avec la pose des variables : tant qu'elles
+ * n'existaient pas, le repli servait toujours. Maintenant qu'elles existent,
+ * elles peuvent être mal renseignées.
+ *
+ * D'où cette lecture : vide, non numérique ou négatif ⇒ on retombe sur le
+ * repli et on le dit dans la console du build. Zéro reste refusé pour un
+ * montant : aucun de ceux que nous lisons ici n'a de raison de valoir zéro.
+ */
+function montantEnv(brut: string | undefined, repli: number, nom: string): number {
+  if (brut == null || brut.trim() === "") return repli;
+  const n = Number(brut.replace(/\s|\u202f|\u00a0/g, "").replace(",", "."));
+  if (!Number.isFinite(n) || n <= 0) {
+    console.warn(
+      `[env] ${nom} = ${JSON.stringify(brut)} n'est pas un montant exploitable — repli sur ${repli}.`,
+    );
+    return repli;
+  }
+  return n;
+}
+
 // URL canonique de prod — source unique pour metadataBase, sitemap, robots,
 // canonical (ADR-018). Surchargeable par env pour les previews Vercel.
 export const SITE_URL =
@@ -17,11 +46,13 @@ export const SITE_URL =
 // Réservation : jamais en dur — lue depuis l'environnement.
 // Fallback passé de 5 000 à 2 000 € le 2026-08-02 (§7 de la spec, ADR-029) —
 // le configurateur v2 affichait déjà 2 000 € et la page d'accueil 5 000 €.
-// `NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR` n'est défini dans aucun scope Vercel
-// (vérifié le 2026-08-02) : c'est bien ce fallback qui sert en production.
-// La définir un jour la ferait gagner sur toutes les surfaces d'un coup.
-const DEPOSIT_EUR = Number(
-  process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR ?? 2000,
+// `NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR` est posée en Preview et en production
+// depuis le 2026-08-22 : c'est elle qui sert, ce littéral n'est plus qu'un
+// repli. Le montant se change désormais sans redéploiement (ADR-003).
+const DEPOSIT_EUR = montantEnv(
+  process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR,
+  2000,
+  "NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR",
 );
 
 /** Montant de réservation formaté, pour les textes éditoriaux (FAQ, réassurance). */
@@ -136,7 +167,11 @@ export const PROMISE =
 // Fallback env/constante jusqu'à implémentation du chargement DB (Phase 4).
 export const TRANSPORT = {
   tarifEurTonneKm: 0.24,   // €/tonne/km — DB: transport.tarif_eur_tonne_km
-  grutageEur: Number(process.env.NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR ?? 1440),
+  grutageEur: montantEnv(
+    process.env.NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR,
+    1440,
+    "NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR",
+  ),
   roadFactor: 1.3,          // haversine → distance route (×1.3)
   usine: { lat: 43.4933, lon: -1.4748 }, // Bayonne — à affiner avec adresse exacte atelier
   poids: { one: 6, max: 9 } as Record<string, number>, // tonnes par produit
@@ -146,13 +181,17 @@ export const TRANSPORT = {
 // ADR-029 : grille §5 de la spec configurateur v2 — Arko Max 99 900 € TTC
 // (TVA 20 %, construction neuve). Remplace l'ancien 89 900 €.
 export const PRICING = {
-  base: Number(process.env.NEXT_PUBLIC_ARKO_BASE_EUR ?? 99900),
+  base: montantEnv(process.env.NEXT_PUBLIC_ARKO_BASE_EUR, 99900, "NEXT_PUBLIC_ARKO_BASE_EUR"),
   perM2: 2250,
   terrassePerM2: 300,
   delivery: {
     grutage: TRANSPORT.grutageEur,
     // perKm = poids Arko Max × tarif/tonne/km (DB: transport.poids_arko_max_tonnes × tarif_eur_tonne_km)
-    perKm: Number(process.env.NEXT_PUBLIC_DELIVERY_PER_KM_EUR ?? +(TRANSPORT.poids.max * TRANSPORT.tarifEurTonneKm).toFixed(4)),
+    perKm: montantEnv(
+      process.env.NEXT_PUBLIC_DELIVERY_PER_KM_EUR,
+      +(TRANSPORT.poids.max * TRANSPORT.tarifEurTonneKm).toFixed(4),
+      "NEXT_PUBLIC_DELIVERY_PER_KM_EUR",
+    ),
     origin: "Bayonne",
   },
   options: [
@@ -187,19 +226,22 @@ export const PRICING = {
 // Albert. Corrige le 77 900 € issu du §5 de la spec, qui n'avait jamais été
 // le tarif de base voulu. Historique : 59 900 € avant ADR-029.
 //
-// ⚠ `NEXT_PUBLIC_ARKO_ONE_BASE_EUR` n'est définie **dans aucun environnement
-// Vercel** : ce repli est la valeur réellement servie, en Preview comme en
-// production. ADR-003 prévoit l'inverse — la variable prime, le repli dépanne.
-// Tant qu'elle n'est pas posée, un prix ne peut pas être corrigé sans
-// redéploiement.
+// `NEXT_PUBLIC_ARKO_ONE_BASE_EUR` est posée en Preview et en production depuis
+// le 2026-08-22 (ADR-003 enfin appliqué) : elle prime, ce littéral dépanne.
+// Un prix se corrige donc sans redéploiement — mais une valeur mal saisie ne
+// doit pas pour autant afficher 0 €, d'où `montantEnv`.
 const ONE_PRICING = {
-  base: Number(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR ?? 69900),
+  base: montantEnv(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR, 69900, "NEXT_PUBLIC_ARKO_ONE_BASE_EUR"),
   perM2: 2250, // TODO ARKO ONE : confirmer €/m²
   terrassePerM2: 300, // TODO ARKO ONE : confirmer
   delivery: {
     grutage: TRANSPORT.grutageEur,
     // perKm = poids Arko One × tarif/tonne/km (DB: transport.poids_arko_one_tonnes × tarif_eur_tonne_km)
-    perKm: Number(process.env.NEXT_PUBLIC_ARKO_ONE_DELIVERY_PER_KM_EUR ?? +(TRANSPORT.poids.one * TRANSPORT.tarifEurTonneKm).toFixed(4)),
+    perKm: montantEnv(
+      process.env.NEXT_PUBLIC_ARKO_ONE_DELIVERY_PER_KM_EUR,
+      +(TRANSPORT.poids.one * TRANSPORT.tarifEurTonneKm).toFixed(4),
+      "NEXT_PUBLIC_ARKO_ONE_DELIVERY_PER_KM_EUR",
+    ),
     origin: "Bayonne",
   }, // TODO ARKO ONE : confirmer poids exact
   options: PRICING.options, // TODO ARKO ONE : grille options propre à confirmer

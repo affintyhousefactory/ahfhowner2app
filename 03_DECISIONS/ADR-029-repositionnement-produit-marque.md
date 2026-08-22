@@ -329,9 +329,11 @@ L'écart entre les deux modèles passe de 22 000 € à **30 000 €**. C'est un
 
 **La version de grille est incrémentée dans le même geste**, et ce n'est pas cosmétique : c'est elle qui fait passer `grillePerimee` à vrai sur les leads antérieurs (ADR-035 §4). Sans elle, une demande chiffrée à 77 900 € se relirait dans le back-office comme si elle valait la grille du jour — un écart de 8 000 € invisible à l'écran.
 
-### Ce que la correction met au jour
+### Ce que la correction a mis au jour — et qui est corrigé le jour même
 
-`NEXT_PUBLIC_ARKO_ONE_BASE_EUR` **n'est définie dans aucun environnement Vercel** — ni Preview, ni production. ADR-003 veut que le montant vienne de l'environnement et que le littéral ne soit qu'un repli ; dans les faits le repli est la seule valeur servie. Conséquence concrète : **un prix ne peut pas être corrigé sans redéploiement**, alors que c'est précisément ce que la variable devait permettre. Constat porté ici, pas corrigé — poser les variables relève d'ADR-003 et se décide avec Richard.
+`NEXT_PUBLIC_ARKO_ONE_BASE_EUR` n'était définie **dans aucun environnement Vercel** — ni Preview, ni production. ADR-003 veut que le montant vienne de l'environnement et que le littéral ne soit qu'un repli ; dans les faits le repli était la seule valeur servie, et un prix ne pouvait pas être corrigé sans redéploiement.
+
+**Corrigé le 2026-08-22 sur demande de Richard** : neuf variables posées en Preview et en production, aux valeurs mêmes des replis — poser la variable ne devait rien changer ce jour-là, seulement rendre le changement possible ensuite. Voir ADR-003 § Amendement du 2026-08-22.
 
 Le prix au m² de l'Arko One (`ONE_PRICING.perM2 = 2250`) reste marqué `TODO ARKO ONE` et **n'a pas été recalculé** : 69 900 € / 20 m² donne 3 495 €/m², soit un tiers de plus que la valeur inscrite. Ce littéral n'alimente aucun affichage de la page Arko One aujourd'hui, mais il devient franchement faux — à confirmer avec le prix définitif.
 
