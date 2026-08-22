@@ -134,7 +134,7 @@ function Parcours() {
               c.manques.length === 0 && sousCondition(c)
                 ? c.terrainTeste
                   ? "* Vérification d'éligibilité du terrain après entretien."
-                  : "* Terrain non testé — éligibilité vérifiée lors de l'entretien."
+                  : "* Vous n'avez pas testé de terrain — l'éligibilité de votre adresse sera vérifiée lors de l'entretien avec notre conseiller."
                 : undefined
             }
             /* ADR-031 — la demande part réellement. Turnstile est laissé à
@@ -144,11 +144,43 @@ function Parcours() {
                configuré. À poser avec le widget, pas avant. */
             onAction={() => void c.soumettre()}
             enCours={c.envoi.phase === "envoi"}
+            retour={retourSoumission(c)}
           />
         )}
       </div>
     </div>
   );
+}
+
+/**
+ * Retour de soumission affiché contre le bouton.
+ *
+ * Le conflit de numéro est absent : il a sa place dans la section 08, à côté
+ * de la grille où le visiteur doit rechoisir. Tous les autres retours se
+ * lisent ici, là où le clic vient d'avoir lieu.
+ */
+function retourSoumission(
+  c: ReturnType<typeof useConfigurateur>,
+): { ton: "ok" | "alerte"; texte: string } | undefined {
+  switch (c.envoi.phase) {
+    case "envoye":
+      return {
+        ton: "ok",
+        texte:
+          "Demande envoyée. Vous recevez un récapitulatif par email, et nous vous rappelons pour confirmer votre numéro.",
+      };
+    case "partiel":
+      return {
+        ton: "alerte",
+        texte: c.envoi.notified
+          ? "Votre demande nous est parvenue, mais son enregistrement n'a pas abouti. Nous vous rappelons — conservez cette page ou notez votre numéro."
+          : "Votre demande nous est parvenue, mais l'email de récapitulatif n'a pas pu partir. Nous vous rappelons.",
+      };
+    case "erreur":
+      return { ton: "alerte", texte: `${c.envoi.message} Vous pouvez aussi nous appeler directement.` };
+    default:
+      return undefined;
+  }
 }
 
 /**

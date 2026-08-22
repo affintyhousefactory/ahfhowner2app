@@ -197,7 +197,15 @@ type Ctx = {
    * doit ni se confondre avec une panne, ni faire perdre la configuration.
    */
   envoi: EtatEnvoi;
-  soumettre: (captchaToken?: string) => Promise<void>;
+  soumettre: () => Promise<void>;
+  /**
+   * Jeton Turnstile, posé par le widget de la section coordonnées.
+   *
+   * Il vit dans le store et non dans la section parce que c'est la soumission
+   * qui en a besoin, et qu'elle part du pied du parcours — deux composants
+   * éloignés pour une même valeur.
+   */
+  setCaptchaToken: (t: string | null) => void;
   /** Numéros encore libres, renvoyés par le serveur en cas de conflit. */
   numerosLibres: number[];
 
@@ -257,6 +265,7 @@ export function ConfigurateurProvider({
   }, []);
 
   const [envoi, setEnvoi] = useState<EtatEnvoi>({ phase: "repos" });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [numerosLibres, setNumerosLibres] = useState<number[]>([]);
 
   /* Changer de studio purge les options devenues incompatibles : le poêle
@@ -313,7 +322,7 @@ export function ConfigurateurProvider({
    * et le store n'en garde que ce dont le parcours a besoin.
    */
   const soumettre = useCallback(
-    async (captchaToken?: string) => {
+    async () => {
       setEnvoi({ phase: "envoi" });
       let pluData: unknown = null;
       try {
@@ -343,7 +352,7 @@ export function ConfigurateurProvider({
             pluConsent: Boolean(pluData),
             pluData,
             optIn: optin,
-            captchaToken,
+            captchaToken: captchaToken ?? undefined,
           }),
         });
 
@@ -355,7 +364,17 @@ export function ConfigurateurProvider({
           return;
         }
         if (!res.ok) {
-          setEnvoi({ phase: "erreur", message: "La demande n'a pas pu être envoyée." });
+          /* Le motif compte : un échec de vérification anti-robot ne se
+             corrige pas comme une panne, et dire « réessayez » à quelqu'un
+             dont le jeton a expiré est la seule chose utile à dire. */
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          const message =
+            data.error === "captcha_required" || data.error === "captcha_failed"
+              ? "La vérification anti-robot n'a pas abouti. Rechargez la page et réessayez."
+              : data.error === "invalid_email"
+                ? "L'adresse email ne semble pas valide."
+                : "La demande n'a pas pu être envoyée.";
+          setEnvoi({ phase: "erreur", message });
           return;
         }
 
@@ -372,7 +391,7 @@ export function ConfigurateurProvider({
         setEnvoi({ phase: "erreur", message: "Connexion interrompue — réessayez." });
       }
     },
-    [contact, numero, modele, usage, quantite, ambiance, ambianceInterieure, terrasse, options, prix, preAnalyse, optin],
+    [contact, numero, modele, usage, quantite, ambiance, ambianceInterieure, terrasse, options, prix, preAnalyse, optin, captchaToken],
   );
 
   const value = useMemo<Ctx>(() => {
@@ -455,6 +474,7 @@ export function ConfigurateurProvider({
       manques,
       envoi,
       soumettre,
+      setCaptchaToken,
       numerosLibres,
       numero,
       setNumero,

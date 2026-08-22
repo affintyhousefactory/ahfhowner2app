@@ -438,6 +438,7 @@ export function BarrePrix({
   note,
   detail,
   enCours,
+  retour,
 }: {
   total: number;
   mention: string;
@@ -462,6 +463,13 @@ export function BarrePrix({
   detail?: ReactNode;
   /** Demande en cours d'envoi — le bouton se verrouille et le dit. */
   enCours?: boolean;
+  /**
+   * Retour de la soumission, affiché **contre le bouton** qui vient d'être
+   * cliqué : c'est là que le regard se trouve. Une erreur montrée à sept
+   * sections de distance oblige à la chercher, quand elle devrait sauter aux
+   * yeux.
+   */
+  retour?: { ton: "ok" | "alerte"; texte: string };
 }) {
   const [delta, setDelta] = useState<number | null>(null);
   const precedent = useRef<number | null>(null);
@@ -646,6 +654,21 @@ export function BarrePrix({
           {enCours ? "Envoi en cours…" : action}
         </button>
       </div>
+      {retour && (
+        <p
+          role="status"
+          aria-live="polite"
+          className={cn(
+            "rounded-xl border px-3 py-2 text-[0.78rem] leading-relaxed",
+            retour.ton === "ok"
+              ? "border-accent/30 bg-accent/[0.06] text-ink"
+              : "border-[#8a6a2f]/35 bg-[#8a6a2f]/[0.09] text-[#8a6a2f]",
+          )}
+        >
+          {retour.texte}
+        </p>
+      )}
+
       {note && (
         <p className="text-center text-[0.68rem] leading-snug text-[#8a6a2f]">{note}</p>
       )}

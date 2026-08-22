@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { Turnstile } from "@marsidev/react-turnstile";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { cn } from "@/shared/lib/cn";
@@ -40,6 +41,12 @@ import type { UsageId } from "@/lib/configurateur/config";
 /* ------------------------------------------------------------------ */
 /* 01 — le studio                                                      */
 /* ------------------------------------------------------------------ */
+
+/* Même repli que `ContactForm` : la clé de test de Cloudflare, qui laisse
+   toujours passer. Elle évite qu'un environnement sans variable ne rende un
+   widget cassé — la vraie barrière est le secret, côté serveur. */
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 
 export function SectionModule() {
   const c = useConfigurateur();
@@ -562,8 +569,10 @@ export function SectionReservation() {
           : "Le numéro choisi vous est attribué à la signature du devis."}
       </p>
 
-      {/* Retour de la soumission (ADR-031). Placé ici parce que c'est ici que
-          se joue le seul cas qui demande une action : le numéro perdu. */}
+      {/* Seul le conflit reste ici : c'est le seul retour qui demande une
+          action **à cet endroit précis** — rechoisir un numéro. Les autres
+          (succès, échec, envoi partiel) s'affichent au pied, contre le bouton
+          qui vient d'être cliqué : c'est là que le regard se trouve. */}
       {c.envoi.phase === "conflit" && (
         <p className="rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.78rem] leading-relaxed text-[#8a6a2f]">
           Ce numéro vient d&apos;être confirmé par un autre client — à quelques
@@ -571,31 +580,6 @@ export function SectionReservation() {
           {c.numerosLibres.length > 0
             ? `choisissez un autre numéro (${c.numerosLibres.map((n) => String(n).padStart(2, "0")).join(", ")} encore libres).`
             : "choisissez un autre numéro ci-dessus."}
-        </p>
-      )}
-
-      {c.envoi.phase === "envoye" && (
-        <p className="rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2 text-[0.78rem] leading-relaxed text-ink">
-          Demande envoyée. Vous recevez un récapitulatif par email, et nous vous
-          rappelons pour confirmer votre numéro.
-        </p>
-      )}
-
-      {c.envoi.phase === "partiel" && (
-        <p className="rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.78rem] leading-relaxed text-[#8a6a2f]">
-          Votre demande nous est parvenue
-          {c.envoi.notified
-            ? ", mais son enregistrement n'a pas abouti"
-            : c.envoi.persisted
-              ? ", mais l'email de récapitulatif n'a pas pu partir"
-              : ", mais son traitement automatique n'a pas abouti"}
-          . Nous vous rappelons — conservez cette page ou notez votre numéro.
-        </p>
-      )}
-
-      {c.envoi.phase === "erreur" && (
-        <p className="rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.78rem] leading-relaxed text-[#8a6a2f]">
-          {c.envoi.message} Vous pouvez aussi nous appeler directement.
         </p>
       )}
 
@@ -735,6 +719,22 @@ export function SectionCoordonnees() {
           </Case>
         )}
       </div>
+
+      {/* Turnstile en mode invisible : la route refuse toute demande sans jeton
+          dès que le secret est configuré — ce qui a fait échouer les premiers
+          envois en 400. Le widget se résout tout seul et ne demande rien au
+          visiteur, sauf s'il est jugé suspect.
+
+          Posé ici plutôt qu'au pied : il doit vivre dans le flux du formulaire
+          pour être monté quand la section est ouverte, et le jeton est prêt
+          bien avant le clic. */}
+      <Turnstile
+        siteKey={TURNSTILE_SITE_KEY}
+        onSuccess={c.setCaptchaToken}
+        onError={() => c.setCaptchaToken(null)}
+        onExpire={() => c.setCaptchaToken(null)}
+        options={{ theme: "light", size: "invisible" }}
+      />
 
       <div className="flex flex-col gap-2.5">
         <Case checked={c.optin} onChange={c.setOptin}>
