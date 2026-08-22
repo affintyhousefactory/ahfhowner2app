@@ -32,12 +32,12 @@ export default function CgvPage() {
         <li>Site internet : <a href="https://howner.fr">https://howner.fr</a></li>
         <li>Contact commercial : contact@howner.fr</li>
         <li>Directeur de la publication : Albert Puigbo</li>
-        <li>Activité principale déclarée : <strong>fabrication hors-site et installation de studios de jardin modulaires</strong></li>
+        <li>Activité principale déclarée : <strong>fabrication hors-site et installation de studios de jardin</strong></li>
         <li>Code APE cible : <strong>16.23Z — Fabrication de charpentes et d’autres menuiseries</strong></li>
         <li>Numéro de TVA intracommunautaire : FR84982581506</li>
-        <li>Assureur responsabilité civile professionnelle : (Information fournie lors de la remise du contrat après réservation)</li>
-        <li>Assureur responsabilité décennale, si applicable aux prestations réalisées : (Information fournie lors de la remise du contrat après réservation)</li>
-        <li>Médiateur de la consommation, pour les Clients consommateurs : (Information fournie lors de la remise du contrat après réservation)</li>
+        <li>Assureur responsabilité civile professionnelle : communiqué lors des devis et contrats émis par AHF</li>
+        <li>Assureur responsabilité décennale, si applicable aux prestations réalisées : communiqué lors des devis et contrats émis par AHF</li>
+        <li>Médiateur de la consommation, pour les Clients consommateurs : communiqué lors des devis et contrats émis par AHF</li>
       </ul>
       <p>Les présentes Conditions Générales de Vente, ci-après les « CGV », encadrent le parcours de présentation, qualification, réservation, devis, commande, fabrication hors-site, livraison et installation des <strong>studios de jardin ARKO</strong> proposés par AHF.</p>
       <h2>2. Définitions</h2>
@@ -46,8 +46,8 @@ export default function CgvPage() {
         <tbody>
           <tr><td><strong>AHF</strong></td><td>Affinity House Factory, société exploitant la marque HOWNER et proposant des prestations de fabrication hors-site, livraison et installation de studios de jardin ARKO, dans le périmètre expressément prévu au devis, au contrat et à leurs annexes.</td></tr>
           <tr><td><strong>HOWNER</strong></td><td>Marque, portail ou espace digital exploité par AHF pour présenter les studios de jardin ARKO, qualifier les projets, éditer des propositions commerciales et accompagner le parcours précontractuel.</td></tr>
-          <tr><td><strong>Studio de jardin ARKO</strong></td><td>Unité modulaire de jardin fabriquée hors-site, livrée et installée sur un terrain choisi et mis à disposition par le Client, selon le modèle, les options et les caractéristiques techniques prévus au devis, au contrat et à leurs annexes.</td></tr>
-          <tr><td><strong>Unité modulaire</strong></td><td>Ensemble fabriqué ou assemblé hors-site, destiné à être livré et installé sur le site du Client, conformément au périmètre contractuel.</td></tr>
+          <tr><td><strong>Studio de jardin ARKO</strong></td><td>Unité de jardin fabriquée hors-site, livrée et installée sur un terrain choisi et mis à disposition par le Client, selon le modèle, les options et les caractéristiques techniques prévus au devis, au contrat et à leurs annexes.</td></tr>
+          <tr><td><strong>Unité</strong></td><td>Ensemble fabriqué ou assemblé hors-site, destiné à être livré et installé sur le site du Client, conformément au périmètre contractuel.</td></tr>
           <tr><td><strong>Modèle ARKO</strong></td><td>Déclinaison proposée par AHF, notamment <strong>ARKO One 20 m²</strong>, <strong>ARKO Max 40 m²</strong>, ou toute autre version figurant dans la proposition commerciale.</td></tr>
           <tr><td><strong>Client</strong></td><td>Toute personne physique ou morale sollicitant AHF pour un projet de studio de jardin ARKO.</td></tr>
           <tr><td><strong>Client Professionnel</strong></td><td>Personne morale ou personne physique agissant à des fins entrant dans le cadre de son activité professionnelle, commerciale, institutionnelle, associative, médico-sociale, sanitaire, artisanale, agricole ou libérale.</td></tr>
@@ -60,7 +60,7 @@ export default function CgvPage() {
           <tr><td><strong>Fiches techniques élémentaires</strong></td><td>Annexes détaillant les composants ou lots techniques : structure, isolation, menuiseries, électricité, plomberie, chauffage, ventilation, finitions, transport, installation ou tout autre élément prévu au contrat.</td></tr>
           <tr><td><strong>Terrain / site d’installation</strong></td><td>Terrain choisi, réservé, acquis ou mis à disposition par le Client, destiné à recevoir le studio de jardin ARKO. AHF n’intervient pas dans l’achat, la vente ou la négociation du terrain.</td></tr>
           <tr><td><strong>Prérequis terrain</strong></td><td>Conditions nécessaires à la fabrication, à la livraison et à l’installation : droits suffisants du Client sur le terrain, autorisations administratives, accès, supports d’accueil, étude de sol si requise, raccordements préparatoires, sécurité du site et pièces justificatives demandées.</td></tr>
-          <tr><td><strong>Supports d’accueil</strong></td><td>Éléments destinés à recevoir l’unité modulaire : plots, longrines, micropieux, dalle, pieux vissés ou tout autre système validé techniquement. Sauf mention contraire expresse, ces éléments sont à la charge du Client.</td></tr>
+          <tr><td><strong>Supports d’accueil</strong></td><td>Éléments destinés à recevoir l’unité : plots, longrines, micropieux, dalle, pieux vissés ou tout autre système validé techniquement. Sauf mention contraire expresse, ces éléments sont à la charge du Client.</td></tr>
           <tr><td><strong>Intervenant spécialisé indépendant</strong></td><td>Courtier en financement, courtier en crédit-bail, courtier en assurance, professionnel de l’immobilier, bureau d’études, géotechnicien, entreprise de supports d’accueil, prestataire de raccordement, conseil ou tout autre professionnel intervenant auprès du Client dans un périmètre distinct de celui d’AHF, sous sa propre responsabilité et dans le cadre d’un contrat séparé.</td></tr>
           <tr><td><strong>Financement sécurisé</strong></td><td>Fonds propres disponibles, budget professionnel validé, accord de crédit-bail, location financière, accord de financement professionnel, accord institutionnel, subvention validée ou tout autre mode de financement jugé suffisant par AHF avant lancement du projet.</td></tr>
           <tr><td><strong>Livraison</strong></td><td>Acheminement du studio de jardin ARKO depuis l’atelier ou le site de production jusqu’au terrain du Client.</td></tr>
@@ -89,7 +89,7 @@ export default function CgvPage() {
       </ul>
       <h2>4. Nature de l’intervention d’AHF</h2>
       <h3>4.1 Périmètre d’intervention</h3>
-      <p>AHF intervient en qualité de <strong>fabricant-installateur de studios de jardin modulaires</strong>, dans le périmètre expressément prévu au devis, au contrat et à leurs annexes.</p>
+      <p>AHF intervient en qualité de <strong>fabricant-installateur de studios de jardin</strong>, dans le périmètre expressément prévu au devis, au contrat et à leurs annexes.</p>
       <p>L’intervention d’AHF porte sur la fabrication hors-site, la livraison et l’installation d’un studio de jardin ARKO sur un terrain choisi et mis à disposition par le Client.</p>
       <p>AHF ne se substitue pas au Client pour l’acquisition foncière, le financement, la souscription de ses assurances, l’obtention des autorisations administratives, la réalisation des supports d’accueil, les raccordements aux réseaux, les études de sol ou les démarches relevant d’autres professionnels, sauf stipulation expresse et écrite dans le contrat.</p>
       <p>Selon la nature exacte du projet, le profil du Client, l’usage prévu, le périmètre d’intervention d’AHF, les prestations incluses et les documents contractuels signés, certaines opérations peuvent relever d’un régime légal impératif. Dans cette hypothèse, les règles légales applicables prévalent sur les présentes CGV. AHF se réserve le droit de suspendre ou de refuser tout projet dont la qualification juridique, assurantielle ou technique ne serait pas compatible avec son périmètre d’intervention ou ses garanties d’assurance.</p>
@@ -385,9 +385,8 @@ export default function CgvPage() {
       <h2>22. Médiation de la consommation</h2>
       <p>Conformément aux articles L.616-1 et suivants du Code de la consommation, le Client consommateur est informé qu’il peut recourir gratuitement à un médiateur de la consommation en vue de la résolution amiable d’un litige l’opposant à AHF, après avoir préalablement adressé une réclamation écrite à AHF.</p>
       <p>Le médiateur de la consommation désigné par AHF est :</p>
-      <p><strong>[Nom du médiateur à compléter]</strong> <strong>Adresse :</strong> [adresse complète à compléter] <strong>Site internet :</strong> [URL de saisine à compléter]</p>
+      <p><strong>Communiqué lors des devis et contrats émis par AHF.</strong></p>
       <p>Le Client consommateur peut saisir le médiateur dans un délai d’un an à compter de sa réclamation écrite auprès d’AHF, sous réserve que le litige n’ait pas déjà été examiné par un autre médiateur ou par une juridiction.</p>
-      <p>Cette clause doit être complétée avant toute publication définitive des CGV.</p>
       <h2>23. Données personnelles</h2>
       <p>AHF traite les données personnelles du Client pour les besoins de la qualification du projet, de la relation commerciale, de l’édition du devis, de la réservation, de la conclusion et de l’exécution du contrat, du suivi client, du service après-vente, de la facturation, de la comptabilité et du respect de ses obligations légales.</p>
       <p>Le Client dispose des droits d’accès, de rectification, d’opposition, d’effacement, de limitation et de portabilité dans les conditions prévues par la réglementation applicable.</p>

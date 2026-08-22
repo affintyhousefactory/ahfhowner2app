@@ -27,7 +27,6 @@ const EXTENSIONS = [".ts", ".tsx", ".mjs"];
 const EXCLUS = [
   // Pages légales — hors périmètre ADR-029 tant que §17.10 n'est pas fourni
   // (textes à livrer par Howner) et que le risque ADR-015 est ouvert.
-  "src/app/(public)/cgv/",
   "src/app/(public)/mentions-legales/",
   "src/app/(public)/confidentialite/",
   "src/app/(public)/cgu-mandataire/",
@@ -131,7 +130,16 @@ const PROSCRITS = [
   { mot: "solutions? compl[èe]tes?", libelle: "solution complète (§30 CGV)" },
   { mot: "prise en charge globale", libelle: "prise en charge globale (§30 CGV)" },
   { mot: "garantie d[e’']autorisation", libelle: "garantie d’autorisation (§30 CGV)" },
-  { mot: "garantie de rentabilit[ée]", libelle: "garantie de rentabilité (§30 CGV)" },
+  {
+    mot: "garantie de rentabilit[ée]",
+    libelle: "garantie de rentabilité (§30 CGV)",
+    /* Les CGV emploient l'expression pour la **nier** — « les simulations […]
+       ne constituent pas une garantie de rentabilité » (§19). C'est la clause
+       qui protège la société, pas une promesse. Exception bornée à ce chemin :
+       le terme reste proscrit partout ailleurs, et les autres termes restent
+       contrôlés sur les CGV. */
+    sauf: ["src/app/(public)/cgv/"],
+  },
   { mot: "financement garanti", libelle: "financement garanti (§30 CGV)" },
   { mot: "terrain garanti", libelle: "terrain garanti (§30 CGV)" },
   { mot: "pr[êe]ts? [àa] louer", libelle: "prêt à louer (§30 CGV)" },

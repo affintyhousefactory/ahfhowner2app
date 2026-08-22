@@ -76,6 +76,8 @@ Howner est la seule entité citée côté client. Aucun nom de fournisseur, de s
 
 ### 5. Périmètre d'application
 
+> ⚠ **Amendé le 2026-08-22** : les **CGV rentrent dans le périmètre du contrôle**. Réécrites sans terme proscrit à la demande de Richard, elles n'ont plus de raison d'en sortir — et les en exclure laisserait le vocabulaire y revenir sans bruit à la prochaine version. Une exception bornée couvre « garantie de rentabilité », que le §19 emploie pour la nier. Les mentions légales, la confidentialité et les CGU mandataire restent exclues. Voir ADR-015 § Amendement du 2026-08-22.
+
 Tout le site **sauf les pages légales** — CGV, mentions légales, politique de confidentialité. Elles sont listées au §17.10 comme à fournir par Howner, et les CGV portent le risque 🔴 ouvert d'ADR-015 (texte non validé par l'avocat, déjà opposable en production). Une incohérence de vocabulaire subsistera donc temporairement entre le site et ses pages légales : elle est assumée et lève dès que §17.10 est fourni.
 
 ## Amendement du 2026-08-02 — un contrôle vert ne prouvait pas la conformité
