@@ -29,7 +29,7 @@ Site **bi-produit** de réservation — **Arko One** (20 m²) + **Arko Max** (40
 
 ## Produit
 **Bi-produit** (ADR-022) — registre `PRODUCTS` (`src/lib/site.ts`) :
-- **Arko One** — 20 m², emprise 6,65 × 3,60 m, **77 900 € TTC** (grille §5 de la spec, ADR-029).
+- **Arko One** — 20 m², emprise 6,65 × 3,60 m, **69 900 € TTC** (ADR-029 § Amendement du 2026-08-22 ; 77 900 € jusque-là).
 - **Arko Max** — 40 m² (= ARKO historique), emprise 4,00 × 11,00 m, **99 900 € TTC** (grille §5 de la spec, ADR-029).
 
 > Prix de base corrigés le 2026-07-31 (ADR-029). Le **reste de la grille** — paliers de terrasse, 6 options dont 3 structurelles, transport par zone — relève d'ADR-030 : le modèle de calcul actuel (`perM2`, `terrassePerM2`, livraison au km) est remplacé, pas ajusté. Le nombre d'exemplaires est à **Série 01 = 6 unités** depuis le 2026-08-04 (arbitrage de Richard, ADR-029 § Amendement) — `SERIE_TOTAL` et `serie.unites` alignés à 6. Les **créneaux en base** restent à ADR-031.

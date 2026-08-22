@@ -21,9 +21,11 @@ Tant que ce cadre n'est pas acté, tout écran construit sur l'ancien vocabulair
 | Cadre de vente | maison sur votre terrain | **annexe sur parcelle bâtie** ou **hébergement professionnel** |
 | Terrain nu | cœur de la promesse | **fermé** — « prochainement », sans prix ni explication |
 | Vocabulaire | 105 occurrences de « maison » | terme **interdit** |
-| Arko One / Max | 59 900 / 89 900 € | **77 900 / 99 900 €** |
+| Arko One / Max | 59 900 / 89 900 € | **77 900 / 99 900 €** ¹ |
 | Réservation | 5 000 € (`DEPOSIT_EUR`) | **2 000 €** + acompte 30 % — ✅ `DEPOSIT_EUR` aligné le 2026-08-02 |
 | Série | `SERIE_TOTAL = 12` | ~~Série 01 = 6 unités~~ → **maintenu à 12** (amendement du 2026-08-02) |
+
+> ¹ **État au 2026-07-31, conservé tel quel.** L'Arko One est passé à **69 900 €** le 2026-08-22 (§ Amendement du 2026-08-22). Ce tableau date la décision d'origine : y écrire le prix du jour ferait disparaître le fait qu'il a bougé, et quand.
 
 ## Décision
 
@@ -53,7 +55,7 @@ La spec est catégorique et le formule comme une contrainte de développement : 
 
 ### 3. Prix et volumes
 
-Arko One **77 900 € TTC**, Arko Max **99 900 € TTC** (TVA 20 %, construction neuve). Réservation **2 000 €**, intégralement remboursable, imputée sur le prix. Acompte de confirmation **30 %**.
+Arko One ~~**77 900 € TTC**~~ → **69 900 € TTC** (§ Amendement du 2026-08-22), Arko Max **99 900 € TTC** (TVA 20 %, construction neuve). Réservation **2 000 €**, intégralement remboursable, imputée sur le prix. Acompte de confirmation **30 %**.
 
 > **~~Amendement du 2026-08-02 — Série 01 reste à 12 unités.~~** ~~La spec fixait 6 ; arbitrage de Richard : le volume public ne change pas.~~ **Annulé le 2026-08-04** (voir ci-dessous).
 
@@ -307,6 +309,32 @@ que coûte un garde-fou qu'on arrange.
 principale » restent interdits partout, y compris sur cette page — et le copy des
 specs, qui les emploie 92 fois au total, est **réécrit** plutôt qu'exempté
 (ADR-038 §4a).
+
+## Amendement du 2026-08-22 — Arko One passe à 69 900 € TTC
+
+**Décision de Richard, arbitrée avec Albert.** Le tarif de base de l'**Arko One** est **69 900 € TTC** (TVA 20 %). Le 77 900 € porté par le §5 de la spec et servi depuis le 2026-08-02 n'était pas le prix voulu. L'**Arko Max reste à 99 900 € TTC** : la correction ne porte que sur le 20 m².
+
+L'écart entre les deux modèles passe de 22 000 € à **30 000 €**. C'est un changement de positionnement autant que de prix : l'Arko One devient nettement le point d'entrée de la gamme, là où les deux montants se tenaient jusqu'ici.
+
+### Portée
+
+| Emplacement | Nature |
+|---|---|
+| `src/lib/site.ts` — `ONE_PRICING.base` | valeur servie aux pages produit et au JSON-LD |
+| `src/lib/configurateur/config.ts` — `modeles.one.prixBaseTtc` | grille du configurateur v2 |
+| `src/lib/configurateur/config.ts` — `version` | `"2026-08-20"` → `"2026-08-22"` |
+| `00_INDEX/PROJECT_STATE.md`, `00_INDEX/HUB_PRODUCT.md` | état canonique |
+| `_RUNTIME/active-context.md`, `_RUNTIME/pending-questions.md` | mémoire active |
+| `docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md` §5 + annexe JSON | grille de référence, corrigée avec note datée |
+
+**La version de grille est incrémentée dans le même geste**, et ce n'est pas cosmétique : c'est elle qui fait passer `grillePerimee` à vrai sur les leads antérieurs (ADR-035 §4). Sans elle, une demande chiffrée à 77 900 € se relirait dans le back-office comme si elle valait la grille du jour — un écart de 8 000 € invisible à l'écran.
+
+### Ce que la correction met au jour
+
+`NEXT_PUBLIC_ARKO_ONE_BASE_EUR` **n'est définie dans aucun environnement Vercel** — ni Preview, ni production. ADR-003 veut que le montant vienne de l'environnement et que le littéral ne soit qu'un repli ; dans les faits le repli est la seule valeur servie. Conséquence concrète : **un prix ne peut pas être corrigé sans redéploiement**, alors que c'est précisément ce que la variable devait permettre. Constat porté ici, pas corrigé — poser les variables relève d'ADR-003 et se décide avec Richard.
+
+Le prix au m² de l'Arko One (`ONE_PRICING.perM2 = 2250`) reste marqué `TODO ARKO ONE` et **n'a pas été recalculé** : 69 900 € / 20 m² donne 3 495 €/m², soit un tiers de plus que la valeur inscrite. Ce littéral n'alimente aucun affichage de la page Arko One aujourd'hui, mais il devient franchement faux — à confirmer avec le prix définitif.
+
 
 ## Points ouverts — arbitrage Howner requis
 

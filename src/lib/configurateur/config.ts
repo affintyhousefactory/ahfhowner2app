@@ -152,9 +152,10 @@ const CONFIG_V1: ConfigurateurConfig = {
    * Historique : `"v1"` jusqu'au 2026-08-04 (retrait du « Pack prêt à louer »),
    * puis `"2026-08-04"` jusqu'au 2026-08-20 (renommage du bardage et de ses
    * teintes, ajout de l'ambiance intérieure — les identifiants ont changé,
-   * une configuration antérieure ne se relit donc pas avec cette grille).
+   * une configuration antérieure ne se relit donc pas avec cette grille),
+   * puis `"2026-08-20"` jusqu'au 2026-08-22 (Arko One 77 900 → 69 900 € TTC).
    */
-  version: "2026-08-20",
+  version: "2026-08-22",
   tva: 20,
 
   usages: [
@@ -188,7 +189,7 @@ const CONFIG_V1: ConfigurateurConfig = {
       surface: 20,
       emprise: "6,65 × 3,60 m",
       typologie: "studio",
-      prixBaseTtc: 77900,
+      prixBaseTtc: 69900,
       urbanismeGenerique: "En général déclaration préalable",
       poidsTonnes: TRANSPORT.poids.one,
     },

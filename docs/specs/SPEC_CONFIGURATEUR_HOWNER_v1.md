@@ -110,8 +110,10 @@ La configuration est sauvegardée derrière un identifiant et reprenable pendant
 
 | Modèle | Surface | Emprise | Typologie | Prix |
 |---|---|---|---|---|
-| Arko One | 20 m² | 6,65 × 3,60 m | studio | **77 900 €** |
+| Arko One | 20 m² | 6,65 × 3,60 m | studio | **69 900 €** ¹ |
 | Arko Max | 40 m² | 4,00 × 11,00 m | T2 | **99 900 €** |
+
+> ¹ **Corrigé le 2026-08-22.** La spec portait 77 900 € ; le tarif de base voulu est **69 900 €** (arbitrage de Richard et Albert, ADR-029 § Amendement du 2026-08-22). Corrigé ici plutôt que laissé faux : ce fichier est lu comme la grille de référence, et une valeur périmée dans une source fait plus de dégâts qu'une correction datée.
 
 **Terrasse** — paliers uniquement, ne jamais afficher de prix au m²
 
@@ -357,7 +359,7 @@ Chaque email en version texte brut en plus du HTML. Domaine d'envoi authentifié
   "acompte_confirmation": { "taux": 30 },
   "modeles": [
     { "id": "one", "nom": "Arko One", "surface": 20, "emprise": "6,65 × 3,60 m",
-      "prix_base_ttc": 77900, "urbanisme_generique": "En général déclaration préalable" },
+      "prix_base_ttc": 69900, "urbanisme_generique": "En général déclaration préalable" },
     { "id": "max", "nom": "Arko Max", "surface": 40, "emprise": "4,00 × 11,00 m",
       "prix_base_ttc": 99900, "urbanisme_generique": "En général permis de construire" }
   ],

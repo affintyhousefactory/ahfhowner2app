@@ -177,15 +177,23 @@ export const PRICING = {
    Arko One = nouveau modèle 20 m². Les valeurs marquées TODO ARKO ONE
    sont des PLACEHOLDERS provisoires (en attente des vraies données
    métier) — jamais inventées comme définitives. base/area/total/ex
-   sont confirmés (77 900 € / 20 m² — grille §5 de la spec, ADR-029).
+   sont confirmés (69 900 € / 20 m² — ADR-029 § Amendement du 2026-08-22).
    Montants en env via fallback (ADR-003), jamais en dur ailleurs.
    ============================================================ */
 
 // Grille tarifaire Arko One (20 m²) — provisoire (TODO ARKO ONE).
-// ADR-029 : grille §5 de la spec configurateur v2 — Arko One 77 900 € TTC
-// (TVA 20 %, construction neuve). Remplace l'ancien 59 900 €.
+// Arko One **69 900 € TTC** (TVA 20 %, construction neuve) depuis le
+// 2026-08-22 — ADR-029 § Amendement du 2026-08-22, arbitrage de Richard et
+// Albert. Corrige le 77 900 € issu du §5 de la spec, qui n'avait jamais été
+// le tarif de base voulu. Historique : 59 900 € avant ADR-029.
+//
+// ⚠ `NEXT_PUBLIC_ARKO_ONE_BASE_EUR` n'est définie **dans aucun environnement
+// Vercel** : ce repli est la valeur réellement servie, en Preview comme en
+// production. ADR-003 prévoit l'inverse — la variable prime, le repli dépanne.
+// Tant qu'elle n'est pas posée, un prix ne peut pas être corrigé sans
+// redéploiement.
 const ONE_PRICING = {
-  base: Number(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR ?? 77900),
+  base: Number(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR ?? 69900),
   perM2: 2250, // TODO ARKO ONE : confirmer €/m²
   terrassePerM2: 300, // TODO ARKO ONE : confirmer
   delivery: {
