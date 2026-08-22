@@ -50,7 +50,7 @@ export function StickyCta() {
                   variant="mini"
                 />
                 <span className="hidden font-mono text-xs text-muted sm:block">
-                  votre Arko {eur(houseTotal)} · acompte{" "}
+                  votre Arko {eur(houseTotal)} · réservation{" "}
                   {BRAND.deposit.toLocaleString("fr-FR")} €
                 </span>
               </div>

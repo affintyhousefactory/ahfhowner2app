@@ -183,14 +183,22 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
             <dl className="space-y-2 text-sm">
               <Ligne label="Usage" valeur={c.usage?.label ?? null} />
               {c.quantite > 1 && <Ligne label="Nombre d'unités" valeur={String(c.quantite)} />}
+              {/* « Maison » → « Studio » le 2026-08-20 : le back-office est hors
+                  périmètre du contrôle vocabulaire, mais un conseiller qui lit
+                  « Maison » toute la journée finit par le dire au téléphone. */}
               <Ligne
-                label="Maison"
+                label="Studio"
                 valeur={c.modele ? `${c.modele.label} · ${c.modele.surface} m² · ${c.modele.emprise}` : null}
               />
               <Ligne
-                label="Ambiance"
+                label="Bardage"
                 valeur={c.ambiance?.label ?? null}
                 pastille={c.ambiance?.teinte}
+              />
+              <Ligne
+                label="Ambiance intérieure"
+                valeur={c.ambianceInterieure?.label ?? null}
+                pastille={c.ambianceInterieure?.teinte}
               />
               <Ligne label="Terrasse" valeur={c.terrasse?.label ?? null} />
             </dl>

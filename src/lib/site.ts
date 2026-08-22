@@ -9,6 +9,35 @@
 
 import { FEATURES } from "@/lib/features";
 
+/**
+ * Montant lu dans l'environnement, avec repli sûr.
+ *
+ * `Number(process.env.X ?? repli)` a un angle mort : `??` ne se déclenche que
+ * sur `null`/`undefined`. Une variable **définie mais vide** — une valeur
+ * effacée dans l'interface Vercel, un espace, un « 69 900 » saisi avec son
+ * séparateur — passe la garde et `Number("")` vaut **0**. Le site afficherait
+ * un studio de jardin à 0 €, sans rien casser qui se voie au déploiement.
+ *
+ * Le risque est né le 2026-08-22 avec la pose des variables : tant qu'elles
+ * n'existaient pas, le repli servait toujours. Maintenant qu'elles existent,
+ * elles peuvent être mal renseignées.
+ *
+ * D'où cette lecture : vide, non numérique ou négatif ⇒ on retombe sur le
+ * repli et on le dit dans la console du build. Zéro reste refusé pour un
+ * montant : aucun de ceux que nous lisons ici n'a de raison de valoir zéro.
+ */
+function montantEnv(brut: string | undefined, repli: number, nom: string): number {
+  if (brut == null || brut.trim() === "") return repli;
+  const n = Number(brut.replace(/\s|\u202f|\u00a0/g, "").replace(",", "."));
+  if (!Number.isFinite(n) || n <= 0) {
+    console.warn(
+      `[env] ${nom} = ${JSON.stringify(brut)} n'est pas un montant exploitable — repli sur ${repli}.`,
+    );
+    return repli;
+  }
+  return n;
+}
+
 // URL canonique de prod — source unique pour metadataBase, sitemap, robots,
 // canonical (ADR-018). Surchargeable par env pour les previews Vercel.
 export const SITE_URL =
@@ -17,11 +46,14 @@ export const SITE_URL =
 // Réservation : jamais en dur — lue depuis l'environnement.
 // Fallback passé de 5 000 à 2 000 € le 2026-08-02 (§7 de la spec, ADR-029) —
 // le configurateur v2 affichait déjà 2 000 € et la page d'accueil 5 000 €.
-// `NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR` n'est défini dans aucun scope Vercel
-// (vérifié le 2026-08-02) : c'est bien ce fallback qui sert en production.
-// La définir un jour la ferait gagner sur toutes les surfaces d'un coup.
-const DEPOSIT_EUR = Number(
-  process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR ?? 2000,
+// `NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR` est posée en Preview et en production
+// depuis le 2026-08-22 : c'est elle qui sert, ce littéral n'est plus qu'un
+// repli. Le montant se change **sans toucher au code** — mais un redéploiement
+// reste nécessaire, Next inlinant les `NEXT_PUBLIC_*` au build (ADR-003).
+const DEPOSIT_EUR = montantEnv(
+  process.env.NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR,
+  2000,
+  "NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR",
 );
 
 /** Montant de réservation formaté, pour les textes éditoriaux (FAQ, réassurance). */
@@ -34,6 +66,54 @@ const DEPOT = `${DEPOSIT_EUR.toLocaleString("fr-FR")} €`;
 // constante est le pool public ET celui du configurateur (`serie.unites`) :
 // les deux se lisent dans le même parcours, ils ne peuvent pas diverger.
 export const SERIE_TOTAL = 6;
+
+/**
+ * Échéancier de paiement — §9.3 des CGV du 2026-08-22.
+ *
+ * Cinq étapes, adaptées à la fabrication hors-site : 40 % au lancement (moins
+ * la réservation déjà versée), 20 % au hors d'eau / hors d'air en atelier,
+ * 35 % à la sortie d'atelier, 5 % à la livraison. Remplace l'échéancier en
+ * quatre temps 40 / 50 / 10, qui ne comportait aucun jalon technique entre le
+ * lancement et la sortie d'atelier.
+ *
+ * **Déclaré ici, et nulle part ailleurs.** Le même échéancier se lit dans la
+ * FAQ, dans les CGV et dans le devis ; l'écrire trois fois garantit qu'un jour
+ * les trois diffèrent. Les CGV le tiennent de leur markdown source
+ * (`docs/legal/`), qui fait foi ; ce tableau en est le reflet éditorial, et
+ * `npm run check:echeancier` vérifie qu'ils concordent.
+ */
+export const ECHEANCIER = [
+  {
+    etape: "Réservation commerciale",
+    part: 0,
+    montant: DEPOT,
+    detail: `Versement initial de ${DEPOT}, intégralement remboursable tant que le contrat n\u2019est pas signé. Il bloque l\u2019un des ${SERIE_TOTAL} numéros de la Série 01 et s\u2019impute sur l\u2019étape suivante.`,
+  },
+  {
+    etape: "Lancement de fabrication",
+    part: 40,
+    montant: "40 % du montant total",
+    detail: `Facture d\u2019étape émise après signature du contrat, validation des prérequis et confirmation du lancement — déduction faite des ${DEPOT} déjà versés.`,
+  },
+  {
+    etape: "Hors d\u2019eau / hors d\u2019air en atelier",
+    part: 20,
+    montant: "20 % du montant total",
+    detail: "Facture d\u2019étape émise lorsque l\u2019avancement technique correspondant est atteint en atelier.",
+  },
+  {
+    etape: "Sortie d\u2019atelier",
+    part: 35,
+    montant: "35 % du montant total",
+    detail: "Facture d\u2019étape émise lorsque votre studio de jardin ARKO est prêt à être livré.",
+  },
+  {
+    etape: "Livraison",
+    part: 5,
+    montant: "5 % du montant total",
+    detail: "Solde facturé à la livraison, selon les conditions prévues au contrat.",
+  },
+] as const;
 
 // Nombre de séries ouvertes (une par modèle). Le compteur de l'en-tête affiche
 // les deux nombres : le total seul laissait croire à une seule série.
@@ -136,7 +216,11 @@ export const PROMISE =
 // Fallback env/constante jusqu'à implémentation du chargement DB (Phase 4).
 export const TRANSPORT = {
   tarifEurTonneKm: 0.24,   // €/tonne/km — DB: transport.tarif_eur_tonne_km
-  grutageEur: Number(process.env.NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR ?? 1440),
+  grutageEur: montantEnv(
+    process.env.NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR,
+    1440,
+    "NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR",
+  ),
   roadFactor: 1.3,          // haversine → distance route (×1.3)
   usine: { lat: 43.4933, lon: -1.4748 }, // Bayonne — à affiner avec adresse exacte atelier
   poids: { one: 6, max: 9 } as Record<string, number>, // tonnes par produit
@@ -146,13 +230,17 @@ export const TRANSPORT = {
 // ADR-029 : grille §5 de la spec configurateur v2 — Arko Max 99 900 € TTC
 // (TVA 20 %, construction neuve). Remplace l'ancien 89 900 €.
 export const PRICING = {
-  base: Number(process.env.NEXT_PUBLIC_ARKO_BASE_EUR ?? 99900),
+  base: montantEnv(process.env.NEXT_PUBLIC_ARKO_BASE_EUR, 99900, "NEXT_PUBLIC_ARKO_BASE_EUR"),
   perM2: 2250,
   terrassePerM2: 300,
   delivery: {
     grutage: TRANSPORT.grutageEur,
     // perKm = poids Arko Max × tarif/tonne/km (DB: transport.poids_arko_max_tonnes × tarif_eur_tonne_km)
-    perKm: Number(process.env.NEXT_PUBLIC_DELIVERY_PER_KM_EUR ?? +(TRANSPORT.poids.max * TRANSPORT.tarifEurTonneKm).toFixed(4)),
+    perKm: montantEnv(
+      process.env.NEXT_PUBLIC_DELIVERY_PER_KM_EUR,
+      +(TRANSPORT.poids.max * TRANSPORT.tarifEurTonneKm).toFixed(4),
+      "NEXT_PUBLIC_DELIVERY_PER_KM_EUR",
+    ),
     origin: "Bayonne",
   },
   options: [
@@ -177,21 +265,33 @@ export const PRICING = {
    Arko One = nouveau modèle 20 m². Les valeurs marquées TODO ARKO ONE
    sont des PLACEHOLDERS provisoires (en attente des vraies données
    métier) — jamais inventées comme définitives. base/area/total/ex
-   sont confirmés (77 900 € / 20 m² — grille §5 de la spec, ADR-029).
+   sont confirmés (69 900 € / 20 m² — ADR-029 § Amendement du 2026-08-22).
    Montants en env via fallback (ADR-003), jamais en dur ailleurs.
    ============================================================ */
 
 // Grille tarifaire Arko One (20 m²) — provisoire (TODO ARKO ONE).
-// ADR-029 : grille §5 de la spec configurateur v2 — Arko One 77 900 € TTC
-// (TVA 20 %, construction neuve). Remplace l'ancien 59 900 €.
+// Arko One **69 900 € TTC** (TVA 20 %, construction neuve) depuis le
+// 2026-08-22 — ADR-029 § Amendement du 2026-08-22, arbitrage de Richard et
+// Albert. Corrige le 77 900 € issu du §5 de la spec, qui n'avait jamais été
+// le tarif de base voulu. Historique : 59 900 € avant ADR-029.
+//
+// `NEXT_PUBLIC_ARKO_ONE_BASE_EUR` est posée en Preview et en production depuis
+// le 2026-08-22 (ADR-003 enfin appliqué) : elle prime, ce littéral dépanne.
+// Un prix se corrige donc sans commit ni PR — un redéploiement suffit, Next
+// inlinant les `NEXT_PUBLIC_*` au build. Une valeur mal saisie ne doit pas
+// pour autant afficher 0 €, d'où `montantEnv`.
 const ONE_PRICING = {
-  base: Number(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR ?? 77900),
+  base: montantEnv(process.env.NEXT_PUBLIC_ARKO_ONE_BASE_EUR, 69900, "NEXT_PUBLIC_ARKO_ONE_BASE_EUR"),
   perM2: 2250, // TODO ARKO ONE : confirmer €/m²
   terrassePerM2: 300, // TODO ARKO ONE : confirmer
   delivery: {
     grutage: TRANSPORT.grutageEur,
     // perKm = poids Arko One × tarif/tonne/km (DB: transport.poids_arko_one_tonnes × tarif_eur_tonne_km)
-    perKm: Number(process.env.NEXT_PUBLIC_ARKO_ONE_DELIVERY_PER_KM_EUR ?? +(TRANSPORT.poids.one * TRANSPORT.tarifEurTonneKm).toFixed(4)),
+    perKm: montantEnv(
+      process.env.NEXT_PUBLIC_ARKO_ONE_DELIVERY_PER_KM_EUR,
+      +(TRANSPORT.poids.one * TRANSPORT.tarifEurTonneKm).toFixed(4),
+      "NEXT_PUBLIC_ARKO_ONE_DELIVERY_PER_KM_EUR",
+    ),
     origin: "Bayonne",
   }, // TODO ARKO ONE : confirmer poids exact
   options: PRICING.options, // TODO ARKO ONE : grille options propre à confirmer
@@ -226,6 +326,10 @@ export const PRODUCTS = {
        qu'ici. */
     video: "/assets/arko/video/turntable.mp4",
     poster: "/assets/arko/video/turntable-poster.jpg",
+    /* Rendu détouré, servi dans le méga-menu et le menu mobile. Sur fond
+       transparent : le volume se pose sur la carte sans y découper un
+       rectangle, et la même image sert quel que soit le fond. */
+    vignette: "/assets/arko/vignettes/one.avif",
     scrub: "/assets/arko/video/film-scrub.mp4",
     scrubPoster: "/assets/arko/video/film-scrub-poster.jpg",
     placeholderMedia: true, // ⚠ assets provisoires (= Arko Max) — à remplacer
@@ -264,6 +368,7 @@ export const PRODUCTS = {
        partent qu'à la lecture. */
     video: "/assets/arko/video/turntable-max.mp4",
     poster: "/assets/arko/video/turntable-max-poster.jpg",
+    vignette: "/assets/arko/vignettes/max.avif",
     scrub: "/assets/arko/video/film-scrub.mp4",
     scrubPoster: "/assets/arko/video/film-scrub-poster.jpg",
     placeholderMedia: false,
@@ -346,15 +451,16 @@ export const FAQ: { q: string; a: string | string[] }[] = [
     q: "Comment se passe le paiement ?",
     a: [
       "Après un premier échange téléphonique, nous vous adressons par email une proposition commerciale comprenant le modèle ARKO retenu, les principales caractéristiques techniques, les options choisies et une estimation du calendrier de fabrication, de livraison et d'installation.",
-      `Pour confirmer votre intérêt et réserver votre projet, un versement initial de ${DEPOT} vous est demandé. Il bloque l\u2019un des 12 numéros de la Série 01.`,
+      `Pour confirmer votre intérêt et réserver votre projet, un versement initial de ${DEPOT} vous est demandé. Il bloque l\u2019un des ${SERIE_TOTAL} numéros de la Série 01.`,
       "Ce versement est intégralement remboursable tant que le contrat de fabrication, livraison et installation n'a pas été signé. Vous pouvez donc renoncer à votre projet avant cette signature, sans avoir à justifier votre décision.",
       `Une fois le contrat signé, ce versement de ${DEPOT} est déduit du prix total de votre studio de jardin ARKO et intégré à l\u2019échéancier de paiement.`,
-      "Le règlement s'effectue ensuite en plusieurs étapes, adaptées à la fabrication en atelier :",
-      "Étape 0 — Premier échange et proposition commerciale\nNous échangeons avec vous sur votre projet, votre terrain, le modèle ARKO envisagé et vos contraintes techniques. Nous vous envoyons ensuite un devis accompagné du portfolio produit correspondant.",
-      `Étape 1 — Réservation du projet\nVous validez le devis de réservation et l\u2019échéancier prévisionnel. Une facture de réservation de ${DEPOT} vous est adressée, réglable par virement bancaire. Aucun paiement n\u2019est encaissé depuis le site : le lien de règlement vous parvient après l\u2019échange de qualification.`,
-      `Étape 2 — Lancement de la fabrication\nAprès signature du contrat de fabrication, livraison et installation, validation des prérequis techniques et confirmation écrite de votre part, la fabrication peut être lancée. Une facture d\u2019étape correspondant à 40 % du montant total de la commande est alors émise, déduction faite des ${DEPOT} déjà versés.`,
-      "Étape 3 — Sortie d'atelier\nLorsque votre studio de jardin ARKO est fabriqué et prêt à être livré, une nouvelle facture d'étape correspondant à 50 % du montant total de la commande est émise.",
-      "Étape 4 — Livraison, installation et réception\nLe solde de 10 % est facturé lors de la livraison et de l'installation sur site, selon les conditions prévues au contrat. La réception donne lieu à l'établissement d'un procès-verbal de réception.",
+      "Le règlement s'effectue ensuite en cinq étapes, adaptées à la fabrication hors-site (§9.3 des CGV) :",
+      /* Dérivé d'`ECHEANCIER` : la FAQ ne réécrit pas les pourcentages, elle les
+         lit. Une correction des CGV se propage ici sans qu'on y pense. */
+      ...ECHEANCIER.map(
+        (e, n) => `Étape ${n + 1} — ${e.etape}\n${e.detail}`,
+      ),
+      "Aucun paiement n'est encaissé depuis le site : le lien de règlement vous parvient après l'échange de qualification. La réception donne lieu à l'établissement d'un procès-verbal.",
       "Il est précisé que l'acquisition éventuelle du terrain relève exclusivement du client et donne lieu, le cas échéant, à la signature d'un acte notarié établi en bonne et due forme.",
       "Affinity House Factory n'intervient pas dans l'opération d'achat du terrain, ni dans les formalités juridiques, administratives ou notariales qui y sont attachées.",
       // Mention des mandataires partenaires — retirée tant que le dispositif

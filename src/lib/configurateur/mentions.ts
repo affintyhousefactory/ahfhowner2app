@@ -25,6 +25,16 @@ export const MENTIONS = {
       "Visuel d'ambiance non contractuel. Teintes, matériaux et mobilier présentés sont indicatifs et peuvent varier selon les approvisionnements. Le mobilier et la décoration ne sont pas inclus. Les références exactes sont arrêtées au dossier de personnalisation, après réservation.",
   },
 
+  /* Ajoutée le 2026-08-20 avec la rubrique d'ambiance intérieure. Distincte de
+     `ambiance`, qui porte sur le bardage : les rendus intérieurs montrent du
+     mobilier et des équipements dont l'inclusion dépend de la configuration —
+     la réserve doit donc être plus explicite sur ce point précis. */
+  ambianceInterieure: {
+    courte: "Rendus non contractuels — aménagement selon configuration.",
+    detail:
+      "Rendus intérieurs non contractuels. Finitions, teintes, équipements et aménagements présentés sont indicatifs : ils dépendent de la configuration retenue et peuvent varier selon les approvisionnements. Le mobilier et la décoration ne sont pas inclus. Les références exactes sont arrêtées au dossier de personnalisation, après réservation.",
+  },
+
   option: {
     courte: "Options fournies et posées — hors travaux de terrain.",
     detail:
@@ -70,16 +80,66 @@ export const URBANISME_GENERIQUE =
 export const DEVIS_TEXTE = {
   intro:
     "Après votre échange avec notre conseiller, vous recevrez un devis détaillé mentionnant un échéancier et une demande de paiement de réservation validant votre exclusivité.",
-  ligne: "Acompte de réservation Arko — remboursable, sans engagement de construction",
+  /* « Acompte » → « versement initial » le 2026-08-22 : le §8.3 des CGV
+     validées qualifie cette somme de versement initial de réservation,
+     intégralement remboursable, qui « ne constitue pas un engagement
+     définitif ». Un acompte, lui, engage fermement (art. 1590 du Code civil).
+     Le §10 de la spec impose de ne pas reformuler ces textes ; ici la
+     reformulation est imposée par un document opposable, et actée à
+     l'ADR-015 § Amendement du 2026-08-22. */
+  ligne: "Versement initial de réservation Arko — intégralement remboursable avant signature du contrat",
   conditions: "Conditions précisées dans les",
 } as const;
 
-/** Écran 6 — socle Signature (§4). ⚠ Contenu à valider par Howner (§17.2). */
+/**
+ * Un poste du socle. `href` et `note` sont réservés aux termes qui appellent
+ * une explication : le sigle LSF ne dit rien à qui le lit pour la première
+ * fois, et c'est précisément le poste le plus structurant du prix.
+ */
+export type PosteSocle = {
+  texte: string;
+  href?: string;
+  /** Développé du terme, affiché en exposant au survol et au clavier. */
+  note?: string;
+};
+
+/**
+ * Écran de réservation — ce que le prix couvre, et ce qu'il ne couvre pas.
+ * ⚠ Contenu à valider par Howner (§17.2).
+ *
+ * Structuré en postes plutôt qu'en une phrase depuis le 2026-08-20 : l'un
+ * d'eux porte un lien, et découper une chaîne pour y glisser un lien aurait
+ * mis la mise en forme dans la donnée.
+ */
 export const SOCLE = {
-  compris:
-    "Ossature, isolation biosourcée, bardage, menuiseries triple vitrage, chauffage, électricité, plomberie, cuisine et salle d'eau, fondations sur pieux vissés, fabrication, transport, levage et pose.",
-  charge:
-    "Terrassement, raccordements aux réseaux, étude de sol si exigée, aménagement des accès camion et grue si nécessaire, mobilier et décoration.",
+  compris: [
+    {
+      texte: "ossature LSF",
+      href: "/a-propos#acier-leger",
+      note: "technologie LSF, Light Steel Frame",
+    },
+    { texte: "isolation biosourcée" },
+    { texte: "bardage joint debout" },
+    { texte: "menuiseries double vitrage aluminium" },
+    { texte: "chauffage électrique" },
+    { texte: "électricité" },
+    { texte: "plomberie" },
+    { texte: "cuisine et salle d'eau" },
+    { texte: "fondations sur pieux vissés" },
+    { texte: "fabrication, transport, levage et pose" },
+  ] as readonly PosteSocle[],
+  /* « À votre charge » → « Non inclus » (2026-08-20) : la première formule
+     désignait une dette du client avant même le devis. La seconde dit la même
+     chose sans la faire porter à personne. */
+  nonInclus: [
+    { texte: "terrassement" },
+    { texte: "travaux d'aménagement VRD (voirie et réseaux divers)" },
+    { texte: "raccordements aux réseaux" },
+    { texte: "assainissement non collectif — micro-station" },
+    { texte: "étude de sol si exigée" },
+    { texte: "aménagement des accès camion et grue si nécessaire" },
+    { texte: "mobilier et décoration" },
+  ] as readonly PosteSocle[],
 } as const;
 
 /** Opt-in email — texte repris de `ContactForm.tsx`, inchangé (ADR-026). */

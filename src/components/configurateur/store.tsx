@@ -30,6 +30,7 @@ import {
   transportEur,
   transportPerKm,
   type ConfigurateurConfig,
+  type VueInterieure,
   type ModeleId,
   type Option,
   type Palier,
@@ -44,12 +45,79 @@ import {
  */
 export const SECTIONS = [
   { n: 1, cle: "module", titre: "Le studio" },
-  { n: 2, cle: "ambiance", titre: "Ambiance" },
-  { n: 3, cle: "terrasse", titre: "Terrasse" },
-  { n: 4, cle: "options", titre: "Options" },
-  { n: 5, cle: "terrain", titre: "Votre situation terrain" },
-  { n: 6, cle: "reservation", titre: "Réserver un numéro" },
+  /* « Ambiance » → « Bardage extérieur » le 2026-08-20 : le libellé désignait
+     mal une rubrique qui ne porte que la peau extérieure, et il devenait
+     ambigu dès lors qu'une ambiance intérieure la suit immédiatement. */
+  { n: 2, cle: "ambiance", titre: "Bardage extérieur" },
+  { n: 3, cle: "interieur", titre: "Ambiance intérieure" },
+  { n: 4, cle: "terrasse", titre: "Terrasse" },
+  { n: 5, cle: "options", titre: "Options" },
+  { n: 6, cle: "terrain", titre: "Votre situation terrain" },
+  /* L'adresse quitte la section « situation terrain » le 2026-08-20 : la
+     pré-analyse y déployait zonage, distance, transport et avertissements sous
+     le choix d'implantation, et l'ensemble devenait illisible. Deux questions
+     distinctes — où l'on implante, puis où se trouve le terrain — méritent deux
+     sections. */
+  { n: 7, cle: "adresse", titre: "Adresse du terrain" },
+  { n: 8, cle: "reservation", titre: "Réserver un numéro" },
+  /* Les coordonnées quittent la réservation le 2026-08-20 : choisir un numéro
+     et se présenter sont deux gestes différents, et le récapitulatif de prix
+     qui les séparait obligeait à le traverser pour passer de l'un à l'autre.
+     Ce récapitulatif vit désormais au pied du parcours, où il explique le total
+     affiché juste à côté. */
+  { n: 9, cle: "coordonnees", titre: "Vos coordonnées" },
 ] as const;
+
+/** Verdict de la pré-analyse. `null` = aucune adresse analysée. */
+export type Eligibilite = "ok" | "ineligible" | null;
+
+export type Contact = {
+  prenom: string;
+  nom: string;
+  tel: string;
+  email: string;
+  /* Adresse postale du contact — celle du devis, pas nécessairement celle du
+     terrain. Les deux coïncident souvent, d'où la case de report. */
+  adresse: string;
+  cp: string;
+  ville: string;
+};
+
+/**
+ * Un élément manquant : son libellé pour l'utilisateur, et l'identifiant du
+ * champ à mettre au premier plan. `ancre` sert au focus — un avertissement qui
+ * dit ce qui manque sans emmener au bon endroit fait deviner l'utilisateur.
+ */
+export type Manque = {
+  cle:
+    | "numero"
+    | "prenom"
+    | "nom"
+    | "adresse_postale"
+    | "cp"
+    | "ville"
+    | "tel"
+    | "email"
+    | "cgv";
+  libelle: string;
+  ancre: string;
+};
+
+/**
+ * État de la soumission (ADR-031).
+ *
+ * `partiel` = la demande est arrivée mais tout n'a pas été enregistré. On le
+ * distingue d'`envoye` plutôt que de l'y fondre : c'est précisément la
+ * confusion qui a rendu une base en pause invisible pendant des semaines
+ * (`shared/lib/panne.ts`).
+ */
+export type EtatEnvoi =
+  | { phase: "repos" }
+  | { phase: "envoi" }
+  | { phase: "envoye" }
+  | { phase: "partiel"; persisted: boolean; notified: boolean }
+  | { phase: "conflit" }
+  | { phase: "erreur"; message: string };
 
 export type PreAnalyse = {
   adresse: string;
@@ -74,6 +142,14 @@ type Ctx = {
   setModele: (m: ModeleId) => void;
   ambiance: string;
   setAmbiance: (a: string) => void;
+  ambianceInterieure: string;
+  setAmbianceInterieure: (a: string) => void;
+  /** Vues intérieures du modèle courant, pour l'ambiance sélectionnée. */
+  vuesInterieures: VueInterieure[];
+  /** Toutes les ambiances intérieures, vues déjà résolues pour ce modèle. */
+  interieurs: { id: string; nom: string; vues: VueInterieure[] }[];
+  /** Bardages, rendu déjà résolu pour ce modèle. */
+  bardages: { id: string; nom: string; teinte: string; visuel: string }[];
   terrasse: PalierId;
   setTerrasse: (t: PalierId) => void;
   options: string[];
@@ -81,6 +157,57 @@ type Ctx = {
 
   preAnalyse: PreAnalyse | null;
   setPreAnalyse: (p: PreAnalyse | null) => void;
+  /**
+   * Verdict d'éligibilité du terrain, calculé par la pré-analyse.
+   * `null` tant qu'aucune adresse n'a été analysée. `"ineligible"` n'interdit
+   * pas de réserver : il change la nature de la réservation.
+   */
+  eligibilite: Eligibilite;
+  /**
+   * `true` dès qu'une parcelle a été analysée, quel que soit le verdict.
+   *
+   * Ne pas l'avoir testée n'interdit rien non plus — la réservation part
+   * « sous condition ». Le parcours qualifie, il ne filtre pas.
+   */
+  terrainTeste: boolean;
+  setEligibilite: (e: Eligibilite) => void;
+
+  contact: Contact;
+  setContact: (champ: keyof Contact, valeur: string) => void;
+  optin: boolean;
+  setOptin: (v: boolean) => void;
+  cgv: boolean;
+  setCgv: (v: boolean) => void;
+
+  /**
+   * Ce qui manque encore pour réserver, dans l'ordre où le parcours le
+   * demande. Vide = la demande peut partir.
+   *
+   * Calculé ici et non dans la barre de prix : c'est une règle métier, pas une
+   * question d'affichage. La barre s'en sert pour son libellé et son motif, la
+   * section pour ses messages — une seule source, deux lectures.
+   */
+  manques: Manque[];
+
+  /**
+   * Où en est la demande.
+   *
+   * `conflit` n'est pas une erreur : c'est une course perdue sur un numéro que
+   * quelqu'un vient de confirmer. Elle a sa propre réponse — rechoisir — et ne
+   * doit ni se confondre avec une panne, ni faire perdre la configuration.
+   */
+  envoi: EtatEnvoi;
+  soumettre: () => Promise<void>;
+  /**
+   * Jeton Turnstile, posé par le widget de la section coordonnées.
+   *
+   * Il vit dans le store et non dans la section parce que c'est la soumission
+   * qui en a besoin, et qu'elle part du pied du parcours — deux composants
+   * éloignés pour une même valeur.
+   */
+  setCaptchaToken: (t: string | null) => void;
+  /** Numéros encore libres, renvoyés par le serveur en cas de conflit. */
+  numerosLibres: number[];
 
   numero: number | null;
   setNumero: (n: number | null) => void;
@@ -113,10 +240,33 @@ export function ConfigurateurProvider({
   const [quantite, setQuantite] = useState(1);
   const [modele, setModeleState] = useState<ModeleId>(modeleInitial);
   const [ambiance, setAmbiance] = useState<string>(cfg.ambiances[0].id);
+  const [ambianceInterieure, setAmbianceInterieure] = useState<string>(
+    cfg.ambiancesInterieures[0].id,
+  );
   const [terrasse, setTerrasse] = useState<PalierId>("sans");
   const [options, setOptions] = useState<string[]>([]);
   const [preAnalyse, setPreAnalyse] = useState<PreAnalyse | null>(null);
   const [numero, setNumero] = useState<number | null>(null);
+  const [eligibilite, setEligibilite] = useState<Eligibilite>(null);
+  const [contact, setContactState] = useState<Contact>({
+    prenom: "",
+    nom: "",
+    tel: "",
+    email: "",
+    adresse: "",
+    cp: "",
+    ville: "",
+  });
+  const [optin, setOptin] = useState(false);
+  const [cgv, setCgv] = useState(false); // jamais pré-cochée (§7)
+
+  const setContact = useCallback((champ: keyof Contact, valeur: string) => {
+    setContactState((prev) => ({ ...prev, [champ]: valeur }));
+  }, []);
+
+  const [envoi, setEnvoi] = useState<EtatEnvoi>({ phase: "repos" });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [numerosLibres, setNumerosLibres] = useState<number[]>([]);
 
   /* Changer de studio purge les options devenues incompatibles : le poêle
      n'existe pas sur l'Arko One, et une option fantôme fausserait le total. */
@@ -133,20 +283,148 @@ export function ConfigurateurProvider({
     setOptions((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }, []);
 
-  const value = useMemo<Ctx>(() => {
-    const m = getModele(cfg, modele);
+  /* Prix isolés dans leur propre mémo : l'affichage et la soumission en ont
+     besoin tous les deux, et les recalculer de chaque côté aurait fait deux
+     chemins pour un même nombre. Un mémo dédié plutôt qu'un calcul nu, sinon
+     les valeurs changent d'identité à chaque rendu et emportent avec elles la
+     mémoïsation du contexte entier. */
+  const prix = useMemo(() => {
+    const modeleCourant = getModele(cfg, modele);
     const paliers = paliersPourModele(cfg, modele);
     const optionsDisponibles = optionsPourModele(cfg, modele);
-
-    const prixBase = m.prixBaseTtc;
+    const prixBase = modeleCourant.prixBaseTtc;
     const prixTerrasse = paliers.find((p) => p.id === terrasse)?.prixTtc ?? 0;
     const prixOptions = optionsDisponibles
       .filter((o) => options.includes(o.id))
       .reduce((s, o) => s + prixOption(o, modele), 0);
-    const transport = transportEur(preAnalyse?.distanceKm ?? null, m);
+    const transport = transportEur(preAnalyse?.distanceKm ?? null, modeleCourant);
+    return {
+      modeleCourant,
+      paliers,
+      optionsDisponibles,
+      prixBase,
+      prixTerrasse,
+      prixOptions,
+      transport,
+      total: prixBase + prixTerrasse + prixOptions + (transport ?? 0),
+    };
+  }, [cfg, modele, terrasse, options, preAnalyse]);
 
+  /**
+   * Envoie la demande de numéro (ADR-031).
+   *
+   * Les prix ne sont pas transmis comme vérité : le serveur les recalcule
+   * depuis sa propre grille. `totalAffiche` ne part que pour être comparé —
+   * un désaccord signale une grille qui a bougé pendant la session.
+   *
+   * L'analyse de terrain est relue depuis `sessionStorage` au moment de
+   * l'envoi plutôt que recopiée dans l'état : c'est là qu'elle est complète,
+   * et le store n'en garde que ce dont le parcours a besoin.
+   */
+  const soumettre = useCallback(
+    async () => {
+      setEnvoi({ phase: "envoi" });
+      let pluData: unknown = null;
+      try {
+        const brut = sessionStorage.getItem("plu_result");
+        if (brut) pluData = JSON.parse(brut);
+      } catch {
+        /* résultat illisible : la demande part sans, plutôt que de ne pas partir */
+      }
+
+      try {
+        const res = await fetch("/api/configurateur/reservation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contact,
+            numero,
+            modele,
+            usage,
+            quantite,
+            ambiance,
+            ambianceInterieure,
+            terrasse,
+            options,
+            totalAffiche: prix.total,
+            transport: prix.transport,
+            distanceKm: preAnalyse?.distanceKm ?? null,
+            pluConsent: Boolean(pluData),
+            pluData,
+            optIn: optin,
+            captchaToken: captchaToken ?? undefined,
+          }),
+        });
+
+        if (res.status === 409) {
+          const data = (await res.json()) as { disponibles?: number[] };
+          setNumerosLibres(data.disponibles ?? []);
+          setNumero(null);
+          setEnvoi({ phase: "conflit" });
+          return;
+        }
+        if (!res.ok) {
+          /* Le motif compte : un échec de vérification anti-robot ne se
+             corrige pas comme une panne, et dire « réessayez » à quelqu'un
+             dont le jeton a expiré est la seule chose utile à dire. */
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          const message =
+            data.error === "captcha_required" || data.error === "captcha_failed"
+              ? "La vérification anti-robot n'a pas abouti. Rechargez la page et réessayez."
+              : data.error === "invalid_email"
+                ? "L'adresse email ne semble pas valide."
+                : "La demande n'a pas pu être envoyée.";
+          setEnvoi({ phase: "erreur", message });
+          return;
+        }
+
+        const data = (await res.json()) as { persisted: boolean; notified: boolean };
+        /* Tout n'a pas forcément abouti. On le dit plutôt que d'afficher un
+           succès plein : AHF sera prévenu par le journal, le visiteur mérite
+           de savoir que sa demande demande un rappel. */
+        setEnvoi(
+          data.persisted && data.notified
+            ? { phase: "envoye" }
+            : { phase: "partiel", persisted: data.persisted, notified: data.notified },
+        );
+      } catch {
+        setEnvoi({ phase: "erreur", message: "Connexion interrompue — réessayez." });
+      }
+    },
+    [contact, numero, modele, usage, quantite, ambiance, ambianceInterieure, terrasse, options, prix, preAnalyse, optin, captchaToken],
+  );
+
+  const value = useMemo<Ctx>(() => {
+    const { modeleCourant: m, paliers, optionsDisponibles, prixBase, prixTerrasse, prixOptions, transport, total } = prix;
     const usageDef = cfg.usages.find((u) => u.id === usage);
     const seuil = usageDef?.seuilDevisDedie;
+
+    /* Un email « valide » se vérifie côté serveur ; ici on ne fait que
+       distinguer une saisie commencée d'une saisie plausible, pour ne pas
+       laisser partir une demande injoignable. Le parcours ne doit pas se
+       transformer en contrôle de conformité. */
+    const emailPlausible = /.+@.+\..{2,}/.test(contact.email.trim());
+    /* Indicatif international compris : `PhoneInput` produit `+33…`. On exige
+       une longueur minimale, pas un format national. */
+    const telPlausible = contact.tel.replace(/\D/g, "").length >= 8;
+
+    const manques: Manque[] = [];
+    if (numero == null) manques.push({ cle: "numero", libelle: "choisir un numéro de série", ancre: "cfg-numeros" });
+    /* ⚠ Le test d'éligibilité du terrain **ne bloque pas** la réservation
+       (décision de Richard, 2026-08-20). Un visiteur qui ne connaît pas encore
+       sa parcelle, dont le terrain sort du référentiel, ou que la pré-analyse
+       ne sait pas traiter, doit pouvoir réserver et être rappelé — sans quoi
+       le parcours retient un prospect au lieu de le qualifier. Terrain non
+       testé ou jugé non éligible mènent au même endroit : une réservation
+       « sous condition », dont le libellé du bouton dit la nature. */
+    if (!contact.prenom.trim()) manques.push({ cle: "prenom", libelle: "votre prénom", ancre: "cfg-prenom" });
+    if (!contact.nom.trim()) manques.push({ cle: "nom", libelle: "votre nom", ancre: "cfg-nom" });
+    if (!contact.adresse.trim()) manques.push({ cle: "adresse_postale", libelle: "votre adresse", ancre: "cfg-adresse-postale" });
+    if (!/^\d{5}$/.test(contact.cp.trim())) manques.push({ cle: "cp", libelle: "votre code postal", ancre: "cfg-cp" });
+    if (!contact.ville.trim()) manques.push({ cle: "ville", libelle: "votre ville", ancre: "cfg-ville" });
+    if (!telPlausible) manques.push({ cle: "tel", libelle: "votre téléphone", ancre: "cfg-tel" });
+    if (!emailPlausible) manques.push({ cle: "email", libelle: "votre email", ancre: "cfg-email" });
+    if (!cgv) manques.push({ cle: "cgv", libelle: "accepter les CGV", ancre: "cfg-cgv" });
 
     return {
       cfg,
@@ -160,12 +438,44 @@ export function ConfigurateurProvider({
       setModele,
       ambiance,
       setAmbiance,
+      ambianceInterieure,
+      setAmbianceInterieure,
+      /* Résolu ici et non dans la scène : le modèle décide des vues
+         disponibles (l'Arko Max a un salon, l'Arko One non), et un composant
+         qui irait les chercher lui-même finirait par indexer en dur. */
+      vuesInterieures:
+        cfg.ambiancesInterieures.find((a) => a.id === ambianceInterieure)?.vues[modele] ?? [],
+      bardages: cfg.ambiances.map((a) => ({
+        id: a.id,
+        nom: a.nom,
+        teinte: a.teinte,
+        visuel: a.visuel[modele],
+      })),
+      interieurs: cfg.ambiancesInterieures.map((a) => ({
+        id: a.id,
+        nom: a.nom,
+        vues: a.vues[modele] ?? [],
+      })),
       terrasse,
       setTerrasse,
       options,
       toggleOption,
       preAnalyse,
       setPreAnalyse,
+      terrainTeste: Boolean(preAnalyse?.adresse || preAnalyse?.parcelle),
+      eligibilite,
+      setEligibilite,
+      contact,
+      setContact,
+      optin,
+      setOptin,
+      cgv,
+      setCgv,
+      manques,
+      envoi,
+      soumettre,
+      setCaptchaToken,
+      numerosLibres,
       numero,
       setNumero,
       paliers,
@@ -177,9 +487,9 @@ export function ConfigurateurProvider({
       prixOptions,
       transport,
       transportDetailPerKm: transportPerKm(m),
-      total: prixBase + prixTerrasse + prixOptions + (transport ?? 0),
+      total,
     };
-  }, [cfg, usage, quantite, modele, setModele, ambiance, terrasse, options, toggleOption, preAnalyse, numero]);
+  }, [cfg, usage, quantite, modele, setModele, ambiance, ambianceInterieure, terrasse, options, toggleOption, preAnalyse, numero, eligibilite, contact, setContact, optin, cgv, envoi, soumettre, numerosLibres, prix]);
 
   return <ConfigCtx.Provider value={value}>{children}</ConfigCtx.Provider>;
 }

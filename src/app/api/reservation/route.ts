@@ -109,41 +109,53 @@ export async function POST(req: NextRequest) {
     ? (TYPEZONE_LABELS[plu.typezone.toUpperCase()] ?? plu.typezone)
     : "";
 
+  /* ⚠ Aligné sur les paramètres du template `BREVO_TEMPLATE_RECAP`, mis à jour
+     par Richard le 2026-08-22 pour le configurateur v2 — **un seul template
+     pour les deux tunnels**. Laisser les anciens noms ici aurait vidé les
+     montants de l'email v1 sans que rien ne le signale : le template ignore
+     silencieusement un paramètre qu'il ne connaît pas.
+
+     `MAISON_TTC` devient `STUDIO_TTC` à cette occasion (ADR-029) ; le
+     renommage n'était possible qu'en touchant code et template ensemble, ce
+     qui est le cas.
+
+     Trois notions du v1 — façade, bar, chambre — n'ont plus de placeholder :
+     le template v2 ne les affiche plus. L'information n'est pas perdue pour
+     autant, elle reste dans `config_json` du lead. Le v1 disparaîtra avec la
+     bascule vers `/configurer` (ADR-031). */
   const params = {
-    // Identité
+    // Contact
     PRENOM: prenom ?? "",
     NOM: nom ?? "",
     EMAIL: email ?? "",
     TEL: tel ?? "",
+    ADRESSE: "",
+    CP_VILLE: "",
     // Réservation
     NUMERO: slot ? String(slot).padStart(2, "0") : "",
-    PRODUIT: `${produit} ${surface}`,
-    // ADR-029 — `MAISON_TTC` est un nom de paramètre du template Brevo
-    // (BREVO_TEMPLATE_RECAP), configuré dans le dashboard. Le renommer ici
-    // sans renommer le placeholder côté Brevo viderait le montant de l'email :
-    // à traiter en une seule fois, code + template. Invisible du client.
-    MAISON_TTC: `${houseTotal?.toLocaleString("fr-FR")} €`,
-    LIVRAISON: livraisonLabel,
-    TERRAIN: terrainLabel,
+    RESERVATION_TTC: "",
+    SOUS_CONDITION: "",
     // Configuration
     MODELE: `${produit} ${surface}`,
+    STUDIO_TTC: `${houseTotal?.toLocaleString("fr-FR")} €`,
     BARDAGE: bardage ?? "",
-    FACADE: facade ?? "",
-    BAR: bar ?? "",
-    CHAMBRE: chambre ?? "",
     INTERIEUR: interieur ?? "",
-    TERRASSE_M2: terrasseM2 > 0 ? `${terrasseM2} m²` : "",
+    TERRASSE: terrasseM2 > 0 ? `${terrasseM2} m²` : "",
+    TERRASSE_TTC: "",
     OPTIONS_LABELS: (optionsLabels ?? []).join(", "),
+    OPTIONS_TTC: "",
+    LIVRAISON: livraisonLabel,
     TOTAL_ESTIME: totalEstime,
+    GRILLE_VERSION: "",
+    TERRAIN: terrainLabel,
     // Analyse PLU (vide si pas de consentement ou pas d'analyse)
-    PLU_PARCELLE: plu?.parcelle ?? "",
     PLU_ADRESSE: plu?.address_label ?? "",
+    PLU_PARCELLE: plu?.parcelle ?? "",
     PLU_ZONE: plu ? `${plu.zone_urba ?? ""} — ${pluZoneLabel}` : "",
     PLU_TYPEDOC: plu ? `${plu.typedoc ?? ""} ${plu.etat_doc ?? ""}`.trim() : "",
     PLU_DATAPPRO: plu?.datappro ? formatDate(plu.datappro) : "",
     PLU_PRESCRIPTIONS: plu?.prescriptions?.join(" · ") ?? "",
     PLU_SERVITUDES: plu?.servitudes?.join(" · ") ?? "",
-    PLU_LIBELONG: plu?.libelong ?? "",
   };
 
   const recipients = [{ email, name: `${prenom} ${nom}`.trim() }];

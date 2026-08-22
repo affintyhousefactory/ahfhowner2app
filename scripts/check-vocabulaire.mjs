@@ -27,7 +27,6 @@ const EXTENSIONS = [".ts", ".tsx", ".mjs"];
 const EXCLUS = [
   // Pages légales — hors périmètre ADR-029 tant que §17.10 n'est pas fourni
   // (textes à livrer par Howner) et que le risque ADR-015 est ouvert.
-  "src/app/(public)/cgv/",
   "src/app/(public)/mentions-legales/",
   "src/app/(public)/confidentialite/",
   "src/app/(public)/cgu-mandataire/",
@@ -112,6 +111,38 @@ const PROSCRITS = [
   },
   { mot: "conteneurs?", libelle: "conteneur" },
   { mot: "catalogues?", libelle: "catalogue" },
+
+  /* ── §30 des CGV du 2026-08-22 — promesses à ne pas faire ────────────────
+     Les CGV validées consacrent une section aux « termes à proscrire dans les
+     supports publics HOWNER ». Ce ne sont pas des préférences de style : ce
+     sont des formulations qui **promettent un résultat qu'AHF ne maîtrise
+     pas** — une autorisation d'urbanisme délivrée par une mairie, la
+     rentabilité d'un investissement, l'accord d'un financeur, la compatibilité
+     d'une parcelle avant étude. Chacune transforme une obligation de moyens en
+     obligation de résultat, et se retourne contre la société le jour où la
+     promesse n'est pas tenue.
+
+     Le §30 est resté hors de la page publiée : c'est une consigne interne, pas
+     une clause opposable au client. Sa place est ici, où elle agit — une règle
+     de communication qu'aucun contrôle n'applique finit par être oubliée.
+
+     « clé en main » figure déjà plus haut, au titre d'ADR-029. */
+  { mot: "solutions? compl[èe]tes?", libelle: "solution complète (§30 CGV)" },
+  { mot: "prise en charge globale", libelle: "prise en charge globale (§30 CGV)" },
+  { mot: "garantie d[e’']autorisation", libelle: "garantie d’autorisation (§30 CGV)" },
+  {
+    mot: "garantie de rentabilit[ée]",
+    libelle: "garantie de rentabilité (§30 CGV)",
+    /* Les CGV emploient l'expression pour la **nier** — « les simulations […]
+       ne constituent pas une garantie de rentabilité » (§19). C'est la clause
+       qui protège la société, pas une promesse. Exception bornée à ce chemin :
+       le terme reste proscrit partout ailleurs, et les autres termes restent
+       contrôlés sur les CGV. */
+    sauf: ["src/app/(public)/cgv/"],
+  },
+  { mot: "financement garanti", libelle: "financement garanti (§30 CGV)" },
+  { mot: "terrain garanti", libelle: "terrain garanti (§30 CGV)" },
+  { mot: "pr[êe]ts? [àa] louer", libelle: "prêt à louer (§30 CGV)" },
 ];
 
 function fichiers(dir, acc = []) {
@@ -139,11 +170,18 @@ for (const cible of CIBLES) {
     // le rendu affichait « clé en main » sur /arko-one et /arko-max pendant que
     // le contrôle annonçait « conforme » (constaté le 2026-08-02).
     // On aplatit donc les blancs, en gardant de quoi retrouver la ligne.
+    // Les blancs internes sont réduits à un espace unique, pas seulement les
+    // retours à la ligne. L'indentation JSX en produit des paquets : « Prise en
+    // charge\n      globale » aplati sans normalisation donne « Prise en charge
+    //       globale », qu'aucun motif écrit avec un espace simple ne peut
+    // atteindre. Le correctif du 2026-08-02 ne traitait que la coupure de
+    // ligne ; il laissait passer tout terme multi-mots coupé sur du code
+    // indenté — c'est-à-dire la quasi-totalité du JSX.
     const debuts = [];
     let plat = "";
     lignes.forEach((ligne, i) => {
       // Les commentaires citant la règle ne sont pas des infractions.
-      const utile = /ADR-029|ADR-004/.test(ligne) ? "" : ligne;
+      const utile = /ADR-029|ADR-004/.test(ligne) ? "" : ligne.replace(/\s+/g, " ").trim();
       debuts.push({ index: plat.length, ligne: i + 1, texte: ligne });
       plat += utile + " ";
     });
@@ -159,7 +197,13 @@ for (const cible of CIBLES) {
 
     for (const { mot, libelle, sauf } of PROSCRITS) {
       if (sauf?.some((s) => rel.startsWith(s))) continue;
-      for (const m of plat.matchAll(new RegExp(`\\b${mot}\\b`, "gi"))) {
+      /* `\b` ne connaît que l'ASCII : entre « rentabilité » et le point qui
+         suit, il n'y a **pas** de limite de mot, `é` n'appartenant pas à `\w`.
+         Un terme finissant par une lettre accentuée échappait donc au contrôle
+         — silencieusement, ce qui est le pire des cas pour un garde-fou. Les
+         limites sont exprimées en propriétés Unicode. */
+      const motif = new RegExp(`(?<![\\p{L}\\p{N}])${mot}(?![\\p{L}\\p{N}])`, "giu");
+      for (const m of plat.matchAll(motif)) {
         const { ligne, texte } = ligneDe(m.index);
         infractions.push({ fichier: rel, ligne, terme: libelle, texte: texte.trim().slice(0, 100) });
       }

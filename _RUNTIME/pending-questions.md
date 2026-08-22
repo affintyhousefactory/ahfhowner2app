@@ -2,7 +2,7 @@
 
 ## Questions ouvertes
 
-- ~~**Grille Arko One ?**~~ ✅ **répondu par la spec** (ADR-029) : base **77 900 €**, emprise **6,65 × 3,60 m**. Les champs `perM2` / `terrassePerM2` deviennent sans objet — ADR-030 remplace le modèle de calcul (paliers de terrasse, options tarifées, transport par zone) au lieu de l'ajuster.
+- ~~**Grille Arko One ?**~~ ✅ **répondu par la spec** (ADR-029) : base **69 900 €** (corrigée le 2026-08-22 ; la spec disait 77 900 €), emprise **6,65 × 3,60 m**. Les champs `perM2` / `terrassePerM2` deviennent sans objet — ADR-030 remplace le modèle de calcul (paliers de terrasse, options tarifées, transport par zone) au lieu de l'ajuster.
 - **Nombre d'ambiances au lancement ?** (§17.3, point ouvert d'ADR-030) — **trois sont livrées** (Littoral / Atelier / Basque, sur les rendus v1). Le tableau reste bouclé : passer à deux ne coûte qu'une ligne de `config.ts`. À confirmer par Howner quand les visuels définitifs arriveront.
 - **Bloc rentabilité en parcours particulier ?** (§17.5, point ouvert d'ADR-030) — ouvert ou réservé au professionnel. Drapeau par usage (`blocRentabilite: null` pour `annexe`), la bascule est gratuite. **Non tranché.**
 - ~~**Alerte Albert ADR-030**~~ ✅ **traitée verbalement le 2026-08-02** — écarts maintenus et assumés par Richard : §8 pré-analyse PLU conservée, §6-§7 aucun paiement en ligne, §5 transport au kilomètre, §5 Série 01 à 12 unités, plus le parti « colonne de sections dépliantes » au lieu du tunnel en 7 écrans.

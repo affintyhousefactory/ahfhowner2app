@@ -232,7 +232,7 @@ export const PIECES_DOSSIER = [
   { id: "photos_terrain",       label: "Photos du terrain",           attenduDe: "client" },
   { id: "financement",          label: "Plan de financement",         attenduDe: "client" },
   { id: "devis",                label: "Devis",                       attenduDe: "ahf" },
-  { id: "plans_maison",         label: "Plans du studio",            attenduDe: "ahf" },
+  { id: "plans_studio",         label: "Plans du studio",            attenduDe: "ahf" },
   { id: "notice_technique",     label: "Notice technique",            attenduDe: "ahf" },
   { id: "autre",                label: "Autre",                       attenduDe: "ahf" },
 ] as const;
@@ -253,6 +253,12 @@ export type LeadConfigV2 = {
   cfg_quantite?: number | null;
   cfg_modele?: string | null;
   cfg_ambiance?: string | null;
+  /* Ajouté le 2026-08-20 avec la rubrique d'ambiance intérieure du
+     configurateur. Le contrat de données doit suivre le parcours : ADR-031
+     écrira ce que ce type décrit, et une dimension absente d'ici serait une
+     dimension que la soumission oublierait de transmettre. Optionnel, comme
+     ses voisines — les leads antérieurs ne la portent pas. */
+  cfg_ambiance_interieure?: string | null;
   cfg_terrasse?: string | null;
   cfg_options?: string[] | null;
   cfg_prix_base?: number | null;
@@ -278,6 +284,8 @@ export function resoudreConfigV2(lead: LeadConfigV2) {
   const modele = cfg.modeles.find((m) => m.id === lead.cfg_modele) ?? null;
   const usage = cfg.usages.find((u) => u.id === lead.cfg_usage) ?? null;
   const ambiance = cfg.ambiances.find((a) => a.id === lead.cfg_ambiance) ?? null;
+  const ambianceInterieure =
+    cfg.ambiancesInterieures.find((a) => a.id === lead.cfg_ambiance_interieure) ?? null;
   const palier = modele
     ? paliersPourModele(cfg, modeleId).find((p) => p.id === lead.cfg_terrasse) ?? null
     : null;
@@ -299,6 +307,13 @@ export function resoudreConfigV2(lead: LeadConfigV2) {
     quantite: lead.cfg_quantite ?? 1,
     modele: modele ? { id: modele.id, label: modele.nom, surface: modele.surface, emprise: modele.emprise } : null,
     ambiance: ambiance ? { id: ambiance.id, label: ambiance.nom, teinte: ambiance.teinte } : null,
+    ambianceInterieure: ambianceInterieure
+      ? {
+          id: ambianceInterieure.id,
+          label: ambianceInterieure.nom,
+          teinte: ambianceInterieure.teinte,
+        }
+      : null,
     terrasse: palier ? { id: palier.id, label: palier.nom, prix: palier.prixTtc } : null,
     options,
     optionsStructurelles: options.filter((o) => o.structurelle),

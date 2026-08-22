@@ -57,7 +57,15 @@ export type SourcePanne =
   | "contact/supabase"
   | "contact/brevo"
   | "admin/leads"
-  | "admin/dashboard";
+  | "admin/dashboard"
+  /* Soumission du configurateur v2 — ADR-031. Le type est fermé à dessein :
+     une source non déclarée ne compile pas, ce qui empêche un journal de
+     panne d'apparaître sous un nom improvisé et de devenir infiltrable. */
+  | "configurateur/reservation/supabase"
+  | "configurateur/reservation/brevo"
+  | "configurateur/reservation/brevo-contact"
+  | "configurateur/reservation/numeros-libres"
+  | "configurateur/reservation/total-divergent";
 
 /**
  * Journalise une panne non bloquante de façon repérable.
