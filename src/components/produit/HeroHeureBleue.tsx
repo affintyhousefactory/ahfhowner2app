@@ -43,69 +43,83 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
 
   return (
     <section className="relative isolate overflow-hidden bg-nuit">
-      <motion.div
-        className="absolute inset-0"
-        initial={reduce ? false : { scale: 1.07 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 2.4, ease: EASE }}
-      >
-        <Image
-          src={c.hero.src}
-          alt={c.hero.alt}
-          fill
-          priority
-          sizes="100vw"
-          style={{ filter: `brightness(${c.hero.luminosite ?? 0.74}) saturate(1.1)` }}
-          className="object-cover"
+      {/* ⚠ Le cadre suit le rapport de l'image jusqu'à `md`. Un hero plein
+          écran sur 390 × 844 px (rapport 0,46) rognerait les deux tiers d'un
+          visuel en 16/9 — donc le studio lui-même. Au-delà, la hauteur permet
+          la superposition sans rien perdre. Même règle que sur l'accueil. */}
+      <div className="relative mt-20 aspect-video w-full md:mt-0 md:aspect-auto md:h-[min(88svh,52rem)]">
+        <motion.div
+          className="absolute inset-0"
+          initial={reduce ? false : { scale: 1.07 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 2.4, ease: EASE }}
+        >
+          <Image
+            src={c.hero.src}
+            alt={c.hero.alt}
+            fill
+            priority
+            sizes="100vw"
+            style={{ filter: `brightness(${c.hero.luminosite ?? 0.74}) saturate(1.1)` }}
+            className="object-cover"
+          />
+        </motion.div>
+
+        {/* Le voile ne sert que le texte : il n'apparaît qu'avec lui. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 hidden bg-[linear-gradient(180deg,rgba(15,21,25,.72)_0%,rgba(15,21,25,.18)_34%,rgba(15,21,25,.97)_100%)] md:block"
         />
-      </motion.div>
 
-      {/* Le dégradé porte la lisibilité du texte : sans lui, le contraste
-          dépend de la photo, donc de la prochaine photo. */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,21,25,.72)_0%,rgba(15,21,25,.18)_34%,rgba(15,21,25,.97)_100%)]"
-      />
+      </div>
 
-      <div className="container-page relative flex min-h-[min(88svh,52rem)] flex-col justify-end pb-14 pt-28 md:pb-20">
-        <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between md:gap-14">
-          <div className="max-w-3xl">
-            <Reveal as="span" delay={0.1} className="block font-mono text-[0.7rem] uppercase tracking-[0.24em] text-lumiere">
+      {/* ⚠ UN SEUL bloc de texte, donc un seul `<h1>` dans le HTML. Deux blocs
+          alternés par media query auraient servi deux titres au crawler, ce que
+          la vérification « un seul h1 par page » d'ADR-038 interdit.
+
+          Sur mobile il suit l'image dans le flux ; à partir de `md` il devient
+          absolu et se pose dessus. Une seule copie du contenu, deux positions. */}
+      <div className="container-page relative z-10 flex flex-col gap-5 py-9 md:absolute md:inset-x-0 md:bottom-0 md:gap-0 md:pb-16">
+        <div className="md:flex md:items-end md:justify-between md:gap-14">
+          <div className="flex flex-col gap-5 md:max-w-3xl md:gap-0">
+            <Reveal as="span" delay={0.1} className="block font-mono text-[0.66rem] uppercase tracking-[0.24em] text-lumiere md:text-[0.7rem]">
               {c.eyebrow}
             </Reveal>
 
-            {/* Rendu sans animation d'opacité : voir la contrainte 2. */}
-            <h1 className="mt-5 titre-xl text-nuit-titre">
+            {/* La coupe de ligne n'existe qu'à partir de `md` : sur 390 px le
+                titre se replie tout seul, un `<br>` y créerait une veuve. */}
+            <h1 className="titre-hero text-nuit-titre md:mt-5">
               {c.titre[0]}
-              <br />
+              <br className="hidden md:inline" />{" "}
               {c.titre[1]}
             </h1>
 
-            <Reveal as="span" delay={0.3} className="block mt-6 max-w-[52ch] text-[1.0625rem] font-light leading-relaxed text-nuit-muted md:text-lg">
+            <Reveal as="span" delay={0.3} className="block text-[0.95rem] font-light leading-relaxed text-nuit-muted md:mt-6 md:max-w-[52ch] md:text-lg">
               {c.accroche}
             </Reveal>
 
-            <Reveal delay={0.42} className="mt-8 flex flex-wrap items-center gap-5">
-              <Button href={reserverHref(produit)} variant="lumiere">
+            <Reveal delay={0.42} className="flex flex-col gap-3 md:mt-8 md:flex-row md:flex-wrap md:items-center md:gap-5">
+              <Button href={reserverHref(produit)} variant="lumiere" className="w-full md:w-auto">
                 Réserver un numéro
                 <Arrow />
               </Button>
-              <span className="text-sm text-nuit-muted">
+              <span className="text-[0.85rem] text-nuit-muted md:text-sm">
                 {libres} numéro{libres > 1 ? "s" : ""} encore libre{libres > 1 ? "s" : ""}
               </span>
             </Reveal>
           </div>
 
-          <Reveal as="span" delay={0.54} className="flex shrink-0 flex-col gap-1.5 md:items-end md:pb-1.5">
-            <span className="titre-l leading-none text-nuit-titre">
+          <Reveal as="span" delay={0.54} className="flex shrink-0 items-baseline gap-3 md:flex-col md:items-end md:gap-1.5 md:pb-1.5">
+            <span className="titre-m leading-none text-nuit-titre md:[font-size:clamp(1.9rem,4vw,2.9rem)]">
               {prixBase(produit).toLocaleString("fr-FR")} €
             </span>
-            <span className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-nuit-faible">
+            <span className="font-mono text-[0.64rem] uppercase tracking-[0.16em] text-nuit-faible md:text-[0.68rem]">
               TTC · à partir de
             </span>
           </Reveal>
         </div>
       </div>
+
     </section>
   );
 }

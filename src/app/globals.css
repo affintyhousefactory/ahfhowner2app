@@ -314,6 +314,26 @@ html {
   letter-spacing: -0.02em;
   line-height: 1.22;
 }
+/* Titre de hero : plus contenu sur mobile, plein format à partir de `md`.
+ *
+ * ⚠ Le responsive est porté ICI et non par un préfixe Tailwind : `md:titre-xl`
+ * ne génère rien, Tailwind ne sait pas préfixer une classe CSS maison. */
+.titre-hero {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 7vw, 2.6rem);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: pretty;
+}
+@media (min-width: 768px) {
+  .titre-hero {
+    font-size: clamp(2.4rem, 6.4vw, 4.6rem);
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+  }
+}
+
 .titre-s {
   font-size: 1.05rem;
   letter-spacing: -0.01em;
