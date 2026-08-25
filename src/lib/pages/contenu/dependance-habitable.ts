@@ -137,7 +137,7 @@ export const DEPENDANCE_HABITABLE = {
   construction: {
     titre: "Légère dans son mode constructif. Exigeante dans sa conception.",
     intro: [
-      "Les studios Arko reposent sur une ossature en acier léger, dite LSF — Light Steel Frame. Cette technologie se prête particulièrement à la fabrication hors-site : les éléments structurels sont préparés avec précision avant l'installation de l'unité sur son emplacement définitif.",
+      "Les studios Arko reposent sur une ossature en acier léger, dite LSF — Light Steel Frame. Cette ossature se prête particulièrement à la fabrication hors-site : les éléments structurels sont préparés avec précision avant l'installation de l'unité sur son emplacement définitif.",
     ],
     arguments: [
       {
@@ -162,7 +162,7 @@ export const DEPENDANCE_HABITABLE = {
       },
     ],
     conclusion:
-      "Le résultat recherché n'est pas de montrer la technologie. C'est de la faire oublier une fois que vous êtes à l'intérieur.",
+      "Le résultat recherché n'est pas de montrer l'ossature. C'est de la faire oublier une fois que vous êtes à l'intérieur.",
   },
 
   integration: {

@@ -97,7 +97,7 @@ export const BUREAU_DE_JARDIN = {
       {
         titre: "Architecture",
         texte:
-          "Une technologie compatible avec des lignes contemporaines et de larges ouvertures — l'écriture d'une vraie architecture, pas celle d'un abri de jardin.",
+          "Une ossature compatible avec des lignes contemporaines et de larges ouvertures — l'écriture d'une vraie architecture, pas celle d'un abri de jardin.",
       },
       {
         titre: "Fabrication hors-site",
