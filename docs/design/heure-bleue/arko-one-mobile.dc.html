@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=Inter:wght@300;400;500&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #e8c9a0; text-decoration: none; }
+    a:hover { color: #f4e0c4; }
+    @keyframes montee { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    @keyframes dezoom { from { transform: scale(1.07); } to { transform: scale(1); } }
+    .m  { animation: montee .85s cubic-bezier(.16,1,.3,1) both; }
+    .d1 { animation-delay: .10s } .d2 { animation-delay: .20s } .d3 { animation-delay: .32s }
+    @media (prefers-reduced-motion: reduce) { .m { animation: none !important; } }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #0f1519; font-family: Inter, system-ui, sans-serif; color: #e8ebee;">
+
+  <!-- Barre : le nom, un menu. Pas de navigation déployée sur 390 px. -->
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.07);">
+    <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px; letter-spacing: .04em; color: #f4f6f8;">HOWNER</span>
+    <button style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -10px -12px -10px 0; background: none; border: none; cursor: pointer;" aria-label="Ouvrir le menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8ebee" stroke-width="1.4" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"></path></svg>
+    </button>
+  </div>
+
+  <!-- Hero : le titre descend sous l'image, sinon rien ne respire sur 390 px -->
+  <div style="position: relative; height: 430px; overflow: hidden;">
+    <img src="interieur.jpg" alt="Intérieur du studio de jardin Arko One, éclairé à la tombée du jour" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.72) saturate(1.1); animation: dezoom 2.4s cubic-bezier(.16,1,.3,1) both;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,21,25,.6) 0%, rgba(15,21,25,.12) 30%, rgba(15,21,25,.98) 100%);"></div>
+    <div style="position: absolute; left: 20px; right: 20px; bottom: 26px;">
+      <p class="m d1" style="margin: 0 0 12px; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: {{lumiere}};">Arko One · 20 m²</p>
+      <h1 class="m d2" style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 400; font-size: 36px; line-height: 1.06; letter-spacing: -.03em; color: #f7f9fa;">
+        À vingt pas de chez vous, et tout à fait ailleurs.
+      </h1>
+    </div>
+  </div>
+
+  <div class="m d3" style="display: flex; flex-direction: column; gap: 20px; padding: 26px 20px 30px;">
+    <p style="margin: 0; font-size: 16px; line-height: 1.62; font-weight: 300; color: #b9c3cb;">
+      Un studio de jardin d'architecte, livré prêt à vivre et posé sur votre
+      parcelle en une journée. Six exemplaires numérotés pour cette collection Arko.
+    </p>
+    <div style="display: flex; align-items: baseline; gap: 10px;">
+      <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 34px; line-height: 1; color: #f7f9fa;">69 900 €</span>
+      <span style="font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #7d8b95;">TTC · à partir de</span>
+    </div>
+  </div>
+
+  <!-- Rareté : les six numéros tiennent sur une ligne à 390 px -->
+  <div style="display: flex; flex-direction: column; gap: 14px; padding: 22px 20px; background: #141c21; border-block: 1px solid rgba(255,255,255,.06);">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #7d8b95;">Édition Arko — 6 unités</span>
+      <span style="font-size: 12px; color: #93a1ab;">6 libres</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <sc-for list="{{numeros}}" as="n" hint-placeholder-count="6">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; border: 1px solid rgba(232,201,160,.34); font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 13px; color: {{lumiere}};">{{n.l}}</span>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- La tension -->
+  <div style="display: flex; flex-direction: column; gap: 18px; padding: 52px 20px; border-bottom: 1px solid rgba(255,255,255,.06);">
+    <h2 style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 400; font-size: 27px; line-height: 1.16; letter-spacing: -.02em; color: #f4f6f8;">
+      Vous n'avez pas besoin de déménager.
+    </h2>
+    <p style="margin: 0; font-size: 16px; line-height: 1.66; font-weight: 300; color: #a9b5be;">
+      Un bureau qui ferme vraiment. Une chambre pour ceux qui restent dormir.
+      Un atelier qui cesse de déborder dans le salon.
+    </p>
+    <p style="margin: 0; font-size: 16px; line-height: 1.66; font-weight: 300; color: #a9b5be;">
+      La plupart des projets d'agrandissement butent sur le même mur : les devis
+      qui s'étirent, la poussière, les mois. L'Arko One, lui, arrive fini.
+    </p>
+  </div>
+
+  <!-- Étapes empilées -->
+  <div style="display: flex; flex-direction: column; gap: 34px; padding: 52px 20px; border-bottom: 1px solid rgba(255,255,255,.06);">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <p style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: {{lumiere}};">Comment ça se passe</p>
+      <h2 style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 400; font-size: 25px; letter-spacing: -.02em; color: #f4f6f8;">Trois étapes, aucun chantier chez vous.</h2>
+    </div>
+    <sc-for list="{{etapes}}" as="e" hint-placeholder-count="3">
+      <div style="display: flex; flex-direction: column; gap: 11px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.08);">
+        <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 12px; letter-spacing: .2em; color: {{lumiere}};">{{e.n}}</span>
+        <h3 style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 400; font-size: 19px; color: #f4f6f8;">{{e.t}}</h3>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #94a2ac;">{{e.d}}</p>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- Chiffres : deux colonnes, jamais quatre -->
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: rgba(255,255,255,.07);">
+    <sc-for list="{{specs}}" as="s" hint-placeholder-count="4">
+      <div style="display: flex; flex-direction: column; gap: 7px; padding: 26px 20px; background: #0f1519;">
+        <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 25px; letter-spacing: -.02em; color: #f4f6f8;">{{s.v}}</span>
+        <span style="font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #7d8b95;">{{s.k}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- La visite — défilement horizontal, une vue et un bout de la suivante -->
+  <div style="display: flex; flex-direction: column; gap: 20px; padding: 48px 0; border-top: 1px solid rgba(255,255,255,.06);">
+    <div style="display: flex; flex-direction: column; gap: 10px; padding: 0 20px;">
+      <p style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: {{lumiere}};">La visite</p>
+      <h2 style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 400; font-size: 25px; line-height: 1.18; letter-spacing: -.02em; color: #f4f6f8;">Quatre vues, dans l'ordre où on les découvre.</h2>
+    </div>
+    <div style="display: flex; gap: 14px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory;">
+        <figure style="flex: 0 0 300px; scroll-snap-align: start; margin: 0; display: flex; flex-direction: column; gap: 13px;">
+          <img src="vue-exterieur.jpg" alt="Dans son jardin — Bardage sombre, terrasse bois, posé sans terrassement." style="display: block; width: 100%; height: 220px; object-fit: cover;">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; color: #f4f6f8;">Dans son jardin</span>
+            <span style="font-size: 13px; line-height: 1.5; color: #8d9ba5;">Bardage sombre, terrasse bois, posé sans terrassement.</span>
+          </div>
+        </figure>
+        <figure style="flex: 0 0 300px; scroll-snap-align: start; margin: 0; display: flex; flex-direction: column; gap: 13px;">
+          <img src="vue-cuisine.jpg" alt="La cuisine — Fenêtre bandeau sur le plan de travail, équipée en atelier." style="display: block; width: 100%; height: 220px; object-fit: cover;">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; color: #f4f6f8;">La cuisine</span>
+            <span style="font-size: 13px; line-height: 1.5; color: #8d9ba5;">Fenêtre bandeau sur le plan de travail, équipée en atelier.</span>
+          </div>
+        </figure>
+        <figure style="flex: 0 0 300px; scroll-snap-align: start; margin: 0; display: flex; flex-direction: column; gap: 13px;">
+          <img src="vue-lit.jpg" alt="Le coin nuit — Un lit, une fenêtre cadrée sur le paysage, des rangements sous le sommier." style="display: block; width: 100%; height: 220px; object-fit: cover;">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; color: #f4f6f8;">Le coin nuit</span>
+            <span style="font-size: 13px; line-height: 1.5; color: #8d9ba5;">Un lit, une fenêtre cadrée sur le paysage, des rangements sous le sommier.</span>
+          </div>
+        </figure>
+        <figure style="flex: 0 0 300px; scroll-snap-align: start; margin: 0; display: flex; flex-direction: column; gap: 13px;">
+          <img src="vue-sdb.jpg" alt="La salle d'eau — Douche, meuble et robinetterie livrés posés et raccordés." style="display: block; width: 100%; height: 220px; object-fit: cover;">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; color: #f4f6f8;">La salle d'eau</span>
+            <span style="font-size: 13px; line-height: 1.5; color: #8d9ba5;">Douche, meuble et robinetterie livrés posés et raccordés.</span>
+          </div>
+        </figure>
+    </div>
+  </div>
+
+  <!-- L'atelier -->
+  <img src="exterieur.jpg" alt="Le studio de jardin Arko One posé sur sa terrasse" style="display: block; width: 100%; height: 260px; object-fit: cover; filter: brightness(.86) saturate(1.05);">
+  <div style="display: flex; flex-direction: column; gap: 16px; padding: 40px 20px 48px;">
+    <p style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: {{lumiere}};">L'atelier</p>
+    <h2 style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 400; font-size: 25px; line-height: 1.18; letter-spacing: -.02em; color: #f4f6f8;">
+      Ce qui arrive chez vous ne se termine pas chez vous.
+    </h2>
+    <p style="margin: 0; font-size: 15px; line-height: 1.66; font-weight: 300; color: #a9b5be;">
+      Ossature acier léger, isolation biosourcée, bardage joint debout. L'unité
+      est montée, câblée, équipée et contrôlée au Pays basque avant de partir.
+    </p>
+  </div>
+
+  <!-- Ce qui reste -->
+  <div style="display: flex; flex-direction: column; gap: 26px; padding: 48px 20px; border-top: 1px solid rgba(255,255,255,.06);">
+    <h2 style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 400; font-size: 25px; line-height: 1.18; letter-spacing: -.02em; color: #f4f6f8;">
+      Ce qu'il laisse au terrain : presque rien.
+    </h2>
+    <sc-for list="{{faits}}" as="f" hint-placeholder-count="4">
+      <div style="display: flex; gap: 14px; align-items: flex-start;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{lumiere}}" stroke-width="1.2" style="flex-shrink: 0; margin-top: 2px;" aria-hidden="true">
+          <path d="M12 21c-4.5-2.6-7-6.1-7-9.7A7 7 0 0 1 12 4a7 7 0 0 1 7 7.3c0 3.6-2.5 7.1-7 9.7Z" stroke-linejoin="round"></path>
+        </svg>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 15px; color: #f4f6f8;">{{f.k}}</span>
+          <p style="margin: 0; font-size: 14px; line-height: 1.58; color: #94a2ac;">{{f.d}}</p>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- Clôture -->
+  <div style="display: flex; flex-direction: column; gap: 20px; padding: 52px 20px 40px; background: #141c21; border-top: 1px solid rgba(255,255,255,.06);">
+    <h2 style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 400; font-size: 30px; line-height: 1.1; letter-spacing: -.03em; color: #f7f9fa;">
+      Six exemplaires pour<br>cette collection Arko.
+    </h2>
+    <p style="margin: 0; font-size: 15px; line-height: 1.64; font-weight: 300; color: #a9b5be;">
+      Chaque Arko One porte son numéro. Le réserver demande un versement initial
+      de 2 000 €, intégralement remboursable tant que le contrat n'est pas signé.
+    </p>
+  </div>
+
+  <!-- Barre d'action collante : le geste attendu reste sous le pouce -->
+  <div style="position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 20px 18px; background: rgba(15,21,25,.96); border-top: 1px solid rgba(255,255,255,.09);">
+    <div style="display: flex; flex-direction: column;">
+      <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 17px; color: #f7f9fa;">69 900 €</span>
+      <span style="font-size: 11px; color: #7d8b95;">6 numéros libres</span>
+    </div>
+    <a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 48px; padding: 0 24px; background: {{lumiere}}; color: #0f1519; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px;">
+      Configurer
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </a>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"lumiere":{"editor":"color","default":"#e8c9a0","options":["#e8c9a0","#d4a373","#9fb8c8","#c9d4b0"],"section":"Direction"}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      lumiere: this.props.lumiere ?? '#e8c9a0',
+      numeros: [{ l: '01' }, { l: '02' }, { l: '03' }, { l: '04' }, { l: '05' }, { l: '06' }],
+      etapes: [
+        { n: '01', t: 'Vous configurez', d: "Modèle, bardage, ambiance intérieure, terrasse. Le prix se met à jour à chaque choix." },
+        { n: '02', t: 'Nous étudions votre terrain', d: "Accès, urbanisme, raccordements. Votre parcelle est vérifiée à la main." },
+        { n: '03', t: 'Nous posons en un jour', d: "L'unité arrive finie de l'atelier. La grue le matin, vos clés le soir." },
+      ],
+      specs: [
+        { v: '20 m²', k: 'Surface habitable' },
+        { v: '6,65 × 3,60', k: 'Emprise (m)' },
+        { v: '12 sem.', k: 'Jusqu’à la pose' },
+        { v: '1 jour', k: 'Sur site' },
+      ],
+      faits: [
+        { k: 'Acier recyclable', d: "L'ossature se recycle indéfiniment, sans perdre ses propriétés." },
+        { k: 'Isolation biosourcée', d: "Une isolation d'origine végétale, pas un dérivé pétrolier." },
+        { k: 'Sol préservé', d: 'Des pieux vissés, pas une dalle : le terrain reste perméable.' },
+        { k: 'Réversible', d: "Démontable sans démolition, le jour où vous changez d'avis." },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
