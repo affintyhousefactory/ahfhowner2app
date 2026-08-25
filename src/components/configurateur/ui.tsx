@@ -647,8 +647,11 @@ export function BarrePrix({
             onAction();
           }}
           className={cn(
-            "min-h-[46px] w-full rounded-xl bg-accent px-4 text-[0.9rem] font-semibold text-white transition-opacity",
-            actionDesactivee || enCours ? "opacity-45" : "hover:bg-accent-ink",
+            /* Teinte du bouton du site (ADR-041 § Amendement) : fond clair + liseré.
+               Le liseré n'est pas décoratif — sans lui, la teinte claire ne se
+               détacherait pas du fond du tunnel. */
+            "min-h-12 w-full rounded-lg border border-accent bg-lumiere px-4 text-[0.9rem] font-semibold text-ink transition-opacity",
+            actionDesactivee || enCours ? "opacity-45" : "hover:bg-lumiere-ink",
           )}
         >
           {enCours ? "Envoi en cours…" : action}

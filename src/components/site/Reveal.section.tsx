@@ -29,7 +29,7 @@ export function RevealSection() {
           <p className="eyebrow text-canvas/60">Le studio qui se révèle</p>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="mt-4 max-w-4xl text-balance kinetic text-canvas/95 [font-size:var(--text-h1)]">
+          <h2 className="titre-xl mt-4 max-w-4xl text-balance text-canvas/95">
             Il s'ouvre. Tout est déjà là, dedans.
           </h2>
         </Reveal>
@@ -59,7 +59,7 @@ export function RevealSection() {
             <Reveal key={p.k} delay={i * 0.06}>
               <div className="border-t border-canvas/15 pt-4">
                 <span className="font-mono text-xs text-canvas/50">{p.k}</span>
-                <h3 className="mt-2 text-lg font-medium tracking-tight text-canvas">
+                <h3 className="titre-s mt-2 text-canvas">
                   {p.t}
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-canvas/60">

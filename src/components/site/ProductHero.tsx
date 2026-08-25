@@ -118,7 +118,7 @@ export function ProductHero({
           <div className="md:col-span-7">
             {/* `md:whitespace-nowrap` retiré : il tenait pour une tagline
                 courte, il ferait déborder un titre de 55 caractères. */}
-            <h1 className="editorial text-balance text-[2rem] leading-[1.05] text-ink md:text-[2.9rem]">
+            <h1 className="titre-l text-balance text-ink">
               {product.h1}
             </h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">

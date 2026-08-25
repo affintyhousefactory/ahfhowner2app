@@ -200,7 +200,21 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
                 valeur={c.ambianceInterieure?.label ?? null}
                 pastille={c.ambianceInterieure?.teinte}
               />
-              <Ligne label="Terrasse" valeur={c.terrasse?.label ?? null} />
+              {/* Un palier retiré de la grille garde sa mention, suivie de
+                  « hors grille » : le conseiller doit voir ce que le client a
+                  choisi, même si l'offre a changé depuis. */}
+              <Ligne
+                label="Terrasse"
+                valeur={
+                  c.terrasse
+                    ? c.terrasse.inconnu
+                      ? `${c.terrasse.label} — hors grille`
+                      : c.terrasse.surfaceM2
+                        ? `${c.terrasse.label} · ${c.terrasse.surfaceM2.toLocaleString("fr-FR")} m²`
+                        : c.terrasse.label
+                    : null
+                }
+              />
             </dl>
 
             {c.options.length > 0 && (

@@ -135,7 +135,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | ADR | Titre | Statut | Faisabilité |
 |---|---|---|---|
 | 001 | Stack Next.js 16 App Router | Accepté (livré) | ✅ |
-| 002 | Charte Affinity (`@theme`) | **Accepté — valider Albert** | ⚠️ |
+| 002 | Charte Affinity (`@theme`) | **Remplacé → ADR-041** | ✅ |
 | 003 | Secrets & montants via env | Accepté (partiel) | ✅ |
 | 004 | Règles de marque absolues | **Remplacé → ADR-029** | ✅ |
 | 005 | Configurator/pricing verrouillé | **Remplacé → ADR-030** | ✅ |
@@ -173,6 +173,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
 | 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — TERMINÉ : lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
 | 039 | **Authentification réelle du back-office** — session en cookie, garde au proxy, gardes serveur sur 10 pages et 26 handlers, policies RLS corrigées | **Accepté — livré et VÉRIFIÉ EN PRODUCTION le 2026-08-25** (PR #89) ; fuite fermée, migration appliquée | ✅ |
+| 040 | **Pages produit « Heure bleue »** — refonte des deux pages produit, fond sombre, quatre moments framer-motion, copy réécrit (amende 002) | **Accepté — livré, à vérifier en Preview** ; **alerte Albert** (écart assumé à la charte Affinity) | ✅ |
+| 041 | **Charte « Heure bleue »** — deux registres, accent chaud, teintes en tokens (remplace 002) | **Accepté — socle livré, application par lots** ; **alerte Albert** | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.

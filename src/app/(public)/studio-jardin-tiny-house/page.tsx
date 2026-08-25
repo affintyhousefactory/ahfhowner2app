@@ -140,7 +140,7 @@ export default function StudioJardinTinyHousePage() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-4xl text-balance text-[2rem] leading-[1.06] text-canvas md:mt-16 md:text-[3.6rem]">
+          <h2 className="titre-l mt-12 max-w-4xl text-balance text-canvas md:mt-16">
             {C.choisir.titre}
           </h2>
         </Reveal>
@@ -148,7 +148,7 @@ export default function StudioJardinTinyHousePage() {
           {[C.choisir.tiny, C.choisir.studio].map((bloc, i) => (
             <Reveal key={bloc.titre} delay={0.08 * i}>
               <div className="border-t border-canvas/25 pt-6">
-                <h3 className="editorial text-xl text-canvas md:text-2xl">{bloc.titre}</h3>
+                <h3 className="titre-m text-canvas">{bloc.titre}</h3>
                 <ListePuces items={bloc.points} clair />
               </div>
             </Reveal>

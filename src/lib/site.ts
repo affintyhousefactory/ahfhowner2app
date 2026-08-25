@@ -140,6 +140,15 @@ export const CONTACT = {
    * réveillerait du code que personne ne sert.
    */
   email: "contact@howner.fr",
+  /**
+   * Compte Instagram officiel.
+   *
+   * Déclaré ici et pas dans les composants : c'est la leçon du 2026-08-22, où
+   * l'adresse de contact était écrite en dur à vingt-cinq endroits. Un compte
+   * social se renomme.
+   */
+  instagram: "https://www.instagram.com/howner_officiel/",
+  instagramHandle: "@howner_officiel",
   /** Forme lue par un humain, telle qu'affichée. */
   phone: PHONE_DISPLAY,
   /* Forme composable (E.164), exigée par le protocole `tel:` et par

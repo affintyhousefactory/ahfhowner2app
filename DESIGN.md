@@ -1,48 +1,165 @@
-# DESIGN — Charte graphique Affinity (référence + appliquée)
+# DESIGN — Charte « Heure bleue »
 
-> Extraite de https://www.affinityhome.io/ le 2026-06-15. Source de vérité visuelle.
-> Appliquée au site ARKO le 2026-06-15 via remap des tokens `@theme` dans `src/app/globals.css` (réversible).
+> Source de vérité visuelle depuis le 2026-08-25 (**ADR-041**, remplace la charte
+> Affinity d'ADR-002). Appliquée par les tokens `@theme` de `src/app/globals.css`.
+> **Les valeurs vivent dans les tokens, pas ici** : ce document explique, il ne
+> duplique pas.
 
-## Esthétique
-Luxe minimal, éditorial, contemporain. Blanc dominant, beaucoup de respiration, photographie d'architecture en vedette. Radius subtil (pas ludique), ombres douces, UI retenue, sentence case.
+## Le parti
+
+**Deux registres, une identité.**
+
+| Registre | Où | Fond |
+|---|---|---|
+| **Nuit** | surfaces d'émotion — accueil, pages produit | encre `--color-nuit` |
+| **Clair** | surfaces de lecture et d'outil — guides, pages légales, configurateur, formulaires | `--color-canvas` |
+
+Ce qui **ne change pas** d'un registre à l'autre : la typographie, le dessin des
+boutons, les filets, l'espacement, et la **famille** de l'accent.
+
+Ce qui change : le fond, et la **valeur** de l'accent — parce qu'une teinte
+lisible sur encre ne l'est pas sur blanc. C'est de la physique, pas du goût.
+
+Pourquoi deux registres plutôt qu'un site tout sombre : les 20 pages éditoriales
+sont du texte long, et ce sont les pages qui doivent se lire jusqu'au bout. Le
+configurateur, lui, sert à comparer des montants. Le sombre y coûterait plus
+qu'il n'apporterait.
 
 ## Palette
 
-| Rôle | Hex | Notes |
+Les valeurs sont dans `@theme` (`globals.css`). Ici, ce qu'elles veulent dire.
+
+**Registre clair** — `canvas` (base), `surface` (blocs et images), `paper`
+(alternative douce), `ink` (texte et titres), `muted` (secondaire), `line`
+(filets).
+
+**Registre nuit** — `nuit` (fond), `nuit-doux` (bandeaux et clôtures),
+`nuit-titre`, `nuit-texte`, `nuit-muted`, `nuit-faible`.
+
+**Accent** — une seule famille chaude, deux valeurs :
+
+| Token | Usage | Contraste mesuré |
 |---|---|---|
-| Ink / charcoal | `#0D141A` | texte & titres (variantes plateforme `#1D1E20`, `#18181A`) |
-| Light / base | `#FFFFFF` | fond dominant |
-| Off-white froid | `#F2F3F6` | sections alternées |
-| Accent slate-blue | `#4A6FA5` | accent de marque (bespoke, relevé inline) |
-| Accent AA-safe | `#3A5A86` | version foncée pour CTA (texte blanc ≥ 4.5:1) |
-| Azure | `#357DF9` | bleu vif secondaire (lien / highlight) |
-| Gris | `#727586` | texte secondaire |
-| Bordure | `#DADCE0` | filets, séparateurs |
+| `accent` `#7a5c28` | bouton plein et lien sur fond clair | 6,2:1 avec texte blanc · 5,8:1 en texte sur canvas |
+| `accent-ink` `#5f4720` | survol sur fond clair | 8,7:1 |
+| `lumiere` `#e8c9a0` | accent sur nuit | 11,6:1 |
+| `lumiere-ink` `#f4e0c4` | survol sur nuit | 14,3:1 |
+
+**Le bleu slate d'Affinity (`#3a5a86`) est retiré.** Il jurait avec la lumière
+des pages produit : sur la Preview du 2026-08-25, le méga-menu affichait des
+boutons bleus au-dessus d'un hero chaud — deux chartes superposées à l'écran.
+C'est ce constat de Richard qui a déclenché cette charte.
+
+`--color-blue` (azure) subsiste pour les **états d'information** seulement, jamais
+comme accent de marque.
+
+Tous les contrastes ci-dessus sont **calculés**, pas estimés. Toute nouvelle
+teinte destinée à porter du texte passe par le même calcul avant d'entrer ici.
 
 ## Typographie
-- **Inter** — corps ET titres (sans-serif géométrique, minimal). Variables source : `--font-primary` / `--font-secondary`.
-- DM Sans présent en secondaire ponctuel.
-- Tracking généreux sur labels, sentence case majoritaire, hiérarchie par taille nette.
 
-## UI
-- Border-radius : léger.
-- Boutons : retenus, ombre douce, fond plein accent + texte blanc.
-- Inputs : bordure fine, sans surcharge.
-- Layout : grille modulaire, whitespace généreux, cartes pour les offres, asymétrie équilibrée.
-- Imagerie : photo d'architecture/intérieur haut de gamme, lumière naturelle.
+Inchangée — c'est ce qui fait que la refonte ne dépayse pas.
 
-## Application à ARKO (mapping tokens)
-Remplace la palette chaude « Argile & Encre ». Voir `src/app/globals.css` bloc `@theme`.
-Polices ARKO conservées (Space Grotesk display) — passage tout-Inter optionnel, non encore fait.
+- **Space Grotesk** en titrage (`--font-display`), graisse normale, interlettrage
+  serré (`-0.02em` à `-0.035em` selon la taille).
+- **Inter** en texte courant (`--font-sans`), graisse légère (300) sur les
+  paragraphes d'accroche.
+- **Space Mono** (`--font-mono`) pour les surtitres et les libellés : capitales,
+  `letter-spacing` 0.16em à 0.24em. C'est la signature de la marque.
 
-| Token ARKO | Avant (chaud) | Après (Affinity) |
+### Échelle de titres
+
+Quatre niveaux, **une seule définition chacun** — `globals.css` :
+
+| Classe | Emploi | Interlettrage |
 |---|---|---|
-| `--color-canvas` | `#f4f1ea` | `#f6f7f9` |
-| `--color-surface` | `#ffffff` | `#ffffff` |
-| `--color-paper` | `#fbfaf6` | `#fbfcfd` |
-| `--color-ink` | `#1a1714` | `#0d141a` |
-| `--color-muted` | `#6e695e` | `#727586` |
-| `--color-line` | `#e4ddd0` | `#dadce0` |
-| `--color-accent` | `#1f5a3c` (vert) | `#3a5a86` (slate-blue AA) |
-| `--color-accent-ink` | `#174630` | `#2c466b` |
-| `--color-blue` | `#1659f0` | `#357df9` |
+| `.titre-xl` | hero, titre de clôture | -0.035em |
+| `.titre-l` | titre de section | -0.03em |
+| `.titre-m` | intertitre | -0.02em |
+| `.titre-s` | libellé de carte, légende | -0.01em |
+
+La taille descend, et l'interlettrage **se desserre avec elle** : un titre de
+4,6 rem supporte -0.035em, un intertitre de 1,3 rem s'y écraserait.
+
+⚠ **Ne pas redéclarer `font-display`, `font-normal`, `tracking-` ni `leading-`
+sur un titre.** C'est ainsi que les pages produit avaient accumulé **onze
+interlettrages différents** pendant que l'accueil passait par `.editorial` en
+graisse 500 — deux typographies perçues pour une seule police chargée.
+
+`.editorial` subsiste sur les **`<p>` et `<span>` mis en avant** — citations,
+chiffres, accroches — et porte les mêmes valeurs : graisse 400, -0.035em. Sur
+un titre, c'est l'échelle qui s'applique.
+
+**Règle de niveau** : un `<h3>` ne porte jamais `.titre-l`, un `<h2>` jamais
+`.titre-s`. L'échelon suit la hiérarchie du document, pas l'envie du moment.
+
+### Ce que l'homogénéisation du 2026-08-25 a corrigé
+
+- **Onze titres étaient rendus en Inter** — sans classe typographique, ils
+  tombaient sur `--font-sans` avec `font-medium`, quand tout le reste du site
+  est en Space Grotesk 400. Sur `ContactForm`, `Reassurance`, `Reveal.section`,
+  `Reservation`, le hub `/guide`.
+- **`.editorial` était en graisse 500**, les pages produit en 400.
+- **74 titres portaient leur propre taille**, souvent doublée d'un
+  `leading-` et d'un `tracking-` inventés au cas par cas.
+
+## Boutons
+
+**Un seul composant** : `src/components/ui/Button.tsx` — `Button`, `IconButton`,
+`Arrow`. Il n'existe pas d'autre façon d'écrire un bouton (voir ADR-040 §
+Amendement : trois systèmes coexistaient, dont un doublon de flèche).
+
+- **Rayon léger** (`rounded-lg`, 8 px) — ni pilule, ni angle vif. Arbitrage de
+  Richard le 2026-08-25 : garder l'arrondi, homogénéiser les couleurs.
+- **Une seule police, une seule graisse, un seul interlettrage**, portés par le
+  socle du composant et jamais surchargés. Deux tailles seulement : `sm`
+  (barres, bandeaux — 40 px) et `md` (cibles principales — 48 px). C'est ainsi
+  que le bouton du menu s'était retrouvé à 0,875 rem et celui des cookies à
+  0,78 rem, ce qui **se lit comme une police différente alors que c'est la
+  même**.
+- **48 px** sur les cibles principales. Sous 44 px, un bouton se rate au doigt.
+- **Une seule teinte de bouton sur tout le site** : fond `lumiere`, texte `ink`,
+  **liseré `accent`** sur fond clair. Le liseré n'est pas décoratif — la teinte
+  claire ne donne que 1,47:1 sur `canvas`, quand WCAG 1.4.11 exige 3:1 pour un
+  composant. Sur fond nuit, la lumière se suffit et le liseré tombe.
+- Variantes par le fond qu'elles habitent : `accent` / `outline` / `ghost` sur
+  clair, `lumiere` / `contour-clair` sur nuit. Un bouton qui doit deviner sa
+  teinte selon la page est un bouton qu'on oublie d'accorder.
+- Effet magnétique sur les boutons actifs seulement — suivre le curseur sur un
+  bouton désactivé promettrait une action qui n'aura pas lieu.
+
+## Mouvement
+
+Quatre moments, pas un de plus (ADR-040). Courbe unique :
+`--ease-out-expo` = `cubic-bezier(0.16, 1, 0.3, 1)`.
+
+1. **Ouverture** d'une page produit — dézoom de l'image + montée décalée.
+2. **Entrées au défilement** — composant `Reveal`, dont l'état masqué vit en CSS
+   sous `.js-motion` : le HTML servi reste visible, donc indexable.
+3. **Chiffres** — incrémentés une fois à l'entrée dans le cadre.
+4. **Barre d'action mobile** — révélée après le hero.
+
+⚠ **Jamais de `<h1>` ou `<h2>` sous un bloc animé en JS.** Un titre en
+`opacity: 0` sérialisé n'est pas indexé (leçon du 2026-08-19).
+
+Tout est respecté sous `prefers-reduced-motion`.
+
+## En-tête et pied de page
+
+**Ils ne changent pas selon le registre**, et c'est volontaire :
+
+- la barre porte un **fond clair permanent** (`bg-canvas/80` + flou) depuis le
+  2026-08-20 — elle avait été corrigée pour survivre aux heros sombres ;
+- le pied de page est **déjà sombre** (`bg-ink`) : une page nuit s'y fond, une
+  page claire y trouve sa clôture.
+
+C'est ce qui permet à un site à deux registres de rester un seul site.
+
+## Ce qui reste hors charte
+
+Le **back-office** garde son identité propre (violet `#7469F4`). C'est un outil
+interne, pas une surface de marque : lui imposer la charte publique n'aurait
+d'autre effet que de rendre deux mondes confusément semblables.
+
+Les **pages légales** suivent le registre clair mais restent hors du contrôle de
+vocabulaire (ADR-029 §17.10).

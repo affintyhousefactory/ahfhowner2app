@@ -78,7 +78,7 @@ export default function AProposPage() {
           </Reveal>
 
           <Reveal delay={0.05}>
-            <h1 className="editorial mt-12 max-w-4xl text-balance text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:text-[4.8rem]">
+            <h1 className="titre-xl mt-12 max-w-4xl text-balance text-ink md:mt-16">
               {ABOUT.title}{" "}
               {/* Le `{" "}` n'est pas décoratif : le <span> est en `block`, donc
                   sans lui le nom accessible du <h1> concatène les deux membres
@@ -110,7 +110,7 @@ export default function AProposPage() {
             </div>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="editorial mt-10 max-w-3xl text-balance text-[2rem] leading-[1.04] text-ink md:mt-14 md:text-[3.6rem]">
+            <h2 className="titre-l mt-10 max-w-3xl text-balance text-ink md:mt-14">
               {philosophie.title}
             </h2>
           </Reveal>
@@ -170,7 +170,7 @@ export default function AProposPage() {
           <div className="mt-10 grid items-start gap-12 md:mt-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16">
             <div>
               <Reveal delay={0.05}>
-                <h2 className="editorial text-balance text-[2rem] leading-[1.04] text-canvas md:text-[3.6rem]">
+                <h2 className="titre-l text-balance text-canvas">
                   {acier.title}
                 </h2>
               </Reveal>
@@ -248,7 +248,7 @@ export default function AProposPage() {
 
             <div>
               <Reveal delay={0.1}>
-                <h2 className="editorial max-w-2xl text-balance text-[2rem] leading-[1.04] text-ink md:text-[3.4rem]">
+                <h2 className="titre-l max-w-2xl text-balance text-ink">
                   {ingenierie.title}
                 </h2>
               </Reveal>
@@ -291,7 +291,7 @@ export default function AProposPage() {
             </div>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="editorial mt-10 max-w-3xl text-balance text-[2rem] leading-[1.04] text-ink md:mt-14 md:text-[3.6rem]">
+            <h2 className="titre-l mt-10 max-w-3xl text-balance text-ink md:mt-14">
               {eco.title}
             </h2>
           </Reveal>

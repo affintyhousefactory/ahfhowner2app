@@ -30,7 +30,7 @@ export function LegalShell({
           </span>
         </div>
 
-        <h1 className="editorial mt-10 max-w-3xl text-balance text-[2.4rem] leading-[1.04] text-ink md:mt-14 md:text-[4.5rem]">
+        <h1 className="titre-xl mt-10 max-w-3xl text-balance text-ink md:mt-14">
           {title}
         </h1>
 

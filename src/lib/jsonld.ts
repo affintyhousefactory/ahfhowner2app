@@ -34,6 +34,10 @@ export function organizationSchema(): JsonLdObject {
     description:
       "Studios de jardin d'exception livrés prêts à vivre, fabriqués au Pays-Basque.",
     email: CONTACT.email,
+    // Profils officiels — `sameAs` est le champ par lequel un moteur rattache
+    // un compte social à l'entité (knowledge panel). Sans lui, le lien du pied
+    // de page n'est qu'un lien sortant de plus.
+    sameAs: [CONTACT.instagram],
     // Numéro au format E.164 — seul format que les moteurs composent
     // correctement (bouton « Appeler » du knowledge panel).
     telephone: CONTACT.phoneTel,

@@ -501,3 +501,7 @@ export function useConfigurateur(): Ctx {
 }
 
 export const eur = (n: number) => `${n.toLocaleString("fr-FR")} €`;
+
+/** Surface en écriture française : « 15,84 », virgule décimale, sans zéro inutile. */
+export const surfaceFr = (n: number) =>
+  n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 });

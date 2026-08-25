@@ -34,10 +34,11 @@ import {
 } from "@/lib/configurateur/mentions";
 import { prixOption } from "@/lib/configurateur/config";
 import { chargerNumeros, estSelectionnable, nbDisponibles } from "@/lib/configurateur/numeros";
-import { useConfigurateur, eur } from "./store";
+import { useConfigurateur, eur, surfaceFr } from "./store";
 import { Choix, Eyebrow, Mention, Section } from "./ui";
 import type { ParcelleData } from "@/shared/types/plu";
 import type { UsageId } from "@/lib/configurateur/config";
+import { Button } from "@/components/ui/Button";
 
 /* ------------------------------------------------------------------ */
 /* 01 — le studio                                                      */
@@ -221,7 +222,10 @@ export function SectionAmbianceInterieure() {
 /* 03 — terrasse, par paliers                                          */
 /* ------------------------------------------------------------------ */
 
-const HAUTEUR: Record<string, number> = { sans: 8, petite: 20, moyenne: 32, grande: 46 };
+/* Hauteur du bandeau : encode la taille RELATIVE des paliers, jamais un prix
+   au m² (§5 de la spec). Trois valeurs depuis le 2026-08-25, la grille étant
+   passée de quatre paliers à deux tailles plus « sans ». */
+const HAUTEUR: Record<string, number> = { sans: 8, std: 26, plus: 46 };
 
 export function SectionTerrasse() {
   const c = useConfigurateur();
@@ -231,9 +235,13 @@ export function SectionTerrasse() {
     <Section
       n={4}
       titre="Terrasse"
-      resume={p && p.prixTtc > 0 ? `${p.nom} · ${eur(p.prixTtc)}` : "Sans terrasse"}
+      resume={
+        p && p.prixTtc > 0
+          ? `${p.nom}${p.surfaceM2 ? ` · ${surfaceFr(p.surfaceM2)} m²` : ""} · ${eur(p.prixTtc)}`
+          : "Sans terrasse"
+      }
     >
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-3 gap-1.5">
         {c.paliers.map((x) => {
           const actif = c.terrasse === x.id;
           return (
@@ -255,6 +263,11 @@ export function SectionTerrasse() {
               />
               <span className="text-[0.7rem] font-semibold text-ink">
                 {x.nom.replace("Sans terrasse", "Sans")}
+              </span>
+              {/* La surface est ce que le visiteur compare d'abord : deux
+                  libellés « Standard » et « Plus » ne disent rien seuls. */}
+              <span className="font-mono text-[0.6rem] tabular-nums text-muted/80">
+                {x.surfaceM2 ? `${surfaceFr(x.surfaceM2)} m²` : "—"}
               </span>
               <span className="font-mono text-[0.62rem] tabular-nums text-muted">
                 {x.prixTtc === 0 ? "—" : eur(x.prixTtc)}
@@ -407,12 +420,9 @@ export function SectionTerrain() {
             Prochainement
           </span>
           <p className="text-[0.78rem] leading-relaxed text-muted">{MENTIONS.usage.detail}</p>
-          <a
-            href={CONTACT_TERRAIN_NU}
-            className="flex min-h-[46px] w-full items-center justify-center rounded-xl bg-accent px-4 text-[0.9rem] font-semibold text-white transition-colors hover:bg-accent-ink"
-          >
+          <Button href={CONTACT_TERRAIN_NU} magnetic={false} className="w-full">
             Être informé en priorité
-          </a>
+          </Button>
         </div>
       ) : null}
     </Section>

@@ -75,7 +75,7 @@ export function Configurator() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h1 className="editorial mt-12 max-w-4xl text-balance text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:text-[5rem]">
+          <h1 className="titre-xl mt-12 max-w-4xl text-balance text-ink md:mt-16">
             Configurer votre {c.active.name}
           </h1>
         </Reveal>

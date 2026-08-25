@@ -101,7 +101,7 @@ export function Discover({ panels = PANELS }: { panels?: readonly Panel[] } = {}
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-4xl text-balance text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:text-[5rem]">
+          <h2 className="titre-xl mt-12 max-w-4xl text-balance text-ink md:mt-16">
             Pièce après pièce, on entre.
           </h2>
         </Reveal>

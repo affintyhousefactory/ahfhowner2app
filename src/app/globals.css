@@ -6,16 +6,46 @@
    ============================================================ */
 
 @theme {
-  /* Charte Affinity (affinityhome.io) — froide, minimale, voir DESIGN.md */
-  --color-canvas: #f6f7f9; /* off-white froid, base */
+  /* ════════════════════════════════════════════════════════════════════
+     Charte « Heure bleue » — ADR-041, remplace la charte Affinity.
+     Voir DESIGN.md. Deux registres, UNE identité.
+
+     Registre CLAIR  — surfaces de lecture et d'outil : guides, pages
+                       légales, configurateur, formulaires.
+     Registre NUIT   — surfaces d'émotion : accueil, pages produit.
+
+     Ce qui ne change pas d'un registre à l'autre : la typographie, le
+     dessin des boutons, les filets, et la **famille** de l'accent. Seule
+     sa valeur change, parce qu'une teinte lisible sur encre ne l'est pas
+     sur blanc — c'est de la physique, pas du goût.
+     ════════════════════════════════════════════════════════════════════ */
+
+  /* ── Registre clair ── */
+  --color-canvas: #f6f7f9; /* off-white, base */
   --color-surface: #ffffff; /* blocs / images */
   --color-paper: #fbfcfd; /* surface alternative douce */
-  --color-ink: #0d141a; /* charcoal, quasi-noir */
-  --color-muted: #727586; /* gris Affinity (AA ≥4.5:1 sur fond clair) */
+  --color-ink: #0d141a; /* charcoal, quasi-noir — aussi le fond du registre nuit */
+  --color-muted: #6c7076; /* texte secondaire (AA 5.9:1 sur canvas) */
   --color-line: #dadce0; /* filet / bordure */
-  --color-accent: #3a5a86; /* slate-blue profond, réservé aux CTA (texte blanc AA) */
-  --color-accent-ink: #2c466b; /* hover */
-  --color-blue: #357df9; /* azure Affinity */
+
+  /* ── Registre nuit ── */
+  --color-nuit: #0f1519; /* fond des surfaces d'émotion */
+  --color-nuit-doux: #141c21; /* bandeaux et blocs de clôture */
+  --color-nuit-titre: #f7f9fa; /* titres sur nuit */
+  --color-nuit-texte: #e8ebee; /* texte courant sur nuit */
+  --color-nuit-muted: #a9b5be; /* secondaire sur nuit (AA 8.8:1) */
+  --color-nuit-faible: #7d8b95; /* tertiaire sur nuit (AA 5.3:1) */
+
+  /* ── Accent : une seule famille chaude, deux valeurs ──
+     Le bleu slate d'Affinity est retiré : il jurait avec la lumière des
+     pages produit — deux chartes se superposaient à l'écran (constat de
+     Richard sur la Preview du 2026-08-25).
+     Contrastes mesurés, pas estimés : voir DESIGN.md. */
+  --color-accent: #7a5c28; /* bronze profond — texte blanc 6,2:1 */
+  --color-accent-ink: #5f4720; /* hover — texte blanc 8,7:1 */
+  --color-lumiere: #e8c9a0; /* lumière chaude sur nuit — 11,6:1 */
+  --color-lumiere-ink: #f4e0c4; /* hover sur nuit — 14,3:1 */
+  --color-blue: #357df9; /* azure — conservé pour les états d'information */
 
   /* Typographies — display suisse + texte net + mono */
   --font-display: var(--font-display), system-ui, "Helvetica Neue", sans-serif;
@@ -200,6 +230,32 @@ html {
   .clip-reveal {
     clip-path: inset(0 0 100% 0);
   }
+
+  /* Rail de défilement horizontal sur fond sombre — ADR-040.
+   *
+   * Sur mobile les barres sont flottantes et disparaissent d'elles-mêmes ;
+   * sur bureau elles sont permanentes, claires et épaisses, et venaient poser
+   * un bandeau gris système au bas d'une page à fond encre.
+   *
+   * La barre n'est pas masquée : sur bureau elle indique la position et reste
+   * saisissable à la souris. Elle est seulement mise à la teinte de la page.
+   */
+  .rail-sombre {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-lumiere) 45%, transparent) rgba(255, 255, 255, 0.06);
+  }
+  .rail-sombre::-webkit-scrollbar {
+    height: 6px;
+  }
+  .rail-sombre::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .rail-sombre::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-lumiere) 45%, transparent);
+  }
+  .rail-sombre::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-lumiere) 70%, transparent);
+  }
 }
 
 /* Typo cinétique : sur-titres serrés (sans) */
@@ -208,13 +264,62 @@ html {
   line-height: 0.92;
 }
 
-/* Display « suisse » (grotesque magistral) */
+/* Display « suisse » (grotesque magistral) — ADR-041.
+ *
+ * Graisse ramenée de 500 à 400 le 2026-08-25 : les titres de l'accueil
+ * paraissaient plus lourds que ceux des pages produit, qui sont en graisse
+ * normale. Même police, deux poids — ce qui se lit comme deux typographies.
+ * L'interlettrage suit (-0.035em, la valeur des pages produit).
+ *
+ * 38 fichiers portent cette classe : c'est ici que la typographie du site
+ * s'accorde, pas dans chaque titre. */
 .editorial {
   font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  font-weight: 400;
+  letter-spacing: -0.035em;
   line-height: 1.0;
 }
+/* ════════════════════════════════════════════════════════════════════
+   Échelle de titres — ADR-041.
+
+   Les pages produit portaient ONZE interlettrages différents (-0.02 à
+   -0.035em) et redéclaraient `font-normal` à chaque titre ; l'accueil
+   passait par `.editorial` en graisse 500. Résultat : deux typographies
+   perçues pour une seule police chargée.
+
+   Quatre niveaux, une seule définition chacun. La taille descend, et
+   l'interlettrage se desserre avec elle — un titre de 4,6 rem supporte
+   -0.035em, un intertitre de 1,3 rem s'y écraserait.
+   ════════════════════════════════════════════════════════════════════ */
+.titre-xl,
+.titre-l,
+.titre-m,
+.titre-s {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+.titre-xl {
+  font-size: clamp(2.2rem, 6.4vw, 4.6rem);
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: pretty;
+}
+.titre-l {
+  font-size: clamp(1.9rem, 4.2vw, 3.4rem);
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+.titre-m {
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  letter-spacing: -0.02em;
+  line-height: 1.22;
+}
+.titre-s {
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
 /* Filet de section + numérotation */
 .rule {
   border-top: 1px solid var(--color-line);
@@ -441,64 +546,6 @@ html {
     transform: translateY(101vh);
     opacity: 0;
   }
-}
-
-/* Bouton signature « éditorial » (anti-IA, letterpress) — repris du labo
-   et reskinné Affinity. Solide + petit radius + ligne d'accent qui grandit
-   sous le label au survol + enfoncement (inset) au clic. Aucun dégradé,
-   aucune flèche qui glisse, aucun sheen. */
-.btn-rl {
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border: 0;
-  cursor: pointer;
-  border-radius: 6px;
-  padding: 0.85rem 1.5rem;
-  font-weight: 600;
-  font-family: var(--font-display);
-  letter-spacing: -0.01em;
-  transition:
-    background-color 0.2s ease,
-    box-shadow 0.12s ease,
-    transform 0.12s ease;
-}
-.btn-rl::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 6px;
-  height: 1.5px;
-  width: calc(100% - 28px);
-  border-radius: 2px;
-  transform: translateX(-50%) scaleX(0);
-  transform-origin: center;
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.btn-rl:hover::after {
-  transform: translateX(-50%) scaleX(1);
-}
-.btn-rl:active {
-  transform: translateY(1px);
-}
-.btn-rl-accent {
-  background: var(--color-accent);
-  color: #fff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 1px 2px rgba(58, 90, 134, 0.35);
-}
-.btn-rl-accent:hover {
-  background: var(--color-accent-ink);
-}
-.btn-rl-accent:active {
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.22);
-}
-.btn-rl-accent::after {
-  background: rgba(255, 255, 255, 0.85);
 }
 
 /* prefers-reduced-motion : tout se calme */

@@ -131,7 +131,7 @@ export default function DependanceHabitablePage() {
         <ListePuces items={C.integration.points} />
         <Reveal delay={0.1}>
           <div className="mt-14 max-w-2xl border-t border-line pt-6">
-            <h3 className="editorial text-xl text-ink md:text-2xl">
+            <h3 className="titre-m text-ink">
               {C.integration.personnalisation.titre}
             </h3>
             <p className="mt-4 text-[1rem] leading-relaxed text-muted">
@@ -156,7 +156,7 @@ export default function DependanceHabitablePage() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-4xl text-balance text-[2rem] leading-[1.06] text-canvas md:mt-16 md:text-[3.6rem]">
+          <h2 className="titre-l mt-12 max-w-4xl text-balance text-canvas md:mt-16">
             {C.urbanisme.titre}
           </h2>
         </Reveal>
@@ -180,7 +180,7 @@ export default function DependanceHabitablePage() {
 
       <Section id="emotion" fond="surface">
         <Reveal>
-          <h2 className="editorial max-w-4xl text-balance text-[2rem] leading-[1.06] text-ink md:text-[3.4rem]">
+          <h2 className="titre-l max-w-4xl text-balance text-ink">
             {C.emotion.titre}
           </h2>
         </Reveal>

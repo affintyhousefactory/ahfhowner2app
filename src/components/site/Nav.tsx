@@ -144,7 +144,8 @@ export function Nav() {
           <Button
             href={reserverHref()}
             variant="accent"
-            className="hidden px-5 py-2.5 text-sm sm:inline-flex"
+            size="sm"
+            className="hidden sm:inline-flex"
           >
             Réserver
             <Arrow />
@@ -297,13 +298,14 @@ export function Nav() {
                 >
                   Découvrir
                 </Link>
-                <Link
+                <Button
                   href={reserverHref(p.key)}
-                  onClick={() => setOpen(false)}
-                  className="rounded-full bg-accent px-4 py-1.5 text-sm text-white"
+                  magnetic={false}
+                  className="px-4 text-sm"
                 >
                   Réserver
-                </Link>
+                  <Arrow />
+                </Button>
               </div>
             </div>
           ))}

@@ -119,7 +119,7 @@ export default function StudioJardinHautDeGammePage() {
           ).map(([bloc, produit], i) => (
             <Reveal key={produit.key} delay={i * 0.08}>
               <div className="flex h-full flex-col border-t border-line pt-6">
-                <h3 className="editorial text-xl text-ink md:text-2xl">{bloc.condition}</h3>
+                <h3 className="titre-m text-ink">{bloc.condition}</h3>
                 <p className="mt-4 text-[1rem] leading-relaxed text-muted">{bloc.texte}</p>
                 <p className="mt-5 text-[0.95rem] font-medium leading-snug text-ink">
                   {produit.area} — {bloc.resume}
@@ -136,7 +136,7 @@ export default function StudioJardinHautDeGammePage() {
 
         <Reveal delay={0.16}>
           <div className="mt-14 border-t border-line pt-6">
-            <h3 className="editorial text-xl text-ink">{C.choisir.hesitation.titre}</h3>
+            <h3 className="titre-s text-ink">{C.choisir.hesitation.titre}</h3>
             <p className="mt-3 max-w-xl text-[1rem] leading-relaxed text-muted">
               {C.choisir.hesitation.texte}
             </p>
@@ -168,7 +168,7 @@ export default function StudioJardinHautDeGammePage() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-4xl text-balance text-[2rem] leading-[1.06] text-canvas md:mt-16 md:text-[3.6rem]">
+          <h2 className="titre-l mt-12 max-w-4xl text-balance text-canvas md:mt-16">
             {C.difference.titre}
           </h2>
         </Reveal>

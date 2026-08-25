@@ -144,7 +144,7 @@ export function Reservation() {
           {/* Gauche : promesse + jauge */}
           <div>
             <Reveal delay={0.05}>
-              <h2 className="text-balance kinetic [font-size:var(--text-h1)]">
+              <h2 className="titre-xl text-balance">
                 {soldOut
                   ? "Série 01 complète."
                   : "Réservez votre exemplaire numéroté."}
@@ -253,7 +253,7 @@ export function Reservation() {
                   <button
                     type="submit"
                     disabled={sending}
-                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-medium text-white transition-opacity disabled:opacity-50"
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-accent bg-lumiere px-6 py-3.5 text-sm font-medium text-ink transition-opacity disabled:opacity-50"
                   >
                     {sending
                       ? "Envoi en cours…"
@@ -495,7 +495,7 @@ function Confirmation({ slot }: { slot: number | null }) {
           <path d="M5 12.5l4 4L19 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      <h3 className="mt-5 text-xl font-medium tracking-tight">
+      <h3 className="titre-m mt-5">
         Demande enregistrée
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -520,7 +520,7 @@ function Waitlist() {
   return (
     <div>
       <p className="eyebrow mb-3">Liste prioritaire</p>
-      <h3 className="text-xl font-medium tracking-tight">
+      <h3 className="titre-m">
         Les 12 sont pris ? Rejoignez la liste prioritaire.
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">
