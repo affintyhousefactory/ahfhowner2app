@@ -1,118 +1,101 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import Image from "next/image";
+import { motion, useReducedMotion } from "framer-motion";
 import { BRAND, SERIE_TOTAL, reserverHref } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Ikurrina } from "@/components/ui/Ikurrina";
+import { contenuProduit } from "@/lib/produits/heure-bleue";
 
+/**
+ * Hero de l'accueil — charte « Heure bleue » (ADR-041).
+ *
+ * Il servait une vidéo dans un cadre posé sur fond clair ; il reprend désormais
+ * la grammaire des pages produit, à la demande de Richard : image plein cadre,
+ * registre nuit, titre en superposition.
+ *
+ * ⚠ **L'image n'est jamais rognée par le cadre.**
+ *
+ * Sur mobile, un hero plein écran fait 390 × 844 px, soit un rapport de 0,46,
+ * quand le visuel est en 16/9 (1,78). Un `object-cover` y perdrait les deux
+ * tiers de la largeur — donc le studio lui-même. L'image garde donc son
+ * rapport (`aspect-video`) et le texte passe **en dessous** ; la superposition
+ * ne commence qu'à partir de `md`, où la hauteur disponible le permet.
+ *
+ * C'est la même règle que pour la maquette mobile : sur 390 px, un titre par
+ * dessus une image coupée ne laisse respirer ni l'un ni l'autre.
+ *
+ * ⚠ Le `<h1>` n'est pas animé en JS et aucun bloc ne part en `opacity: 0`
+ * sérialisé : l'entrée passe par les classes CSS `hero-*`, conditionnées à
+ * `.js-motion`. Sans JS, tout reste visible — leçon du 2026-08-25, où
+ * l'accroche et le bouton d'une page produit partaient invisibles.
+ */
 export function Hero() {
-  const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-  const mediaY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 90]);
-  const mediaScale = useTransform(scrollYProgress, [0, 1], [1, reduce ? 1 : 1.06]);
+  /* Le visuel d'accueil est celui de la page Arko Max : même fichier, même
+     source de vérité. Le recopier ici aurait laissé les deux diverger. */
+  const visuel = contenuProduit("max").hero;
 
   return (
-    <section
-      id="top"
-      ref={ref}
-      className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden pt-20 md:pt-24"
-    >
-      {/* Rail haut — marque + provenance (mono) */}
-      <div className="container-page flex items-baseline justify-between pt-4">
-        <span
-          className="hero-fade font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted"
-          style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}
-        >
-          {BRAND.maker}
+    <section id="top" className="relative isolate overflow-hidden bg-nuit text-nuit-texte">
+      {/* Bandeau de contexte, au-dessus de l'image sur mobile comme sur bureau. */}
+      <div className="container-page flex items-baseline justify-between gap-4 pt-24 md:absolute md:inset-x-0 md:top-0 md:z-20 md:pt-28">
+        <span className="hero-fade font-mono text-[0.68rem] uppercase tracking-[0.2em] text-nuit-faible">
+          {SERIE_TOTAL} exemplaires numérotés
         </span>
-        <span
-          className="hero-fade inline-flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted"
-          style={{ "--reveal-delay": "0.15s" } as React.CSSProperties}
-        >
+        <span className="hero-fade inline-flex items-center gap-2 font-mono text-[0.68rem] uppercase tracking-[0.2em] text-nuit-faible">
           <Ikurrina width={16} height={11} className="rounded-[1px]" />
           {BRAND.madeIn}
         </span>
       </div>
 
-      {/* Média hero — le studio comme focal éditorial (sans wordmark, ADR-022). */}
-      <div className="relative flex min-h-0 flex-1 flex-col justify-center">
-        <div className="relative z-0 mt-8 flex justify-center">
-          {/* Parallaxe au scroll : reste en framer-motion (motion values sur le
-              transform). L'entrée en opacité, elle, passe par `hero-fade` —
-              sinon framer sérialise `opacity:0` dans le HTML du serveur. */}
-          <motion.figure
-            style={
-              {
-                y: mediaY,
-                scale: mediaScale,
-                "--reveal-delay": "0.35s",
-              } as React.ComponentProps<typeof motion.figure>["style"]
-            }
-            className="hero-fade relative aspect-video w-[min(94vw,1120px,96svh)] overflow-hidden rounded-xl bg-surface shadow-[0_50px_80px_rgba(26,23,20,0.16)]"
-          >
-            <video
-              className="h-full w-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="/assets/arko/video/turntable-poster.jpg"
-            >
-              <source src="/assets/arko/video/turntable.mp4" type="video/mp4" />
-            </video>
-            {/* Voile clair en haut : garde "ARKO" (encre) lisible là où il
-                mord sur l'image, et fait « émerger » l'image du canvas. */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 bg-gradient-to-b from-canvas via-canvas/60 to-transparent" />
-            <figcaption className="pointer-events-none absolute bottom-3 left-4 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-white/80">
-              Vue 360° — modèle Série 01
-            </figcaption>
-          </motion.figure>
+      {/* Le rapport de l'image est tenu jusqu'à `md` : rien n'est rogné. */}
+      <div className="relative mt-6 aspect-video w-full md:mt-0 md:aspect-auto md:h-[min(92svh,54rem)]">
+        <motion.div
+          className="absolute inset-0"
+          initial={reduce ? false : { scale: 1.06 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <Image
+            src={visuel.src}
+            alt={visuel.alt}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </motion.div>
+
+        {/* Voile : il ne sert qu'au texte, donc il n'apparaît qu'avec lui. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 hidden bg-[linear-gradient(180deg,rgba(15,21,25,.55)_0%,rgba(15,21,25,.10)_38%,rgba(15,21,25,.96)_100%)] md:block"
+        />
+
+      </div>
+
+      {/* ⚠ UN SEUL bloc de texte, donc un seul `<h1>` dans le HTML — deux blocs
+          alternés par media query en auraient servi deux au crawler. Sur mobile
+          il suit l'image dans le flux ; à partir de `md` il se pose dessus. */}
+      <div className="container-page relative z-10 flex flex-col gap-6 py-10 md:absolute md:inset-x-0 md:bottom-0 md:gap-0 md:pb-14">
+        <h1 className="titre-hero text-balance text-nuit-titre md:max-w-[19ch]">
+          {BRAND.h1}
+        </h1>
+        <p className="hero-rise text-[0.95rem] leading-relaxed text-nuit-muted md:mt-6 md:max-w-md md:text-base">
+          {BRAND.subline}
+        </p>
+        <div className="hero-rise flex flex-col gap-3 md:mt-8 md:flex-row md:flex-wrap md:items-center md:gap-4">
+          <Button href={reserverHref()} variant="lumiere" className="w-full md:w-auto">
+            Réserver
+            <Arrow />
+          </Button>
+          <Button href="/studio-jardin-arko-one" variant="contour-clair" className="w-full md:w-auto">
+            Voir les studios
+          </Button>
         </div>
       </div>
 
-      {/* Rail bas — baseline (h1) + CTA + jauge. Animé en CSS et non en
-          framer-motion : le h1 ne doit jamais être servi sous `opacity:0`. */}
-      <div
-        className="hero-rise container-page pb-8"
-        style={{ "--reveal-delay": "0.6s" } as React.CSSProperties}
-      >
-        <div className="rule grid grid-cols-1 gap-8 pt-6 md:grid-cols-12 md:items-end">
-          <div className="md:col-span-7">
-            {/* `BRAND.h1` et non `BRAND.baseline` depuis le 2026-08-19 : le
-                titre de page nomme la catégorie et la marque (référencement),
-                la baseline reste la signature éditoriale du pied de page. */}
-            <h1 className="titre-l max-w-xl text-balance text-ink">
-              {BRAND.h1}
-            </h1>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
-              {BRAND.subline}
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-5 md:col-span-5 md:items-end">
-            {/* Un seul CTA. « Tester mon terrain » a été retiré le 2026-08-02 :
-                `/terrain` est suspendue (ADR-028) et son repli menait au
-                configurateur v1, que plus aucun autre bouton de la page ne
-                dessert. La vérification de parcelle vit désormais dans le
-                parcours lui-même, en section 05. */}
-            <div className="flex flex-wrap items-center gap-3 md:justify-end">
-              <Button href={reserverHref()} variant="accent">
-                Réserver
-                <Arrow />
-              </Button>
-            </div>
-            <p className="font-mono text-xs text-muted md:text-right">
-              {SERIE_TOTAL} exemplaires numérotés
-            </p>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

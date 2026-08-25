@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { PRODUCT_LIST, reserverHref, type Product } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { useTilt } from "@/components/effects/useTilt";
-import { Button } from "@/components/ui/Button";
+import { Button, Arrow } from "@/components/ui/Button";
+import { contenuProduit } from "@/lib/produits/heure-bleue";
 
 /* Accueil — entrée vers les deux modèles (parcours Découvrir / Réserver).
    Tilt 3D suivi-souris sur chaque carte (perf-safe, framer spring). */
@@ -54,18 +55,18 @@ function ProductCard({ p }: { p: Product }) {
       }}
       className="flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-canvas"
     >
-      <div className="relative aspect-video w-full overflow-hidden bg-surface">
-        <video
-          className="h-full w-full object-cover"
-          muted
-          loop
-          autoPlay
-          playsInline
-          preload="none"
-          poster={p.poster}
-        >
-          <source src={p.video} type="video/mp4" />
-        </video>
+      {/* Le visuel vient de `contenuProduit(...)`, la source qu'utilise la page
+          de détail : les deux ne peuvent pas diverger. Il remplace une vidéo en
+          lecture automatique — deux vidéos qui tournent en fond sur l'accueil
+          coûtaient plus qu'elles ne montraient. */}
+      <div className="relative aspect-video w-full overflow-hidden bg-nuit">
+        <Image
+          src={contenuProduit(p.key).hero.src}
+          alt={contenuProduit(p.key).hero.alt}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
+        />
       </div>
       <div className="flex flex-1 flex-col p-6 md:p-8">
         <div className="flex items-baseline justify-between">
@@ -81,14 +82,12 @@ function ProductCard({ p }: { p: Product }) {
           dès {p.pricing.base.toLocaleString("fr-FR")} €
         </p>
         <div className="mt-auto flex flex-wrap gap-3 pt-6">
-          <Link
-            href={p.slug}
-            className="rounded-full border border-line px-5 py-2.5 text-sm text-ink transition-colors hover:border-ink"
-          >
+          <Button href={p.slug} variant="outline" size="sm" magnetic={false}>
             Découvrir
-          </Link>
-          <Button href={reserverHref(p.key)} magnetic={false} className="px-5 text-sm">
+          </Button>
+          <Button href={reserverHref(p.key)} size="sm" magnetic={false}>
             Réserver
+            <Arrow />
           </Button>
         </div>
       </div>
