@@ -70,15 +70,35 @@ un jour, l'absence d'accès chantier et l'annexe sur parcelle déjà bâtie — 
 cadre de vente d'ADR-029. **Retirée du carrousel sur demande de Richard**
 (2026-08-25) ; conservée au dépôt car c'est la seule image non générée du lot.
 
+## L'en-tête et le pied de page ne sont PAS à reprendre
+
+C'était présenté comme le coût principal de cette direction. Vérification faite
+dans le code **et sur la production**, c'était faux :
+
+- la barre porte un **fond clair permanent** (`bg-canvas/80` + flou) depuis la
+  décision du 2026-08-20 — elle avait précisément été corrigée pour survivre
+  aux heros sombres des pages éditoriales, et le commentaire de `Nav.tsx` le
+  dit : « ce qui évite que la prochaine page à hero sombre reproduise le
+  défaut » ;
+- le pied de page est **déjà sombre** (`bg-ink`, `#0d141a`), à deux points de
+  la teinte de fond des maquettes (`#0f1519`) : la page s'y fond au lieu de
+  trancher ;
+- et le cas **tourne déjà en ligne** : `/guide` ouvre sur un hero `ink` sous
+  cette même barre.
+
+Les quatre maquettes montrent désormais les deux composants réels. Reste un
+**réglage**, pas une reprise : la barre est translucide à 80 %, donc le contenu
+sombre qui défile dessous la teinte légèrement. La passer à 95 % sur ces pages
+est une valeur à changer.
+
 ## Ce qui reste à trancher avant d'implémenter
 
-- **Le fond sombre impose de reprendre l'en-tête et le pied de page**, pensés
-  pour un fond clair. C'est le vrai coût de cette direction, pas le motion.
 - **ADR-006** verrouille Lighthouse 100 et un LCP sous 0,8 s. L'image du hero
   **est** le LCP : `priority`, AVIF, et pas de JS devant elle. Le dézoom est un
   `transform` composité, sans effet sur la mesure.
-- **ADR-002** (charte Affinity) attend toujours la validation d'Albert : cette
-  direction s'en écarte, c'est une **alerte Albert** et un amendement à écrire.
+- ~~**ADR-002** (charte Affinity)~~ — **levé le 2026-08-25** : la direction
+  « Heure bleue » est validée côté charte (arbitrage de Richard). L'amendement
+  d'ADR-002 reste à écrire, il ne conditionne plus l'implémentation.
 - **Le pool de six est commun** aux deux modèles — ce n'est pas 6 + 6. Les deux
   pages affichent chacune « 6 numéros encore libres » sans le préciser : à
   arbitrer.

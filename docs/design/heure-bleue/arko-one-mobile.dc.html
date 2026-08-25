@@ -22,11 +22,11 @@
 
 <div style="width: 390px; background: #0f1519; font-family: Inter, system-ui, sans-serif; color: #e8ebee;">
 
-  <!-- Barre : le nom, un menu. Pas de navigation déployée sur 390 px. -->
-  <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.07);">
-    <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px; letter-spacing: .04em; color: #f4f6f8;">HOWNER</span>
+  <!-- Barre — composant Nav réel : fond clair permanent, inchangé. -->
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #f6f7f9; border-bottom: 1px solid #dadce0;">
+    <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px; letter-spacing: .04em; color: #0d141a;">HOWNER</span>
     <button style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -10px -12px -10px 0; background: none; border: none; cursor: pointer;" aria-label="Ouvrir le menu">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8ebee" stroke-width="1.4" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"></path></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d141a" stroke-width="1.4" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"></path></svg>
     </button>
   </div>
 
@@ -196,6 +196,14 @@
       Configurer
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
     </a>
+  </div>
+
+
+  <!-- ══ Pied de page — composant Footer réel : bg-ink (#0d141a), déjà sombre.
+       La page s'y fond au lieu de trancher. Rien à reprendre non plus. ══ -->
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 34px 20px; background: #0d141a; border-top: 1px solid rgba(255,255,255,.08);">
+    <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: rgba(246,247,249,.55);">Howner</span>
+    <span style="font-size: 12px; color: rgba(246,247,249,.45);">Pied de page existant — inchangé</span>
   </div>
 
 </div>

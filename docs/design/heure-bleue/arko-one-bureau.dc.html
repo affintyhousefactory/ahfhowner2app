@@ -27,14 +27,16 @@
 
 <div style="width: 1280px; background: #0f1519; font-family: Inter, system-ui, sans-serif; color: #e8ebee;">
 
-  <!-- ══ Barre ══ -->
-  <div style="position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 20px 64px; border-bottom: 1px solid rgba(255,255,255,.07);">
-    <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 15px; letter-spacing: .04em; color: #f4f6f8;">HOWNER</span>
-    <div style="display: flex; align-items: center; gap: 34px; font-size: 13px; color: #93a1ab;">
-      <a href="#" style="color: #93a1ab;">Nos studios</a>
-      <a href="#" style="color: #93a1ab;">Le guide</a>
-      <a href="#" style="color: #93a1ab;">À propos</a>
-      <a href="#" style="padding: 9px 20px; border: 1px solid rgba(232,201,160,.42); color: {{lumiere}};">Configurer</a>
+  <!-- ══ Barre — le composant Nav réel : fond clair permanent (bg-canvas/80),
+       filet line, libellés ink. Inchangé depuis le 2026-08-20, il n'a pas à
+       être repris pour une page sombre. ══ -->
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 20px 64px; background: #f6f7f9; border-bottom: 1px solid #dadce0;">
+    <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 15px; letter-spacing: .04em; color: #0d141a;">HOWNER</span>
+    <div style="display: flex; align-items: center; gap: 34px; font-size: 13px;">
+      <a href="#" style="color: #727586;">Nos studios</a>
+      <a href="#" style="color: #727586;">Le guide</a>
+      <a href="#" style="color: #727586;">À propos</a>
+      <a href="#" style="padding: 9px 20px; background: #0d141a; color: #f6f7f9;">Configurer</a>
     </div>
   </div>
 
@@ -238,6 +240,14 @@
       <span style="flex-grow: 1; height: 1px; background: rgba(255,255,255,.09);"></span>
       <span style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #6f7d87;">Dessiné par notre architecte intégrée · Fabriqué au Pays-Basque</span>
     </div>
+  </div>
+
+
+  <!-- ══ Pied de page — composant Footer réel : bg-ink (#0d141a), déjà sombre.
+       La page s'y fond au lieu de trancher. Rien à reprendre non plus. ══ -->
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 34px 64px; background: #0d141a; border-top: 1px solid rgba(255,255,255,.08);">
+    <span style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: rgba(246,247,249,.55);">Howner</span>
+    <span style="font-size: 12px; color: rgba(246,247,249,.45);">Pied de page existant — inchangé</span>
   </div>
 
 </div>
