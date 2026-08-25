@@ -76,8 +76,19 @@ Inchangée — c'est ce qui fait que la refonte ne dépayse pas.
 `Arrow`. Il n'existe pas d'autre façon d'écrire un bouton (voir ADR-040 §
 Amendement : trois systèmes coexistaient, dont un doublon de flèche).
 
-- **Angles nets.** Pas de pilule : le dessin s'accorde aux filets et aux cadres.
-- **48 px de hauteur minimale**, partout. Sous 44 px, un bouton se rate au doigt.
+- **Rayon léger** (`rounded-lg`, 8 px) — ni pilule, ni angle vif. Arbitrage de
+  Richard le 2026-08-25 : garder l'arrondi, homogénéiser les couleurs.
+- **Une seule police, une seule graisse, un seul interlettrage**, portés par le
+  socle du composant et jamais surchargés. Deux tailles seulement : `sm`
+  (barres, bandeaux — 40 px) et `md` (cibles principales — 48 px). C'est ainsi
+  que le bouton du menu s'était retrouvé à 0,875 rem et celui des cookies à
+  0,78 rem, ce qui **se lit comme une police différente alors que c'est la
+  même**.
+- **48 px** sur les cibles principales. Sous 44 px, un bouton se rate au doigt.
+- **Une seule teinte de bouton sur tout le site** : fond `lumiere`, texte `ink`,
+  **liseré `accent`** sur fond clair. Le liseré n'est pas décoratif — la teinte
+  claire ne donne que 1,47:1 sur `canvas`, quand WCAG 1.4.11 exige 3:1 pour un
+  composant. Sur fond nuit, la lumière se suffit et le liseré tombe.
 - Variantes par le fond qu'elles habitent : `accent` / `outline` / `ghost` sur
   clair, `lumiere` / `contour-clair` sur nuit. Un bouton qui doit deviner sa
   teinte selon la page est un bouton qu'on oublie d'accorder.

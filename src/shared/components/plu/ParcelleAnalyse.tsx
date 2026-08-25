@@ -282,7 +282,11 @@ export function ParcelleAnalyse({ mode, initialParcelle = "" }: Props) {
 
   const btnCls = cn(
     "shrink-0 inline-flex items-center gap-2 whitespace-nowrap rounded-full px-5 text-sm font-medium transition-colors disabled:opacity-50",
-    isDark ? "bg-accent py-3.5 text-white hover:bg-accent/90" : "bg-accent py-2.5 text-white hover:bg-accent/90",
+    /* Même teinte dans les deux registres : sur fond sombre la lumière se
+       suffit, sur fond clair le liseré la détache. */
+    isDark
+      ? "bg-lumiere py-3.5 text-nuit hover:bg-lumiere-ink"
+      : "border border-accent bg-lumiere py-2.5 text-ink hover:bg-lumiere-ink",
   );
 
   const resultPanelCls = isDark
@@ -677,7 +681,7 @@ function MandatairePitch({
       <div className="mt-4">
         <a
           href={`/configurer?parcelle=${encodeURIComponent(parcelle)}`}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent py-3.5 text-sm font-medium text-white transition-colors hover:bg-accent/90"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-accent bg-lumiere py-3.5 text-sm font-medium text-ink transition-colors hover:bg-lumiere-ink"
         >
           Configurer mon Arko avec cette parcelle
           <Arrow />

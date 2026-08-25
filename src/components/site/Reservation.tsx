@@ -253,7 +253,7 @@ export function Reservation() {
                   <button
                     type="submit"
                     disabled={sending}
-                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-medium text-white transition-opacity disabled:opacity-50"
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-accent bg-lumiere px-6 py-3.5 text-sm font-medium text-ink transition-opacity disabled:opacity-50"
                   >
                     {sending
                       ? "Envoi en cours…"

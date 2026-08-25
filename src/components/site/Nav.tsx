@@ -144,7 +144,8 @@ export function Nav() {
           <Button
             href={reserverHref()}
             variant="accent"
-            className="hidden px-5 py-2.5 text-sm sm:inline-flex"
+            size="sm"
+            className="hidden sm:inline-flex"
           >
             Réserver
             <Arrow />

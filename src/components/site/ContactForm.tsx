@@ -217,7 +217,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={loading}
-        className="group mt-4 inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-accent px-7 py-3.5 text-[0.95rem] font-medium tracking-tight text-white transition-colors duration-300 hover:bg-accent-ink disabled:opacity-50"
+        className="group mt-4 inline-flex w-full items-center justify-center gap-2.5 rounded-lg border border-accent bg-lumiere px-7 py-3.5 text-[0.95rem] font-medium tracking-tight text-ink transition-colors duration-300 hover:bg-lumiere-ink disabled:opacity-50"
       >
         {loading ? "Envoi…" : "Envoyer"}
         {!loading && <Arrow />}

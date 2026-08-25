@@ -96,6 +96,37 @@ Deux boutons écrits en ligne rejoignent le composant au passage : celui des
 cartes du méga-menu (le premier repéré par Richard) et celui de l'écran
 « terrain nu » du configurateur.
 
+## Amendement 2 du 2026-08-25 — police, rayon, et les derniers boutons
+
+Troisième passe sur la Preview. Richard : « la police sur les boutons du menu ne
+semble pas être la même que celle des CTA des pages Arko », « voir également le
+bouton des cookies », « laisser l'arrondi, homogénéiser les couleurs ».
+
+**Ce n'était pas la police.** Les trois boutons employaient la même — seule la
+**taille** variait : 0,95 rem au socle, 0,875 rem au menu (surcharge par
+`className`), 0,78 rem aux cookies (qui n'était même pas passé par le
+composant). Un écart de taille et de graisse se lit comme un changement de fonte.
+
+Correctif : le socle porte désormais **police, graisse, interlettrage et rayon**,
+et les tailles passent par une prop `size` — `sm` (40 px) ou `md` (48 px). Une
+surcharge de taille par `className` n'a plus de raison d'être.
+
+**Rayon** : `rounded-lg` (8 px). L'amendement 1 d'ADR-040 avait retenu des angles
+vifs ; Richard demande de garder l'arrondi. `DESIGN.md` corrigé en conséquence.
+
+**Les boutons restés en dehors du composant rejoignent la teinte commune** :
+bandeau cookies (les deux boutons, désormais de vrais `<Button>`), formulaire de
+contact, réservation v1, analyse de parcelle (ses deux registres), et surtout le
+**CTA final du configurateur** — celui qui porte la conversion, au passage remonté
+de 46 à 48 px.
+
+`type="submit"` est ajouté au composant : c'est ce qui manquait pour que les
+boutons de formulaire puissent y entrer.
+
+⚠ Restent volontairement en bronze : les **états de sélection** (`Reservation`,
+chips du configurateur), qui ne sont pas des boutons d'action, et
+`RechercheTerrainForm` — domaine suspendu (ADR-028), qu'on ne réveille pas.
+
 ## Reste à faire (application par lots)
 
 1. ✅ Socle — tokens, `DESIGN.md`, boutons, composants produit.
@@ -104,12 +135,8 @@ cartes du méga-menu (le premier repéré par Richard) et celui de l'écran
 3. **Les surfaces claires** — vérifier que les 20 guides, les pages légales et le
    configurateur restent justes avec le nouvel accent.
 4. ✅ **Le méga-menu** — son bouton en ligne rejoint le composant.
-5. **Huit boutons de soumission** (`ContactForm`, `Reservation`, `CookieBanner`,
-   `configurateur/ui`, `ParcelleAnalyse`, `RechercheTerrainForm`) écrivent encore
-   `bg-accent text-white` en ligne. Ils restent **lisibles** (6,2:1) mais
-   divergent désormais du CTA principal. Les convertir demande d'ajouter le
-   support de `type="submit"` au composant et touche des formulaires en
-   production — **à traiter comme un lot à part**, pas en fin de course.
+5. ✅ **Les boutons de soumission** sont alignés (voir Amendement 2), hors
+   domaine suspendu et états de sélection.
 
 ## Hors périmètre
 

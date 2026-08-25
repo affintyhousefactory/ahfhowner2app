@@ -30,8 +30,20 @@ import { Magnetic } from "./Magnetic";
 
 type Variant = "accent" | "outline" | "ghost" | "lumiere" | "contour-clair";
 
+/* Le socle porte tout ce qui ne doit JAMAIS varier d'un bouton à l'autre : la
+   police, la graisse, l'interlettrage, le rayon. Les tailles passent par `size`
+   et non par une surcharge de `className` — c'est ainsi que le bouton du menu
+   s'était retrouvé à 0,875 rem et celui des cookies à 0,78 rem, ce qui se lit
+   comme une police différente alors que c'est la même. */
 const base =
-  "group relative inline-flex min-h-12 items-center justify-center gap-2.5 px-7 text-[0.95rem] font-medium tracking-tight transition-colors duration-300 will-change-transform whitespace-nowrap";
+  "group relative inline-flex items-center justify-center gap-2.5 rounded-lg font-sans font-medium tracking-tight transition-colors duration-300 will-change-transform whitespace-nowrap";
+
+/* Deux tailles, pas davantage. `sm` reste au-dessus de 40 px : c'est un bouton
+   de barre, entouré d'espace ; `md` tient les 48 px des cibles principales. */
+const sizes = {
+  sm: "min-h-10 px-5 text-[0.85rem]",
+  md: "min-h-12 px-7 text-[0.95rem]",
+} as const;
 
 const styles: Record<Variant, string> = {
   /* ── Fonds clairs ── */
@@ -54,22 +66,27 @@ export function Button({
   children,
   href,
   variant = "accent",
+  size = "md",
   className,
   magnetic = true,
   onClick,
   ariaLabel,
   disabled,
   tabIndex,
+  type = "button",
 }: {
   children: React.ReactNode;
   href?: string;
   variant?: Variant;
+  size?: keyof typeof sizes;
   className?: string;
   magnetic?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
   disabled?: boolean;
   tabIndex?: number;
+  /** `submit` pour les boutons de formulaire — ils rejoignent le composant. */
+  type?: "button" | "submit";
 }) {
   const inner = (
     <span className="relative z-10 inline-flex items-center gap-2.5">{children}</span>
@@ -77,6 +94,7 @@ export function Button({
 
   const cls = cn(
     base,
+    sizes[size],
     styles[variant],
     disabled && "pointer-events-none border-white/10 bg-transparent text-white/20",
     className,
@@ -88,7 +106,7 @@ export function Button({
     </Link>
   ) : (
     <button
-      type="button"
+      type={type}
       className={cls}
       onClick={onClick}
       aria-label={ariaLabel}
@@ -132,7 +150,7 @@ export function IconButton({
       disabled={disabled}
       aria-label={ariaLabel}
       className={cn(
-        "group inline-flex h-12 w-12 items-center justify-center transition-colors duration-300",
+        "group inline-flex h-12 w-12 items-center justify-center rounded-lg transition-colors duration-300",
         styles[variant],
         disabled && "pointer-events-none border-white/10 bg-transparent text-white/20",
         className,
