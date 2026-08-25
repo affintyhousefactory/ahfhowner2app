@@ -4,6 +4,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { reserverHref, type ProductKey } from "@/lib/site";
 import { contenuProduit, numerosLibres } from "@/lib/produits/heure-bleue";
 import { Fleche } from "./HeroHeureBleue";
+import { BandeVisite } from "./BandeVisite";
 
 /**
  * Corps des pages produit — direction « Heure bleue » (ADR-040).
@@ -12,9 +13,10 @@ import { Fleche } from "./HeroHeureBleue";
  * mouvement d'entrée vient de `Reveal`, dont l'état masqué vit dans le CSS et
  * non en style inline — le HTML servi reste donc lisible, et indexable, sans JS.
  *
- * Seuls trois îlots sont clients, chacun pour une raison précise : le hero
+ * Seuls quatre îlots sont clients, chacun pour une raison précise : le hero
  * (orchestration), les chiffres (compteur), la barre d'action mobile
- * (révélation au défilement).
+ * (révélation au défilement) et la bande de visite (commandes de bureau et
+ * état début/fin de course).
  */
 
 /* ── Bandeau de série ─────────────────────────────────────────────────── */
@@ -106,45 +108,13 @@ export function SectionEtapes({ produit }: { produit: ProductKey }) {
 
 export function SectionVisite({ produit }: { produit: ProductKey }) {
   const { visite } = contenuProduit(produit);
+  /* Le rail est un îlot client : il porte les commandes de bureau et l'état
+     début/fin de course. Le reste de la page n'a pas d'état à tenir. */
   return (
     <section className="border-t border-white/[.06] py-20 md:py-24">
-      <Reveal className="container-page flex flex-wrap items-end justify-between gap-6 pb-9">
-        <div className="flex flex-col gap-3">
-          <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-[#e8c9a0]">
-            La visite
-          </p>
-          <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-[#f4f6f8]">
-            {visite.titre}
-          </h2>
-        </div>
-        <span className="inline-flex items-center gap-2.5 pb-2 text-sm text-[#7d8b95]">
-          Faites défiler
-          <Fleche />
-        </span>
+      <Reveal>
+        <BandeVisite titre={visite.titre} vues={visite.vues} />
       </Reveal>
-
-      {/* Défilement au doigt et au trackpad, avec accrochage. Pas de rotation
-          automatique : un défilement qui avance seul fait rater la vue qu'on
-          était en train de regarder. Le dernier volet dépasse du cadre — c'est
-          ce qui dit qu'il y a une suite, sans flèche ni pastille à ajouter. */}
-      <ul className="container-page flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:gap-6">
-        {visite.vues.map((v) => (
-          <li key={v.src} className="flex w-[78vw] shrink-0 snap-start flex-col gap-3.5 md:w-[29rem]">
-            <Image
-              src={v.src}
-              alt={v.alt}
-              width={2000}
-              height={1116}
-              sizes="(max-width: 768px) 78vw, 29rem"
-              className="h-56 w-full object-cover md:h-80"
-            />
-            <div className="flex flex-col gap-1.5">
-              <span className="font-display text-[1.05rem] text-[#f4f6f8]">{v.titre}</span>
-              <span className="text-[0.82rem] leading-snug text-[#8d9ba5]">{v.legende}</span>
-            </div>
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }

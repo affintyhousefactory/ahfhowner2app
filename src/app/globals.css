@@ -200,6 +200,32 @@ html {
   .clip-reveal {
     clip-path: inset(0 0 100% 0);
   }
+
+  /* Rail de défilement horizontal sur fond sombre — ADR-040.
+   *
+   * Sur mobile les barres sont flottantes et disparaissent d'elles-mêmes ;
+   * sur bureau elles sont permanentes, claires et épaisses, et venaient poser
+   * un bandeau gris système au bas d'une page à fond encre.
+   *
+   * La barre n'est pas masquée : sur bureau elle indique la position et reste
+   * saisissable à la souris. Elle est seulement mise à la teinte de la page.
+   */
+  .rail-sombre {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 201, 160, 0.45) rgba(255, 255, 255, 0.06);
+  }
+  .rail-sombre::-webkit-scrollbar {
+    height: 6px;
+  }
+  .rail-sombre::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .rail-sombre::-webkit-scrollbar-thumb {
+    background: rgba(232, 201, 160, 0.45);
+  }
+  .rail-sombre::-webkit-scrollbar-thumb:hover {
+    background: rgba(232, 201, 160, 0.7);
+  }
 }
 
 /* Typo cinétique : sur-titres serrés (sans) */
