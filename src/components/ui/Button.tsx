@@ -40,9 +40,9 @@ const styles: Record<Variant, string> = {
   ghost: "text-ink hover:text-accent",
 
   /* ── Fonds sombres (ADR-040) ── */
-  lumiere: "bg-[#e8c9a0] text-[#0f1519] hover:bg-[#f4e0c4]",
+  lumiere: "bg-lumiere text-nuit hover:bg-lumiere-ink",
   "contour-clair":
-    "border border-[#e8c9a0]/40 text-[#e8c9a0] hover:border-[#e8c9a0]/75 hover:bg-[#e8c9a0]/10",
+    "border border-lumiere/40 text-lumiere hover:border-lumiere/75 hover:bg-lumiere/10",
 };
 
 export function Button({

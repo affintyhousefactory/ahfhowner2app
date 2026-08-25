@@ -28,22 +28,22 @@ export function BandeauSerie({ produit }: { produit: ProductKey }) {
   const total = Array.from({ length: 6 }, (_, i) => i + 1);
 
   return (
-    <div className="border-b border-white/[.06] bg-[#141c21]">
+    <div className="border-b border-white/[.06] bg-nuit-doux">
       <div className="container-page flex flex-wrap items-center justify-between gap-x-8 gap-y-4 py-5">
-        <span className="font-mono text-[0.68rem] uppercase tracking-[0.22em] text-[#7d8b95]">
+        <span className="font-mono text-[0.68rem] uppercase tracking-[0.22em] text-nuit-faible">
           Édition Arko — 6 unités
         </span>
         <ul className="flex items-center gap-2">
           {total.map((n) => (
             <li
               key={n}
-              className="inline-flex h-11 w-11 items-center justify-center border border-[#e8c9a0]/[.34] font-display text-[0.8rem] text-[#e8c9a0] md:h-9 md:w-9"
+              className="inline-flex h-11 w-11 items-center justify-center border border-lumiere/35 font-display text-[0.8rem] text-lumiere md:h-9 md:w-9"
             >
               {String(n).padStart(2, "0")}
             </li>
           ))}
         </ul>
-        <span className="text-sm text-[#93a1ab]">
+        <span className="text-sm text-nuit-muted">
           {libres} numéro{libres > 1 ? "s" : ""} encore libre{libres > 1 ? "s" : ""}
         </span>
       </div>
@@ -58,10 +58,10 @@ export function SectionTension({ produit }: { produit: ProductKey }) {
   return (
     <section className="border-b border-white/[.06]">
       <Reveal className="container-page grid gap-10 py-20 md:grid-cols-2 md:gap-16 md:py-28">
-        <h2 className="font-display text-[clamp(1.7rem,3.4vw,2.6rem)] font-normal leading-[1.12] tracking-[-0.025em] text-[#f4f6f8]">
+        <h2 className="font-display text-[clamp(1.7rem,3.4vw,2.6rem)] font-normal leading-[1.12] tracking-[-0.025em] text-nuit-titre">
           {tension.titre}
         </h2>
-        <div className="flex flex-col gap-5 text-[1.0625rem] font-light leading-relaxed text-[#a9b5be]">
+        <div className="flex flex-col gap-5 text-[1.0625rem] font-light leading-relaxed text-nuit-muted">
           {tension.paragraphes.map((p) => (
             <p key={p.slice(0, 24)}>{p}</p>
           ))}
@@ -78,24 +78,24 @@ export function SectionEtapes({ produit }: { produit: ProductKey }) {
   return (
     <section className="border-b border-white/[.06]">
       <Reveal className="container-page py-20 md:py-24">
-        <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-[#e8c9a0]">
+        <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-lumiere">
           Comment ça se passe
         </p>
-        <h2 className="mt-3 font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-[#f4f6f8]">
+        <h2 className="mt-3 font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-nuit-titre">
           Trois étapes, aucun chantier chez vous.
         </h2>
 
         <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-11">
           {etapes.map((e) => (
             <li key={e.n} className="flex flex-col gap-4">
-              <span aria-hidden className="h-px w-full bg-[#e8c9a0]" />
-              <span className="font-display text-[0.8rem] tracking-[0.2em] text-[#e8c9a0]">
+              <span aria-hidden className="h-px w-full bg-lumiere" />
+              <span className="font-display text-[0.8rem] tracking-[0.2em] text-lumiere">
                 {e.n}
               </span>
-              <h3 className="font-display text-[1.3rem] font-normal leading-tight text-[#f4f6f8]">
+              <h3 className="font-display text-[1.3rem] font-normal leading-tight text-nuit-titre">
                 {e.titre}
               </h3>
-              <p className="text-[0.95rem] leading-relaxed text-[#94a2ac]">{e.texte}</p>
+              <p className="text-[0.95rem] leading-relaxed text-nuit-faible">{e.texte}</p>
             </li>
           ))}
         </ol>
@@ -126,19 +126,19 @@ export function SectionAtelier({ produit }: { produit: ProductKey }) {
   return (
     <section className="grid border-t border-white/[.06] md:grid-cols-[1.05fr_1fr]">
       <Reveal className="flex flex-col justify-center gap-6 px-[clamp(1.25rem,4vw,4rem)] py-20 md:py-24">
-        <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-[#e8c9a0]">
+        <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-lumiere">
           L&apos;atelier
         </p>
-        <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal leading-[1.14] tracking-[-0.025em] text-[#f4f6f8]">
+        <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal leading-[1.14] tracking-[-0.025em] text-nuit-titre">
           {atelier.titre[0]}
           <br className="hidden md:inline" /> {atelier.titre[1]}
         </h2>
-        <p className="max-w-[46ch] text-base font-light leading-relaxed text-[#a9b5be]">
+        <p className="max-w-[46ch] text-base font-light leading-relaxed text-nuit-muted">
           {atelier.texte}
         </p>
         <Link
           href="/a-propos#acier-leger"
-          className="mt-1 inline-flex items-center gap-2.5 self-start border-b border-[#e8c9a0]/50 pb-1.5 text-sm text-[#e8c9a0] transition-colors hover:border-[#e8c9a0]"
+          className="mt-1 inline-flex items-center gap-2.5 self-start border-b border-lumiere/50 pb-1.5 text-sm text-lumiere transition-colors hover:border-lumiere"
         >
           Comment nous fabriquons
           <Arrow />
@@ -164,17 +164,17 @@ export function SectionDurable({ produit }: { produit: ProductKey }) {
     <section className="border-t border-white/[.06]">
       <Reveal className="container-page py-20 md:py-24">
         <div className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3 pb-11">
-          <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-[#f4f6f8]">
+          <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-nuit-titre">
             {durable.titre}
           </h2>
-          <span className="text-sm text-[#7d8b95]">Quatre faits, pas quatre promesses</span>
+          <span className="text-sm text-nuit-faible">Quatre faits, pas quatre promesses</span>
         </div>
         <ul className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
           {durable.faits.map((f) => (
             <li key={f.titre} className="flex flex-col gap-3">
               <Goutte />
-              <span className="font-display text-base text-[#f4f6f8]">{f.titre}</span>
-              <p className="text-[0.88rem] leading-relaxed text-[#94a2ac]">{f.texte}</p>
+              <span className="font-display text-base text-nuit-titre">{f.titre}</span>
+              <p className="text-[0.88rem] leading-relaxed text-nuit-faible">{f.texte}</p>
             </li>
           ))}
         </ul>
@@ -188,16 +188,16 @@ export function SectionDurable({ produit }: { produit: ProductKey }) {
 export function SectionCloture({ produit }: { produit: ProductKey }) {
   const { cloture } = contenuProduit(produit);
   return (
-    <section className="border-t border-white/[.06] bg-[#141c21]">
+    <section className="border-t border-white/[.06] bg-nuit-doux">
       <Reveal className="container-page py-20 md:py-28">
         <div className="grid gap-10 md:grid-cols-2 md:items-end md:gap-16">
           <div className="flex flex-col gap-5">
-            <h2 className="font-display text-[clamp(1.9rem,4vw,2.9rem)] font-normal leading-[1.08] tracking-[-0.03em] text-[#f7f9fa]">
+            <h2 className="font-display text-[clamp(1.9rem,4vw,2.9rem)] font-normal leading-[1.08] tracking-[-0.03em] text-nuit-titre">
               {cloture.titre[0]}
               <br />
               {cloture.titre[1]}
             </h2>
-            <p className="max-w-[42ch] text-base font-light leading-relaxed text-[#a9b5be]">
+            <p className="max-w-[42ch] text-base font-light leading-relaxed text-nuit-muted">
               {cloture.texte}
             </p>
           </div>
@@ -206,7 +206,7 @@ export function SectionCloture({ produit }: { produit: ProductKey }) {
               Configurer mon {produit === "one" ? "Arko One" : "Arko Max"}
               <Arrow />
             </Button>
-            <span className="text-sm text-[#7d8b95]">
+            <span className="text-sm text-nuit-faible">
               Sans rendez-vous · prix affiché à chaque choix
             </span>
           </div>
@@ -214,7 +214,7 @@ export function SectionCloture({ produit }: { produit: ProductKey }) {
 
         <div className="mt-16 flex items-center gap-5">
           <span aria-hidden className="h-px flex-grow bg-white/[.09]" />
-          <span className="text-center font-mono text-[0.66rem] uppercase tracking-[0.16em] text-[#6f7d87]">
+          <span className="text-center font-mono text-[0.66rem] uppercase tracking-[0.16em] text-nuit-faible">
             Dessiné par notre architecte intégrée · Fabriqué au Pays-Basque
           </span>
         </div>
@@ -230,7 +230,7 @@ function Goutte() {
       height="22"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#e8c9a0"
+      stroke="var(--color-lumiere)"
       strokeWidth="1.2"
       aria-hidden
     >

@@ -46,7 +46,7 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
         };
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#0f1519]">
+    <section className="relative isolate overflow-hidden bg-nuit">
       <motion.div
         className="absolute inset-0"
         initial={reduce ? false : { scale: 1.07 }}
@@ -75,13 +75,13 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
           <div className="max-w-3xl">
             <motion.p
               {...monte(0.1)}
-              className="font-mono text-[0.7rem] uppercase tracking-[0.24em] text-[#e8c9a0]"
+              className="font-mono text-[0.7rem] uppercase tracking-[0.24em] text-lumiere"
             >
               {c.eyebrow}
             </motion.p>
 
             {/* Rendu sans animation d'opacité : voir la contrainte 2. */}
-            <h1 className="mt-5 font-display text-[clamp(2.2rem,6.4vw,4.6rem)] font-normal leading-[1.02] tracking-[-0.035em] text-[#f7f9fa] [text-wrap:pretty]">
+            <h1 className="mt-5 font-display text-[clamp(2.2rem,6.4vw,4.6rem)] font-normal leading-[1.02] tracking-[-0.035em] text-nuit-titre [text-wrap:pretty]">
               {c.titre[0]}
               <br />
               {c.titre[1]}
@@ -89,7 +89,7 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
 
             <motion.p
               {...monte(0.3)}
-              className="mt-6 max-w-[52ch] text-[1.0625rem] font-light leading-relaxed text-[#b9c3cb] md:text-lg"
+              className="mt-6 max-w-[52ch] text-[1.0625rem] font-light leading-relaxed text-nuit-muted md:text-lg"
             >
               {c.accroche}
             </motion.p>
@@ -99,7 +99,7 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
                 Réserver un numéro
                 <Arrow />
               </Button>
-              <span className="text-sm text-[#b9c3cb]">
+              <span className="text-sm text-nuit-muted">
                 {libres} numéro{libres > 1 ? "s" : ""} encore libre{libres > 1 ? "s" : ""}
               </span>
             </motion.div>
@@ -109,10 +109,10 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
             {...monte(0.54)}
             className="flex shrink-0 flex-col gap-1.5 md:items-end md:pb-1.5"
           >
-            <span className="font-display text-[clamp(1.9rem,4vw,2.9rem)] leading-none text-[#f7f9fa]">
+            <span className="font-display text-[clamp(1.9rem,4vw,2.9rem)] leading-none text-nuit-titre">
               {prixBase(produit).toLocaleString("fr-FR")} €
             </span>
-            <span className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-[#7d8b95]">
+            <span className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-nuit-faible">
               TTC · à partir de
             </span>
           </motion.p>

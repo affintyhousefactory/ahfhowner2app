@@ -71,14 +71,14 @@ function Case({ chiffre }: { chiffre: Chiffre }) {
   }, [cible, reduce, chiffre.valeur]);
 
   return (
-    <div className="flex flex-col gap-2 bg-[#0f1519] px-5 py-7 md:px-8 md:py-10">
+    <div className="flex flex-col gap-2 bg-nuit px-5 py-7 md:px-8 md:py-10">
       <span
         ref={ref}
-        className="font-display text-[clamp(1.4rem,2.6vw,2rem)] tracking-[-0.02em] text-[#f4f6f8]"
+        className="font-display text-[clamp(1.4rem,2.6vw,2rem)] tracking-[-0.02em] text-nuit-titre"
       >
         {affiche ?? chiffre.valeur}
       </span>
-      <span className="font-mono text-[0.66rem] uppercase tracking-[0.16em] text-[#7d8b95]">
+      <span className="font-mono text-[0.66rem] uppercase tracking-[0.16em] text-nuit-faible">
         {chiffre.libelle}
       </span>
     </div>

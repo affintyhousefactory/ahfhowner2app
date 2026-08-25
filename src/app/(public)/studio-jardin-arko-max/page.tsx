@@ -33,7 +33,7 @@ export default function ArkoMaxPage() {
   const c = contenuProduit("max");
 
   return (
-    <main className="bg-[#0f1519] text-[#e8ebee]">
+    <main className="bg-nuit text-nuit-texte">
       <JsonLd data={productSchema(PRODUCTS.max)} />
       <HeroHeureBleue produit="max" />
       <BandeauSerie produit="max" />

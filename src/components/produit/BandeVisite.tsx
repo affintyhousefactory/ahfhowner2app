@@ -67,10 +67,10 @@ export function BandeVisite({ titre, vues }: { titre: string; vues: VueVisite[] 
     <>
       <div className="container-page flex flex-wrap items-end justify-between gap-6 pb-9">
         <div className="flex flex-col gap-3">
-          <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-[#e8c9a0]">
+          <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-lumiere">
             La visite
           </p>
-          <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-[#f4f6f8]">
+          <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-nuit-titre">
             {titre}
           </h2>
         </div>
@@ -94,7 +94,7 @@ export function BandeVisite({ titre, vues }: { titre: string; vues: VueVisite[] 
         ref={rail}
         tabIndex={0}
         aria-label="Vues du studio"
-        className="rail-sombre container-page flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#e8c9a0] md:gap-6"
+        className="rail-sombre container-page flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-lumiere md:gap-6"
       >
         {vues.map((v) => (
           <li key={v.src} className="flex w-[78vw] shrink-0 snap-start flex-col gap-3.5 md:w-[29rem]">
@@ -107,8 +107,8 @@ export function BandeVisite({ titre, vues }: { titre: string; vues: VueVisite[] 
               className="h-56 w-full object-cover md:h-80"
             />
             <div className="flex flex-col gap-1.5">
-              <span className="font-display text-[1.05rem] text-[#f4f6f8]">{v.titre}</span>
-              <span className="text-[0.82rem] leading-snug text-[#8d9ba5]">{v.legende}</span>
+              <span className="font-display text-[1.05rem] text-nuit-titre">{v.titre}</span>
+              <span className="text-[0.82rem] leading-snug text-nuit-faible">{v.legende}</span>
             </div>
           </li>
         ))}

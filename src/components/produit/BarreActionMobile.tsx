@@ -36,7 +36,7 @@ export function BarreActionMobile({ produit }: { produit: ProductKey }) {
   return (
     <div
       className={[
-        "fixed inset-x-0 bottom-0 z-40 border-t border-white/[.09] bg-[#0f1519]/95 backdrop-blur-md transition-transform duration-500 md:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-white/[.09] bg-nuit/95 backdrop-blur-md transition-transform duration-500 md:hidden",
         visible ? "translate-y-0" : "translate-y-full",
       ].join(" ")}
       style={{ transitionTimingFunction: "var(--ease-out-expo)" }}
@@ -46,10 +46,10 @@ export function BarreActionMobile({ produit }: { produit: ProductKey }) {
     >
       <div className="flex items-center justify-between gap-4 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <span className="flex flex-col">
-          <span className="font-display text-[1.05rem] leading-tight text-[#f7f9fa]">
+          <span className="font-display text-[1.05rem] leading-tight text-nuit-titre">
             {prixBase(produit).toLocaleString("fr-FR")} €
           </span>
-          <span className="text-[0.7rem] text-[#7d8b95]">
+          <span className="text-[0.7rem] text-nuit-faible">
             {libres} numéro{libres > 1 ? "s" : ""} libre{libres > 1 ? "s" : ""}
           </span>
         </span>

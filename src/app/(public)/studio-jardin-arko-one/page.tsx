@@ -37,7 +37,7 @@ export default function ArkoOnePage() {
   const c = contenuProduit("one");
 
   return (
-    <main className="bg-[#0f1519] text-[#e8ebee]">
+    <main className="bg-nuit text-nuit-texte">
       <JsonLd data={productSchema(PRODUCTS.one)} />
       <HeroHeureBleue produit="one" />
       <BandeauSerie produit="one" />

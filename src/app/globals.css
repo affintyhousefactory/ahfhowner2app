@@ -6,16 +6,46 @@
    ============================================================ */
 
 @theme {
-  /* Charte Affinity (affinityhome.io) — froide, minimale, voir DESIGN.md */
-  --color-canvas: #f6f7f9; /* off-white froid, base */
+  /* ════════════════════════════════════════════════════════════════════
+     Charte « Heure bleue » — ADR-041, remplace la charte Affinity.
+     Voir DESIGN.md. Deux registres, UNE identité.
+
+     Registre CLAIR  — surfaces de lecture et d'outil : guides, pages
+                       légales, configurateur, formulaires.
+     Registre NUIT   — surfaces d'émotion : accueil, pages produit.
+
+     Ce qui ne change pas d'un registre à l'autre : la typographie, le
+     dessin des boutons, les filets, et la **famille** de l'accent. Seule
+     sa valeur change, parce qu'une teinte lisible sur encre ne l'est pas
+     sur blanc — c'est de la physique, pas du goût.
+     ════════════════════════════════════════════════════════════════════ */
+
+  /* ── Registre clair ── */
+  --color-canvas: #f6f7f9; /* off-white, base */
   --color-surface: #ffffff; /* blocs / images */
   --color-paper: #fbfcfd; /* surface alternative douce */
-  --color-ink: #0d141a; /* charcoal, quasi-noir */
-  --color-muted: #727586; /* gris Affinity (AA ≥4.5:1 sur fond clair) */
+  --color-ink: #0d141a; /* charcoal, quasi-noir — aussi le fond du registre nuit */
+  --color-muted: #6c7076; /* texte secondaire (AA 5.9:1 sur canvas) */
   --color-line: #dadce0; /* filet / bordure */
-  --color-accent: #3a5a86; /* slate-blue profond, réservé aux CTA (texte blanc AA) */
-  --color-accent-ink: #2c466b; /* hover */
-  --color-blue: #357df9; /* azure Affinity */
+
+  /* ── Registre nuit ── */
+  --color-nuit: #0f1519; /* fond des surfaces d'émotion */
+  --color-nuit-doux: #141c21; /* bandeaux et blocs de clôture */
+  --color-nuit-titre: #f7f9fa; /* titres sur nuit */
+  --color-nuit-texte: #e8ebee; /* texte courant sur nuit */
+  --color-nuit-muted: #a9b5be; /* secondaire sur nuit (AA 8.8:1) */
+  --color-nuit-faible: #7d8b95; /* tertiaire sur nuit (AA 5.3:1) */
+
+  /* ── Accent : une seule famille chaude, deux valeurs ──
+     Le bleu slate d'Affinity est retiré : il jurait avec la lumière des
+     pages produit — deux chartes se superposaient à l'écran (constat de
+     Richard sur la Preview du 2026-08-25).
+     Contrastes mesurés, pas estimés : voir DESIGN.md. */
+  --color-accent: #7a5c28; /* bronze profond — texte blanc 6,2:1 */
+  --color-accent-ink: #5f4720; /* hover — texte blanc 8,7:1 */
+  --color-lumiere: #e8c9a0; /* lumière chaude sur nuit — 11,6:1 */
+  --color-lumiere-ink: #f4e0c4; /* hover sur nuit — 14,3:1 */
+  --color-blue: #357df9; /* azure — conservé pour les états d'information */
 
   /* Typographies — display suisse + texte net + mono */
   --font-display: var(--font-display), system-ui, "Helvetica Neue", sans-serif;
@@ -212,7 +242,7 @@ html {
    */
   .rail-sombre {
     scrollbar-width: thin;
-    scrollbar-color: rgba(232, 201, 160, 0.45) rgba(255, 255, 255, 0.06);
+    scrollbar-color: color-mix(in srgb, var(--color-lumiere) 45%, transparent) rgba(255, 255, 255, 0.06);
   }
   .rail-sombre::-webkit-scrollbar {
     height: 6px;
@@ -221,10 +251,10 @@ html {
     background: rgba(255, 255, 255, 0.06);
   }
   .rail-sombre::-webkit-scrollbar-thumb {
-    background: rgba(232, 201, 160, 0.45);
+    background: color-mix(in srgb, var(--color-lumiere) 45%, transparent);
   }
   .rail-sombre::-webkit-scrollbar-thumb:hover {
-    background: rgba(232, 201, 160, 0.7);
+    background: color-mix(in srgb, var(--color-lumiere) 70%, transparent);
   }
 }
 
