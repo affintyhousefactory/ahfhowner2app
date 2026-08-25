@@ -23,6 +23,7 @@ import {
 } from "@/shared/components/plu/ParcelleAnalyse";
 import { TRANSPORT } from "@/lib/site";
 import {
+  appelDeNote,
   DEVIS_TEXTE,
   MENTIONS,
   OPTIN_TEXTE,
@@ -937,34 +938,59 @@ function decouperAdresse(libelle: string): { rue: string; cp: string; ville: str
  * développé est donné en `title` **et** en texte accessible — un sigle expliqué
  * seulement au survol reste opaque au clavier et au tactile.
  */
+/**
+ * Un encart du socle — « Compris dans le prix » ou « Non inclus ».
+ *
+ * L'appel de note vient d'`appelDeNote()` : il était écrit `*` en dur, et n'était
+ * rendu que sur les postes porteurs d'un lien. Deux limites depuis que les VRD et
+ * la micro-station portent une estimation de coût — elles n'ont pas de lien, et
+ * leurs appels doivent suivre celui de l'ossature LSF, qui vit dans l'autre liste.
+ */
 function ListeSocle({ postes }: { postes: readonly PosteSocle[] }) {
+  const avecNote = postes.filter((p) => p.note);
+
   return (
     <p className="text-[0.76rem] leading-relaxed text-muted">
-      {postes.map((poste, i) => (
-        <span key={poste.texte}>
-          {i > 0 && ", "}
-          {poste.href ? (
-            <a
-              href={poste.href}
-              title={poste.note}
-              className="text-accent underline decoration-dotted underline-offset-2 transition-colors hover:decoration-solid"
-            >
-              {poste.texte}
-              <span aria-hidden>*</span>
-              {poste.note && <span className="sr-only"> — {poste.note}</span>}
-            </a>
-          ) : (
-            poste.texte
-          )}
-        </span>
-      ))}
+      {postes.map((poste, i) => {
+        const appel = appelDeNote(poste);
+        /* Le développé reste lisible sans souris ni pointeur : `title` pour le
+           survol, `sr-only` pour les lecteurs d'écran, et la ligne de notes
+           ci-dessous pour tout le monde. */
+        const corps = (
+          <>
+            {poste.texte}
+            {appel && <span aria-hidden>{appel}</span>}
+            {poste.note && <span className="sr-only"> — {poste.note}</span>}
+          </>
+        );
+
+        return (
+          <span key={poste.texte}>
+            {i > 0 && ", "}
+            {poste.href ? (
+              <a
+                href={poste.href}
+                title={poste.note}
+                className="text-accent underline decoration-dotted underline-offset-2 transition-colors hover:decoration-solid"
+              >
+                {corps}
+              </a>
+            ) : (
+              corps
+            )}
+            {/* Hors du lien : le développé d'un sigle n'est pas cliquable. */}
+            {poste.complement}
+          </span>
+        );
+      })}
       .
-      {postes.some((p) => p.note) && (
+      {avecNote.length > 0 && (
         <span className="mt-1 block font-mono text-[0.64rem] text-muted/80">
-          {postes
-            .filter((p) => p.note)
-            .map((p) => `* ${p.note}`)
-            .join(" · ")}
+          {avecNote.map((p) => (
+            <span key={p.texte} className="block">
+              {appelDeNote(p)} {p.note}
+            </span>
+          ))}
         </span>
       )}
     </p>
