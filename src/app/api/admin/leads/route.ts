@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
   const body = (await req.json()) as Record<string, unknown>;
 
   const { prenom, nom, email } = body as { prenom?: string; nom?: string; email?: string };

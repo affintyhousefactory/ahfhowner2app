@@ -4,10 +4,18 @@ import MandataireActions from "@/components/admin/MandataireActions";
 import MandataireEditContact from "@/components/admin/MandataireEditContact";
 import MandataireDossiers from "@/components/admin/MandataireDossiers";
 import { guardMandataire } from "@/shared/lib/feature-guard";
+import { estAdmin } from "@/shared/lib/supabase-server";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function MandataireFiche({ params }: { params: Promise<{ id: string }> }) {
+  /* ADR-039 — défense en profondeur. Le proxy garde déjà cette route ; cette
+     seconde vérification protège le jour où le matcher change ou qu'une page
+     naît hors de son périmètre. Une page admin ne lit jamais en `service_role`
+     sans avoir prouvé l'identité de qui la demande. */
+  if (!(await estAdmin())) redirect("/admin/auth/signin");
+
   // ADR-028 — défense en profondeur derrière le proxy : empêche la
   // requête Supabase si la page était atteinte par un autre chemin.
   guardMandataire();

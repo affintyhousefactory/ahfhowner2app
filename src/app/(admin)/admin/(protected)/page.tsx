@@ -21,6 +21,8 @@ import { Entonnoir } from "@/shared/components/admin/Entonnoir";
 import { StatutsCommerciauxDonut } from "@/shared/components/admin/StatutsCommerciauxDonut";
 import { ConseillersBar, type ChargeConseiller } from "@/shared/components/admin/ConseillersBar";
 import { FEATURES } from "@/lib/features";
+import { estAdmin } from "@/shared/lib/supabase-server";
+import { redirect } from "next/navigation";
 import {
   STATUTS_COMMERCIAUX,
   statutCommercial,
@@ -65,6 +67,12 @@ type LeadRow = {
 const SANS_CONSEILLER = "Non attribué";
 
 export default async function AdminDashboard() {
+  /* ADR-039 — défense en profondeur. Le proxy garde déjà cette route ; cette
+     seconde vérification protège le jour où le matcher change ou qu'une page
+     naît hors de son périmètre. Une page admin ne lit jamais en `service_role`
+     sans avoir prouvé l'identité de qui la demande. */
+  if (!(await estAdmin())) redirect("/admin/auth/signin");
+
   const supabase = getSupabaseAdmin();
 
   // `error` lu sur les leads : **tous** les indicateurs de cet écran en

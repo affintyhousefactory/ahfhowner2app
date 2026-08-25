@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 
 const ALLOWED_FIELDS = [
   // Identité
@@ -38,6 +39,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
   const { id } = await params;
   const body = (await req.json()) as Record<string, unknown>;
 
