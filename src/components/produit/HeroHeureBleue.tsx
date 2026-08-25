@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import { Reveal } from "@/components/ui/Reveal";
 import { reserverHref, type ProductKey } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { contenuProduit, prixBase, numerosLibres } from "@/lib/produits/heure-bleue";
@@ -18,10 +19,15 @@ import { contenuProduit, prixBase, numerosLibres } from "@/lib/produits/heure-bl
  *    `sizes="100vw"`. Le dézoom porte sur `scale`, composité par le GPU : il
  *    n'entre pas dans la mesure du LCP, contrairement à un `width` animé.
  *
- * 2. **Le titre n'est jamais masqué en JS.** Il est rendu tel quel côté
- *    serveur ; l'animation ne s'applique qu'aux blocs qui l'entourent. Un
- *    `<h1>` en `opacity: 0` sérialisé n'est pas indexé — leçon du 2026-08-19,
- *    et raison d'être de l'état masqué en CSS dans `Reveal`.
+ * 2. **Rien n'est masqué par un style inline.** Le titre est rendu tel quel, et
+ *    les blocs qui l'entourent passent par `Reveal`, dont l'état masqué vit
+ *    dans le CSS sous `.js-motion` — classe posée seulement si JS s'exécute.
+ *
+ *    ⚠ Ce n'était pas le cas au premier jet : `motion.p` sérialisait
+ *    `style="opacity:0"` dans le HTML servi. Le `<h1>` était épargné, mais
+ *    l'accroche ET le bouton « Réserver un numéro » partaient invisibles —
+ *    sans JS, la page n'avait plus de CTA. Constaté en production le
+ *    2026-08-25, sur le corps servi. Le code HTTP ne l'aurait jamais dit.
  *
  * 3. **L'en-tête du site n'est pas repris.** Sa barre porte un fond clair
  *    permanent depuis le 2026-08-20 : elle se pose sur ce hero sombre sans
@@ -34,16 +40,6 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
   const c = contenuProduit(produit);
   const reduce = useReducedMotion();
   const libres = numerosLibres(produit);
-
-  /* Le titre est le repère : les blocs voisins entrent autour de lui. */
-  const monte = (delai: number) =>
-    reduce
-      ? {}
-      : {
-          initial: { opacity: 0, y: 22 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.9, delay: delai, ease: EASE },
-        };
 
   return (
     <section className="relative isolate overflow-hidden bg-nuit">
@@ -74,12 +70,9 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
       <div className="container-page relative flex min-h-[min(88svh,52rem)] flex-col justify-end pb-14 pt-28 md:pb-20">
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between md:gap-14">
           <div className="max-w-3xl">
-            <motion.p
-              {...monte(0.1)}
-              className="font-mono text-[0.7rem] uppercase tracking-[0.24em] text-lumiere"
-            >
+            <Reveal as="span" delay={0.1} className="block font-mono text-[0.7rem] uppercase tracking-[0.24em] text-lumiere">
               {c.eyebrow}
-            </motion.p>
+            </Reveal>
 
             {/* Rendu sans animation d'opacité : voir la contrainte 2. */}
             <h1 className="mt-5 titre-xl text-nuit-titre">
@@ -88,14 +81,11 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
               {c.titre[1]}
             </h1>
 
-            <motion.p
-              {...monte(0.3)}
-              className="mt-6 max-w-[52ch] text-[1.0625rem] font-light leading-relaxed text-nuit-muted md:text-lg"
-            >
+            <Reveal as="span" delay={0.3} className="block mt-6 max-w-[52ch] text-[1.0625rem] font-light leading-relaxed text-nuit-muted md:text-lg">
               {c.accroche}
-            </motion.p>
+            </Reveal>
 
-            <motion.div {...monte(0.42)} className="mt-8 flex flex-wrap items-center gap-5">
+            <Reveal delay={0.42} className="mt-8 flex flex-wrap items-center gap-5">
               <Button href={reserverHref(produit)} variant="lumiere">
                 Réserver un numéro
                 <Arrow />
@@ -103,20 +93,17 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
               <span className="text-sm text-nuit-muted">
                 {libres} numéro{libres > 1 ? "s" : ""} encore libre{libres > 1 ? "s" : ""}
               </span>
-            </motion.div>
+            </Reveal>
           </div>
 
-          <motion.p
-            {...monte(0.54)}
-            className="flex shrink-0 flex-col gap-1.5 md:items-end md:pb-1.5"
-          >
+          <Reveal as="span" delay={0.54} className="flex shrink-0 flex-col gap-1.5 md:items-end md:pb-1.5">
             <span className="titre-l leading-none text-nuit-titre">
               {prixBase(produit).toLocaleString("fr-FR")} €
             </span>
             <span className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-nuit-faible">
               TTC · à partir de
             </span>
-          </motion.p>
+          </Reveal>
         </div>
       </div>
     </section>
