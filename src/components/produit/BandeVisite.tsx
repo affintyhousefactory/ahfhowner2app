@@ -70,7 +70,7 @@ export function BandeVisite({ titre, vues }: { titre: string; vues: VueVisite[] 
           <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-lumiere">
             La visite
           </p>
-          <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-nuit-titre">
+          <h2 className="titre-l text-nuit-titre">
             {titre}
           </h2>
         </div>
@@ -107,7 +107,7 @@ export function BandeVisite({ titre, vues }: { titre: string; vues: VueVisite[] 
               className="h-56 w-full object-cover md:h-80"
             />
             <div className="flex flex-col gap-1.5">
-              <span className="font-display text-[1.05rem] text-nuit-titre">{v.titre}</span>
+              <span className="titre-s text-nuit-titre">{v.titre}</span>
               <span className="text-[0.82rem] leading-snug text-nuit-faible">{v.legende}</span>
             </div>
           </li>

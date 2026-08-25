@@ -87,7 +87,7 @@ export function Hero() {
             {/* `BRAND.h1` et non `BRAND.baseline` depuis le 2026-08-19 : le
                 titre de page nomme la catégorie et la marque (référencement),
                 la baseline reste la signature éditoriale du pied de page. */}
-            <h1 className="editorial max-w-xl text-balance text-[2rem] leading-[1.05] text-ink md:text-[2.9rem]">
+            <h1 className="titre-l max-w-xl text-balance text-ink">
               {BRAND.h1}
             </h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">

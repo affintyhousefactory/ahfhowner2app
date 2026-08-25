@@ -18,7 +18,7 @@ export function Reassurance() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-4xl text-balance text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:text-[4.4rem]">
+          <h2 className="titre-xl mt-12 max-w-4xl text-balance text-canvas md:mt-16">
             Réserver, sans rien risquer en deux étapes.
           </h2>
         </Reveal>
@@ -39,7 +39,7 @@ export function Reassurance() {
                 <span className="font-mono text-xs text-canvas/60">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="editorial mt-3 text-xl text-canvas">{r.t}</h3>
+                <h3 className="titre-s mt-3 text-canvas">{r.t}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-canvas/60">
                   {r.d}
                 </p>

@@ -58,7 +58,7 @@ export function SectionTension({ produit }: { produit: ProductKey }) {
   return (
     <section className="border-b border-white/[.06]">
       <Reveal className="container-page grid gap-10 py-20 md:grid-cols-2 md:gap-16 md:py-28">
-        <h2 className="font-display text-[clamp(1.7rem,3.4vw,2.6rem)] font-normal leading-[1.12] tracking-[-0.025em] text-nuit-titre">
+        <h2 className="titre-l text-nuit-titre">
           {tension.titre}
         </h2>
         <div className="flex flex-col gap-5 text-[1.0625rem] font-light leading-relaxed text-nuit-muted">
@@ -81,7 +81,7 @@ export function SectionEtapes({ produit }: { produit: ProductKey }) {
         <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-lumiere">
           Comment ça se passe
         </p>
-        <h2 className="mt-3 font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-nuit-titre">
+        <h2 className="mt-3 titre-l text-nuit-titre">
           Trois étapes, aucun chantier chez vous.
         </h2>
 
@@ -92,7 +92,7 @@ export function SectionEtapes({ produit }: { produit: ProductKey }) {
               <span className="font-display text-[0.8rem] tracking-[0.2em] text-lumiere">
                 {e.n}
               </span>
-              <h3 className="font-display text-[1.3rem] font-normal leading-tight text-nuit-titre">
+              <h3 className="titre-m text-nuit-titre">
                 {e.titre}
               </h3>
               <p className="text-[0.95rem] leading-relaxed text-nuit-faible">{e.texte}</p>
@@ -129,7 +129,7 @@ export function SectionAtelier({ produit }: { produit: ProductKey }) {
         <p className="font-mono text-[0.68rem] uppercase tracking-[0.24em] text-lumiere">
           L&apos;atelier
         </p>
-        <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal leading-[1.14] tracking-[-0.025em] text-nuit-titre">
+        <h2 className="titre-l text-nuit-titre">
           {atelier.titre[0]}
           <br className="hidden md:inline" /> {atelier.titre[1]}
         </h2>
@@ -164,7 +164,7 @@ export function SectionDurable({ produit }: { produit: ProductKey }) {
     <section className="border-t border-white/[.06]">
       <Reveal className="container-page py-20 md:py-24">
         <div className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3 pb-11">
-          <h2 className="font-display text-[clamp(1.6rem,3vw,2.35rem)] font-normal tracking-[-0.02em] text-nuit-titre">
+          <h2 className="titre-l text-nuit-titre">
             {durable.titre}
           </h2>
           <span className="text-sm text-nuit-faible">Quatre faits, pas quatre promesses</span>
@@ -173,7 +173,7 @@ export function SectionDurable({ produit }: { produit: ProductKey }) {
           {durable.faits.map((f) => (
             <li key={f.titre} className="flex flex-col gap-3">
               <Goutte />
-              <span className="font-display text-base text-nuit-titre">{f.titre}</span>
+              <span className="titre-s text-nuit-titre">{f.titre}</span>
               <p className="text-[0.88rem] leading-relaxed text-nuit-faible">{f.texte}</p>
             </li>
           ))}
@@ -192,7 +192,7 @@ export function SectionCloture({ produit }: { produit: ProductKey }) {
       <Reveal className="container-page py-20 md:py-28">
         <div className="grid gap-10 md:grid-cols-2 md:items-end md:gap-16">
           <div className="flex flex-col gap-5">
-            <h2 className="font-display text-[clamp(1.9rem,4vw,2.9rem)] font-normal leading-[1.08] tracking-[-0.03em] text-nuit-titre">
+            <h2 className="titre-l text-nuit-titre">
               {cloture.titre[0]}
               <br />
               {cloture.titre[1]}

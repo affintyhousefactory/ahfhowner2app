@@ -81,7 +81,7 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
             </motion.p>
 
             {/* Rendu sans animation d'opacité : voir la contrainte 2. */}
-            <h1 className="mt-5 font-display text-[clamp(2.2rem,6.4vw,4.6rem)] font-normal leading-[1.02] tracking-[-0.035em] text-nuit-titre [text-wrap:pretty]">
+            <h1 className="mt-5 titre-xl text-nuit-titre">
               {c.titre[0]}
               <br />
               {c.titre[1]}
@@ -109,7 +109,7 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
             {...monte(0.54)}
             className="flex shrink-0 flex-col gap-1.5 md:items-end md:pb-1.5"
           >
-            <span className="font-display text-[clamp(1.9rem,4vw,2.9rem)] leading-none text-nuit-titre">
+            <span className="titre-l leading-none text-nuit-titre">
               {prixBase(produit).toLocaleString("fr-FR")} €
             </span>
             <span className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-nuit-faible">

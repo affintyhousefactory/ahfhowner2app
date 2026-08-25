@@ -74,7 +74,7 @@ function Case({ chiffre }: { chiffre: Chiffre }) {
     <div className="flex flex-col gap-2 bg-nuit px-5 py-7 md:px-8 md:py-10">
       <span
         ref={ref}
-        className="font-display text-[clamp(1.4rem,2.6vw,2rem)] tracking-[-0.02em] text-nuit-titre"
+        className="titre-m text-nuit-titre"
       >
         {affiche ?? chiffre.valeur}
       </span>

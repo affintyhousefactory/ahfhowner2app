@@ -46,7 +46,7 @@ export function BarreActionMobile({ produit }: { produit: ProductKey }) {
     >
       <div className="flex items-center justify-between gap-4 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <span className="flex flex-col">
-          <span className="font-display text-[1.05rem] leading-tight text-nuit-titre">
+          <span className="titre-s text-nuit-titre">
             {prixBase(produit).toLocaleString("fr-FR")} €
           </span>
           <span className="text-[0.7rem] text-nuit-faible">

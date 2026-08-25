@@ -264,13 +264,62 @@ html {
   line-height: 0.92;
 }
 
-/* Display « suisse » (grotesque magistral) */
+/* Display « suisse » (grotesque magistral) — ADR-041.
+ *
+ * Graisse ramenée de 500 à 400 le 2026-08-25 : les titres de l'accueil
+ * paraissaient plus lourds que ceux des pages produit, qui sont en graisse
+ * normale. Même police, deux poids — ce qui se lit comme deux typographies.
+ * L'interlettrage suit (-0.035em, la valeur des pages produit).
+ *
+ * 38 fichiers portent cette classe : c'est ici que la typographie du site
+ * s'accorde, pas dans chaque titre. */
 .editorial {
   font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  font-weight: 400;
+  letter-spacing: -0.035em;
   line-height: 1.0;
 }
+/* ════════════════════════════════════════════════════════════════════
+   Échelle de titres — ADR-041.
+
+   Les pages produit portaient ONZE interlettrages différents (-0.02 à
+   -0.035em) et redéclaraient `font-normal` à chaque titre ; l'accueil
+   passait par `.editorial` en graisse 500. Résultat : deux typographies
+   perçues pour une seule police chargée.
+
+   Quatre niveaux, une seule définition chacun. La taille descend, et
+   l'interlettrage se desserre avec elle — un titre de 4,6 rem supporte
+   -0.035em, un intertitre de 1,3 rem s'y écraserait.
+   ════════════════════════════════════════════════════════════════════ */
+.titre-xl,
+.titre-l,
+.titre-m,
+.titre-s {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+.titre-xl {
+  font-size: clamp(2.2rem, 6.4vw, 4.6rem);
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: pretty;
+}
+.titre-l {
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+.titre-m {
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  letter-spacing: -0.02em;
+  line-height: 1.22;
+}
+.titre-s {
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
 /* Filet de section + numérotation */
 .rule {
   border-top: 1px solid var(--color-line);

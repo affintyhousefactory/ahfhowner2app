@@ -67,8 +67,27 @@ Inchangée — c'est ce qui fait que la refonte ne dépayse pas.
 - **Space Mono** (`--font-mono`) pour les surtitres et les libellés : capitales,
   `letter-spacing` 0.16em à 0.24em. C'est la signature de la marque.
 
-Échelle fluide par `clamp()` : `--text-display`, `--text-h1`, `--text-h2`,
-`--text-h3`.
+### Échelle de titres
+
+Quatre niveaux, **une seule définition chacun** — `globals.css` :
+
+| Classe | Emploi | Interlettrage |
+|---|---|---|
+| `.titre-xl` | hero, titre de clôture | -0.035em |
+| `.titre-l` | titre de section | -0.03em |
+| `.titre-m` | intertitre | -0.02em |
+| `.titre-s` | libellé de carte, légende | -0.01em |
+
+La taille descend, et l'interlettrage **se desserre avec elle** : un titre de
+4,6 rem supporte -0.035em, un intertitre de 1,3 rem s'y écraserait.
+
+⚠ **Ne pas redéclarer `font-display`, `font-normal`, `tracking-` ni `leading-`
+sur un titre.** C'est ainsi que les pages produit avaient accumulé **onze
+interlettrages différents** pendant que l'accueil passait par `.editorial` en
+graisse 500 — deux typographies perçues pour une seule police chargée.
+
+`.editorial` subsiste (38 fichiers) et porte les mêmes valeurs : graisse 400,
+-0.035em.
 
 ## Boutons
 
