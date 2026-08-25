@@ -38,6 +38,7 @@ import { useConfigurateur, eur } from "./store";
 import { Choix, Eyebrow, Mention, Section } from "./ui";
 import type { ParcelleData } from "@/shared/types/plu";
 import type { UsageId } from "@/lib/configurateur/config";
+import { Button } from "@/components/ui/Button";
 
 /* ------------------------------------------------------------------ */
 /* 01 — le studio                                                      */
@@ -407,12 +408,9 @@ export function SectionTerrain() {
             Prochainement
           </span>
           <p className="text-[0.78rem] leading-relaxed text-muted">{MENTIONS.usage.detail}</p>
-          <a
-            href={CONTACT_TERRAIN_NU}
-            className="flex min-h-[46px] w-full items-center justify-center rounded-xl bg-accent px-4 text-[0.9rem] font-semibold text-white transition-colors hover:bg-accent-ink"
-          >
+          <Button href={CONTACT_TERRAIN_NU} magnetic={false} className="w-full">
             Être informé en priorité
-          </a>
+          </Button>
         </div>
       ) : null}
     </Section>

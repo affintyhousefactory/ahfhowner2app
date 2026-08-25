@@ -297,13 +297,14 @@ export function Nav() {
                 >
                   Découvrir
                 </Link>
-                <Link
+                <Button
                   href={reserverHref(p.key)}
-                  onClick={() => setOpen(false)}
-                  className="rounded-full bg-accent px-4 py-1.5 text-sm text-white"
+                  magnetic={false}
+                  className="px-4 text-sm"
                 >
                   Réserver
-                </Link>
+                  <Arrow />
+                </Button>
               </div>
             </div>
           ))}

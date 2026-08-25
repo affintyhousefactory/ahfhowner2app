@@ -35,7 +35,12 @@ const base =
 
 const styles: Record<Variant, string> = {
   /* ── Fonds clairs ── */
-  accent: "bg-accent text-white hover:bg-accent-ink shadow-[0_1px_0_rgba(0,0,0,0.04)]",
+  /* ⚠ Fond `lumiere` ET liseré `accent`, les deux ensemble.
+     La teinte claire des pages produit ne donne que 1,47:1 sur le fond de la
+     barre de menu : sans liseré, le bouton ne se détacherait pas de son fond
+     (WCAG 1.4.11 exige 3:1 pour un composant). Le liseré bronze est à 5,8:1.
+     Le texte, lui, est confortable — encre sur lumière, 11,7:1. */
+  accent: "border border-accent bg-lumiere text-ink hover:bg-lumiere-ink",
   outline: "border border-ink/15 text-ink hover:border-ink/40 bg-transparent",
   ghost: "text-ink hover:text-accent",
 

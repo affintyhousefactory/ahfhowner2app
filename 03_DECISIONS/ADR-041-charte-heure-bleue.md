@@ -71,6 +71,31 @@ le site, sans chercher les occurrences.
 - **ADR-002 est remplacée**, deux mois après avoir été posée sans validation.
 - **Alerte Albert** — changement de charte graphique du site entier.
 
+## Amendement du 2026-08-25 — le CTA prend la teinte claire partout
+
+Second constat de Richard sur la Preview : le bouton « Réserver » du menu était
+en **bronze** quand le CTA de la page était en **lumière chaude**. Deux teintes
+pour la même action, à quinze centimètres l'une de l'autre.
+
+**Décision : garder la teinte claire des pages produit**, partout.
+
+La variante `accent` du composant — celle par défaut, donc **42 boutons** —
+devient `bg-lumiere text-ink` avec un **liseré `accent`**.
+
+⚠ Le liseré n'est pas décoratif. La teinte claire ne donne que **1,47:1** sur le
+fond de la barre de menu : sans lui, le bouton ne se détacherait pas de son fond,
+alors que WCAG 1.4.11 exige 3:1 pour un composant d'interface. Le liseré bronze
+est à **5,8:1**. Le texte, lui, est confortable : encre sur lumière, **11,7:1**.
+
+**La valeur du token `--color-accent` ne change pas**, et c'est délibéré : huit
+boutons de formulaire écrivent encore `bg-accent text-white` en dur. Éclaircir le
+token les aurait rendus illisibles d'un coup — blanc sur beige clair, 1,58:1.
+C'est la variante du composant qui change, pas la teinte.
+
+Deux boutons écrits en ligne rejoignent le composant au passage : celui des
+cartes du méga-menu (le premier repéré par Richard) et celui de l'écran
+« terrain nu » du configurateur.
+
 ## Reste à faire (application par lots)
 
 1. ✅ Socle — tokens, `DESIGN.md`, boutons, composants produit.
@@ -78,8 +103,13 @@ le site, sans chercher les occurrences.
    `Reassurance`, `Faq`, `StickyCta`.
 3. **Les surfaces claires** — vérifier que les 20 guides, les pages légales et le
    configurateur restent justes avec le nouvel accent.
-4. **Le méga-menu** — c'est le point de départ du constat de Richard : ses cartes
-   produit et ses boutons doivent suivre.
+4. ✅ **Le méga-menu** — son bouton en ligne rejoint le composant.
+5. **Huit boutons de soumission** (`ContactForm`, `Reservation`, `CookieBanner`,
+   `configurateur/ui`, `ParcelleAnalyse`, `RechercheTerrainForm`) écrivent encore
+   `bg-accent text-white` en ligne. Ils restent **lisibles** (6,2:1) mais
+   divergent désormais du CTA principal. Les convertir demande d'ajouter le
+   support de `type="submit"` au composant et touche des formulaires en
+   production — **à traiter comme un lot à part**, pas en fin de course.
 
 ## Hors périmètre
 
