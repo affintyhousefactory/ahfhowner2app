@@ -49,7 +49,7 @@ export function EditorialHero({
         </Reveal>
 
         <Reveal delay={0.05}>
-          <h1 className="editorial mt-6 max-w-5xl text-balance text-[2.1rem] leading-[1.04] text-canvas md:text-[4.2rem]">
+          <h1 className="titre-xl mt-6 max-w-5xl text-balance text-canvas">
             {h1}
           </h1>
         </Reveal>

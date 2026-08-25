@@ -26,7 +26,7 @@ export function Reassurance() {
         <Stagger className="mt-10 grid gap-x-10 gap-y-6 md:grid-cols-2">
           {REASSURANCE_INTRO.map((r) => (
             <StaggerItem key={r.t}>
-              <h3 className="font-medium text-canvas">{r.t}</h3>
+              <h3 className="titre-s text-canvas">{r.t}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-canvas/60">{r.d}</p>
             </StaggerItem>
           ))}

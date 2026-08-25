@@ -144,7 +144,7 @@ export function Reservation() {
           {/* Gauche : promesse + jauge */}
           <div>
             <Reveal delay={0.05}>
-              <h2 className="text-balance kinetic [font-size:var(--text-h1)]">
+              <h2 className="titre-xl text-balance">
                 {soldOut
                   ? "Série 01 complète."
                   : "Réservez votre exemplaire numéroté."}
@@ -495,7 +495,7 @@ function Confirmation({ slot }: { slot: number | null }) {
           <path d="M5 12.5l4 4L19 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      <h3 className="mt-5 text-xl font-medium tracking-tight">
+      <h3 className="titre-m mt-5">
         Demande enregistrée
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -520,7 +520,7 @@ function Waitlist() {
   return (
     <div>
       <p className="eyebrow mb-3">Liste prioritaire</p>
-      <h3 className="text-xl font-medium tracking-tight">
+      <h3 className="titre-m">
         Les 12 sont pris ? Rejoignez la liste prioritaire.
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">

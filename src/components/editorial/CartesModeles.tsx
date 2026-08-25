@@ -42,7 +42,7 @@ function CarteModele({ cle, modele }: { cle: ProductKey; modele: Modele }) {
     <Reveal delay={cle === "max" ? 0.08 : 0}>
       <article className="flex h-full flex-col border border-line bg-surface p-8 md:p-10">
         <div className="flex items-baseline justify-between gap-4">
-          <h3 className="editorial text-2xl text-ink md:text-3xl">{produit.name}</h3>
+          <h3 className="titre-m text-ink">{produit.name}</h3>
           <span className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-muted">
             {produit.area}
           </span>

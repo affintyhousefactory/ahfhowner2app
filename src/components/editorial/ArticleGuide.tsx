@@ -62,7 +62,7 @@ export function ArticleGuide({ guide }: { guide: Guide }) {
           </Reveal>
 
           <Reveal delay={0.05}>
-            <h1 className="editorial mt-6 max-w-4xl text-balance text-[2rem] leading-[1.05] text-canvas md:text-[3.6rem]">
+            <h1 className="titre-l mt-6 max-w-4xl text-balance text-canvas">
               {page.h1}
             </h1>
           </Reveal>
@@ -94,7 +94,7 @@ export function ArticleGuide({ guide }: { guide: Guide }) {
             {guide.sections.map((s, i) => (
               <section key={s.titre} className={i === 0 ? "" : "mt-16 md:mt-20"}>
                 <Reveal>
-                  <h2 className="editorial text-balance text-[1.6rem] leading-snug text-ink md:text-[2.2rem]">
+                  <h2 className="titre-l text-balance text-ink">
                     {s.titre}
                   </h2>
                 </Reveal>
@@ -190,7 +190,7 @@ export function ArticleGuide({ guide }: { guide: Guide }) {
           <div className="container-page">
             <div className="max-w-3xl">
               <Reveal>
-                <h2 className="editorial text-[1.6rem] leading-snug text-ink md:text-[2.2rem]">
+                <h2 className="titre-l text-ink">
                   Questions fréquentes
                 </h2>
               </Reveal>

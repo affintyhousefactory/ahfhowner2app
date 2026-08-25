@@ -57,7 +57,7 @@ export default function GuideHubPage() {
           </Reveal>
 
           <Reveal delay={0.05}>
-            <h1 className="editorial mt-6 max-w-4xl text-balance text-[2.1rem] leading-[1.04] text-canvas md:text-[4rem]">
+            <h1 className="titre-xl mt-6 max-w-4xl text-balance text-canvas">
               {page.h1}
             </h1>
           </Reveal>
@@ -114,7 +114,7 @@ export default function GuideHubPage() {
                     <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-muted">
                       Guide {String(i + 1).padStart(2, "0")}
                     </span>
-                    <h2 className="mt-2 text-[1.2rem] font-medium leading-snug tracking-tight text-ink transition-colors group-hover:text-accent md:text-[1.5rem]">
+                    <h2 className="titre-m mt-2 text-ink transition-colors group-hover:text-accent">
                       {a.h1}
                     </h2>
                     <p className="mt-2 text-[0.95rem] leading-relaxed text-muted">
@@ -156,7 +156,7 @@ export default function GuideHubPage() {
             <Reveal key={produit.key} delay={i * 0.08}>
               <div className="flex h-full flex-col border border-line bg-canvas p-8">
                 <div className="flex items-baseline justify-between gap-4">
-                  <h3 className="editorial text-2xl text-ink">{produit.name}</h3>
+                  <h3 className="titre-m text-ink">{produit.name}</h3>
                   <span className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-muted">
                     {produit.area}
                   </span>
@@ -175,7 +175,7 @@ export default function GuideHubPage() {
 
       <Section id="reassurance" fond="ink">
         <Reveal>
-          <h2 className="editorial max-w-3xl text-balance text-[2rem] leading-[1.06] text-canvas md:text-[3.4rem]">
+          <h2 className="titre-l max-w-3xl text-balance text-canvas">
             {C.reassurance.titre}
           </h2>
         </Reveal>

@@ -86,8 +86,22 @@ sur un titre.** C'est ainsi que les pages produit avaient accumulé **onze
 interlettrages différents** pendant que l'accueil passait par `.editorial` en
 graisse 500 — deux typographies perçues pour une seule police chargée.
 
-`.editorial` subsiste (38 fichiers) et porte les mêmes valeurs : graisse 400,
--0.035em.
+`.editorial` subsiste sur les **`<p>` et `<span>` mis en avant** — citations,
+chiffres, accroches — et porte les mêmes valeurs : graisse 400, -0.035em. Sur
+un titre, c'est l'échelle qui s'applique.
+
+**Règle de niveau** : un `<h3>` ne porte jamais `.titre-l`, un `<h2>` jamais
+`.titre-s`. L'échelon suit la hiérarchie du document, pas l'envie du moment.
+
+### Ce que l'homogénéisation du 2026-08-25 a corrigé
+
+- **Onze titres étaient rendus en Inter** — sans classe typographique, ils
+  tombaient sur `--font-sans` avec `font-medium`, quand tout le reste du site
+  est en Space Grotesk 400. Sur `ContactForm`, `Reassurance`, `Reveal.section`,
+  `Reservation`, le hub `/guide`.
+- **`.editorial` était en graisse 500**, les pages produit en 400.
+- **74 titres portaient leur propre taille**, souvent doublée d'un
+  `leading-` et d'un `tracking-` inventés au cas par cas.
 
 ## Boutons
 

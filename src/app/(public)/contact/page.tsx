@@ -27,7 +27,7 @@ export default function ContactPage() {
 
         <div className="mt-12 grid gap-12 md:mt-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
-            <h1 className="editorial text-balance text-[2.4rem] leading-[1.02] text-ink md:text-[4.5rem]">
+            <h1 className="titre-xl text-balance text-ink">
               Parlons de votre projet.
             </h1>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-muted">

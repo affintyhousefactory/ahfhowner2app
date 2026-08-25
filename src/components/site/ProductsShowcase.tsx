@@ -24,7 +24,7 @@ export function ProductsShowcase() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:whitespace-nowrap md:text-[4.6rem]">
+          <h2 className="titre-xl mt-12 text-ink md:mt-16 md:whitespace-nowrap">
             Deux studios, un même soin.
           </h2>
         </Reveal>
@@ -69,7 +69,7 @@ function ProductCard({ p }: { p: Product }) {
       </div>
       <div className="flex flex-1 flex-col p-6 md:p-8">
         <div className="flex items-baseline justify-between">
-          <h3 className="editorial text-3xl text-ink">{p.name}</h3>
+          <h3 className="titre-m text-ink">{p.name}</h3>
           <span className="font-mono text-xs text-muted">
             {p.area} · {p.total} ex.
           </span>
