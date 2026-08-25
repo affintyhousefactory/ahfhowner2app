@@ -125,7 +125,7 @@ export const SOCLE = {
     {
       texte: "ossature LSF",
       href: "/a-propos#acier-leger",
-      note: "technologie LSF, Light Steel Frame",
+      note: "ossature acier léger",
     },
     { texte: "isolation biosourcée" },
     { texte: "bardage joint debout" },

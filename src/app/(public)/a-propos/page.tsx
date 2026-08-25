@@ -9,7 +9,7 @@ import { Button, Arrow } from "@/components/ui/Button";
 export const metadata: Metadata = {
   // Titre court : le `kicker` complet portait la balise à 76 caractères, au-delà
   // de ce qu'un SERP affiche. Il reste dans le <h1> et dans le JSON-LD.
-  title: "L'ADN Howner — technologie & art de vivre | HOWNER",
+  title: "L'ADN Howner — acier léger & art de vivre | HOWNER",
   description:
     "L'architecture d'avant-garde au service de votre liberté : ossature acier léger, ingénierie de pointe et fabrication Hors-Site au Pays-Basque. La philosophie derrière Arko One et Arko Max.",
   alternates: { canonical: "/a-propos" },
