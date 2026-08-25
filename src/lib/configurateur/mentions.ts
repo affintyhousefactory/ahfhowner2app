@@ -145,12 +145,12 @@ export const SOCLE = {
     {
       texte: "travaux d'aménagement VRD",
       complement: " (voirie et réseaux divers)",
-      note: "Prix estimatif entre 3 000 € et 10 000 € selon distance et difficultés de raccordement",
+      note: "Prix estimatif entre 5 000 € et 15 000 € selon distance et difficultés de raccordement",
     },
     { texte: "raccordements aux réseaux" },
     {
       texte: "assainissement non collectif — micro-station",
-      note: "Prix estimatif entre 4 000 € et 10 000 €",
+      note: "Prix estimatif entre 4 000 € et 12 000 €",
     },
     { texte: "étude de sol si exigée" },
     { texte: "aménagement des accès camion et grue si nécessaire" },
