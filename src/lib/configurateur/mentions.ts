@@ -101,6 +101,15 @@ export type PosteSocle = {
   href?: string;
   /** Développé du terme, affiché en exposant au survol et au clavier. */
   note?: string;
+  /**
+   * Précision rendue **après** l'appel de note, pas avant.
+   *
+   * Sert au seul cas où le terme qui appelle la note est suivi de son
+   * développé entre parenthèses : « VRD** (voirie et réseaux divers) ». Sans
+   * ce champ, l'appel se poserait après la parenthèse et renverrait à
+   * l'explication plutôt qu'au terme.
+   */
+  complement?: string;
 };
 
 /**
@@ -133,14 +142,40 @@ export const SOCLE = {
      chose sans la faire porter à personne. */
   nonInclus: [
     { texte: "terrassement" },
-    { texte: "travaux d'aménagement VRD (voirie et réseaux divers)" },
+    {
+      texte: "travaux d'aménagement VRD",
+      complement: " (voirie et réseaux divers)",
+      note: "Prix estimatif entre 3 000 € et 10 000 € selon distance et difficultés de raccordement",
+    },
     { texte: "raccordements aux réseaux" },
-    { texte: "assainissement non collectif — micro-station" },
+    {
+      texte: "assainissement non collectif — micro-station",
+      note: "Prix estimatif entre 4 000 € et 10 000 €",
+    },
     { texte: "étude de sol si exigée" },
     { texte: "aménagement des accès camion et grue si nécessaire" },
     { texte: "mobilier et décoration" },
   ] as readonly PosteSocle[],
 } as const;
+
+/**
+ * Appel de note d'un poste — `*`, `**`, `***`…
+ *
+ * Le rang est calculé sur l'ordre d'apparition **dans les deux listes réunies**,
+ * « Compris » puis « Non inclus » : la note de l'ossature LSF est la première,
+ * celles des VRD et de la micro-station suivent, alors qu'elles vivent dans
+ * l'autre liste. Une numérotation par liste redonnerait `*` aux VRD et ferait
+ * cohabiter deux notes différentes sous le même appel dans un même encart.
+ *
+ * Calculé, jamais écrit dans les données : un appel de note recopié à la main
+ * se désynchronise au premier poste inséré.
+ */
+const POSTES_NOTES = [...SOCLE.compris, ...SOCLE.nonInclus].filter((p) => p.note);
+
+export function appelDeNote(poste: PosteSocle): string | null {
+  const rang = POSTES_NOTES.findIndex((p) => p.texte === poste.texte);
+  return rang < 0 ? null : "*".repeat(rang + 1);
+}
 
 /** Opt-in email — texte repris de `ContactForm.tsx`, inchangé (ADR-026). */
 export const OPTIN_TEXTE =
