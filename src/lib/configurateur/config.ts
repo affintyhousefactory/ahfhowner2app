@@ -373,7 +373,12 @@ const CONFIG_V1: ConfigurateurConfig = {
   // revient au §5 de la spec. `SERIE_TOTAL` (`site.ts`) a été ramené à 6 dans
   // le même geste — les deux nombres se lisent dans le même parcours (en-tête
   // public puis sélecteur du tunnel), ils ne peuvent pas diverger.
-  serie: { id: "serie_01", libelle: "Série 01", unites: 6 },
+  /* « Série 01 » → « Édition Arko » le 2026-08-25 (demande de Richard). `id`
+     reste `serie_01` : il n'est ni stocké sur le lead, ni affiché — le renommer
+     ne dirait rien à personne et casserait la comparaison avec l'historique.
+     La règle du 2026-08-20 (« les identifiants suivent les libellés ») vise les
+     valeurs qu'un conseiller lit en base ; ce n'est pas le cas ici. */
+  serie: { id: "serie_01", libelle: "Édition Arko", unites: 6 },
   reservation: { montantTtc: 2000, delaiRetractationJours: 30 },
 };
 
