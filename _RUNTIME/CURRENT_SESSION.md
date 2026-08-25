@@ -1,5 +1,13 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-25 (MISE EN PRODUCTION — PR #89)
+- **`main` = `5ed78a4d`.** Emails du configurateur réparés + back-office authentifié (ADR-039). Migration RLS appliquée en prod et vérifiée par requête.
+- **Fuite fermée, prouvée sur le corps servi** : `/admin/*` en 307 vers la connexion, **zéro email dans le corps** ; `/api/admin/*` en 401.
+- **La garde laisse passer un admin — l'autre moitié de la vérification.** Turnstile bloquant le formulaire en automatisé, session obtenue par l'API puis **cookie `@supabase/ssr` reconstitué à la main** : `/admin/leads` → 200 avec son écran. Une garde qui bloque tout le monde a l'air de marcher ; il faut prouver les deux sens.
+- **⚠ Une Preview protégée par le SSO Vercel ne peut pas servir à vérifier une garde d'authentification** — sa racine répond 302 vers `vercel.com/sso-api`, on ne distingue plus sa protection de la nôtre. Vérification faite en production, retour arrière prêt.
+- **Site public intact** : 27 URLs au sitemap, `/arko-one` toujours en 308, `/admin/auth/*` accessibles.
+- **⚠ Reste** : définir les mots de passe (SMTP Supabase, pas Brevo — lent et souvent en indésirables) · **vérifier que les deux boîtes `@howner.fr` existent côté Google Workspace** · rejouer les 3 récapitulatifs (validera le correctif email) · 2FA à décider · déclarer `*.vercel.app` dans Turnstile pour rendre les Preview testables.
+
 ## Décisions — 2026-08-25 (ADR-039 — le back-office n'avait aucune authentification serveur)
 - **`/admin/leads` répondait 200 sans session**, données des prospects dans le HTML. **17 routes `/api/admin/*` sur 19 sans aucune vérification.** RGPD art. 33.
 - **Même cause qu'ADR-028, vue par l'autre bout** : un layout **client** devant la garde ; il redirige après que le serveur a répondu.
