@@ -4,17 +4,45 @@ import Link from "next/link";
 import { cn } from "@/shared/lib/cn";
 import { Magnetic } from "./Magnetic";
 
-type Variant = "accent" | "outline" | "ghost";
+/**
+ * Bouton unique du site — homogénéisé le 2026-08-25 (ADR-040 § Amendement).
+ *
+ * Il coexistait trois façons de dessiner un bouton : ce composant (16 fichiers),
+ * la classe `.btn-rl` de `globals.css` (un seul fichier), et des boutons écrits
+ * en ligne dans les pages produit. Trois façons, c'est trois dérives possibles :
+ * tout passe désormais par ici.
+ *
+ * **Deux changements visibles sur tout le site**, décidés par Richard :
+ *
+ * - **Angles nets** au lieu de la pilule. C'est le dessin proposé avec la
+ *   direction « Heure bleue » et retenu pour l'ensemble ; il s'accorde aux
+ *   filets et aux cadres de la charte, là où le `rounded-full` tirait vers le
+ *   bouton d'application.
+ * - **48 px de hauteur minimale**, partout. La cible tactile descendait
+ *   au-dessous sur certains écrans ; en dessous de 44 px un bouton se rate au
+ *   doigt.
+ *
+ * Les variantes `lumiere` et `contour-clair` servent les fonds sombres (pages
+ * produit) ; `accent`, `outline` et `ghost` les fonds clairs. Un bouton qui
+ * doit choisir sa teinte selon le fond de la page est un bouton qu'on oublie
+ * d'accorder — d'où des variantes nommées par le fond qu'elles habitent.
+ */
+
+type Variant = "accent" | "outline" | "ghost" | "lumiere" | "contour-clair";
 
 const base =
-  "group relative inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 text-[0.95rem] font-medium tracking-tight transition-colors duration-300 will-change-transform whitespace-nowrap";
+  "group relative inline-flex min-h-12 items-center justify-center gap-2.5 px-7 text-[0.95rem] font-medium tracking-tight transition-colors duration-300 will-change-transform whitespace-nowrap";
 
 const styles: Record<Variant, string> = {
-  accent:
-    "bg-accent text-white hover:bg-accent-ink shadow-[0_1px_0_rgba(0,0,0,0.04)]",
-  outline:
-    "border border-ink/15 text-ink hover:border-ink/40 bg-transparent",
+  /* ── Fonds clairs ── */
+  accent: "bg-accent text-white hover:bg-accent-ink shadow-[0_1px_0_rgba(0,0,0,0.04)]",
+  outline: "border border-ink/15 text-ink hover:border-ink/40 bg-transparent",
   ghost: "text-ink hover:text-accent",
+
+  /* ── Fonds sombres (ADR-040) ── */
+  lumiere: "bg-[#e8c9a0] text-[#0f1519] hover:bg-[#f4e0c4]",
+  "contour-clair":
+    "border border-[#e8c9a0]/40 text-[#e8c9a0] hover:border-[#e8c9a0]/75 hover:bg-[#e8c9a0]/10",
 };
 
 export function Button({
@@ -24,6 +52,9 @@ export function Button({
   className,
   magnetic = true,
   onClick,
+  ariaLabel,
+  disabled,
+  tabIndex,
 }: {
   children: React.ReactNode;
   href?: string;
@@ -31,28 +62,86 @@ export function Button({
   className?: string;
   magnetic?: boolean;
   onClick?: () => void;
+  ariaLabel?: string;
+  disabled?: boolean;
+  tabIndex?: number;
 }) {
   const inner = (
-    <span className="relative z-10 inline-flex items-center gap-2.5">
-      {children}
-    </span>
+    <span className="relative z-10 inline-flex items-center gap-2.5">{children}</span>
   );
 
-  const cls = cn(base, styles[variant], className);
+  const cls = cn(
+    base,
+    styles[variant],
+    disabled && "pointer-events-none border-white/10 bg-transparent text-white/20",
+    className,
+  );
 
   const el = href ? (
-    <Link href={href} className={cls} onClick={onClick}>
+    <Link href={href} className={cls} onClick={onClick} aria-label={ariaLabel} tabIndex={tabIndex}>
       {inner}
     </Link>
   ) : (
-    <button type="button" className={cls} onClick={onClick}>
+    <button
+      type="button"
+      className={cls}
+      onClick={onClick}
+      aria-label={ariaLabel}
+      disabled={disabled}
+      tabIndex={tabIndex}
+    >
       {inner}
     </button>
   );
 
-  return magnetic ? <Magnetic strength={0.25}>{el}</Magnetic> : el;
+  /* Un bouton désactivé ne suit pas le curseur : l'effet promettrait une action
+     qui n'aura pas lieu. */
+  return magnetic && !disabled ? <Magnetic strength={0.25}>{el}</Magnetic> : el;
 }
 
+/**
+ * Bouton carré d'icône — commandes de défilement, fermeture, navigation.
+ *
+ * Même grammaire que `Button` (angles nets, 48 px), sans la gouttière ni le
+ * remplissage horizontal d'un bouton porteur de texte.
+ */
+export function IconButton({
+  children,
+  onClick,
+  ariaLabel,
+  variant = "contour-clair",
+  disabled,
+  className,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  ariaLabel: string;
+  variant?: Extract<Variant, "contour-clair" | "outline">;
+  disabled?: boolean;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      className={cn(
+        "group inline-flex h-12 w-12 items-center justify-center transition-colors duration-300",
+        styles[variant],
+        disabled && "pointer-events-none border-white/10 bg-transparent text-white/20",
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/**
+ * La flèche du site. Une seule — elle était dessinée deux fois, ici et dans les
+ * pages produit sous le nom `Fleche`, avec exactement le même tracé.
+ */
 export function Arrow({ className }: { className?: string }) {
   return (
     <svg
@@ -60,10 +149,7 @@ export function Arrow({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 16 16"
       fill="none"
-      className={cn(
-        "transition-transform duration-300 group-hover:translate-x-0.5",
-        className,
-      )}
+      className={cn("transition-transform duration-300 group-hover:translate-x-0.5", className)}
       aria-hidden
     >
       <path

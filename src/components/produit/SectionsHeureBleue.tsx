@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { reserverHref, type ProductKey } from "@/lib/site";
 import { contenuProduit, numerosLibres } from "@/lib/produits/heure-bleue";
-import { Fleche } from "./HeroHeureBleue";
+import { Button, Arrow } from "@/components/ui/Button";
 import { BandeVisite } from "./BandeVisite";
 
 /**
@@ -141,7 +141,7 @@ export function SectionAtelier({ produit }: { produit: ProductKey }) {
           className="mt-1 inline-flex items-center gap-2.5 self-start border-b border-[#e8c9a0]/50 pb-1.5 text-sm text-[#e8c9a0] transition-colors hover:border-[#e8c9a0]"
         >
           Comment nous fabriquons
-          <Fleche />
+          <Arrow />
         </Link>
       </Reveal>
       <Image
@@ -202,13 +202,10 @@ export function SectionCloture({ produit }: { produit: ProductKey }) {
             </p>
           </div>
           <div className="flex flex-col items-start gap-4">
-            <Link
-              href={reserverHref(produit)}
-              className="inline-flex min-h-12 items-center gap-3 bg-[#e8c9a0] px-9 font-display text-[0.95rem] text-[#0f1519] transition-colors hover:bg-[#f4e0c4]"
-            >
+            <Button href={reserverHref(produit)} variant="lumiere">
               Configurer mon {produit === "one" ? "Arko One" : "Arko Max"}
-              <Fleche />
-            </Link>
+              <Arrow />
+            </Button>
             <span className="text-sm text-[#7d8b95]">
               Sans rendez-vous · prix affiché à chaque choix
             </span>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { VueVisite } from "@/lib/produits/heure-bleue";
+import { IconButton, Arrow } from "@/components/ui/Button";
 
 /**
  * Bande de visite — ADR-040.
@@ -76,8 +77,16 @@ export function BandeVisite({ titre, vues }: { titre: string; vues: VueVisite[] 
 
         {/* Commandes : bureau seulement. Sur mobile, le doigt suffit. */}
         <div className="hidden items-center gap-2.5 pb-1 md:flex">
-          <Commande sens={-1} actif={peutReculer} onClick={() => glisser(-1)} />
-          <Commande sens={1} actif={peutAvancer} onClick={() => glisser(1)} />
+          <IconButton
+            ariaLabel="Vue précédente"
+            disabled={!peutReculer}
+            onClick={() => glisser(-1)}
+          >
+            <Arrow className="rotate-180 group-hover:-translate-x-0.5 group-hover:translate-x-0" />
+          </IconButton>
+          <IconButton ariaLabel="Vue suivante" disabled={!peutAvancer} onClick={() => glisser(1)}>
+            <Arrow />
+          </IconButton>
         </div>
       </div>
 
@@ -105,38 +114,5 @@ export function BandeVisite({ titre, vues }: { titre: string; vues: VueVisite[] 
         ))}
       </ul>
     </>
-  );
-}
-
-function Commande({
-  sens,
-  actif,
-  onClick,
-}: {
-  sens: 1 | -1;
-  actif: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={!actif}
-      aria-label={sens === 1 ? "Vue suivante" : "Vue précédente"}
-      className="inline-flex h-11 w-11 items-center justify-center border border-[#e8c9a0]/35 text-[#e8c9a0] transition-all hover:border-[#e8c9a0]/70 hover:bg-[#e8c9a0]/10 disabled:pointer-events-none disabled:border-white/10 disabled:text-white/20"
-    >
-      <svg
-        width="17"
-        height="17"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        aria-hidden
-        className={sens === -1 ? "rotate-180" : undefined}
-      >
-        <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </button>
   );
 }

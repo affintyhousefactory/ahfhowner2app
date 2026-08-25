@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { reserverHref, type ProductKey } from "@/lib/site";
 import { prixBase, numerosLibres } from "@/lib/produits/heure-bleue";
-import { Fleche } from "./HeroHeureBleue";
+import { Button, Arrow } from "@/components/ui/Button";
 
 /**
  * Barre d'action mobile — ADR-040, moment de motion n° 4.
@@ -54,14 +53,16 @@ export function BarreActionMobile({ produit }: { produit: ProductKey }) {
             {libres} numéro{libres > 1 ? "s" : ""} libre{libres > 1 ? "s" : ""}
           </span>
         </span>
-        <Link
+        <Button
           href={reserverHref(produit)}
+          variant="lumiere"
+          magnetic={false}
           tabIndex={visible ? undefined : -1}
-          className="inline-flex min-h-12 items-center gap-2.5 bg-[#e8c9a0] px-6 font-display text-sm text-[#0f1519]"
+          className="px-6"
         >
           Configurer
-          <Fleche />
-        </Link>
+          <Arrow />
+        </Button>
       </div>
     </div>
   );

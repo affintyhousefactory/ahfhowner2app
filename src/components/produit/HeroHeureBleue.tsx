@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { reserverHref, type ProductKey } from "@/lib/site";
+import { Button, Arrow } from "@/components/ui/Button";
 import { contenuProduit, prixBase, numerosLibres } from "@/lib/produits/heure-bleue";
 
 /**
@@ -95,13 +95,10 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
             </motion.p>
 
             <motion.div {...monte(0.42)} className="mt-8 flex flex-wrap items-center gap-5">
-              <Link
-                href={reserverHref(produit)}
-                className="inline-flex min-h-12 items-center gap-3 bg-[#e8c9a0] px-8 font-display text-sm text-[#0f1519] transition-colors hover:bg-[#f4e0c4]"
-              >
+              <Button href={reserverHref(produit)} variant="lumiere">
                 Réserver un numéro
-                <Fleche />
-              </Link>
+                <Arrow />
+              </Button>
               <span className="text-sm text-[#b9c3cb]">
                 {libres} numéro{libres > 1 ? "s" : ""} encore libre{libres > 1 ? "s" : ""}
               </span>
@@ -125,19 +122,3 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
   );
 }
 
-export function Fleche({ className }: { className?: string }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      aria-hidden
-      className={className}
-    >
-      <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}

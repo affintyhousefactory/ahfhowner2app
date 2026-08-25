@@ -116,3 +116,53 @@ fait tomber une objection que j'avais posée sans regarder le composant.*
   teinte légèrement. La passer à 95 % sur ces pages est une valeur à changer.
 - **Alerte Albert** — repositionnement visuel des deux pages produit les plus
   vues du site, écart assumé à la charte Affinity.
+
+
+## Amendement du 2026-08-25 — un seul système de boutons
+
+**Décision de Richard** : le dessin de bouton proposé avec « Heure bleue » vaut
+pour **tout le site**.
+
+### Ce qui existait
+
+Trois façons de dessiner un bouton coexistaient :
+
+| Système | Portée |
+|---|---|
+| `<Button>` (`ui/Button.tsx`) | 16 fichiers |
+| `.btn-rl` / `.btn-rl-accent` (`globals.css`) | **1 seul** fichier |
+| Boutons écrits en ligne | les 4 composants produit — **les miens** |
+
+Plus une flèche dessinée **deux fois** : `<Arrow>` (21 fichiers) et `<Fleche>`
+(3 fichiers), au tracé rigoureusement identique. Le doublon venait de cette
+refonte : il a été créé sans regarder ce qui existait.
+
+### Ce qui a été fait
+
+Tout passe par `ui/Button.tsx`, qui expose `Button`, `IconButton` et `Arrow`.
+`.btn-rl` et `Fleche` sont supprimés — plus aucune occurrence.
+
+**Deux changements visibles sur tout le site :**
+
+- **Angles nets** au lieu de la pilule (`rounded-full` retiré du socle). Le
+  dessin s'accorde aux filets et aux cadres de la charte, là où l'arrondi
+  complet tirait vers le bouton d'application. ⚠ **Écart à `DESIGN.md`**, qui
+  prescrit « border-radius : léger » — à reporter dans la charte.
+- **48 px de hauteur minimale**, partout. La cible descendait au-dessous sur
+  certains écrans ; sous 44 px un bouton se rate au doigt.
+
+Deux variantes s'ajoutent pour les fonds sombres — `lumiere` et
+`contour-clair` — nommées par le fond qu'elles habitent : un bouton qui doit
+deviner sa teinte selon la page est un bouton qu'on oublie d'accorder.
+
+Un bouton désactivé perd l'effet magnétique : suivre le curseur promettrait une
+action qui n'aura pas lieu.
+
+### Portée réelle
+
+**20 fichiers** rendent désormais leurs boutons par le même composant. Le
+changement se voit donc au-delà des pages produit — accueil, contact,
+configurateur, back-office compris. C'est l'homogénéisation demandée ; elle est
+à regarder en Preview sur les pages qui n'ont rien à voir avec « Heure bleue ».
+
+eslint : **320 erreurs avant, 320 après** — aucune régression.
