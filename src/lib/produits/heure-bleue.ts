@@ -189,10 +189,11 @@ const CONTENUS: Record<ProductKey, ContenuProduit> = {
     accroche:
       "Un studio de jardin de 40 m² : séjour, cuisine ouverte, chambre séparée et salle de bain. Livré prêt à vivre, posé sur votre parcelle en une journée.",
     hero: {
-      /* Celui-ci est déjà en fin de journée, intérieur allumé : l'heure bleue
-         sans retouche. C'est le seul des deux modèles à avoir son propre hero. */
-      src: "/assets/arko/max/carousel/exterieur.avif",
-      alt: "L'Arko Max en fin de journée, intérieur allumé, terrasse sur pilotis",
+      /* Vue panoramique fournie par Richard le 2026-08-25 : fin de journée,
+         intérieur allumé, terrasse sur pilotis dans les pins. L'heure bleue
+         sans retouche — d'où l'absence de `luminosite`, le défaut suffit. */
+      src: "/assets/arko/max/hero-exterieur.avif",
+      alt: "L'Arko Max en fin de journée, intérieur allumé, terrasse sur pilotis dans les pins",
     },
     tension: {
       titre: "Accueillir sans se serrer.",
