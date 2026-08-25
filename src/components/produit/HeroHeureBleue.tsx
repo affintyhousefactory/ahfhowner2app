@@ -59,7 +59,8 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
           fill
           priority
           sizes="100vw"
-          className="object-cover brightness-[.74] saturate-[1.1]"
+          style={{ filter: `brightness(${c.hero.luminosite ?? 0.74}) saturate(1.1)` }}
+          className="object-cover"
         />
       </motion.div>
 

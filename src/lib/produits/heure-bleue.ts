@@ -35,7 +35,19 @@ export type ContenuProduit = {
   /** Deux lignes : la coupe est voulue, elle porte le rythme du titre. */
   titre: [string, string];
   accroche: string;
-  hero: { src: string; alt: string };
+  hero: {
+    src: string;
+    alt: string;
+    /**
+     * Assombrissement appliqué au visuel du hero, entre 0 et 1.
+     *
+     * Il n'est pas le même pour les deux modèles, et ce n'est pas un caprice :
+     * le visuel du Max est déjà pris à la tombée du jour et supporte un fort
+     * assombrissement, celui du One est diurne et en pleine lumière — le même
+     * traitement le rendrait terne au lieu de nocturne. Défaut : 0.74.
+     */
+    luminosite?: number;
+  };
   tension: { titre: string; paragraphes: [string, string] };
   etapes: [Etape, Etape, Etape];
   chiffres: { valeur: string; libelle: string }[];
@@ -105,11 +117,12 @@ const CONTENUS: Record<ProductKey, ContenuProduit> = {
     accroche:
       "Un studio de jardin d'architecte, livré prêt à vivre et posé sur votre parcelle en une journée.",
     hero: {
-      /* ⚠ Visuel de l'Arko Max : les rendus du One fournis le 2026-08-25 sont
-         diurnes et ne tiennent pas l'heure bleue. Arbitrage laissé ouvert —
-         un rendu nocturne du One reste à commander. */
-      src: "/assets/arko/video/interieur-poster.jpg",
-      alt: "Intérieur d'un studio de jardin Arko, éclairé à la tombée du jour",
+      /* Vue extérieure propre à l'Arko One, fournie par Richard le 2026-08-25.
+         Elle remplace un intérieur de l'Arko **Max** servi faute de mieux —
+         la page produit du One ne montre plus l'autre modèle en ouverture. */
+      src: "/assets/arko/one/hero-exterieur.avif",
+      alt: "L'Arko One posé dans les montagnes basques, bardage sombre et terrasse en bois",
+      luminosite: 0.88,
     },
     tension: {
       titre: "Vous n'avez pas besoin de déménager.",

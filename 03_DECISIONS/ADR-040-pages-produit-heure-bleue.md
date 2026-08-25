@@ -108,10 +108,13 @@ fait tomber une objection que j'avais posée sans regarder le composant.*
 
 ## Reste ouvert
 
-- **Le hero de l'Arko One** sert encore un intérieur de l'Arko **Max** au
-  crépuscule : les rendus One fournis sont diurnes et ne tiennent pas l'heure
-  bleue. Trois issues — assumer, basculer sur l'extérieur One, ou commander un
-  rendu nocturne. Le Max, lui, a désormais le sien.
+- ~~Le hero de l'Arko One sert un intérieur de l'Arko Max~~ — **réglé le
+  2026-08-25** : Richard a fourni une vue extérieure propre au One (montagnes
+  basques). Chaque page produit ouvre désormais sur son propre modèle.
+  ⚠ Ce visuel étant **diurne** quand celui du Max est crépusculaire,
+  l'assombrissement du hero est passé dans les données (`hero.luminosite`) :
+  0,88 pour le One, 0,74 par défaut. Le même traitement rendait le visuel du
+  One terne au lieu de nocturne.
 - **La barre est translucide à 80 %** : le contenu sombre qui défile dessous la
   teinte légèrement. La passer à 95 % sur ces pages est une valeur à changer.
 - **Alerte Albert** — repositionnement visuel des deux pages produit les plus
