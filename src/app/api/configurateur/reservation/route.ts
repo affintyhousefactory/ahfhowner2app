@@ -27,10 +27,17 @@ import type { ParcelleData } from "@/shared/types/plu";
  * 3. **Les prix sont recalculés côté serveur**, jamais repris du client. Un
  *    total envoyé par le navigateur est une valeur qu'on ne contrôle pas ; ici
  *    il ne sert qu'à détecter un désaccord, signalé sans bloquer.
+ *
+ * ⚠ 4. **La configuration d'envoi se lit dans la fonction, jamais au niveau du
+ *    module.** `BREVO_TEMPLATE_RECAP` et `BREVO_TO_AHF` étaient des constantes
+ *    de module ; en production elles arrivaient vides, et la route a répondu
+ *    `notified: true` à trois demandes sans envoyer un seul email (24 et 25
+ *    août 2026). Les variables serveur ne sont fiables qu'au moment du rendu
+ *    dynamique — c'est ce que dit la doc Next livrée
+ *    (`02-guides/environment-variables.md`, § Runtime Environment Variables).
+ *    Ne pas les remonter en tête de fichier « pour la lisibilité ».
  */
 
-const TEMPLATE_ID = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
-const TO_AHF = process.env.BREVO_TO_AHF ?? "";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /** Statuts où le numéro est réellement pris (ADR-035, ADR-031 §2). */
@@ -261,18 +268,27 @@ export async function POST(req: NextRequest) {
     PLU_SERVITUDES: plu?.servitudes?.join(" · ") ?? "",
   };
 
+  /* Lues ici, à chaque requête : voir le principe 4 en tête de fichier. */
+  const templateId = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
+  const toAhf = process.env.BREVO_TO_AHF ?? "";
+
   const destinataires = [{ email: c.email, name: nomComplet }];
-  if (TO_AHF) destinataires.push({ email: TO_AHF, name: "Howner" });
+  if (toAhf) destinataires.push({ email: toAhf, name: "Howner" });
 
   let notified = true;
   try {
-    await sendBrevoTemplate({ templateId: TEMPLATE_ID, to: destinataires, params });
+    await sendBrevoTemplate({ templateId, to: destinataires, params });
   } catch (err) {
     notified = false;
     signalerPanne("configurateur/reservation/brevo", err);
   }
 
-  addBrevoContact(
+  /* ⚠ `await` obligatoire. Sans lui, la promesse survivait au `return` : la
+     fonction rendait sa réponse, l'exécution s'arrêtait, et le fetch vers
+     Brevo mourait en vol — d'où les `fetch failed` du 22 au 25 août, qui
+     n'étaient pas une panne réseau mais un cycle de vie. Le contact CRM
+     n'était jamais créé. */
+  await addBrevoContact(
     c.email,
     { PRENOM: c.prenom, NOM: c.nom, SMS: c.tel || undefined, HOWNER_GROUP: "Lead_Configurateur_v2" },
     body.optIn ? [parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8")] : [],

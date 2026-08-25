@@ -47,14 +47,24 @@ export async function sendBrevoTemplate({
   to: { email: string; name?: string }[];
   params: Record<string, string | number | null | undefined>;
 }): Promise<void> {
+  /* ⚠ Ces deux défauts **lèvent**, ils ne se contentent plus d'un `console.warn`
+     suivi d'un `return`.
+
+     Motif, constaté en production le 2026-08-25 : une configuration manquante
+     sortait d'ici sans erreur, donc sans exception à attraper, donc avec un
+     `notified: true` renvoyé par des routes qui n'avaient rien envoyé. Trois
+     leads du configurateur sont restés trois jours sans récapitulatif, et le
+     triptyque `ok`/`persisted`/`notified` — écrit précisément pour ne pas
+     mentir — affirmait le contraire.
+
+     Un chemin qui ne jette pas ne se rattrape pas : tout appelant doit donc
+     entourer cet appel d'un `catch` qui bascule son propre `notified`. */
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
-    console.warn("[email] BREVO_API_KEY manquant — email non envoyé.");
-    return;
+    throw new Error("[email] BREVO_API_KEY manquant — email non envoyé.");
   }
   if (!templateId) {
-    console.warn("[email] templateId manquant — email non envoyé.");
-    return;
+    throw new Error("[email] templateId manquant (0 ou NaN) — email non envoyé.");
   }
 
   const res = await fetch(BREVO_API, {

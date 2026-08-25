@@ -4,8 +4,9 @@ import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { signalerPanne } from "@/shared/lib/panne";
 import type { ParcelleData } from "@/shared/types/plu";
 
-const TEMPLATE_ID = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
-const TO_AHF = process.env.BREVO_TO_AHF ?? "";
+/* ⚠ `BREVO_TEMPLATE_RECAP` et `BREVO_TO_AHF` se lisent dans la fonction, pas
+   ici : au niveau du module elles arrivaient vides en production et l'email
+   partait dans le vide (constat du 2026-08-25, même défaut sur la route v2). */
 
 const PACK_LABELS: Record<string, string> = {
   essentiel: "Pack Essentiel — 4 900 € TTC",
@@ -158,27 +159,41 @@ export async function POST(req: NextRequest) {
     PLU_SERVITUDES: plu?.servitudes?.join(" · ") ?? "",
   };
 
-  const recipients = [{ email, name: `${prenom} ${nom}`.trim() }];
-  if (TO_AHF) recipients.push({ email: TO_AHF, name: "Howner" });
+  const templateId = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
+  const toAhf = process.env.BREVO_TO_AHF ?? "";
 
-  await sendBrevoTemplate({ templateId: TEMPLATE_ID, to: recipients, params });
+  const recipients = [{ email, name: `${prenom} ${nom}`.trim() }];
+  if (toAhf) recipients.push({ email: toAhf, name: "Howner" });
+
+  /* L'appel était nu : `sendBrevoTemplate` lève désormais sur configuration
+     manquante, et une 500 ici ferait réessayer un visiteur dont le lead est
+     déjà enregistré. On signale, on n'interrompt pas. */
+  let notified = true;
+  try {
+    await sendBrevoTemplate({ templateId, to: recipients, params });
+  } catch (err) {
+    notified = false;
+    signalerPanne("reservation/brevo", err);
+  }
 
   // Contact CRM Brevo : toujours créé (groupe Lead_Configurateur). Pas de flux double
   // opt-in (template DOI non actif côté Brevo) — inscription directe SUBSCRIBED (liste
   // prospects) si coché, sinon créé blocklisté, comme sur le formulaire de contact.
   const brevoAttrs = { PRENOM: prenom, NOM: nom, SMS: tel ?? undefined, HOWNER_GROUP: "Lead_Configurateur" };
-  addBrevoContact(
+  /* `await` : sans lui le fetch meurt avec la fonction, après le `return`. */
+  await addBrevoContact(
     email,
     brevoAttrs,
     optIn ? [parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8")] : [],
     { emailBlacklisted: !optIn },
-  ).catch((err) => console.error("[reservation] Brevo contact error:", err));
+  ).catch((err) => signalerPanne("reservation/brevo-contact", err));
 
-  // `ok` reste vrai : du point de vue du visiteur la demande est bien partie,
-  // l'email de récapitulatif l'atteste. `persisted` dit l'autre moitié de la
-  // vérité — le lead est-il en base ? Un `{ ok: true }` seul rendait la panne
+  // `ok` reste vrai : du point de vue du visiteur la demande est bien partie.
+  // `persisted` dit si le lead est en base, `notified` si l'email est parti —
+  // ce dernier manquait, et son absence a laissé croire pendant trois jours
+  // que les récapitulatifs partaient. Un `{ ok: true }` seul rendait la panne
   // indétectable, y compris pour une sonde externe.
-  return NextResponse.json({ ok: true, persisted });
+  return NextResponse.json({ ok: true, persisted, notified });
 }
 
 function formatDate(dateStr: string): string {
