@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 // ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
 import { mandataireDisabled } from "@/shared/lib/feature-guard";
+import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 
 interface PappersRepresentant {
   prenom?: string;
@@ -25,6 +26,9 @@ interface PappersEntreprise {
 export async function GET(req: NextRequest) {
   const off = mandataireDisabled();
   if (off) return off;
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
 
   const siren = req.nextUrl.searchParams.get("siren")?.replace(/\s/g, "");
 

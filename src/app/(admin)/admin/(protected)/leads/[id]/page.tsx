@@ -20,6 +20,8 @@ import LeadConfiguration from "@/components/admin/LeadConfiguration";
 import LeadAppels from "@/components/admin/LeadAppels";
 import { FEATURES } from "@/lib/features";
 import { etatSuivi, dateHeureFr } from "@/lib/crm";
+import { estAdmin } from "@/shared/lib/supabase-server";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +36,12 @@ type MandataireActif = {
 };
 
 export default async function LeadFiche({ params }: { params: Promise<{ id: string }> }) {
+  /* ADR-039 — défense en profondeur. Le proxy garde déjà cette route ; cette
+     seconde vérification protège le jour où le matcher change ou qu'une page
+     naît hors de son périmètre. Une page admin ne lit jamais en `service_role`
+     sans avoir prouvé l'identité de qui la demande. */
+  if (!(await estAdmin())) redirect("/admin/auth/signin");
+
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 

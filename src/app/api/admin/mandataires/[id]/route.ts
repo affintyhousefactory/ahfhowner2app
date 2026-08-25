@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 // ADR-028 — domaine « Mandataire & Terrain » suspendu : 404 tant que le flag est off.
 import { mandataireDisabled } from "@/shared/lib/feature-guard";
+import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 
 const EDITABLE_FIELDS = [
   "prenom", "nom", "email", "tel",
@@ -18,6 +19,9 @@ export async function PATCH(
 ) {
   const off = mandataireDisabled();
   if (off) return off;
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
 
   const { id } = await params;
   const body = (await req.json()) as Record<string, unknown>;

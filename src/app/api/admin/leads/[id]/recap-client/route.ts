@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
+import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 
 /* ⚠ `BREVO_TEMPLATE_RECAP` se lit dans la fonction : au niveau du module, elle
    arrivait vide en production (constat du 2026-08-25). Ici le défaut se voyait
@@ -13,6 +14,9 @@ const PACK_LABELS: Record<string, string> = {
 };
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 

@@ -1,5 +1,17 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-25 (ADR-039 — le back-office n'avait aucune authentification serveur)
+- **`/admin/leads` répondait 200 sans session**, données des prospects dans le HTML. **17 routes `/api/admin/*` sur 19 sans aucune vérification.** RGPD art. 33.
+- **Même cause qu'ADR-028, vue par l'autre bout** : un layout **client** devant la garde ; il redirige après que le serveur a répondu.
+- **La session vivait dans le `localStorage`** — invisible au serveur. Toute garde serveur exigeait d'abord de passer la session en **cookies** (`@supabase/ssr`). Mon premier plan (« garde au proxy ») était faux tel quel.
+- **Quatre couches** : cookies · proxy (`getUser()`, pas `getSession()`) · `estAdmin()` sur 10 pages · `refuserSiPasAdmin()` sur 26 handlers.
+- **Les 6 policies RLS `admin_*` n'avaient jamais rien accordé** (`auth.jwt() ->> 'role'` = `authenticated`). Prouvé sur un jeton réel. Corrigées, **Preview seulement**.
+- ⚠ **`revoke from public` ne retire pas `anon`** : Supabase l'accorde par privilège par défaut. Se vérifie dans `proacl`, pas dans le texte de la migration.
+- **Filtrage par IP écarté par Richard** — qualifier les leads depuis n'importe quel coworking. Comptes créés **avant** la garde pour ne pas s'enfermer dehors.
+- **`richard@howner.fr` et `albert@howner.fr`** créés en production, rôle admin, **connexion prouvée**. Albert n'avait aucun compte. ⚠ Les boîtes doivent exister côté Google Workspace.
+- **ADR-035 validé en réel** par l'appel journalisé de Richard (trigger OK, statut propagé). Kanban/GED/badges : non vérifiables sans navigateur.
+- **⚠ Reste** : vérification Preview · migration Prod à la validation `dev` → `main` · 2FA et protection mots de passe compromis à décider.
+
 ## Décisions — 2026-08-25 (correctif — les emails du configurateur ne partaient pas)
 - **Trois demandes de numéro sans récapitulatif** (24 et 25 août). Brevo : `requests: 0` sur 24 h. Journal de production : `[email] templateId manquant`.
 - **La variable existait, c'est l'endroit de lecture qui était faux.** Constante de module = valeur vide en production. **Règle : toute variable serveur se lit dans la fonction**, jamais en tête de fichier. Les routes qui le faisaient déjà (`/api/contact`) n'ont jamais cessé de fonctionner — d'où le symptôme « le contact arrive, le configurateur non ».
