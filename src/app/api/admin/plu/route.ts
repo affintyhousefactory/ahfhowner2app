@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { geocodeAddress, analyseCoords } from "@/shared/lib/plu";
+import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 
 // Route admin — même logique que /api/parcelle mais sans Turnstile.
 // Accessible uniquement depuis le portail admin (pas exposé publiquement utile car CORS restrictif).
 export async function POST(req: NextRequest) {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
   const { address } = (await req.json()) as { address?: string };
 
   if (!address || address.trim().length < 5) {

@@ -11,6 +11,8 @@ import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { signalerPanne } from "@/shared/lib/panne";
 import LeadsVue, { type LeadListe } from "@/components/admin/LeadsVue";
 import { ErreurRequete } from "@/components/admin/ErreurRequete";
+import { estAdmin } from "@/shared/lib/supabase-server";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,12 @@ export default async function LeadsPage({
 }: {
   searchParams: Promise<{ vue?: string }>;
 }) {
+  /* ADR-039 — défense en profondeur. Le proxy garde déjà cette route ; cette
+     seconde vérification protège le jour où le matcher change ou qu'une page
+     naît hors de son périmètre. Une page admin ne lit jamais en `service_role`
+     sans avoir prouvé l'identité de qui la demande. */
+  if (!(await estAdmin())) redirect("/admin/auth/signin");
+
   const { vue } = await searchParams;
 
   // ADR-028/035 — la jointure `mandataires` alimentait la colonne « Mandataire »

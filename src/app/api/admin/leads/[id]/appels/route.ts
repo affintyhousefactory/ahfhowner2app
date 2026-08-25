@@ -12,6 +12,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 
 const SENS = ["entrant", "sortant", "note"] as const;
 const ISSUES = ["joint", "repondeur", "pas_de_reponse", "rappel_demande", "refus"] as const;
@@ -20,6 +21,9 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
   const { id } = await params;
 
   const { data, error } = await getSupabaseAdmin()
@@ -36,6 +40,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
   const { id } = await params;
   const body = (await req.json()) as Record<string, unknown>;
 
@@ -100,6 +107,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
   const { id } = await params;
   const { appelId } = (await req.json()) as { appelId?: string };
   if (!appelId) return NextResponse.json({ error: "appelId requis" }, { status: 400 });

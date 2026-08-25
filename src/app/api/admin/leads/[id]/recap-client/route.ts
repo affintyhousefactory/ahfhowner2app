@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
+import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 
-const TEMPLATE_ID = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
+/* ⚠ `BREVO_TEMPLATE_RECAP` se lit dans la fonction : au niveau du module, elle
+   arrivait vide en production (constat du 2026-08-25). Ici le défaut se voyait
+   — la route renvoie un 500 explicite — mais la cause était la même. */
 
 const PACK_LABELS: Record<string, string> = {
   essentiel: "Pack Essentiel — 4 900 € TTC",
@@ -11,6 +14,9 @@ const PACK_LABELS: Record<string, string> = {
 };
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
   const { id } = await params;
   const supabase = getSupabaseAdmin();
 
@@ -24,7 +30,8 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Lead introuvable ou sans email" }, { status: 404 });
   }
 
-  if (!TEMPLATE_ID) {
+  const templateId = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
+  if (!templateId) {
     return NextResponse.json({ error: "BREVO_TEMPLATE_RECAP non défini" }, { status: 500 });
   }
 
@@ -51,7 +58,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
   try {
     await sendBrevoTemplate({
-      templateId: TEMPLATE_ID,
+      templateId,
       to: [{ email: lead.email, name: `${lead.prenom ?? ""} ${lead.nom ?? ""}`.trim() }],
       params: {
         PRENOM: lead.prenom ?? "",
