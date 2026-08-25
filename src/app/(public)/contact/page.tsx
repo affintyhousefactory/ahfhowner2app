@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { ContactForm } from "@/components/site/ContactForm";
 import { PhoneLink } from "@/components/ui/PhoneLink";
 import { CONTACT } from "@/lib/site";
+import { Instagram } from "@/components/ui/Instagram";
 
 export const metadata: Metadata = {
   title: "Contact | HOWNER",
@@ -51,6 +52,26 @@ export default function ContactPage() {
               </p>
               <PhoneLink full className="mt-5 w-fit px-4 py-2 text-sm" />
             </div>
+
+            {/* Troisième voie, volontairement plus discrète que les deux
+                autres : on y va pour voir les studios, pas pour poser une
+                question — un message privé n'a ni trace ni délai de réponse
+                annoncé, contrairement au formulaire et au téléphone. */}
+            <a
+              href={CONTACT.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Howner sur Instagram (${CONTACT.instagramHandle}) — nouvel onglet`}
+              className="mt-6 inline-flex min-h-11 max-w-md items-center gap-3 text-sm text-muted transition-colors hover:text-ink"
+            >
+              <Instagram />
+              <span>
+                Voir les studios sur Instagram
+                <span className="ml-1.5 font-mono text-[0.72rem] text-muted/70">
+                  {CONTACT.instagramHandle}
+                </span>
+              </span>
+            </a>
           </div>
           <Suspense fallback={<div className="rounded-2xl border border-line bg-canvas p-6 md:p-8" />}>
             <ContactForm />

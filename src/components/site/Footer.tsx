@@ -11,6 +11,7 @@ import {
 } from "@/lib/site";
 import { pagesDeFamille } from "@/lib/pages/registry";
 import { FEATURES } from "@/lib/features";
+import { Instagram } from "@/components/ui/Instagram";
 
 export function Footer() {
   const usages = pagesDeFamille("usage");
@@ -54,6 +55,19 @@ export function Footer() {
               Deux studios de jardin d'architecte, conçus avec notre architecte
               intégrée et livrés prêts à vivre. Fabriqués au Pays-Basque.
             </p>
+            {/* Sous la baseline, dans le bloc d'identité : c'est là qu'on
+                cherche « qui est cette marque », pas dans les colonnes de
+                navigation. Cible tactile de 44 px malgré une icône de 18. */}
+            <a
+              href={CONTACT.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Howner sur Instagram (${CONTACT.instagramHandle}) — nouvel onglet`}
+              className="mt-6 inline-flex min-h-11 items-center gap-2.5 text-sm text-canvas/70 transition-colors hover:text-canvas"
+            >
+              <Instagram />
+              <span>{CONTACT.instagramHandle}</span>
+            </a>
           </div>
 
           <nav className="flex flex-col gap-2.5">
