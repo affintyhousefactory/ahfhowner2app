@@ -1,6 +1,17 @@
 # CURRENT_SESSION — Howner / ARKO
 
+## Décisions — 2026-08-25 (correctif — les emails du configurateur ne partaient pas)
+- **Trois demandes de numéro sans récapitulatif** (24 et 25 août). Brevo : `requests: 0` sur 24 h. Journal de production : `[email] templateId manquant`.
+- **La variable existait, c'est l'endroit de lecture qui était faux.** Constante de module = valeur vide en production. **Règle : toute variable serveur se lit dans la fonction**, jamais en tête de fichier. Les routes qui le faisaient déjà (`/api/contact`) n'ont jamais cessé de fonctionner — d'où le symptôme « le contact arrive, le configurateur non ».
+- **`BREVO_TO_AHF` avait le même défaut** : sans le correctif complet, Howner n'aurait pas été en copie.
+- **`notified: true` a menti trois fois.** `sendBrevoTemplate` sortait sur `console.warn` + `return` : **un chemin qui ne jette pas ne se rattrape pas**. Les deux gardes lèvent désormais.
+- **`fetch failed` n'était pas le réseau** mais un `addBrevoContact` sans `await` : le fetch mourait avec la fonction, après le `return`.
+- **Côté Brevo, rien à corriger** — compte, expéditeur, DKIM/SPF de `howner.fr`, templates 9 et 10, quota : tous vérifiés bons.
+- **Domaine suspendu non touché** (ADR-028) ; ses deux appels sans `catch` sont coupés en 404 avant l'appel — vérifié, à reprendre à la réactivation.
+- **⚠ Reste à faire** : rejouer les trois récapitulatifs perdus depuis la fiche lead, **après validation explicite** (aucun email envoyé sans accord).
+
 ## Décisions — 2026-08-22 (MISE EN PRODUCTION : configurateur branché, prix Arko One, CGV validées)
+- **`main` = `e4165729`** (PR #86, après PR #85). **PR #86** : `contact@howner.fr` sur `/mentions-legales`, `/confidentialite` et le **JSON-LD** — les deux pages étaient déjà sans « maison » ni terme proscrit, seule l'adresse était celle de l'éditeur. `CONTACT.email` devient la source unique (elle était en dur à 25 endroits). Aucune migration.
 - **`main` = `c993ee1c`** (PR #85). PR #84 fusionnée dans `dev` au préalable — 26 commits depuis le 19 août.
 - **Le configurateur crée enfin un lead.** Le CTA final n'avait pas de handler depuis le 19/08. Prix **recalculé côté serveur** ; conflit de numéro en 409 avec les numéros encore libres.
 - **Arko One : 69 900 € TTC.** ⚠ Richard annonçait un départ de 79 900 € ; le montant servi était **77 900 €** (vérifié en production, aucune occurrence de 79 900 dans le dépôt). Version de grille incrémentée dans le même geste.

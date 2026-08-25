@@ -65,7 +65,12 @@ export type SourcePanne =
   | "configurateur/reservation/brevo"
   | "configurateur/reservation/brevo-contact"
   | "configurateur/reservation/numeros-libres"
-  | "configurateur/reservation/total-divergent";
+  | "configurateur/reservation/total-divergent"
+  /* Tunnel v1 (`/api/reservation`) — ses deux appels Brevo étaient nus ou
+     rendus muets par un `console.error`. Déclarés ici pour qu'ils remontent
+     comme les autres. Le v1 disparaîtra avec la bascule sur `/configurer`. */
+  | "reservation/brevo"
+  | "reservation/brevo-contact";
 
 /**
  * Journalise une panne non bloquante de façon repérable.
