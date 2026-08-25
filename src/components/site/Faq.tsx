@@ -31,7 +31,7 @@ export function Faq() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-3xl text-balance text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:text-[4rem]">
+          <h2 className="titre-xl mt-12 max-w-3xl text-balance text-ink md:mt-16">
             Les réponses, franches.
           </h2>
         </Reveal>

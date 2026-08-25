@@ -23,7 +23,7 @@ export const HAUT_DE_GAMME = {
       "Un bureau indépendant. Une suite pour recevoir. Un espace de travail. Un hébergement premium. Un lieu pour créer, louer ou simplement gagner de précieux mètres carrés.",
     paragraphes: [
       "Avec Arko One et Arko Max, Howner traite le studio de jardin comme un véritable espace d'architecture : contemporain, confortable, durable, et pensé pour s'intégrer naturellement à votre projet.",
-      "Nos studios sont réalisés hors-site en technologie Light Steel Frame (LSF), une ossature légère en acier qui conjugue précision de fabrication, liberté architecturale et maîtrise de la qualité.",
+      "Nos studios sont réalisés hors-site en ossature acier léger (LSF), qui conjugue précision de fabrication, liberté architecturale et maîtrise de la qualité.",
     ],
     note: "Vous choisissez votre modèle, vos usages et vos options. Howner vous accompagne de l'étude du projet à la fabrication, puis à l'installation sur site.",
   },
@@ -69,7 +69,7 @@ export const HAUT_DE_GAMME = {
     titre: "Pourquoi choisir un studio de jardin Howner ?",
     intro: [
       "Un studio de jardin haut de gamme ne se résume pas à quelques mètres carrés supplémentaires. Il doit être agréable à regarder, confortable à vivre et cohérent avec son environnement.",
-      "C'est pour cette raison que Howner associe architecture, fabrication hors-site et technologie LSF dans une même approche.",
+      "C'est pour cette raison que Howner associe architecture, fabrication hors-site et ossature acier léger dans une même approche.",
     ],
     arguments: [
       {
@@ -80,7 +80,7 @@ export const HAUT_DE_GAMME = {
       {
         titre: "Une ossature Light Steel Frame précise et durable",
         texte:
-          "La technologie LSF repose sur une ossature légère en acier formée avec précision. Pour un studio de jardin, elle apporte une grande précision dimensionnelle, une excellente stabilité géométrique, une structure légère adaptée à la fabrication hors-site, une réelle liberté de conception, une industrialisation qui facilite le contrôle qualité, une ossature non combustible et un acier recyclable adossé à une filière structurée.",
+          "L'ossature acier léger (LSF) est formée avec précision. Pour un studio de jardin, elle apporte une grande précision dimensionnelle, une excellente stabilité géométrique, une structure légère adaptée à la fabrication hors-site, une réelle liberté de conception, une industrialisation qui facilite le contrôle qualité, une ossature non combustible et un acier recyclable adossé à une filière structurée.",
         /* Nuance exigée par la spec (« points de vigilance ») : ne jamais
            imputer les performances finales à la seule ossature. */
         reserve:

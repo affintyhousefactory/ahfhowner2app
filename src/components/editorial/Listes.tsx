@@ -21,7 +21,7 @@ export function Arguments({
             <span className="editorial text-[2rem] leading-none text-ink/20">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <h3 className="editorial mt-4 text-xl text-ink md:text-2xl">{a.titre}</h3>
+            <h3 className="titre-m mt-4 text-ink">{a.titre}</h3>
             <p className="mt-3 text-[1rem] leading-relaxed text-muted">{a.texte}</p>
             {a.reserve ? <Reserve>{a.reserve}</Reserve> : null}
           </div>
@@ -42,7 +42,7 @@ export function Cartes({
       {items.map((c) => (
         <StaggerItem key={c.titre}>
           <div className="flex h-full flex-col border border-line bg-surface p-7">
-            <h3 className="editorial text-lg text-ink md:text-xl">{c.titre}</h3>
+            <h3 className="titre-s text-ink">{c.titre}</h3>
             <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">{c.texte}</p>
           </div>
         </StaggerItem>
@@ -65,7 +65,7 @@ export function Etapes({
             <span className="editorial text-[2.5rem] leading-none text-ink/20 md:text-[3rem]">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <h3 className="editorial mt-4 text-lg text-ink">{e.titre}</h3>
+            <h3 className="titre-s mt-4 text-ink">{e.titre}</h3>
             <p className="mt-3 text-sm leading-relaxed text-muted">{e.texte}</p>
           </div>
         </StaggerItem>

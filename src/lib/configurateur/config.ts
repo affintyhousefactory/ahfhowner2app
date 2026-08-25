@@ -19,7 +19,13 @@ import { TRANSPORT } from "@/lib/site";
 
 export type UsageId = "annexe" | "pro" | "logement_nu";
 export type ModeleId = "one" | "max";
-export type PalierId = "sans" | "petite" | "moyenne" | "grande";
+/* « petite / moyenne / grande » → « sans / std / plus » le 2026-08-25
+   (CHIFFRAGE_TERRASSES_ARKO du 24/08). Les identifiants suivent les libellés,
+   comme pour le bardage le 2026-08-20 : un `cfg_terrasse: "moyenne"` ne dirait
+   rien à un conseiller qui lit « Standard » à l'écran.
+   ⚠ Trois leads portent encore « moyenne » — voir `resoudreConfigV2`, qui
+   affiche désormais un palier disparu au lieu de le taire. */
+export type PalierId = "sans" | "std" | "plus";
 
 export type Usage = {
   id: UsageId;
@@ -111,7 +117,17 @@ export type AmbianceInterieure = {
   vues: Record<ModeleId, VueInterieure[]>;
 };
 
-export type Palier = { id: PalierId; nom: string; prixTtc: number };
+export type Palier = {
+  id: PalierId;
+  nom: string;
+  prixTtc: number;
+  /** Surface en m², affichée au visiteur : « Standard · 15,84 m² ». */
+  surfaceM2?: number;
+  /** Supplément d'un revêtement cumaru, chiffré par palier (spec §4).
+      ⚠ Aucun écran ne le propose encore : le choix du revêtement serait une
+      rubrique de plus dans le parcours, donc un amendement d'ADR-030. */
+  supplementCumaruTtc?: number;
+};
 
 export type Option = {
   id: string;
@@ -155,7 +171,7 @@ const CONFIG_V1: ConfigurateurConfig = {
    * une configuration antérieure ne se relit donc pas avec cette grille),
    * puis `"2026-08-20"` jusqu'au 2026-08-22 (Arko One 77 900 → 69 900 € TTC).
    */
-  version: "2026-08-22",
+  version: "2026-08-25",
   tva: 20,
 
   usages: [
@@ -313,18 +329,20 @@ const CONFIG_V1: ConfigurateurConfig = {
     },
   ],
 
+  /* Grille du 2026-08-25 — CHIFFRAGE_TERRASSES_ARKO (AHF, 24/08), §4
+     « Grille retenue — constitution A′, prix psychologiques ».
+     Deux tailles par modèle au lieu de trois : le document ne chiffre que STD
+     et PLUS. Surfaces et prix repris au chiffre près. */
   terrasse: {
     one: [
       { id: "sans", nom: "Sans terrasse", prixTtc: 0 },
-      { id: "petite", nom: "Petite", prixTtc: 1990 },
-      { id: "moyenne", nom: "Moyenne", prixTtc: 2990 },
-      { id: "grande", nom: "Grande", prixTtc: 3990 },
+      { id: "std", nom: "Standard", prixTtc: 5990, surfaceM2: 15.84, supplementCumaruTtc: 1890 },
+      { id: "plus", nom: "Plus", prixTtc: 8990, surfaceM2: 23.76, supplementCumaruTtc: 2890 },
     ],
     max: [
       { id: "sans", nom: "Sans terrasse", prixTtc: 0 },
-      { id: "petite", nom: "Petite", prixTtc: 3990 },
-      { id: "moyenne", nom: "Moyenne", prixTtc: 5990 },
-      { id: "grande", nom: "Grande", prixTtc: 7990 },
+      { id: "std", nom: "Standard", prixTtc: 9990, surfaceM2: 25.92, supplementCumaruTtc: 2990 },
+      { id: "plus", nom: "Plus", prixTtc: 14990, surfaceM2: 38.88, supplementCumaruTtc: 4790 },
     ],
   },
 
@@ -373,7 +391,12 @@ const CONFIG_V1: ConfigurateurConfig = {
   // revient au §5 de la spec. `SERIE_TOTAL` (`site.ts`) a été ramené à 6 dans
   // le même geste — les deux nombres se lisent dans le même parcours (en-tête
   // public puis sélecteur du tunnel), ils ne peuvent pas diverger.
-  serie: { id: "serie_01", libelle: "Série 01", unites: 6 },
+  /* « Série 01 » → « Édition Arko » le 2026-08-25 (demande de Richard). `id`
+     reste `serie_01` : il n'est ni stocké sur le lead, ni affiché — le renommer
+     ne dirait rien à personne et casserait la comparaison avec l'historique.
+     La règle du 2026-08-20 (« les identifiants suivent les libellés ») vise les
+     valeurs qu'un conseiller lit en base ; ce n'est pas le cas ici. */
+  serie: { id: "serie_01", libelle: "Édition Arko", unites: 6 },
   reservation: { montantTtc: 2000, delaiRetractationJours: 30 },
 };
 

@@ -140,6 +140,15 @@ export const CONTACT = {
    * réveillerait du code que personne ne sert.
    */
   email: "contact@howner.fr",
+  /**
+   * Compte Instagram officiel.
+   *
+   * Déclaré ici et pas dans les composants : c'est la leçon du 2026-08-22, où
+   * l'adresse de contact était écrite en dur à vingt-cinq endroits. Un compte
+   * social se renomme.
+   */
+  instagram: "https://www.instagram.com/howner_officiel/",
+  instagramHandle: "@howner_officiel",
   /** Forme lue par un humain, telle qu'affichée. */
   phone: PHONE_DISPLAY,
   /* Forme composable (E.164), exigée par le protocole `tel:` et par
@@ -611,10 +620,10 @@ export const ABOUT = {
      celle des sections de l'accueil, la réemployer sur une autre page ferait
      croire à une suite. */
   eyebrow: "À propos",
-  kicker: "Quand la haute technologie sublime l'art de vivre",
+  kicker: "Quand la précision du geste sublime l'art de vivre",
   title: "L'ADN Howner.",
   quote:
-    "L'architecture d'avant-garde au service de votre liberté : un cocon technologique, durable et chaleureux, pensé pour l'essentiel.",
+    "L'architecture d'avant-garde au service de votre liberté : un espace durable et chaleureux, pensé pour l'essentiel.",
   sections: [
     {
       id: "philosophie",
@@ -642,7 +651,7 @@ export const ABOUT = {
       eyebrow: "L'acier léger",
       title: "Une armature secrète pour des volumes libres.",
       intro:
-        "Derrière la poésie de nos intérieurs chaleureux se cache une révolution structurelle : la technologie LSF, Light Steel Frame.",
+        "Derrière la poésie de nos intérieurs chaleureux se cache une révolution structurelle : l'ossature acier léger.",
       points: [
         {
           k: "Une liberté totale",
@@ -650,7 +659,7 @@ export const ABOUT = {
         },
         {
           k: "La précision millimétrique",
-          d: "Modélisée entièrement en 3D, la structure s'assemble à la perfection, comme une pièce de haute horlogerie — une isolation thermique et acoustique idéale, pour un intérieur qui reste un cocon douillet en toute saison.",
+          d: "Modélisée entièrement en 3D, la structure s'assemble à la perfection, comme une pièce de haute horlogerie — une isolation thermique et acoustique idéale, pour un intérieur qui reste tempéré en toute saison.",
         },
       ],
     },
@@ -667,7 +676,7 @@ export const ABOUT = {
           d: "Chaque courbe, chaque ouverture imaginée par notre architecte intégrée est certifiée par une ingénierie de pointe, assurant à votre studio une robustesse absolue face au temps.",
         },
         {
-          k: "La technologie de pointe",
+          k: "La fabrication de précision",
           d: "Le passage direct de la modélisation intelligente aux robots de fabrication permet de pré-percer chaque gaine technique. Tout est fluide, invisible et parfaitement intégré, pour laisser place à la beauté brute des matériaux.",
         },
       ],

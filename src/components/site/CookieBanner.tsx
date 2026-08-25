@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/Button";
 
 // Préférence analytique — persiste entre sessions (localStorage)
 const CONSENT_KEY = "ahf-consent";
@@ -86,18 +87,12 @@ export function CookieBanner() {
                   Politique de confidentialité
                 </a>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={deny}
-                    className="rounded-full border border-line px-4 py-1.5 text-[0.78rem] font-medium text-muted transition-colors hover:border-ink hover:text-ink"
-                  >
+                  <Button onClick={deny} variant="outline" size="sm" magnetic={false}>
                     Refuser
-                  </button>
-                  <button
-                    onClick={accept}
-                    className="rounded-full bg-accent px-4 py-1.5 text-[0.78rem] font-medium text-white shadow-sm transition-colors hover:bg-accent-ink"
-                  >
+                  </Button>
+                  <Button onClick={accept} size="sm" magnetic={false}>
                     Tout accepter
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

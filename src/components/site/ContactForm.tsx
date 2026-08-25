@@ -122,7 +122,7 @@ export function ContactForm() {
             <path d="M5 12.5l4 4L19 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </span>
-        <h3 className="mt-5 text-xl font-medium tracking-tight">Message envoyé</h3>
+        <h3 className="titre-m mt-5">Message envoyé</h3>
         <p className="mt-2 text-sm leading-relaxed text-muted">
           Merci — nous revenons vers vous sous 24 h ouvrées.
         </p>
@@ -217,7 +217,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={loading}
-        className="group mt-4 inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-accent px-7 py-3.5 text-[0.95rem] font-medium tracking-tight text-white transition-colors duration-300 hover:bg-accent-ink disabled:opacity-50"
+        className="group mt-4 inline-flex w-full items-center justify-center gap-2.5 rounded-lg border border-accent bg-lumiere px-7 py-3.5 text-[0.95rem] font-medium tracking-tight text-ink transition-colors duration-300 hover:bg-lumiere-ink disabled:opacity-50"
       >
         {loading ? "Envoi…" : "Envoyer"}
         {!loading && <Arrow />}

@@ -26,7 +26,7 @@ export function LandTool() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h1 className="editorial mt-12 text-[2.4rem] leading-[1.02] text-canvas md:mt-16 md:whitespace-nowrap md:text-[3rem]">
+          <h1 className="titre-l mt-12 text-canvas md:mt-16 md:whitespace-nowrap">
             Votre terrain peut&#x2011;il accueillir un Arko&nbsp;?
           </h1>
         </Reveal>

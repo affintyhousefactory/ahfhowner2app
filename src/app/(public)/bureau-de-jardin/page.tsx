@@ -138,7 +138,7 @@ export default function BureauDeJardinPage() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-4xl text-balance text-[2rem] leading-[1.06] text-canvas md:mt-16 md:text-[3.6rem]">
+          <h2 className="titre-l mt-12 max-w-4xl text-balance text-canvas md:mt-16">
             {C.sansTravaux.titre}
           </h2>
         </Reveal>

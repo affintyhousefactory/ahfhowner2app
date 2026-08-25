@@ -24,7 +24,7 @@ export function Process() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="editorial mt-12 max-w-4xl text-balance text-[2.4rem] leading-[1.02] text-ink md:mt-16 md:text-[4.4rem]">
+          <h2 className="titre-xl mt-12 max-w-4xl text-balance text-ink md:mt-16">
             De l'atelier à votre terrain, en une pose.
           </h2>
         </Reveal>
@@ -37,7 +37,7 @@ export function Process() {
                 <span className="editorial text-[2.5rem] leading-none text-ink/20 md:text-[3rem]">
                   {p.step}
                 </span>
-                <h3 className="editorial mt-4 text-xl text-ink">{p.title}</h3>
+                <h3 className="titre-s mt-4 text-ink">{p.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted">{p.text}</p>
               </div>
             </StaggerItem>
@@ -89,7 +89,7 @@ export function Process() {
         <div className="mt-20 border-t border-line pt-10 md:mt-28 md:pt-14">
           <Reveal>
             <div className="flex flex-wrap items-end justify-between gap-4">
-              <h3 className="editorial text-2xl text-ink md:text-3xl">
+              <h3 className="titre-m text-ink">
                 Préparer votre terrain
               </h3>
               <a

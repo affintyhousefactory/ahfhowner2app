@@ -58,7 +58,7 @@ export function PageLocaleView({ page: contenu }: { page: PageLocale }) {
           {contenu.sections.map((s, i) => (
             <section key={s.titre} className={i === 0 ? "" : "mt-16 md:mt-20"}>
               <Reveal>
-                <h2 className="editorial text-balance text-[1.6rem] leading-snug text-ink md:text-[2.2rem]">
+                <h2 className="titre-l text-balance text-ink">
                   {s.titre}
                 </h2>
               </Reveal>
@@ -188,7 +188,7 @@ export function PageLocaleView({ page: contenu }: { page: PageLocale }) {
         <Section>
           <div className="max-w-3xl">
             <Reveal>
-              <h2 className="editorial text-[1.6rem] leading-snug text-ink md:text-[2.2rem]">
+              <h2 className="titre-l text-ink">
                 Questions fréquentes — {entree.libelle}
               </h2>
             </Reveal>

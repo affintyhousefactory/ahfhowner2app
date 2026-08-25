@@ -314,7 +314,30 @@ export function resoudreConfigV2(lead: LeadConfigV2) {
           teinte: ambianceInterieure.teinte,
         }
       : null,
-    terrasse: palier ? { id: palier.id, label: palier.nom, prix: palier.prixTtc } : null,
+    /* Un palier absent de la grille courante est **affiché quand même**, avec
+       son identifiant brut et `inconnu: true` — même traitement que les options
+       depuis toujours. Sans cela, les leads antérieurs à un changement de grille
+       perdaient silencieusement leur ligne terrasse à l'écran alors que
+       `cfg_prix_terrasse` restait en base. Constaté le 2026-08-25 en passant les
+       paliers de « petite/moyenne/grande » à « std/plus » : trois leads
+       portaient « moyenne ». */
+    terrasse: palier
+      ? {
+          id: palier.id,
+          label: palier.nom,
+          prix: palier.prixTtc,
+          surfaceM2: palier.surfaceM2 ?? null,
+          inconnu: false,
+        }
+      : lead.cfg_terrasse
+        ? {
+            id: lead.cfg_terrasse,
+            label: lead.cfg_terrasse,
+            prix: lead.cfg_prix_terrasse ?? null,
+            surfaceM2: null,
+            inconnu: true,
+          }
+        : null,
     options,
     optionsStructurelles: options.filter((o) => o.structurelle),
     optionsLibres: options.filter((o) => !o.structurelle),
