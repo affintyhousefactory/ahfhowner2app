@@ -72,6 +72,17 @@ Aucune config supplémentaire n'est nécessaire : `dev` est une branche Preview 
 | `BREVO_API_KEY` | ✅ | ✅ | local |
 | `BREVO_TEMPLATE_CONTACT` | 10 | 10 | 10 |
 | `BREVO_TEMPLATE_RECAP` | 9 | 9 | 9 |
+| `BREVO_LIST_PROSPECTS` | 8 | 8 | 8 |
+| `BREVO_LIST_NEWSLETTER` | 5 | 5 | 5 |
+
+> **Les deux listes ne jouent pas le même rôle** (2026-08-26). `BREVO_LIST_PROSPECTS`
+> (« Prospects ») reçoit tout visiteur du formulaire de contact : c'est le CRM.
+> `BREVO_LIST_NEWSLETTER` (« AHF – Newsletter ») ne reçoit que ceux qui cochent la case
+> d'acceptation : c'est le consentement marketing. **Une campagne se cible sur
+> `BREVO_LIST_NEWSLETTER`, jamais sur `BREVO_LIST_PROSPECTS`.**
+>
+> Les deux ont un repli codé en dur (`?? "8"` et `?? "5"`), donc une variable absente ne
+> casse rien — mais elle rend l'environnement muet sur son propre câblage. Les définir.
 
 > Stripe retiré du MVP (ADR-008 amendé 2026-06-27) — ne pas configurer `STRIPE_*`.
 

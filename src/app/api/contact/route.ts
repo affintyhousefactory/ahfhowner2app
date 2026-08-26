@@ -113,13 +113,37 @@ export async function POST(req: NextRequest) {
     signalerPanne("contact/brevo", err);
   });
 
-  // Contact CRM Brevo : toujours créé. Pas de flux double opt-in sur ce formulaire —
-  // l'utilisateur est directement inscrit (SUBSCRIBED, liste prospects) si la case est
-  // cochée, ou créé blocklisté sinon (traçabilité de la demande sans communication marketing).
+  /* Contact CRM Brevo : toujours créé, dans DEUX listes aux rôles distincts —
+     décision de Richard du 2026-08-26.
+
+     - « Prospects » (8) reçoit **tout le monde**, coche ou pas. C'est le CRM :
+       il trace qui a écrit, ce qui est un intérêt légitime, pas une
+       communication. Auparavant, un visiteur qui ne cochait pas n'entrait dans
+       aucune liste — sa demande existait en base mais le CRM l'ignorait.
+     - « AHF – Newsletter » (5) ne reçoit **que** ceux qui cochent. C'est là que
+       vit le consentement marketing, et c'est cette liste, jamais « Prospects »,
+       qui doit servir de cible à une campagne.
+
+     Le flag `emailBlacklisted` double la protection au niveau du contact, de
+     sorte qu'une campagne mal ciblée sur « Prospects » n'atteigne personne qui
+     n'a pas consenti.
+
+     ⚠ Effet de bord assumé : Brevo n'ajoute qu'aux listes, il n'en retire
+     jamais. Un contact qui a coché une première fois puis revient sans cocher
+     reste donc dans « Newsletter » mais repasse blocklisté — l'envoi est bien
+     bloqué, mais les deux signaux se contredisent dans l'interface. Le retrait
+     de consentement doit passer par le lien de désinscription, pas par une case
+     laissée vide sur un second message.
+
+     Pas de double opt-in ici : `addBrevoContactDOI()` existe dans
+     `shared/lib/email.ts` mais n'est câblé nulle part. */
+  const listeProspects = parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8");
+  const listeNewsletter = parseInt(process.env.BREVO_LIST_NEWSLETTER ?? "5");
+
   await addBrevoContact(
     email,
     { PRENOM: prenom, NOM: nom, SMS: tel ?? undefined },
-    optIn ? [parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8")] : [],
+    optIn ? [listeProspects, listeNewsletter] : [listeProspects],
     { emailBlacklisted: !optIn },
   ).catch((err) => console.error("[contact] Brevo contact error:", err));
 
