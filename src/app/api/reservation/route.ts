@@ -176,15 +176,26 @@ export async function POST(req: NextRequest) {
     signalerPanne("reservation/brevo", err);
   }
 
-  // Contact CRM Brevo : toujours créé (groupe Lead_Configurateur). Pas de flux double
-  // opt-in (template DOI non actif côté Brevo) — inscription directe SUBSCRIBED (liste
-  // prospects) si coché, sinon créé blocklisté, comme sur le formulaire de contact.
+  /* Contact CRM Brevo : toujours créé (groupe Lead_Configurateur), dans deux
+     listes aux rôles distincts — même règle que `/api/contact`, où elle est
+     expliquée en entier. En résumé : « Prospects » reçoit tout le monde (c'est
+     le CRM), « AHF – Newsletter » ne reçoit que ceux qui cochent (c'est le
+     consentement marketing), et une campagne se cible sur la seconde.
+
+     La case porte ici le texte `OPTIN_TEXTE`, mot pour mot celui du formulaire
+     de contact : même consentement, donc même traitement. Trois formulaires qui
+     posent la même question et la classent différemment, c'est un fichier
+     contact qu'on ne sait plus lire.
+
+     Pas de double opt-in : le template DOI n'est câblé nulle part. */
   const brevoAttrs = { PRENOM: prenom, NOM: nom, SMS: tel ?? undefined, HOWNER_GROUP: "Lead_Configurateur" };
+  const listeProspects = parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8");
+  const listeNewsletter = parseInt(process.env.BREVO_LIST_NEWSLETTER ?? "5");
   /* `await` : sans lui le fetch meurt avec la fonction, après le `return`. */
   await addBrevoContact(
     email,
     brevoAttrs,
-    optIn ? [parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8")] : [],
+    optIn ? [listeProspects, listeNewsletter] : [listeProspects],
     { emailBlacklisted: !optIn },
   ).catch((err) => signalerPanne("reservation/brevo-contact", err));
 
