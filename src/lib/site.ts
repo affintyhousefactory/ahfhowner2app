@@ -43,6 +43,29 @@ function montantEnv(brut: string | undefined, repli: number, nom: string): numbe
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://howner.fr";
 
+/**
+ * Plaquette commerciale jointe au récapitulatif d'appel.
+ *
+ * **Un lien, pas une pièce jointe** (décision de Richard du 2026-08-26). Une
+ * pièce jointe fait grossir l'email, dégrade la délivrabilité, et surtout ne
+ * dit rien : avec un lien, Brevo sait qui l'a ouverte, ce qui est exactement le
+ * signal qu'un conseiller cherche après un premier appel.
+ *
+ * **Un fichier désigné, pas « le plus récent d'un dossier »** (même décision).
+ * Prendre automatiquement le dernier fichier modifié d'un répertoire Drive,
+ * c'est envoyer un brouillon à un client le jour où quelqu'un rouvre un
+ * document pour corriger une virgule. La version courante se change ici, ou par
+ * `NEXT_PUBLIC_PLAQUETTE_URL` sans toucher au code.
+ *
+ * ⚠ Tant que le fichier n'est pas déposé, la valeur reste vide et le récap
+ * s'envoie **sans** la ligne « plaquette » — un lien mort vaut moins que pas de
+ * lien. Voir `docs/deployment.md`.
+ */
+export const PLAQUETTE = {
+  url: process.env.NEXT_PUBLIC_PLAQUETTE_URL ?? "",
+  libelle: "Plaquette Howner — la gamme Arko",
+} as const;
+
 // Réservation : jamais en dur — lue depuis l'environnement.
 // Fallback passé de 5 000 à 2 000 € le 2026-08-02 (§7 de la spec, ADR-029) —
 // le configurateur v2 affichait déjà 2 000 € et la page d'accueil 5 000 €.

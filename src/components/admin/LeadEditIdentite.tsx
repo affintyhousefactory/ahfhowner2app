@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { loadGooglePlacesScript } from "@/shared/lib/google-places";
 import { CONSEILLERS, dateHeureFr, etatSuivi } from "@/lib/crm";
+import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 
 interface LeadIdentite {
   id: string;
@@ -31,6 +32,11 @@ interface LeadIdentite {
   prochain_rappel_at?: string | null;
   dernier_appel_at?: string | null;
   statut_commercial?: string | null;
+  /* Date du dernier récapitulatif envoyé au client. Optionnelle : la colonne
+     arrive avec `20260826_recap_envoye_at.sql` et le code tourne avant comme
+     après — sans elle, la mention « déjà envoyé le… » ne s'affiche simplement
+     pas. */
+  recap_envoye_at?: string | null;
   created_at?: string;
 }
 
@@ -84,9 +90,6 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [recapLoading, setRecapLoading] = useState(false);
-  const [recapDone, setRecapDone] = useState(false);
-  const [recapError, setRecapError] = useState<string | null>(null);
   const containerRef    = useRef<HTMLDivElement>(null);
   const placeElementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
 
@@ -175,23 +178,6 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleSendRecap() {
-    setRecapLoading(true);
-    setRecapError(null);
-    try {
-      const res = await fetch(`/api/admin/leads/${lead.id}/recap-client`, { method: "POST" });
-      if (!res.ok) {
-        const body = (await res.json()) as { error?: string };
-        throw new Error(body.error ?? "Erreur serveur");
-      }
-      setRecapDone(true);
-    } catch (e) {
-      setRecapError(e instanceof Error ? e.message : "Erreur");
-    } finally {
-      setRecapLoading(false);
     }
   }
 
@@ -289,15 +275,16 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
           </p>
         </div>
 
+        {/* ⚠ Ce bouton envoyait autrefois le récapitulatif d'un seul clic, sans
+            que personne ait vu ce qui partait. Il passe par la relecture :
+            ce qui part porte un prix, une distance et un nom. */}
         <div className="mt-4">
-          <button
-            onClick={handleSendRecap}
-            disabled={recapLoading || !lead.email}
-            className="w-full rounded-xl border border-white/10 py-2.5 text-sm text-white/70 transition-colors hover:border-[#7469F4]/50 hover:text-white disabled:opacity-40"
-          >
-            {recapLoading ? "Envoi…" : recapDone ? "✓ Récap envoyé" : "✉️ Envoyer récap au client"}
-          </button>
-          {recapError && <p className="mt-1 text-xs text-red-400">{recapError}</p>}
+          <RecapClientApercu
+            leadId={lead.id}
+            email={lead.email}
+            dejaEnvoyeLe={lead.recap_envoye_at ?? null}
+            onEnvoye={() => router.refresh()}
+          />
         </div>
       </>
     );

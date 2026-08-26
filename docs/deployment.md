@@ -74,6 +74,7 @@ Aucune config supplémentaire n'est nécessaire : `dev` est une branche Preview 
 | `BREVO_TEMPLATE_RECAP` | 9 | 9 | 9 |
 | `BREVO_LIST_PROSPECTS` | 8 | 8 | 8 |
 | `BREVO_LIST_NEWSLETTER` | 5 | 5 | 5 |
+| `NEXT_PUBLIC_PLAQUETTE_URL` | à poser | à poser | à poser |
 
 > **Les deux listes ne jouent pas le même rôle** (2026-08-26). `BREVO_LIST_PROSPECTS`
 > (« Prospects ») reçoit tout visiteur du formulaire de contact : c'est le CRM.
@@ -83,6 +84,17 @@ Aucune config supplémentaire n'est nécessaire : `dev` est une branche Preview 
 >
 > Les deux ont un repli codé en dur (`?? "8"` et `?? "5"`), donc une variable absente ne
 > casse rien — mais elle rend l'environnement muet sur son propre câblage. Les définir.
+
+> **`NEXT_PUBLIC_PLAQUETTE_URL`** (2026-08-26) — lien vers la plaquette commerciale
+> jointe au récapitulatif d'appel. **Un lien, pas une pièce jointe** : une pièce jointe
+> alourdit l'email, dégrade la délivrabilité et ne dit rien, là où un lien se mesure
+> dans Brevo. **Un fichier désigné, pas « le dernier d'un dossier »** : prendre
+> automatiquement le fichier le plus récemment modifié, c'est envoyer un brouillon le
+> jour où quelqu'un rouvre un document pour corriger une virgule.
+>
+> Tant que la variable est vide, le récapitulatif part **sans** la ligne plaquette —
+> un lien mort vaut moins que pas de lien. Le template Brevo doit porter la ligne sous
+> `{% if params.PLAQUETTE_URL %}`.
 
 > Stripe retiré du MVP (ADR-008 amendé 2026-06-27) — ne pas configurer `STRIPE_*`.
 

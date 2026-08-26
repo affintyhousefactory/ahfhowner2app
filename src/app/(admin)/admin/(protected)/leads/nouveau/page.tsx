@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
 import { FEATURES } from "@/lib/features";
 import { CONSEILLERS, STATUTS_COMMERCIAUX, eur } from "@/lib/crm";
+import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 import { TRANSPORT } from "@/lib/site";
 import {
   distanceAtelierKm,
@@ -44,6 +45,12 @@ export default function NouveauLeadPage() {
 
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  /* Le lead créé n'envoie plus le conseiller ailleurs tout de suite : l'écran
+     bascule sur la relecture du récapitulatif. Rediriger d'abord aurait fait
+     perdre le fil de l'appel — le conseiller vient de raccrocher, c'est
+     maintenant qu'il sait si ce qui part est juste. */
+  const [leadCree, setLeadCree] = useState<string | null>(null);
 
   // Identité
   const [prenom, setPrenom] = useState("");
@@ -260,7 +267,9 @@ export default function NouveauLeadPage() {
       });
       const data = (await res.json()) as { id?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Erreur serveur");
-      router.push(`/admin/leads/${data.id}`);
+      if (!data.id) throw new Error("Lead créé sans identifiant renvoyé");
+      setLeadCree(data.id);
+      setLoading(false);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Erreur");
       setLoading(false);
@@ -274,6 +283,43 @@ export default function NouveauLeadPage() {
       ? [{ value: "pack" as TerrainMode, label: "Proposition de Pack Terrain", desc: "Pack Affinity : Essentiel / Étendu / Département" }]
       : []),
   ];
+
+  /* Lead enregistré : l'écran passe à la relecture. Le formulaire disparaît —
+     le laisser visible aurait invité à « corriger vite fait » un lead déjà en
+     base, alors que la fiche est faite pour ça et qu'elle, elle enregistre. */
+  if (leadCree) {
+    return (
+      <div className="max-w-3xl p-8">
+        <h1 className="text-xl font-semibold text-white">Lead enregistré</h1>
+        <p className="mt-2 text-sm text-white/40">
+          L&apos;appel est consigné. Relisez le récapitulatif avant de l&apos;envoyer à{" "}
+          <span className="text-white/60">{email}</span> — c&apos;est le premier document
+          que ce client recevra de nous.
+        </p>
+
+        <div className="mt-6">
+          <RecapClientApercu leadId={leadCree} email={email} />
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => router.push(`/admin/leads/${leadCree}`)}
+            className="rounded-lg border border-white/10 px-4 py-2 text-xs text-white/60 transition-colors hover:border-white/25 hover:text-white"
+          >
+            Ouvrir la fiche du lead
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/admin/leads/nouveau")}
+            className="rounded-lg border border-white/10 px-4 py-2 text-xs text-white/40 transition-colors hover:border-white/25 hover:text-white"
+          >
+            Saisir un autre appel
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl p-8">
