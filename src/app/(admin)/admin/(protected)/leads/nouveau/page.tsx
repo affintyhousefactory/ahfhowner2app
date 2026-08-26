@@ -17,11 +17,16 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
 import { FEATURES } from "@/lib/features";
 import { CONSEILLERS, STATUTS_COMMERCIAUX, eur } from "@/lib/crm";
+import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
+import { TRANSPORT } from "@/lib/site";
 import {
+  distanceAtelierKm,
   loadConfig,
   optionsPourModele,
   paliersPourModele,
   prixOption,
+  transportEur,
+  transportPerKm,
   type ModeleId,
 } from "@/lib/configurateur/config";
 import type { ParcelleData } from "@/shared/types/plu";
@@ -40,6 +45,12 @@ export default function NouveauLeadPage() {
 
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  /* Le lead créé n'envoie plus le conseiller ailleurs tout de suite : l'écran
+     bascule sur la relecture du récapitulatif. Rediriger d'abord aurait fait
+     perdre le fil de l'appel — le conseiller vient de raccrocher, c'est
+     maintenant qu'il sait si ce qui part est juste. */
+  const [leadCree, setLeadCree] = useState<string | null>(null);
 
   // Identité
   const [prenom, setPrenom] = useState("");
@@ -77,6 +88,17 @@ export default function NouveauLeadPage() {
   // Notes
   const [notes, setNotes] = useState("");
 
+  /* Distance atelier → terrain, dès que le PLU a rendu des coordonnées.
+
+     Le conseiller ne calcule plus le transport de tête pendant l'appel : la
+     seule chose qu'il ait à faire est de dicter l'adresse. Tant qu'aucune
+     parcelle n'est identifiée, la distance vaut `null` — et l'écran le dit,
+     plutôt que d'afficher un zéro qui passerait pour une livraison offerte. */
+  const distanceKm = useMemo(
+    () => distanceAtelierKm(pluData?.lat ?? null, pluData?.lon ?? null),
+    [pluData],
+  );
+
   /* Les prix suivent la grille, jamais la saisie. */
   const calcul = useMemo(() => {
     const m = cfg.modeles.find((x) => x.id === modele) ?? cfg.modeles[0];
@@ -87,9 +109,23 @@ export default function NouveauLeadPage() {
     const prixOptions = dispo
       .filter((o) => options.includes(o.id))
       .reduce((s, o) => s + prixOption(o, m.id), 0);
-    const t = transport ? Number(transport) : 0;
-    return { m, paliers, dispo, base, prixTerrasse, prixOptions, transport: t, total: base + prixTerrasse + prixOptions + t };
-  }, [cfg, modele, terrasse, options, transport]);
+
+    /* Le transport calculé sert de valeur par défaut ; la saisie du conseiller
+       ne fait que le **surcharger**. Pré-remplir le champ aurait été plus
+       simple à écrire et plus faux à l'usage : au moindre changement de modèle
+       le poids change, donc le prix aussi, et une correction saisie deux
+       minutes plus tôt serait écrasée sans que personne le voie. Ici le calcul
+       reste vivant, et une valeur tapée reste une décision. */
+    const transportAuto = transportEur(distanceKm, m);
+    const transportEffectif = transport !== "" ? Number(transport) : (transportAuto ?? 0);
+
+    return {
+      m, paliers, dispo, base, prixTerrasse, prixOptions,
+      transportAuto,
+      transport: transportEffectif,
+      total: base + prixTerrasse + prixOptions + transportEffectif,
+    };
+  }, [cfg, modele, terrasse, options, transport, distanceKm]);
 
   const usageDef = cfg.usages.find((u) => u.id === usage);
   const brancheFermee = usageDef ? !usageDef.eligible : false;
@@ -154,11 +190,18 @@ export default function NouveauLeadPage() {
       ambiance,
       terrasse,
       options,
+      /* Même clé que `/api/configurateur/reservation` : la distance vit dans
+         l'instantané JSON, pas en colonne. Elle fige ce qui a servi au calcul
+         le jour de l'appel — recalculer plus tard donnerait un autre chiffre
+         le jour où les coordonnées de l'atelier seront affinées. */
+      distance_km: distanceKm,
       prix: {
         base: calcul.base,
         terrasse: calcul.prixTerrasse,
         options: calcul.prixOptions,
-        transport: transport ? Number(transport) : null,
+        transport: calcul.transport,
+        transport_auto: calcul.transportAuto,
+        transport_surcharge: transport !== "" ? Number(transport) : null,
         total: calcul.total,
       },
       slot: slot ? Number(slot) : null,
@@ -186,7 +229,7 @@ export default function NouveauLeadPage() {
       cfg_prix_base: calcul.base,
       cfg_prix_terrasse: calcul.prixTerrasse,
       cfg_prix_options: calcul.prixOptions,
-      cfg_transport: transport ? Number(transport) : null,
+      cfg_transport: calcul.transport,
       cfg_total: calcul.total,
       slot: slot ? Number(slot) : null,
 
@@ -224,7 +267,9 @@ export default function NouveauLeadPage() {
       });
       const data = (await res.json()) as { id?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Erreur serveur");
-      router.push(`/admin/leads/${data.id}`);
+      if (!data.id) throw new Error("Lead créé sans identifiant renvoyé");
+      setLeadCree(data.id);
+      setLoading(false);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Erreur");
       setLoading(false);
@@ -238,6 +283,43 @@ export default function NouveauLeadPage() {
       ? [{ value: "pack" as TerrainMode, label: "Proposition de Pack Terrain", desc: "Pack Affinity : Essentiel / Étendu / Département" }]
       : []),
   ];
+
+  /* Lead enregistré : l'écran passe à la relecture. Le formulaire disparaît —
+     le laisser visible aurait invité à « corriger vite fait » un lead déjà en
+     base, alors que la fiche est faite pour ça et qu'elle, elle enregistre. */
+  if (leadCree) {
+    return (
+      <div className="max-w-3xl p-8">
+        <h1 className="text-xl font-semibold text-white">Lead enregistré</h1>
+        <p className="mt-2 text-sm text-white/40">
+          L&apos;appel est consigné. Relisez le récapitulatif avant de l&apos;envoyer à{" "}
+          <span className="text-white/60">{email}</span> — c&apos;est le premier document
+          que ce client recevra de nous.
+        </p>
+
+        <div className="mt-6">
+          <RecapClientApercu leadId={leadCree} email={email} />
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => router.push(`/admin/leads/${leadCree}`)}
+            className="rounded-lg border border-white/10 px-4 py-2 text-xs text-white/60 transition-colors hover:border-white/25 hover:text-white"
+          >
+            Ouvrir la fiche du lead
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/admin/leads/nouveau")}
+            className="rounded-lg border border-white/10 px-4 py-2 text-xs text-white/40 transition-colors hover:border-white/25 hover:text-white"
+          >
+            Saisir un autre appel
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl p-8">
@@ -416,15 +498,44 @@ export default function NouveauLeadPage() {
 
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block text-xs text-white/40">Transport (€ TTC)</label>
+              <label className="mb-1.5 block text-xs text-white/40">
+                Transport (€ TTC)
+                {calcul.transportAuto != null && (
+                  <span className="ml-2 text-[#7469F4]">calculé automatiquement</span>
+                )}
+              </label>
               <input
                 type="number"
                 min={0}
                 value={transport}
                 onChange={(e) => setTransport(e.target.value)}
-                placeholder="à estimer"
+                placeholder={
+                  calcul.transportAuto != null
+                    ? `${calcul.transportAuto} — laisser vide pour garder le calcul`
+                    : "à estimer une fois le terrain connu"
+                }
                 className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
               />
+
+              {/* Le détail du calcul est affiché, pas seulement son résultat :
+                  un conseiller qui annonce un prix au téléphone doit pouvoir
+                  dire d'où il sort si le client le lui demande. */}
+              {distanceKm != null ? (
+                <p className="mt-1.5 text-[11px] leading-relaxed text-white/40">
+                  <span className="text-white/60">{distanceKm} km</span> depuis l&apos;atelier de
+                  Bayonne · grutage {eur(TRANSPORT.grutageEur)} + {distanceKm} km ×{" "}
+                  {transportPerKm(calcul.m).toFixed(2)} €/km ({calcul.m.poidsTonnes} t) ={" "}
+                  <span className="text-white/60">{eur(calcul.transportAuto ?? 0)}</span>
+                  {transport !== "" && (
+                    <span className="text-[#E2A03F]"> — surchargé à {eur(Number(transport))}</span>
+                  )}
+                </p>
+              ) : (
+                <p className="mt-1.5 text-[11px] leading-relaxed text-[#E2A03F]/80">
+                  Terrain non identifié — le transport ne peut pas être calculé maintenant.
+                  Analyser le PLU d&apos;une adresse pour l&apos;obtenir, ou le chiffrer plus tard.
+                </p>
+              )}
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
               <p className="text-[11px] text-white/30">Total TTC — grille {cfg.version}</p>

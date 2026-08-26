@@ -449,3 +449,33 @@ export function transportEur(distanceKm: number | null, modele: Modele): number 
 export function transportPerKm(modele: Modele): number {
   return modele.poidsTonnes * TRANSPORT.tarifEurTonneKm;
 }
+
+/**
+ * Distance atelier → terrain, en kilomètres de route.
+ *
+ * Haversine (distance à vol d'oiseau) multipliée par `TRANSPORT.roadFactor`,
+ * le facteur qui approche le trajet réel — une route ne va jamais tout droit.
+ *
+ * ⚠ Cette fonction vivait en double : une copie privée dans
+ * `components/configurateur/sections.tsx`, et rien côté back-office, où le
+ * conseiller saisissait le transport de tête. Deux calculs pour un même prix,
+ * c'est un jour où le devis du site et celui de l'appel ne tombent plus
+ * pareil. Elle est ici, avec `transportEur()` qui la consomme.
+ *
+ * Le point de départ est `TRANSPORT.usine` (Bayonne). Ses coordonnées restent
+ * approximatives — le commentaire de `site.ts` le dit depuis l'origine : « à
+ * affiner avec adresse exacte atelier ». Sur un trajet de 300 km l'écart est
+ * dans le bruit ; sur un client à 15 km, il se voit.
+ */
+export function distanceAtelierKm(lat: number | null, lon: number | null): number | null {
+  if (lat == null || lon == null) return null;
+  const R = 6371;
+  const dLat = ((lat - TRANSPORT.usine.lat) * Math.PI) / 180;
+  const dLon = ((lon - TRANSPORT.usine.lon) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((TRANSPORT.usine.lat * Math.PI) / 180) *
+      Math.cos((lat * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return Math.round(2 * R * Math.asin(Math.sqrt(a)) * TRANSPORT.roadFactor);
+}
