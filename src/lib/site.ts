@@ -62,7 +62,11 @@ export const SITE_URL =
  * lien. Voir `docs/deployment.md`.
  */
 export const PLAQUETTE = {
-  url: process.env.NEXT_PUBLIC_PLAQUETTE_URL ?? "",
+  /* Chemin relatif : `construireParamsRecap()` le préfixe de `SITE_URL`, un
+     email n'ayant pas d'origine à laquelle rapporter une URL relative. La
+     variable d'environnement reste prioritaire, pour pointer ailleurs (un
+     stockage objet, une version datée) sans toucher au code. */
+  url: process.env.NEXT_PUBLIC_PLAQUETTE_URL ?? "/documents/plaquette-howner-2026.pdf",
   libelle: "Plaquette Howner — la gamme Arko",
 } as const;
 

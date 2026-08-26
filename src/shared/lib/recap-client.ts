@@ -10,7 +10,7 @@
  * Les clés correspondent aux `{{ params.X }}` du template Brevo « RECAP ».
  */
 
-import { PLAQUETTE } from "@/lib/site";
+import { PLAQUETTE, SITE_URL } from "@/lib/site";
 import type { ParamsBrevo } from "@/shared/lib/brevo-render";
 
 /** Colonnes lues sur `leads` — une seule liste, partagée par les deux routes. */
@@ -84,10 +84,16 @@ export function construireParamsRecap(lead: LeadRecap): ParamsBrevo {
     MODELE: `${lead.produit ?? ""} ${lead.surface ?? ""}`.trim(),
     TOTAL_ESTIME: totalEstime,
 
-    /* Vide tant qu'aucun fichier n'est déposé : le template garde la ligne sous
-       un `{% if params.PLAQUETTE_URL %}`, donc elle disparaît d'elle-même
-       plutôt que d'offrir un lien qui ne mène nulle part. */
-    PLAQUETTE_URL: PLAQUETTE.url,
+    /* ⚠ URL **absolue**. Un email n'a pas d'origine : `/documents/…` y serait
+       un lien mort, quel que soit le client de messagerie. La ligne reste sous
+       `{% if params.PLAQUETTE_URL %}` dans le template, de sorte qu'une
+       variable vidée fasse disparaître la ligne au lieu d'offrir un lien qui
+       ne mène nulle part. */
+    PLAQUETTE_URL: PLAQUETTE.url
+      ? PLAQUETTE.url.startsWith("http")
+        ? PLAQUETTE.url
+        : `${SITE_URL}${PLAQUETTE.url}`
+      : "",
     PLAQUETTE_LIBELLE: PLAQUETTE.url ? PLAQUETTE.libelle : "",
   };
 }

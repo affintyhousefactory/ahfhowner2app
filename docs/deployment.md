@@ -74,7 +74,7 @@ Aucune config supplémentaire n'est nécessaire : `dev` est une branche Preview 
 | `BREVO_TEMPLATE_RECAP` | 9 | 9 | 9 |
 | `BREVO_LIST_PROSPECTS` | 8 | 8 | 8 |
 | `BREVO_LIST_NEWSLETTER` | 5 | 5 | 5 |
-| `NEXT_PUBLIC_PLAQUETTE_URL` | à poser | à poser | à poser |
+| `NEXT_PUBLIC_PLAQUETTE_URL` | *(repli code)* | *(repli code)* | *(repli code)* |
 
 > **Les deux listes ne jouent pas le même rôle** (2026-08-26). `BREVO_LIST_PROSPECTS`
 > (« Prospects ») reçoit tout visiteur du formulaire de contact : c'est le CRM.
@@ -92,9 +92,17 @@ Aucune config supplémentaire n'est nécessaire : `dev` est une branche Preview 
 > automatiquement le fichier le plus récemment modifié, c'est envoyer un brouillon le
 > jour où quelqu'un rouvre un document pour corriger une virgule.
 >
-> Tant que la variable est vide, le récapitulatif part **sans** la ligne plaquette —
-> un lien mort vaut moins que pas de lien. Le template Brevo doit porter la ligne sous
-> `{% if params.PLAQUETTE_URL %}`.
+> Le fichier est servi par le dépôt : `public/documents/plaquette-howner-2026.pdf`
+> (1,7 Mo, 28 pages). La variable n'a donc pas à être posée — elle ne sert qu'à pointer
+> ailleurs (stockage objet, version datée) sans toucher au code. La vider fait
+> disparaître la ligne du récapitulatif : un lien mort vaut moins que pas de lien. Le
+> template Brevo porte la ligne sous `{% if params.PLAQUETTE_URL %}`.
+>
+> ⚠ L'URL envoyée est **absolue** (`SITE_URL` + chemin) : un email n'a pas d'origine à
+> laquelle rapporter un chemin relatif.
+>
+> ⚠ La version publiée est destinée à l'écran (images JPEG, ~1755 px de large, soit
+> ~150 dpi en A4). **Garder l'original pour l'imprimeur** — il est sur le Drive AHF.
 
 > Stripe retiré du MVP (ADR-008 amendé 2026-06-27) — ne pas configurer `STRIPE_*`.
 
