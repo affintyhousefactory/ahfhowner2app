@@ -90,7 +90,7 @@ export function Hero() {
             Réserver
             <Arrow />
           </Button>
-          <Button href="/studio-jardin-arko-one" variant="contour-clair" className="w-full md:w-auto">
+          <Button href="#produits" variant="contour-clair" className="w-full md:w-auto">
             Voir les studios
           </Button>
         </div>
