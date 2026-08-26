@@ -288,10 +288,17 @@ export async function POST(req: NextRequest) {
      Brevo mourait en vol — d'où les `fetch failed` du 22 au 25 août, qui
      n'étaient pas une panne réseau mais un cycle de vie. Le contact CRM
      n'était jamais créé. */
+  /* Deux listes aux rôles distincts — même règle que `/api/contact`, où elle est
+     expliquée en entier : « Prospects » reçoit tout le monde (le CRM), « AHF –
+     Newsletter » ne reçoit que ceux qui cochent (le consentement marketing), et
+     une campagne se cible sur la seconde. La case du configurateur porte
+     `OPTIN_TEXTE`, mot pour mot celle du formulaire de contact. */
+  const listeProspects = parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8");
+  const listeNewsletter = parseInt(process.env.BREVO_LIST_NEWSLETTER ?? "5");
   await addBrevoContact(
     c.email,
     { PRENOM: c.prenom, NOM: c.nom, SMS: c.tel || undefined, HOWNER_GROUP: "Lead_Configurateur_v2" },
-    body.optIn ? [parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8")] : [],
+    body.optIn ? [listeProspects, listeNewsletter] : [listeProspects],
     { emailBlacklisted: !body.optIn },
   ).catch((err) => signalerPanne("configurateur/reservation/brevo-contact", err));
 
