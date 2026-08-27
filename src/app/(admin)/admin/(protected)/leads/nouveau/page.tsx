@@ -666,34 +666,46 @@ export default function NouveauLeadPage() {
                   « je veux voir les deux » est une réponse aussi fréquente que
                   l'une ou l'autre. La reléguer à une case à cocher plus bas
                   reviendrait à demander au conseiller de trancher d'abord, puis
-                  de se dédire. */}
+                  de se dédire.
+
+                  ⚠ Il couvre **deux** situations, pas une seule : le prospect
+                  hésite entre plusieurs modèles, **ou** il demande des options
+                  et services personnalisés qui sortent de la grille. Les deux
+                  ont la même conséquence — rien n'est chiffrable en l'état — et
+                  c'est cette conséquence, pas la cause, qui décide de l'email
+                  envoyé. */}
               <button
                 type="button"
                 onClick={() => setMultiConfig(true)}
                 className={cn(
-                  "flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors",
+                  "flex-1 basis-full rounded-xl border px-4 py-2.5 text-left text-sm font-medium transition-colors md:basis-0",
                   multiConfig
                     ? "border-[#E2A03F] bg-[#E2A03F]/15 text-[#E2A03F]"
                     : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10",
                 )}
               >
                 Multi-Configuration
-                <span className="ml-1.5 text-xs opacity-60">plusieurs modèles</span>
+                <span className="mt-0.5 block text-xs font-normal leading-snug opacity-60">
+                  Plusieurs modèles, ou options et services personnalisés assujettis à devis
+                  préalables complémentaires
+                </span>
               </button>
             </div>
 
             {multiConfig && (
               <div className="mt-3 rounded-xl border border-[#E2A03F]/25 bg-[#E2A03F]/5 px-3 py-2.5">
                 <p className="text-xs leading-relaxed text-[#E2A03F]/90">
-                  <span className="font-semibold">Aucun prix ne sera calculé ni envoyé.</span> La
-                  qualification n&apos;a pas tranché : chiffrer une configuration que le client
-                  n&apos;a pas choisie reviendrait à lui communiquer un prix qu&apos;on ne pourrait
-                  plus reprendre.
+                  <span className="font-semibold">Aucun prix ne sera calculé ni envoyé.</span> Soit
+                  la qualification n&apos;a pas tranché entre les modèles, soit la demande sort de
+                  la grille — options ou services personnalisés, <span className="font-semibold">
+                  assujettis à devis préalables complémentaires</span>. Dans les deux cas, chiffrer
+                  ici reviendrait à communiquer un prix qu&apos;on ne pourrait plus reprendre.
                 </p>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-white/40">
                   Le client recevra la présentation Howner accompagnée de la plaquette, et non le
-                  récapitulatif chiffré. Notez dans les notes d&apos;appel les modèles évoqués et ce
-                  qui reste à arbitrer.
+                  récapitulatif chiffré. Notez dans les notes d&apos;appel les modèles évoqués, les
+                  options demandées et ce qui reste à arbitrer — c&apos;est de là que partira le
+                  devis complémentaire.
                 </p>
               </div>
             )}
