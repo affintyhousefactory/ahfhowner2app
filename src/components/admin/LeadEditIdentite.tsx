@@ -13,6 +13,14 @@ import {
   issueAppel,
 } from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
+import { AdresseAutocomplete, type ValeursAdresse } from "@/components/admin/AdresseAutocomplete";
+import {
+  emailMalForme,
+  normaliserSiteWeb,
+  sirenChiffres,
+  sirenFormate,
+  sirenValide,
+} from "@/shared/lib/validation";
 
 interface LeadIdentite {
   id: string;
@@ -48,6 +56,12 @@ interface LeadIdentite {
   cible_commerciale?: string | null;
   derniere_issue?: string | null;
   multi_configuration?: boolean | null;
+  raison_sociale?: string | null;
+  siren?: string | null;
+  site_web?: string | null;
+  adresse_societe?: string | null;
+  cp_societe?: string | null;
+  ville_societe?: string | null;
   created_at?: string;
 }
 
@@ -80,6 +94,12 @@ function etatInitial(lead: LeadIdentite) {
     description_projet: lead.description_projet ?? "",
     cible_commerciale: lead.cible_commerciale ?? "",
     derniere_issue: lead.derniere_issue ?? "",
+    raison_sociale: lead.raison_sociale ?? "",
+    siren: lead.siren ?? "",
+    site_web: lead.site_web ?? "",
+    adresse_societe: lead.adresse_societe ?? "",
+    cp_societe: lead.cp_societe ?? "",
+    ville_societe: lead.ville_societe ?? "",
     responsable: lead.responsable ?? "",
     prochain_rappel_at: versChampLocal(lead.prochain_rappel_at),
   };
@@ -173,6 +193,21 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
              `cible_commerciale` accepte l'absence de valeur, jamais `''`. Sans
              cette conversion, vider le champ ferait échouer tout
              l'enregistrement de la fiche. */
+          /* ⚠ Vidé, le champ envoie `""`, pas `null`. Depuis que la colonne est
+             nullable (2026-08-27), une chaîne vide s'enregistrerait telle quelle
+             et passerait les tests `lead.email ?` un peu partout : l'écran
+             croirait à une adresse, l'envoi échouerait chez Brevo. */
+          email: form.email || null,
+          /* Mêmes règles qu'à la création : le SIREN perd ses espaces, le site
+             gagne son schéma. Deux écritures d'un même numéro ne se
+             rapprocheraient pas d'un fichier de prospection, et une URL sans
+             schéma devient un lien relatif au back-office. */
+          raison_sociale: form.raison_sociale || null,
+          siren: sirenChiffres(form.siren) || null,
+          site_web: normaliserSiteWeb(form.site_web),
+          adresse_societe: form.adresse_societe || null,
+          cp_societe: form.cp_societe || null,
+          ville_societe: form.ville_societe || null,
           cible_commerciale: form.cible_commerciale || null,
           derniere_issue: form.derniere_issue || null,
           total_estime: form.total_estime ? Number(form.total_estime) : null,
@@ -234,6 +269,10 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
             /* La cible n'est saisissable qu'à la création : elle décrit l'appel
                qui a eu lieu, pas l'état du dossier. La relire ici évite qu'une
                donnée obligatoire à la saisie devienne invisible ensuite. */
+            ["Raison sociale", lead.raison_sociale],
+            ["SIREN", lead.siren ? sirenFormate(lead.siren) : null],
+            ["Site web", lead.site_web],
+            ["Adresse société", [lead.adresse_societe, lead.cp_societe, lead.ville_societe].filter(Boolean).join(" · ") || null],
             ["Cible commerciale", cibleCommerciale(lead.cible_commerciale)?.label ?? null],
             /* Affiché seulement quand c'est vrai : « non » n'apprend rien, et la
                liste ne rend que les valeurs non nulles. */
@@ -357,7 +396,55 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
         <div>
           <label className={labelCls}>Email</label>
           <input className={inputCls} type="email" value={form.email} onChange={set("email")} />
+          {/* Facultatif depuis le 2026-08-27, mais s'il est rempli il doit
+              pouvoir fonctionner : une adresse mal formée ne se découvre
+              autrement qu'au retour Brevo. */}
+          {emailMalForme(form.email) && (
+            <p className="mt-1 text-[11px] text-[#E2555A]">
+              Cette adresse ne peut pas fonctionner — vérifiez l&apos;arobase et le domaine.
+            </p>
+          )}
         </div>
+
+        {/* Société — la personne morale, distincte du contact ci-dessus. */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>Raison sociale</label>
+            <input className={inputCls} value={form.raison_sociale} onChange={set("raison_sociale")} />
+          </div>
+          <div>
+            <label className={labelCls}>SIREN</label>
+            <input className={inputCls} value={form.siren} onChange={set("siren")} inputMode="numeric" />
+            {sirenChiffres(form.siren).length === 9 && !sirenValide(form.siren) && (
+              <p className="mt-1 text-[11px] text-[#E2A03F]/80">
+                Clé de contrôle inhabituelle — certains organismes publics font exception.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className={labelCls}>Site web</label>
+          <input className={inputCls} value={form.site_web} onChange={set("site_web")} placeholder="camping-des-pins.fr" />
+        </div>
+
+        <AdresseAutocomplete
+          id="fiche-societe"
+          libelle="Adresse de la société"
+          valeurs={{
+            adresse: form.adresse_societe,
+            cp: form.cp_societe,
+            ville: form.ville_societe,
+          }}
+          onChange={(v: ValeursAdresse) =>
+            setForm((prev) => ({
+              ...prev,
+              adresse_societe: v.adresse,
+              cp_societe: v.cp,
+              ville_societe: v.ville,
+            }))
+          }
+        />
 
         <div>
           <label className={labelCls}>Téléphone</label>

@@ -30,7 +30,7 @@ export type LeadRecap = {
   terrain_mode: string | null;
   pack_terrain: string | null;
   config_v2: { distance_km?: number | null; prix?: { transport?: number | null } } | null;
-  /** Le prospect hésite entre plusieurs modèles : rien n'est chiffrable. */
+  /** Rien n'est chiffrable : modèles en balance, ou demande hors grille. */
   multi_configuration?: boolean | null;
 };
 
@@ -39,7 +39,8 @@ export type LeadRecap = {
  *
  * Deux emails, deux situations. Le récapitulatif chiffré (`BREVO_TEMPLATE_RECAP`)
  * suppose une configuration arrêtée ; quand le prospect hésite encore entre
- * plusieurs modèles, il n'y a rien à chiffrer et l'envoyer reviendrait à
+ * plusieurs modèles — ou demande des options hors grille, assujetties à devis
+ * complémentaire — il n'y a rien à chiffrer et l'envoyer reviendrait à
  * communiquer un prix sur un choix que personne n'a fait — un prix communiqué ne
  * se reprend pas. On envoie alors une présentation accompagnée de la plaquette
  * (`BREVO_TEMPLATE_MULTICFG`).

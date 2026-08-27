@@ -9,8 +9,14 @@ export async function POST(req: NextRequest) {
   const body = (await req.json()) as Record<string, unknown>;
 
   const { prenom, nom, email } = body as { prenom?: string; nom?: string; email?: string };
-  if (!prenom || !nom || !email) {
-    return NextResponse.json({ error: "Champs requis : prénom, nom, email" }, { status: 400 });
+  /* ⚠ L'email n'est plus requis (2026-08-27). Au téléphone, tout le monde ne
+     donne pas son adresse : l'exiger obligeait à en inventer une — qui finit par
+     recevoir un devis — ou à renoncer à la fiche, c'est-à-dire à perdre l'appel.
+     Sans elle, aucun récapitulatif ne partira ; c'est le seul effet, et l'écran
+     le dit. La colonne a été relâchée par `20260827_lead_email_facultatif.sql` :
+     sans cette migration, l'insertion échouerait ici en erreur serveur. */
+  if (!prenom || !nom) {
+    return NextResponse.json({ error: "Champs requis : prénom, nom" }, { status: 400 });
   }
 
   const { data, error } = await getSupabaseAdmin()
@@ -18,8 +24,21 @@ export async function POST(req: NextRequest) {
     .insert({
       prenom,
       nom,
-      email,
+      /* Chaîne vide → null : le formulaire envoie "" quand le champ est laissé
+         libre, et une adresse vide stockée telle quelle passerait les tests
+         `lead.email ?` un peu partout. */
+      email: email || null,
       tel: (body.tel as string) || null,
+
+      /* Société — tous facultatifs (`20260827_lead_societe.sql`). L'écran
+         normalise déjà : SIREN réduit à neuf chiffres, site web préfixé. La
+         base ne refuse qu'un SIREN qui n'en est pas un. */
+      raison_sociale: (body.raison_sociale as string) || null,
+      siren: (body.siren as string) || null,
+      site_web: (body.site_web as string) || null,
+      adresse_societe: (body.adresse_societe as string) || null,
+      cp_societe: (body.cp_societe as string) || null,
+      ville_societe: (body.ville_societe as string) || null,
       produit: (body.produit as string) || null,
       pack_terrain: (body.pack_terrain as string) || null,
       terrain_mode: (body.terrain_mode as string) || null,

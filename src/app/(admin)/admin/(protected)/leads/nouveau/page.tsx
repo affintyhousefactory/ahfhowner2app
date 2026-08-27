@@ -25,6 +25,14 @@ import {
 } from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 import { RechercheIdentite } from "@/components/admin/RechercheIdentite";
+import { AdresseAutocomplete } from "@/components/admin/AdresseAutocomplete";
+import {
+  emailMalForme,
+  normaliserSiteWeb,
+  sirenChiffres,
+  sirenValide,
+  siteWebPlausible,
+} from "@/shared/lib/validation";
 import { TRANSPORT } from "@/lib/site";
 import {
   distanceAtelierKm,
@@ -68,6 +76,15 @@ export default function NouveauLeadPage() {
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [tel, setTel] = useState("");
+
+  /* Société — tous facultatifs. Quatre des cinq cibles sont des personnes
+     morales, mais la cinquième (investisseurs particuliers) n'a ni raison
+     sociale ni SIREN, et un premier appel se termine rarement avec le SIREN
+     sous la main. */
+  const [raisonSociale, setRaisonSociale] = useState("");
+  const [siren, setSiren] = useState("");
+  const [siteWeb, setSiteWeb] = useState("");
+  const [adresseSociete, setAdresseSociete] = useState({ adresse: "", cp: "", ville: "" });
 
   // Suivi
   const [responsable, setResponsable] = useState("");
@@ -189,7 +206,17 @@ export default function NouveauLeadPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!prenom || !nom || !email) return;
+    /* ⚠ L'email n'est plus exigé. Au téléphone, tout le monde ne donne pas son
+       adresse ; l'imposer revenait à en faire inventer une, ou à perdre l'appel. */
+    if (!prenom || !nom) return;
+
+    /* ⚠ Une adresse mal formée est refusée, une adresse absente ne l'est pas.
+       Laisser passer « jean.dupont@gmail » revient à croire qu'on pourra
+       recontacter ce prospect, et à ne s'en apercevoir qu'au retour Brevo. */
+    if (emailMalForme(email)) {
+      setSubmitError("L'adresse email est mal formée. Corrigez-la, ou laissez le champ vide.");
+      return;
+    }
 
     /* Garde-fou en plus du `required` du champ : la soumission peut venir d'un
        navigateur qui ne valide pas, et surtout le message natif (« Veuillez
@@ -244,6 +271,17 @@ export default function NouveauLeadPage() {
        ramasser une configuration que personne n'a arrêtée. */
     const body = {
       prenom, nom, email, tel: tel || null,
+
+      /* Société. `sirenChiffres` retire les espaces de la dictée : deux
+         écritures d'un même numéro ne se rapprocheraient pas d'un fichier de
+         prospection. `normaliserSiteWeb` préfixe `https://` — sans schéma, le
+         lien deviendrait relatif au back-office. */
+      raison_sociale: raisonSociale.trim() || null,
+      siren: sirenChiffres(siren) || null,
+      site_web: normaliserSiteWeb(siteWeb),
+      adresse_societe: adresseSociete.adresse.trim() || null,
+      cp_societe: adresseSociete.cp.trim() || null,
+      ville_societe: adresseSociete.ville.trim() || null,
       produit: multiConfig ? "Multi-Configuration — à arbitrer" : calcul.m.nom,
       multi_configuration: multiConfig,
 
@@ -328,9 +366,19 @@ export default function NouveauLeadPage() {
       <div className="max-w-3xl p-8">
         <h1 className="text-xl font-semibold text-white">Lead enregistré</h1>
         <p className="mt-2 text-sm text-white/40">
-          L&apos;appel est consigné. Relisez le récapitulatif avant de l&apos;envoyer à{" "}
-          <span className="text-white/60">{email}</span> — c&apos;est le premier document
-          que ce client recevra de nous.
+          {email ? (
+            <>
+              L&apos;appel est consigné. Relisez le récapitulatif avant de l&apos;envoyer à{" "}
+              <span className="text-white/60">{email}</span> — c&apos;est le premier document
+              que ce client recevra de nous.
+            </>
+          ) : (
+            <>
+              L&apos;appel est consigné. Ce lead n&apos;a pas d&apos;adresse email : aucun
+              récapitulatif ne peut partir. Complétez-la depuis sa fiche dès que vous
+              l&apos;obtenez, l&apos;envoi restera possible.
+            </>
+          )}
         </p>
 
         <div className="mt-6">
@@ -445,8 +493,102 @@ export default function NouveauLeadPage() {
           <div className="grid grid-cols-2 gap-4">
             <Field label="Prénom *" value={prenom} onChange={setPrenom} required />
             <Field label="Nom *" value={nom} onChange={setNom} required />
-            <Field label="Email *" type="email" value={email} onChange={setEmail} required />
+            <Field label="Email" type="email" value={email} onChange={setEmail} />
             <Field label="Téléphone" value={tel} onChange={setTel} />
+          </div>
+
+          {/* Avertir, jamais bloquer. Un nom d'établissement et une note valent
+              mieux qu'un appel perdu, et l'adresse se complète au rappel — mais
+              une fiche sans aucun moyen de reprise ne sert personne, et ça ne se
+              voit qu'au moment où on veut rappeler. */}
+          {!email && !tel && (
+            <p className="mt-2 text-[11px] leading-relaxed text-[#E2A03F]/80">
+              Ni email ni téléphone — ce lead ne pourra pas être recontacté. Vous pouvez
+              l&apos;enregistrer tel quel et compléter plus tard depuis sa fiche.
+            </p>
+          )}
+          {!email && tel && (
+            <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+              Sans adresse email, aucun récapitulatif ne pourra être envoyé à ce prospect.
+              Le suivi se fera par téléphone.
+            </p>
+          )}
+
+          {/* Contrôle à la saisie, pas seulement à l'envoi : corriger une faute
+              de frappe pendant l'appel coûte une seconde, s'en apercevoir au
+              retour Brevo coûte le prospect. */}
+          {emailMalForme(email) && (
+            <p className="mt-2 text-[11px] leading-relaxed text-[#E2555A]">
+              Cette adresse ne peut pas fonctionner — vérifiez l&apos;arobase et le domaine.
+            </p>
+          )}
+        </Section>
+
+        {/* ── 1 bis. Société ──────────────────────────────────────────────
+            Quatre des cinq cibles sont des personnes morales. La raison sociale
+            se retrouvait jusqu'ici dans les notes d'appel, d'où l'on ne peut ni
+            trier ni rapprocher des fichiers de prospection.
+
+            Tout est facultatif : la cinquième cible — investisseurs particuliers
+            — n'a ni raison sociale ni SIREN, et un premier appel se termine
+            rarement avec le SIREN sous la main. */}
+        <Section title="Société (facultatif)">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Raison sociale" value={raisonSociale} onChange={setRaisonSociale} />
+            <div>
+              <label className="mb-1.5 block text-xs text-white/40">SIREN</label>
+              <input
+                value={siren}
+                onChange={(e) => setSiren(e.target.value)}
+                placeholder="812 345 678"
+                inputMode="numeric"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
+              />
+              {/* ⚠ Avertissement, jamais blocage : La Poste porte le 356 000 000,
+                  qui ne respecte pas la clé de contrôle, et l'INSEE l'admet.
+                  Refuser la saisie ferait perdre les huit autres chiffres pour
+                  un seul mal entendu au téléphone. */}
+              {sirenChiffres(siren).length > 0 && sirenChiffres(siren).length !== 9 && (
+                <p className="mt-1.5 text-[11px] text-[#E2A03F]/80">
+                  Un SIREN compte 9 chiffres — {sirenChiffres(siren).length} saisi
+                  {sirenChiffres(siren).length > 1 ? "s" : ""}.
+                </p>
+              )}
+              {sirenChiffres(siren).length === 9 && !sirenValide(siren) && (
+                <p className="mt-1.5 text-[11px] text-[#E2A03F]/80">
+                  Clé de contrôle inhabituelle — vérifiez le numéro. Certains organismes
+                  publics font exception, la saisie reste possible.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <label className="mb-1.5 block text-xs text-white/40">Site web</label>
+            <input
+              value={siteWeb}
+              onChange={(e) => setSiteWeb(e.target.value)}
+              placeholder="camping-des-pins.fr"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
+            />
+            {siteWeb.trim() && !siteWebPlausible(siteWeb) && (
+              <p className="mt-1.5 text-[11px] text-[#E2A03F]/80">
+                Adresse de site inhabituelle — il manque peut-être l&apos;extension (.fr, .com).
+              </p>
+            )}
+          </div>
+
+          <div className="mt-4">
+            <AdresseAutocomplete
+              id="societe"
+              libelle="Adresse de la société"
+              valeurs={adresseSociete}
+              onChange={setAdresseSociete}
+            />
+            <p className="mt-1.5 text-[11px] text-white/25">
+              C&apos;est cette adresse qui reçoit le studio, et non le domicile du contact —
+              renseigné plus haut. Les deux diffèrent souvent.
+            </p>
           </div>
         </Section>
 
@@ -524,34 +666,46 @@ export default function NouveauLeadPage() {
                   « je veux voir les deux » est une réponse aussi fréquente que
                   l'une ou l'autre. La reléguer à une case à cocher plus bas
                   reviendrait à demander au conseiller de trancher d'abord, puis
-                  de se dédire. */}
+                  de se dédire.
+
+                  ⚠ Il couvre **deux** situations, pas une seule : le prospect
+                  hésite entre plusieurs modèles, **ou** il demande des options
+                  et services personnalisés qui sortent de la grille. Les deux
+                  ont la même conséquence — rien n'est chiffrable en l'état — et
+                  c'est cette conséquence, pas la cause, qui décide de l'email
+                  envoyé. */}
               <button
                 type="button"
                 onClick={() => setMultiConfig(true)}
                 className={cn(
-                  "flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors",
+                  "flex-1 basis-full rounded-xl border px-4 py-2.5 text-left text-sm font-medium transition-colors md:basis-0",
                   multiConfig
                     ? "border-[#E2A03F] bg-[#E2A03F]/15 text-[#E2A03F]"
                     : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10",
                 )}
               >
                 Multi-Configuration
-                <span className="ml-1.5 text-xs opacity-60">plusieurs modèles</span>
+                <span className="mt-0.5 block text-xs font-normal leading-snug opacity-60">
+                  Plusieurs modèles, ou options et services personnalisés assujettis à devis
+                  préalables complémentaires
+                </span>
               </button>
             </div>
 
             {multiConfig && (
               <div className="mt-3 rounded-xl border border-[#E2A03F]/25 bg-[#E2A03F]/5 px-3 py-2.5">
                 <p className="text-xs leading-relaxed text-[#E2A03F]/90">
-                  <span className="font-semibold">Aucun prix ne sera calculé ni envoyé.</span> La
-                  qualification n&apos;a pas tranché : chiffrer une configuration que le client
-                  n&apos;a pas choisie reviendrait à lui communiquer un prix qu&apos;on ne pourrait
-                  plus reprendre.
+                  <span className="font-semibold">Aucun prix ne sera calculé ni envoyé.</span> Soit
+                  la qualification n&apos;a pas tranché entre les modèles, soit la demande sort de
+                  la grille — options ou services personnalisés, <span className="font-semibold">
+                  assujettis à devis préalables complémentaires</span>. Dans les deux cas, chiffrer
+                  ici reviendrait à communiquer un prix qu&apos;on ne pourrait plus reprendre.
                 </p>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-white/40">
                   Le client recevra la présentation Howner accompagnée de la plaquette, et non le
-                  récapitulatif chiffré. Notez dans les notes d&apos;appel les modèles évoqués et ce
-                  qui reste à arbitrer.
+                  récapitulatif chiffré. Notez dans les notes d&apos;appel les modèles évoqués, les
+                  options demandées et ce qui reste à arbitrer — c&apos;est de là que partira le
+                  devis complémentaire.
                 </p>
               </div>
             )}
@@ -843,7 +997,7 @@ export default function NouveauLeadPage() {
         <div className="flex gap-3 pt-1">
           <button
             type="submit"
-            disabled={loading || !prenom || !nom || !email}
+            disabled={loading || !prenom || !nom}
             className="rounded-xl bg-[#7469F4] px-6 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-40"
           >
             {loading ? "Création…" : "Créer le lead"}
