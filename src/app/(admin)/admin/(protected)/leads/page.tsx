@@ -40,7 +40,7 @@ export default async function LeadsPage({
   const { data, error } = await getSupabaseAdmin()
     .from("leads")
     .select(
-      "id, lead_number, prenom, nom, email, tel, statut, statut_commercial, responsable, produit, commune, created_at, dernier_appel_at, prochain_rappel_at, cfg_modele, cfg_total, slot",
+      "id, lead_number, prenom, nom, email, tel, statut, statut_commercial, responsable, produit, commune, created_at, dernier_appel_at, derniere_issue, prochain_rappel_at, cfg_modele, cfg_total, slot",
     )
     .order("created_at", { ascending: false });
 

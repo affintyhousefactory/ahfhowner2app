@@ -102,8 +102,19 @@ le même devis.
 ### 2.4 Le journal d'appels
 
 `lead_appels` enregistre chaque échange : sens, **issue** (Joint · Répondeur · Pas de réponse ·
-Rappel demandé · Refus), note, durée, auteur, prochain rappel. Un trigger propage la date du dernier
-appel sur le lead.
+Rappel demandé · Refus), note, durée, auteur, prochain rappel. Un trigger propage sur le lead la
+date du dernier appel **et son issue**.
+
+**L'issue remonte sur le lead** (`leads.derniere_issue`, 2026-08-27) : visible dans la liste, sur la
+carte du Kanban et sur la fiche, et **filtrable** — « tous les répondeurs à relancer » est le geste
+d'une campagne. Elle reste un **axe distinct** du statut commercial : celui-ci dit où en est
+l'affaire, l'issue dit comment s'est terminé le dernier échange. Un lead peut être « En discussion »
+et avoir eu un répondeur ce matin ; les fondre en un seul champ ferait perdre l'un des deux.
+
+L'issue retenue est celle du **dernier appel qui en porte une** — le formulaire accepte une note
+sans issue, et un commentaire ajouté après coup ne doit pas effacer le « Répondeur » de la veille.
+Corrigeable à la main depuis la fiche, mais le trigger reprend la main au prochain appel journalisé :
+la saisie est un rattrapage, le journal reste la source.
 
 ⚠ **Aucune issue ne décrit un rendez-vous.** C'est le manque qui bloque le temps 2 (§ 5).
 
