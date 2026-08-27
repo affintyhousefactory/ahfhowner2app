@@ -25,6 +25,14 @@ import {
 } from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 import { RechercheIdentite } from "@/components/admin/RechercheIdentite";
+import { AdresseAutocomplete } from "@/components/admin/AdresseAutocomplete";
+import {
+  emailMalForme,
+  normaliserSiteWeb,
+  sirenChiffres,
+  sirenValide,
+  siteWebPlausible,
+} from "@/shared/lib/validation";
 import { TRANSPORT } from "@/lib/site";
 import {
   distanceAtelierKm,
@@ -68,6 +76,15 @@ export default function NouveauLeadPage() {
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [tel, setTel] = useState("");
+
+  /* Société — tous facultatifs. Quatre des cinq cibles sont des personnes
+     morales, mais la cinquième (investisseurs particuliers) n'a ni raison
+     sociale ni SIREN, et un premier appel se termine rarement avec le SIREN
+     sous la main. */
+  const [raisonSociale, setRaisonSociale] = useState("");
+  const [siren, setSiren] = useState("");
+  const [siteWeb, setSiteWeb] = useState("");
+  const [adresseSociete, setAdresseSociete] = useState({ adresse: "", cp: "", ville: "" });
 
   // Suivi
   const [responsable, setResponsable] = useState("");
@@ -193,6 +210,14 @@ export default function NouveauLeadPage() {
        adresse ; l'imposer revenait à en faire inventer une, ou à perdre l'appel. */
     if (!prenom || !nom) return;
 
+    /* ⚠ Une adresse mal formée est refusée, une adresse absente ne l'est pas.
+       Laisser passer « jean.dupont@gmail » revient à croire qu'on pourra
+       recontacter ce prospect, et à ne s'en apercevoir qu'au retour Brevo. */
+    if (emailMalForme(email)) {
+      setSubmitError("L'adresse email est mal formée. Corrigez-la, ou laissez le champ vide.");
+      return;
+    }
+
     /* Garde-fou en plus du `required` du champ : la soumission peut venir d'un
        navigateur qui ne valide pas, et surtout le message natif (« Veuillez
        sélectionner un élément ») n'apprend rien à qui ne sait pas de quoi il
@@ -246,6 +271,17 @@ export default function NouveauLeadPage() {
        ramasser une configuration que personne n'a arrêtée. */
     const body = {
       prenom, nom, email, tel: tel || null,
+
+      /* Société. `sirenChiffres` retire les espaces de la dictée : deux
+         écritures d'un même numéro ne se rapprocheraient pas d'un fichier de
+         prospection. `normaliserSiteWeb` préfixe `https://` — sans schéma, le
+         lien deviendrait relatif au back-office. */
+      raison_sociale: raisonSociale.trim() || null,
+      siren: sirenChiffres(siren) || null,
+      site_web: normaliserSiteWeb(siteWeb),
+      adresse_societe: adresseSociete.adresse.trim() || null,
+      cp_societe: adresseSociete.cp.trim() || null,
+      ville_societe: adresseSociete.ville.trim() || null,
       produit: multiConfig ? "Multi-Configuration — à arbitrer" : calcul.m.nom,
       multi_configuration: multiConfig,
 
@@ -477,6 +513,83 @@ export default function NouveauLeadPage() {
               Le suivi se fera par téléphone.
             </p>
           )}
+
+          {/* Contrôle à la saisie, pas seulement à l'envoi : corriger une faute
+              de frappe pendant l'appel coûte une seconde, s'en apercevoir au
+              retour Brevo coûte le prospect. */}
+          {emailMalForme(email) && (
+            <p className="mt-2 text-[11px] leading-relaxed text-[#E2555A]">
+              Cette adresse ne peut pas fonctionner — vérifiez l&apos;arobase et le domaine.
+            </p>
+          )}
+        </Section>
+
+        {/* ── 1 bis. Société ──────────────────────────────────────────────
+            Quatre des cinq cibles sont des personnes morales. La raison sociale
+            se retrouvait jusqu'ici dans les notes d'appel, d'où l'on ne peut ni
+            trier ni rapprocher des fichiers de prospection.
+
+            Tout est facultatif : la cinquième cible — investisseurs particuliers
+            — n'a ni raison sociale ni SIREN, et un premier appel se termine
+            rarement avec le SIREN sous la main. */}
+        <Section title="Société (facultatif)">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Raison sociale" value={raisonSociale} onChange={setRaisonSociale} />
+            <div>
+              <label className="mb-1.5 block text-xs text-white/40">SIREN</label>
+              <input
+                value={siren}
+                onChange={(e) => setSiren(e.target.value)}
+                placeholder="812 345 678"
+                inputMode="numeric"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
+              />
+              {/* ⚠ Avertissement, jamais blocage : La Poste porte le 356 000 000,
+                  qui ne respecte pas la clé de contrôle, et l'INSEE l'admet.
+                  Refuser la saisie ferait perdre les huit autres chiffres pour
+                  un seul mal entendu au téléphone. */}
+              {sirenChiffres(siren).length > 0 && sirenChiffres(siren).length !== 9 && (
+                <p className="mt-1.5 text-[11px] text-[#E2A03F]/80">
+                  Un SIREN compte 9 chiffres — {sirenChiffres(siren).length} saisi
+                  {sirenChiffres(siren).length > 1 ? "s" : ""}.
+                </p>
+              )}
+              {sirenChiffres(siren).length === 9 && !sirenValide(siren) && (
+                <p className="mt-1.5 text-[11px] text-[#E2A03F]/80">
+                  Clé de contrôle inhabituelle — vérifiez le numéro. Certains organismes
+                  publics font exception, la saisie reste possible.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <label className="mb-1.5 block text-xs text-white/40">Site web</label>
+            <input
+              value={siteWeb}
+              onChange={(e) => setSiteWeb(e.target.value)}
+              placeholder="camping-des-pins.fr"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
+            />
+            {siteWeb.trim() && !siteWebPlausible(siteWeb) && (
+              <p className="mt-1.5 text-[11px] text-[#E2A03F]/80">
+                Adresse de site inhabituelle — il manque peut-être l&apos;extension (.fr, .com).
+              </p>
+            )}
+          </div>
+
+          <div className="mt-4">
+            <AdresseAutocomplete
+              id="societe"
+              libelle="Adresse de la société"
+              valeurs={adresseSociete}
+              onChange={setAdresseSociete}
+            />
+            <p className="mt-1.5 text-[11px] text-white/25">
+              C&apos;est cette adresse qui reçoit le studio, et non le domicile du contact —
+              renseigné plus haut. Les deux diffèrent souvent.
+            </p>
+          </div>
         </Section>
 
         {/* ── 2. Suivi ────────────────────────────────────────────────── */}

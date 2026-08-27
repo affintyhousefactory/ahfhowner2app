@@ -8,8 +8,13 @@ const ALLOWED_FIELDS = [
   // Projet
   "produit", "source", "statut", "pack_terrain",
   "budget_terrain", "total_estime", "notes_ahf",
-  // Adresse client
+  // Adresse client — la personne physique
   "adresse_postale_client", "cp_client", "ville_client",
+  /* Société — la personne morale. Distincte de l'adresse client : le siège d'un
+     camping et le domicile de son gérant ne sont pas au même endroit, et c'est
+     le premier qui reçoit le studio. */
+  "raison_sociale", "siren", "site_web",
+  "adresse_societe", "cp_societe", "ville_societe",
   // Zone de recherche terrain
   "adresse_recherche", "commune", "code_postal", "departement",
   // Données PLU

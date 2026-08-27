@@ -29,6 +29,16 @@ export async function POST(req: NextRequest) {
          `lead.email ?` un peu partout. */
       email: email || null,
       tel: (body.tel as string) || null,
+
+      /* Société — tous facultatifs (`20260827_lead_societe.sql`). L'écran
+         normalise déjà : SIREN réduit à neuf chiffres, site web préfixé. La
+         base ne refuse qu'un SIREN qui n'en est pas un. */
+      raison_sociale: (body.raison_sociale as string) || null,
+      siren: (body.siren as string) || null,
+      site_web: (body.site_web as string) || null,
+      adresse_societe: (body.adresse_societe as string) || null,
+      cp_societe: (body.cp_societe as string) || null,
+      ville_societe: (body.ville_societe as string) || null,
       produit: (body.produit as string) || null,
       pack_terrain: (body.pack_terrain as string) || null,
       terrain_mode: (body.terrain_mode as string) || null,
