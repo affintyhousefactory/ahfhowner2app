@@ -173,6 +173,11 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
              `cible_commerciale` accepte l'absence de valeur, jamais `''`. Sans
              cette conversion, vider le champ ferait échouer tout
              l'enregistrement de la fiche. */
+          /* ⚠ Vidé, le champ envoie `""`, pas `null`. Depuis que la colonne est
+             nullable (2026-08-27), une chaîne vide s'enregistrerait telle quelle
+             et passerait les tests `lead.email ?` un peu partout : l'écran
+             croirait à une adresse, l'envoi échouerait chez Brevo. */
+          email: form.email || null,
           cible_commerciale: form.cible_commerciale || null,
           derniere_issue: form.derniere_issue || null,
           total_estime: form.total_estime ? Number(form.total_estime) : null,

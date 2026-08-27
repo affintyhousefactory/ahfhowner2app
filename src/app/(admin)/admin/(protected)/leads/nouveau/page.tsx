@@ -189,7 +189,9 @@ export default function NouveauLeadPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!prenom || !nom || !email) return;
+    /* ⚠ L'email n'est plus exigé. Au téléphone, tout le monde ne donne pas son
+       adresse ; l'imposer revenait à en faire inventer une, ou à perdre l'appel. */
+    if (!prenom || !nom) return;
 
     /* Garde-fou en plus du `required` du champ : la soumission peut venir d'un
        navigateur qui ne valide pas, et surtout le message natif (« Veuillez
@@ -328,9 +330,19 @@ export default function NouveauLeadPage() {
       <div className="max-w-3xl p-8">
         <h1 className="text-xl font-semibold text-white">Lead enregistré</h1>
         <p className="mt-2 text-sm text-white/40">
-          L&apos;appel est consigné. Relisez le récapitulatif avant de l&apos;envoyer à{" "}
-          <span className="text-white/60">{email}</span> — c&apos;est le premier document
-          que ce client recevra de nous.
+          {email ? (
+            <>
+              L&apos;appel est consigné. Relisez le récapitulatif avant de l&apos;envoyer à{" "}
+              <span className="text-white/60">{email}</span> — c&apos;est le premier document
+              que ce client recevra de nous.
+            </>
+          ) : (
+            <>
+              L&apos;appel est consigné. Ce lead n&apos;a pas d&apos;adresse email : aucun
+              récapitulatif ne peut partir. Complétez-la depuis sa fiche dès que vous
+              l&apos;obtenez, l&apos;envoi restera possible.
+            </>
+          )}
         </p>
 
         <div className="mt-6">
@@ -445,9 +457,26 @@ export default function NouveauLeadPage() {
           <div className="grid grid-cols-2 gap-4">
             <Field label="Prénom *" value={prenom} onChange={setPrenom} required />
             <Field label="Nom *" value={nom} onChange={setNom} required />
-            <Field label="Email *" type="email" value={email} onChange={setEmail} required />
+            <Field label="Email" type="email" value={email} onChange={setEmail} />
             <Field label="Téléphone" value={tel} onChange={setTel} />
           </div>
+
+          {/* Avertir, jamais bloquer. Un nom d'établissement et une note valent
+              mieux qu'un appel perdu, et l'adresse se complète au rappel — mais
+              une fiche sans aucun moyen de reprise ne sert personne, et ça ne se
+              voit qu'au moment où on veut rappeler. */}
+          {!email && !tel && (
+            <p className="mt-2 text-[11px] leading-relaxed text-[#E2A03F]/80">
+              Ni email ni téléphone — ce lead ne pourra pas être recontacté. Vous pouvez
+              l&apos;enregistrer tel quel et compléter plus tard depuis sa fiche.
+            </p>
+          )}
+          {!email && tel && (
+            <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+              Sans adresse email, aucun récapitulatif ne pourra être envoyé à ce prospect.
+              Le suivi se fera par téléphone.
+            </p>
+          )}
         </Section>
 
         {/* ── 2. Suivi ────────────────────────────────────────────────── */}
@@ -843,7 +872,7 @@ export default function NouveauLeadPage() {
         <div className="flex gap-3 pt-1">
           <button
             type="submit"
-            disabled={loading || !prenom || !nom || !email}
+            disabled={loading || !prenom || !nom}
             className="rounded-xl bg-[#7469F4] px-6 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-40"
           >
             {loading ? "Création…" : "Créer le lead"}
