@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { loadGooglePlacesScript } from "@/shared/lib/google-places";
-import { CONSEILLERS, dateHeureFr, etatSuivi } from "@/lib/crm";
+import { CIBLES_COMMERCIALES, CONSEILLERS, cibleCommerciale, dateHeureFr, etatSuivi } from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 
 interface LeadIdentite {
@@ -37,6 +37,7 @@ interface LeadIdentite {
      après — sans elle, la mention « déjà envoyé le… » ne s'affiche simplement
      pas. */
   recap_envoye_at?: string | null;
+  cible_commerciale?: string | null;
   created_at?: string;
 }
 
@@ -67,6 +68,7 @@ function etatInitial(lead: LeadIdentite) {
     ville_client: lead.ville_client ?? "",
     delai_projet: lead.delai_projet ?? "",
     description_projet: lead.description_projet ?? "",
+    cible_commerciale: lead.cible_commerciale ?? "",
     responsable: lead.responsable ?? "",
     prochain_rappel_at: versChampLocal(lead.prochain_rappel_at),
   };
@@ -156,6 +158,11 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
         body: JSON.stringify({
           ...form,
           budget_terrain: form.budget_terrain ? Number(form.budget_terrain) : null,
+          /* ⚠ La chaîne vide n'est pas `null` pour Postgres : le `check` de
+             `cible_commerciale` accepte l'absence de valeur, jamais `''`. Sans
+             cette conversion, vider le champ ferait échouer tout
+             l'enregistrement de la fiche. */
+          cible_commerciale: form.cible_commerciale || null,
           total_estime: form.total_estime ? Number(form.total_estime) : null,
           responsable: form.responsable || null,
           // Horodate la prise en charge, et seulement quand elle change : sinon
@@ -212,6 +219,10 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
 
         <dl className="space-y-2 text-sm">
           {([
+            /* La cible n'est saisissable qu'à la création : elle décrit l'appel
+               qui a eu lieu, pas l'état du dossier. La relire ici évite qu'une
+               donnée obligatoire à la saisie devienne invisible ensuite. */
+            ["Cible commerciale", cibleCommerciale(lead.cible_commerciale)?.label ?? null],
             ["Modèle", lead.produit],
             ["Pack", lead.pack_terrain],
             ["Budget terrain", lead.budget_terrain ? `${Number(lead.budget_terrain).toLocaleString("fr-FR")} €` : null],
@@ -447,6 +458,26 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
               {DELAIS_PROJET.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
+        </div>
+
+        {/* ⚠ Corrigeable, contrairement à ce que laissait croire la première
+            version : une cible se choisit au premier appel, et c'est justement
+            le moment où l'on se trompe — le « gérant de camping » annoncé par
+            le standard tient en fait un domaine. La liste déroulante suffit
+            ici : les radios détaillées avec codes NAF servent à choisir avant
+            l'appel, corriger après ne demande que de retrouver le bon libellé.
+
+            « — Non renseignée » est proposé pour les leads nés sur le site
+            public, qui n'en ont pas : ne pas l'offrir obligerait à inventer une
+            cible pour pouvoir enregistrer la moindre autre correction. */}
+        <div>
+          <label className={labelCls}>Cible commerciale</label>
+          <select className={inputCls} value={form.cible_commerciale} onChange={set("cible_commerciale")}>
+            <option value="">— Non renseignée</option>
+            {CIBLES_COMMERCIALES.map((c) => (
+              <option key={c.id} value={c.id}>{c.numero}. {c.label}</option>
+            ))}
+          </select>
         </div>
 
         {/* Notes */}

@@ -45,6 +45,12 @@ export async function POST(req: NextRequest) {
       notes_ahf: (body.notes_ahf as string) || null,
 
       // ── Suivi CRM (ADR-035 §1 et §2) ────────────────────────────────────
+      /* Cible commerciale : obligatoire côté écran, tolérée nulle ici. Les
+         leads venus du site public (configurateur, formulaire de contact)
+         n'ont personne pour la renseigner — imposer la colonne `not null`
+         aurait fait échouer leur enregistrement. La contrainte de valeur, elle,
+         est bien en base : un identifiant inconnu est refusé. */
+      cible_commerciale: (body.cible_commerciale as string) || null,
       responsable: (body.responsable as string) || null,
       responsable_at: body.responsable ? new Date().toISOString() : null,
       prochain_rappel_at: (body.prochain_rappel_at as string) || null,

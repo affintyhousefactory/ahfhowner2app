@@ -21,6 +21,8 @@ import { cn } from "@/shared/lib/cn";
 import { NumeroSerieBadge } from "@/shared/components/admin/NumeroSerieBadge";
 import {
   STATUTS_COMMERCIAUX,
+  STATUTS_KANBAN,
+  horsKanban,
   statutCommercial,
   etatSuivi,
   urgence,
@@ -91,10 +93,33 @@ export default function LeadsVue({ leads: initial, vue }: { leads: LeadListe[]; 
     });
   }, [leads, q, conseiller, retardSeul]);
 
+  /** Comptés sur les leads filtrés : le chiffre suit la recherche en cours. */
+  const rebutes = useMemo(
+    () => filtres.filter((l) => horsKanban(l.statut_commercial)).length,
+    [filtres],
+  );
+
   /** Déplacement Kanban — optimiste, annulé si la route refuse. */
   async function changerStatut(leadId: string, statut: StatutCommercialId) {
     const avant = leads.find((l) => l.id === leadId)?.statut_commercial ?? null;
     if (avant === statut) return;
+
+    /* ⚠ Le rebut n'a pas de colonne : la carte va disparaître de l'écran sous
+       les yeux de celui qui la déplace. Une disparition sans préavis se lit
+       comme une suppression, et fait chercher un bouton d'annulation qui
+       n'existe pas — d'où la confirmation, qui dit à la fois ce qui va se
+       passer et où le lead se retrouvera. */
+    if (horsKanban(statut)) {
+      const lead = leads.find((l) => l.id === leadId);
+      const nom = lead ? `${lead.prenom ?? ""} ${lead.nom ?? ""}`.trim() || "Ce lead" : "Ce lead";
+      const ok = window.confirm(
+        `${nom} va passer en « Erreur / Test / Doublon ».\n\n` +
+          `Il disparaîtra du Kanban : ce statut n'a pas de colonne, pour ne pas fausser les compteurs.\n\n` +
+          `Il n'est pas supprimé — vous le retrouverez dans la vue Tableau, et pourrez lui rendre un statut de là.`,
+      );
+      if (!ok) return;
+    }
+
     setErreur(null);
     setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, statut_commercial: statut } : l)));
     try {
@@ -174,7 +199,23 @@ export default function LeadsVue({ leads: initial, vue }: { leads: LeadListe[]; 
       {erreur && <p className="mb-3 text-sm text-red-400">{erreur}</p>}
 
       {vue === "kanban" ? (
-        <Kanban leads={filtres} onMove={changerStatut} />
+        <>
+          <Kanban leads={filtres} onMove={changerStatut} />
+
+          {/* Un lead retiré du Kanban ne doit pas être un lead oublié : le
+              compte reste affiché, avec le chemin pour aller le voir. Sans
+              cette ligne, le rebut deviendrait un trou noir. */}
+          {rebutes > 0 && (
+            <p className="mt-3 text-[11px] text-white/30">
+              {rebutes} lead{rebutes > 1 ? "s" : ""} en « Erreur / Test / Doublon » —
+              hors Kanban pour ne pas fausser les compteurs.{" "}
+              <Link href="/admin/leads" className="text-white/50 underline underline-offset-2 hover:text-white">
+                Visible{rebutes > 1 ? "s" : ""} dans la vue Tableau
+              </Link>
+              .
+            </p>
+          )}
+        </>
       ) : (
         <Tableau leads={filtres} />
       )}
@@ -297,7 +338,7 @@ function Kanban({
 
   return (
     <div className="flex gap-3 overflow-x-auto pb-4">
-      {STATUTS_COMMERCIAUX.map((s) => {
+      {STATUTS_KANBAN.map((s) => {
         const colonne = leads
           .filter((l) => statutCommercial(l.statut_commercial).id === s.id)
           .sort((a, b) => urgence(etatSuivi(b)) - urgence(etatSuivi(a)));

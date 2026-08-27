@@ -44,6 +44,20 @@ export const STATUTS_COMMERCIAUX = [
   { id: "paiement_reserve", label: "Paiement réservé", badge: "bg-teal-500/20 text-teal-300",    dot: "bg-teal-300",    couleur: "#2dd4bf", actif: true  },
   { id: "signe",         label: "Signé",         badge: "bg-green-500/20 text-green-400",        dot: "bg-green-400",   couleur: "#4ade80", actif: false },
   { id: "perdu",         label: "Non retenu",    badge: "bg-red-500/10 text-red-400/60",         dot: "bg-red-400/60",  couleur: "#6b7280", actif: false },
+
+  /* Rebut : ni un prospect, ni une affaire perdue. Une saisie de test, un
+     doublon, une erreur de frappe — des lignes qui existent en base mais ne
+     décrivent personne.
+
+     `horsKanban` les retire du tableau de bord : mêlées aux vraies, elles
+     faussent les compteurs de colonne, et « Non retenu » ne convenait pas — il
+     dit qu'un prospect a dit non, ce qui est une information commerciale.
+     Celui-ci dit qu'il n'y a jamais eu de prospect.
+
+     ⚠ Retiré du Kanban, **pas supprimé** : la ligne reste en base et visible
+     dans la vue tableau. Un statut qui efface pour de bon n'aurait pas sa place
+     dans un menu déroulant qu'on manipule d'une main en parlant au téléphone. */
+  { id: "erreur_test_doublon", label: "Erreur / Test / Doublon", badge: "bg-white/5 text-white/30", dot: "bg-white/20", couleur: "#4b5563", actif: false, horsKanban: true },
 ] as const;
 
 export type StatutCommercialId = (typeof STATUTS_COMMERCIAUX)[number]["id"];
@@ -56,6 +70,111 @@ export function statutCommercial(id: string | null | undefined): StatutCommercia
 /** `actif: false` = affaire close. Ni relance, ni alerte de silence. */
 export function estClos(id: string | null | undefined): boolean {
   return !statutCommercial(id).actif;
+}
+
+/**
+ * Statuts qui ne paraissent pas au Kanban — le rebut, pas les affaires closes.
+ *
+ * `estClos()` et celui-ci ne se recouvrent pas : « Signé » est clos et bien
+ * visible, c'est même la colonne qu'on regarde en premier.
+ */
+export function horsKanban(id: string | null | undefined): boolean {
+  const statut = statutCommercial(id);
+  return "horsKanban" in statut && statut.horsKanban === true;
+}
+
+/** Colonnes du Kanban — l'ordre d'avancement, sans le rebut. */
+export const STATUTS_KANBAN = STATUTS_COMMERCIAUX.filter((s) => !("horsKanban" in s && s.horsKanban));
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* Cibles commerciales                                                        */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Les cinq cibles du script de phoning, dans l'ordre du document.
+ *
+ * Elles ne sont pas une catégorisation a posteriori : ce sont les cinq
+ * populations pour lesquelles une trame d'appel distincte a été écrite —
+ * accroche, punch lines, objections propres. Demander la cible à la création du
+ * lead, c'est demander **avec quelle trame l'appel a été mené**. D'où le
+ * caractère obligatoire : un lead sans cible est un appel dont on ignore ce qui
+ * a été dit.
+ *
+ * ⚠ **Codes NAF rév. 2 (2008)**, vérifiés un à un sur insee.fr le 2026-08-27.
+ * La NAF 2025 a beau être publiée, elle ne sert à coder les APE qu'à partir du
+ * 1er janvier 2027 : d'ici là, les codes portés par les entreprises — et par
+ * les fichiers de prospection — sont ceux-ci. Ils devront être revus à la
+ * bascule.
+ *
+ * Les codes servent au ciblage et au rapprochement avec les fichiers de
+ * prospection ; ils ne sont pas exhaustifs et ne valent pas règle : un camping
+ * exploité en SCI peut porter un code immobilier. C'est le conseiller qui
+ * tranche, la liste l'aide.
+ */
+export const CIBLES_COMMERCIALES = [
+  {
+    id: "hpa",
+    numero: 1,
+    label: "Campings et hôtellerie de plein air",
+    court: "Camping / HPA",
+    badge: "bg-emerald-500/15 text-emerald-300",
+    naf: [{ code: "55.30Z", libelle: "Terrains de camping et parcs pour caravanes ou véhicules de loisirs" }],
+  },
+  {
+    id: "tourisme",
+    numero: 2,
+    label: "Hôtels, domaines, gîtes et hébergements touristiques",
+    court: "Hôtel / tourisme",
+    badge: "bg-sky-500/15 text-sky-300",
+    naf: [
+      { code: "55.10Z", libelle: "Hôtels et hébergement similaire" },
+      { code: "55.20Z", libelle: "Hébergement touristique et autre hébergement de courte durée" },
+    ],
+  },
+  {
+    id: "medico_social",
+    numero: 3,
+    label: "EHPAD, résidences services seniors, médico-social",
+    court: "Médico-social",
+    badge: "bg-violet-500/15 text-violet-300",
+    naf: [
+      { code: "87.10A", libelle: "Hébergement médicalisé pour personnes âgées" },
+      { code: "87.30A", libelle: "Hébergement social pour personnes âgées" },
+      { code: "87.10C", libelle: "Hébergement médicalisé pour adultes handicapés et autre hébergement médicalisé" },
+      { code: "87.30B", libelle: "Hébergement social pour handicapés physiques" },
+    ],
+  },
+  {
+    id: "collectivites",
+    numero: 4,
+    label: "Collectivités, employeurs et logement des saisonniers",
+    court: "Collectivité / employeur",
+    badge: "bg-amber-500/15 text-amber-300",
+    naf: [
+      { code: "84.11Z", libelle: "Administration publique générale" },
+      { code: "55.90Z", libelle: "Autres hébergements" },
+      { code: "68.20B", libelle: "Location de terrains et d'autres biens immobiliers" },
+    ],
+  },
+  {
+    id: "investisseurs",
+    numero: 5,
+    label: "Particuliers investisseurs disposant de fonds",
+    court: "Investisseur",
+    badge: "bg-rose-500/15 text-rose-300",
+    /* Un particulier n'a pas de code NAF — il n'exerce pas d'activité
+       économique enregistrée. Le seul cas où un code apparaît est celui d'une
+       société civile immobilière. Écrire ici un code « par défaut » aurait
+       rendu la colonne inexploitable pour le ciblage. */
+    naf: [{ code: "68.20A", libelle: "Location de logements — seulement si le lead investit via une SCI" }],
+  },
+] as const;
+
+export type CibleCommercialeId = (typeof CIBLES_COMMERCIALES)[number]["id"];
+export type CibleCommerciale = (typeof CIBLES_COMMERCIALES)[number];
+
+export function cibleCommerciale(id: string | null | undefined): CibleCommerciale | null {
+  return CIBLES_COMMERCIALES.find((c) => c.id === id) ?? null;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
