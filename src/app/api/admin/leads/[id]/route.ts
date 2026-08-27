@@ -21,6 +21,12 @@ const ALLOWED_FIELDS = [
   "delai_projet", "description_projet",
   // Suivi commercial (indépendant du statut d'affectation)
   "statut_commercial",
+  /* Corrigeable après coup : une cible se choisit au premier appel, et c'est
+     précisément le moment où l'on se trompe — l'interlocuteur annoncé comme
+     gérant de camping tient en fait un domaine. La valeur reste contrainte par
+     la base (`leads_cible_commerciale_check`), qui refuse tout identifiant hors
+     des cinq. */
+  "cible_commerciale",
   // Suivi CRM — ADR-035 §1 et §2. `responsable` = conseiller AHF, sans rapport
   // avec `mandataire_id` (domaine suspendu, ADR-028).
   "responsable", "responsable_at", "prochain_rappel_at",
