@@ -193,6 +193,127 @@ fréquence de synchronisation, comportement en cas de remboursement), donc une
 alerte Albert au sens de `CLAUDE.md`. Rien n'est engagé ici hors le nom du
 statut.
 
+## Amendement du 2026-08-27 — l'écran d'appel : cible, distance, relecture
+
+Quatre décisions de Richard, prises en travaillant l'écran de pré-qualification.
+Toutes livrées en production.
+
+### 1. Cible commerciale — obligatoire, en tête de l'écran
+
+Les **cinq cibles du script de phoning** (`PITCHS_PAR_CIBLE.md`, projet
+AHF_MARKETING), dans l'ordre du document et avec ses libellés exacts. Ce ne sont
+pas des catégories inventées après coup : chacune a sa trame d'appel — accroche,
+punch lines, objections propres. Renseigner la cible, c'est enregistrer **avec
+quelle trame le contact a été mené**. Un lead sans cible est un appel dont on
+ignore ce qui a été dit.
+
+L'encart est placé **avant l'identité** : c'est la question qu'on se pose avant
+de composer le numéro, pas après avoir raccroché.
+
+Chaque cible porte ses **codes NAF**, affichés sous elle — ce sont eux qui
+relient le lead aux fichiers de prospection HPA.
+
+| | Cible | NAF rév. 2 |
+|---|---|---|
+| 1 | Campings et hôtellerie de plein air | `55.30Z` |
+| 2 | Hôtels, domaines, gîtes et hébergements touristiques | `55.10Z` · `55.20Z` |
+| 3 | EHPAD, résidences services seniors, médico-social | `87.10A` · `87.30A` · `87.10C` · `87.30B` |
+| 4 | Collectivités, employeurs et logement des saisonniers | `84.11Z` · `55.90Z` · `68.20B` |
+| 5 | Particuliers investisseurs disposant de fonds | `68.20A` — **seulement en SCI** |
+
+⚠ **NAF rév. 2, pas NAF 2025.** Chaque libellé vérifié un à un sur insee.fr le
+2026-08-27, et d'abord la nomenclature elle-même : la NAF 2025 est publiée mais
+**ne codera les APE qu'au 1er janvier 2027**. Jusque-là, les codes portés par les
+entreprises et par les fichiers de prospection sont ceux de la rév. 2. **À revoir
+à la bascule.**
+
+La cinquième cible ne reçoit **pas** de code par défaut : un particulier n'exerce
+pas d'activité enregistrée. En inventer un aurait rendu la colonne inexploitable
+pour le ciblage.
+
+⚠ **Colonne `nullable` malgré l'obligation à la saisie.** Le back-office l'exige
+du conseiller, mais les leads nés sur le site public n'ont personne pour la
+renseigner : un `not null` aurait fait échouer leur enregistrement, c'est-à-dire
+perdu un lead pour cause de champ administratif. L'obligation est là où elle a du
+sens — dans l'écran d'appel. La contrainte de **valeur** est bien en base
+(`leads_cible_commerciale_check`).
+
+**Corrigeable depuis la fiche** (décision du 2026-08-27) : une cible se choisit au
+premier appel, et c'est là qu'on se trompe. La chaîne vide est convertie en
+`null` à l'envoi — le `check` accepte l'absence de valeur, jamais `''`.
+
+### 2. Statut « Erreur / Test / Doublon » — le rebut a son statut
+
+Une saisie de test, un doublon, une frappe ratée : des lignes qui existent en base
+mais ne décrivent personne. « Non retenu » ne convenait pas — il dit qu'un
+prospect a dit non, ce qui est une **information commerciale**. Celui-ci dit qu'il
+n'y a jamais eu de prospect.
+
+`horsKanban: true` le prive de colonne : mêlées aux vraies, ces lignes faussent
+les compteurs. **Retiré du Kanban, jamais supprimé** — la ligne reste en base et
+dans la vue tableau, d'où on peut lui rendre un statut.
+
+Deux garde-fous, parce qu'une carte qui s'évanouit se lit comme une suppression :
+une **confirmation** qui dit ce qui va se passer *et* où le lead se retrouvera ;
+un **compteur sous le Kanban** avec le lien vers la vue tableau. Sans lui, le
+rebut serait un trou noir.
+
+⚠ Ici, **l'écran et la base doivent avancer ensemble** : la contrainte
+`leads_statut_commercial_check` est **remplacée**, Postgres n'ajoutant pas une
+valeur à un `check` en place. Les huit valeurs précédentes sont reprises à
+l'identique — les retirer invaliderait les lignes existantes.
+
+### 3. Le transport se calcule pendant l'appel
+
+Le conseiller le saisissait de tête. Le calcul existait pourtant
+(`transportEur()`), mais n'était câblé que sur le configurateur public.
+
+Dès que l'analyse PLU rend des coordonnées, l'écran affiche la distance **et le
+détail** : `412 km depuis l'atelier de Bayonne · grutage 1 440 € + 412 km ×
+2,16 €/km (9 t) = 2 330 €`. Le détail, pas seulement le résultat — un conseiller
+qui annonce un prix au téléphone doit pouvoir dire d'où il sort.
+
+**Sans terrain identifié, rien n'est calculé**, et l'écran le dit : un zéro se
+lirait comme une livraison offerte.
+
+**Le champ reste une surcharge, pas un pré-remplissage.** Pré-remplir aurait été
+plus simple à écrire et plus faux à l'usage : au moindre changement de modèle le
+poids change, donc le prix, et une correction saisie deux minutes plus tôt serait
+écrasée sans que personne le voie.
+
+`distanceAtelierKm()` rejoint `transportEur()` dans `lib/configurateur/config.ts`.
+Elle vivait en copie privée dans le configurateur public et nulle part côté
+back-office : deux calculs pour un même prix, c'est un jour où le devis du site
+et celui de l'appel ne tombent plus pareil.
+
+`distance_km` est figée dans l'instantané `config_v2` — pas recalculée. Un client
+à qui on a annoncé 412 km au téléphone doit lire 412 km dans son email.
+
+⚠ **`TRANSPORT.usine` reste approximatif** — « à affiner avec adresse exacte
+atelier », dit `site.ts` depuis l'origine. Sur 300 km l'écart est dans le bruit ;
+sur un client à 15 km, il se voit. **Coordonnées réelles toujours attendues.**
+
+### 4. Le récapitulatif se relit avant de partir
+
+Il s'envoyait d'un clic depuis la fiche, sans que personne ait vu ce qui partait.
+Sur un premier appel retranscrit à la volée, ce qui part porte un prix, une
+distance et un nom.
+
+`RecapClientApercu` affiche le **vrai template Brevo** peuplé des valeurs du lead,
+dans une iframe (`sandbox=""` : on l'affiche, on ne l'exécute pas). Le template
+est lu **chez Brevo**, pas dans le repo — c'est Brevo qui enverra, donc c'est son
+template qui fait foi. Une copie locale aurait divergé dès la première retouche
+dans l'éditeur ; le 2026-08-26 en donne deux exemples.
+
+**Une seule construction des valeurs** : `construireParamsRecap()` sert l'aperçu
+et l'envoi. Deux constructions pour un même email, c'est un écran qui finit par
+montrer autre chose que ce qui part — et il montrerait des prix.
+
+`leads.recap_envoye_at` trace l'envoi : sans elle, à deux conseillers, le client
+reçoit deux fois le même devis. La date est écrite **après** l'envoi et son échec
+ne le remet pas en cause (`horodate: false`) — une trace manquée ne doit jamais
+annuler un envoi réussi.
+
 ## Faisabilité
 
 - **Verdict** : ✅ Élevée. Aucune API externe, aucune clé, aucun service nouveau. Une migration additive.
