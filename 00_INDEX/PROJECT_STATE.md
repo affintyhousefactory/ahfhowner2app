@@ -110,6 +110,20 @@ BREVO_SENDER_NAME=Howner - By Affinity House Factory
 BREVO_TO_AHF=contact@affinityhousefactory.com
 BREVO_TEMPLATE_CONTACT=10
 BREVO_TEMPLATE_RECAP=9
+# ⚠ Deux listes, deux rôles (ADR-026 § Amendement 2026-08-26) :
+#   PROSPECTS   = CRM, reçoit TOUT visiteur d'un formulaire, coche ou pas.
+#   NEWSLETTER  = consentement marketing, ne reçoit QUE ceux qui cochent.
+#   Une campagne se cible sur NEWSLETTER, JAMAIS sur PROSPECTS.
+# ⚠ Ne pas confondre : chez Brevo, templates et listes ont des numérotations
+#   indépendantes. La liste 5 est « AHF – Newsletter », le template 5 est tout autre chose.
+BREVO_LIST_PROSPECTS=8
+BREVO_LIST_NEWSLETTER=5            # posée le 2026-08-26 ; repli codé « 5 »
+BREVO_LIST_MANDATAIRES=7           # domaine suspendu (ADR-028)
+
+# Plaquette commerciale (ADR-026 § Amendement 2026-08-26)
+# Repli codé : public/documents/plaquette-howner-2026.pdf (1,7 Mo). La variable ne sert
+# qu'à pointer ailleurs. Vide = la ligne disparaît du récapitulatif (jamais de lien mort).
+# NEXT_PUBLIC_PLAQUETTE_URL=
 
 # Transport livraison (valeurs par défaut dans site.ts)
 NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR=1440
@@ -159,7 +173,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 023 | Déploiement production Vercel | Proposé | ✅ |
 | 024 | Bandeau consentement cookies + Cloudflare Turnstile | Accepté | ✅ |
 | 025 | Page `/rechercheterrain` — recherche personnalisée de parcelles | Accepté — **⏸ suspendue (028)** | ✅ |
-| 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
+| 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** ; **amendé le 2026-08-26** : deux listes (Prospects = CRM / Newsletter = consentement), `{{ unsubscribe_link }}` était un tag inexistant, plaquette jointe par lien ; ⚠ **double opt-in toujours non câblé** | ✅ |
 | 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** | ✅ |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
 | 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** | ✅ |
@@ -168,7 +182,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |
 | 033 | Back-office des grilles tarifaires (`loadConfig()` → base) | Réservé — à écrire | ❓ |
 | 034 | Espace client (dépôt de pièces) | Réservé — à écrire ; GED prête côté CRM (`origine = 'client'`) | ❓ |
-| 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré sur `feat/adr-035-crm-leads` (2026-08-04)** ; **amendé le 2026-08-04** : « Lead chaud » → « Paiement réservé », règle de blocage du numéro de série, connecteur Pennylane à écrire | ✅ |
+| 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré et EN PRODUCTION** ; **amendé le 2026-08-04** (« Paiement réservé », blocage du numéro, Pennylane) puis **le 2026-08-27** : cible commerciale obligatoire (5 cibles + NAF rév. 2), statut « Erreur / Test / Doublon » hors Kanban, transport calculé depuis le PLU, relecture obligatoire du récapitulatif | ✅ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
 | 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — TERMINÉ : lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
@@ -209,6 +223,42 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-26/27 (CRM — l'écran d'appel devient utilisable ; emails — consentement et pied de page réparés)** — Quatre mises en production, quatre PR fusionnées, deux migrations passées en prod et vérifiées par requête **et** par essais fonctionnels annulés.
+
+**`main` = `d60e2cb3`.**
+
+| PR | Objet | Migration |
+|---|---|---|
+| #100 | Accueil — « Voir les studios » renvoie à `#produits` au lieu de quitter la page | — |
+| #101 | Brevo — « Prospects » pour tous, « AHF – Newsletter » pour ceux qui consentent | — |
+| #103 | CRM — distance en direct, relecture du récapitulatif, plaquette jointe | `recap_envoye_at` ✅ Preview + Prod |
+| #104 | CRM — cible commerciale obligatoire, statut « Erreur / Test / Doublon » | `cible_commerciale` + rebut ✅ Preview + Prod |
+| #102 | Trois migrations appliquées mais jamais versionnées | **ouverte** — documentaire |
+
+**Ce qui était cassé et qu'on ne voyait pas.** Trois défauts ont vécu en production sans qu'aucun contrôle ne bronche, et tous les trois ne se voyaient qu'en **sondant la sortie réelle** :
+
+1. **`{{ unsubscribe_link }}` n'est pas un tag Brevo.** Brevo le remplaçait par une chaîne vide : le HTML délivré portait `<a href="">Se désinscrire</a>`. Le template source, lui, paraissait normal. Le tag correct est `{{ unsubscribe }}`. → ADR-026 § Amendement du 2026-08-26.
+2. **« Supprimer mon compte » menait à une page de maintenance.** `affinityhousefactory.com` sert la même page à toute URL avec un `200` — empreinte identique à celle d'une URL absurde testée sur le même domaine. Un droit à l'effacement annoncé qui ne mène nulle part vaut moins que pas d'annonce.
+3. **La liste « AHF – Newsletter » n'était jamais alimentée**, et un visiteur qui ne cochait pas la case n'entrait dans **aucune** liste. Sa demande vivait en base, le CRM Brevo l'ignorait.
+
+**Trois migrations tournaient en production sans exister dans le repo** (`create_mandataires_table`, `mandataires_email_unique`, `admin_tables_safe`), passées à la main fin juin. Versées en PR #102, **SQL recopié tel qu'enregistré en base, sans retouche** — un rattrapage qui « améliore » ce qui tourne ne documente plus rien. Vérifié au passage : prod et Preview étaient déjà alignées (grants `anon` et `search_path` identiques).
+
+**Décisions de Richard** — détail dans les amendements d'ADR-026 et d'ADR-035 :
+- **Deux listes Brevo, deux rôles** : « Prospects » = CRM (tout le monde), « Newsletter » = consentement marketing. **Une campagne se cible sur la seconde, jamais sur la première.**
+- **Plaquette : un lien, un fichier désigné** — pas de pièce jointe, pas de « dernier fichier du dossier ».
+- **Cible commerciale obligatoire** à la création d'un lead, corrigeable ensuite depuis la fiche.
+- **Statut « Erreur / Test / Doublon »**, retiré du Kanban mais jamais supprimé.
+
+**⚠ Points ouverts nés de cette session :**
+- **Le double opt-in n'est pas en service.** `addBrevoContactDOI()` existe mais **n'est appelé nulle part** — les six routes font de l'ajout direct. Légal en France, mais le nom de la fonction laisse croire le contraire.
+- **Codes NAF rév. 2** — la NAF 2025 ne codera les APE qu'au **1er janvier 2027**. Les cinq cibles devront être revues à la bascule.
+- **`TRANSPORT.usine` toujours approximatif** (43.4933, −1.4748). Sur 300 km c'est dans le bruit ; sur un client à 15 km, ça se voit. **Coordonnées réelles de l'atelier attendues.**
+- **La plaquette publiée vise l'écran** (~150 dpi en A4). **L'original 64,6 Mo reste le fichier d'impression**, sur le Drive AHF.
+- **Les 5 leads de production n'ont pas de cible** et n'en auront jamais : les premiers chiffres par cible ne porteront que sur les appels saisis à partir du 2026-08-27.
+- **Aucune Preview n'a été parcourue avant fusion** sur ces quatre PR — choix de Richard, consigné.
+
+**Leçon de méthode confirmée, quatrième occurrence** : un contrôle qui n'observe pas la sortie réelle ne contrôle rien. Ici, un template Brevo ne se vérifie pas sur sa source (un tag inconnu y est indiscernable d'un tag valide) et un `200` ne prouve pas qu'un fichier est servi (486 Ko de HTML au lieu d'un PDF de 1,7 Mo).
 
 **2026-08-20 (configurateur v2 — bardage renommé, rubrique « Ambiance intérieure », PR #84)** — Demande de Richard. Deux mouvements, tous deux pilotés par `config.ts` : **aucun libellé ni visuel en dur dans un composant** (guardrail ADR-030).
 

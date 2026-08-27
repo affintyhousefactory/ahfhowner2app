@@ -72,9 +72,21 @@ Aucune config supplémentaire n'est nécessaire : `dev` est une branche Preview 
 | `BREVO_API_KEY` | ✅ | ✅ | local |
 | `BREVO_TEMPLATE_CONTACT` | 10 | 10 | 10 |
 | `BREVO_TEMPLATE_RECAP` | 9 | 9 | 9 |
+| `BREVO_TEMPLATE_MULTICFG` | **à poser** | **à poser** | **à poser** |
 | `BREVO_LIST_PROSPECTS` | 8 | 8 | 8 |
 | `BREVO_LIST_NEWSLETTER` | 5 | 5 | 5 |
 | `NEXT_PUBLIC_PLAQUETTE_URL` | *(repli code)* | *(repli code)* | *(repli code)* |
+
+> **`BREVO_TEMPLATE_MULTICFG` = 17** (2026-08-27) — présentation Howner + plaquette, envoyée
+> quand le lead porte `multi_configuration` : le prospect hésite entre plusieurs modèles, il n'y a
+> rien à chiffrer. Le récapitulatif chiffré (`BREVO_TEMPLATE_RECAP`) suppose une configuration
+> arrêtée ; l'envoyer reviendrait à communiquer un prix sur un choix que personne n'a fait, et un
+> prix communiqué ne se reprend pas.
+>
+> ⚠ **Aucun repli codé en dur pour les deux identifiants de template.** Un identifiant deviné
+> enverrait le mauvais email à un client : les routes d'envoi et d'aperçu renvoient un 500 explicite
+> quand la variable manque. **Tant que `BREVO_TEMPLATE_MULTICFG` n'est pas posée, un lead
+> Multi-Configuration ne peut pas recevoir son email** — l'aperçu le dira avant l'envoi.
 
 > **Les deux listes ne jouent pas le même rôle** (2026-08-26). `BREVO_LIST_PROSPECTS`
 > (« Prospects ») reçoit tout visiteur du formulaire de contact : c'est le CRM.

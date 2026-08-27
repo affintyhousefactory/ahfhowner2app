@@ -27,6 +27,16 @@ const ALLOWED_FIELDS = [
      la base (`leads_cible_commerciale_check`), qui refuse tout identifiant hors
      des cinq. */
   "cible_commerciale",
+  /* Corrigeable à la main, bien qu'un trigger la maintienne : une issue se note
+     à la volée pendant l'appel, et se corrige après coup sans qu'on veuille pour
+     autant rouvrir le journal. Le trigger reprendra la main au prochain appel
+     journalisé — c'est lui la source, la saisie n'est qu'un rattrapage. */
+  "derniere_issue",
+  /* Corrigeable : un prospect qui hésitait au premier appel finit par choisir,
+     et c'est ce basculement qui rend son lead chiffrable. ⚠ Le repasser à
+     `false` ne recalcule rien — les colonnes de prix restent nulles tant qu'une
+     configuration n'a pas été saisie. */
+  "multi_configuration",
   // Suivi CRM — ADR-035 §1 et §2. `responsable` = conseiller AHF, sans rapport
   // avec `mandataire_id` (domaine suspendu, ADR-028).
   "responsable", "responsable_at", "prochain_rappel_at",

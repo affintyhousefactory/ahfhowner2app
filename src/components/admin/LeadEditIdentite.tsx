@@ -3,7 +3,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { loadGooglePlacesScript } from "@/shared/lib/google-places";
-import { CIBLES_COMMERCIALES, CONSEILLERS, cibleCommerciale, dateHeureFr, etatSuivi } from "@/lib/crm";
+import {
+  CIBLES_COMMERCIALES,
+  CONSEILLERS,
+  ISSUES_APPEL,
+  cibleCommerciale,
+  dateHeureFr,
+  etatSuivi,
+  issueAppel,
+} from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 
 interface LeadIdentite {
@@ -38,6 +46,8 @@ interface LeadIdentite {
      pas. */
   recap_envoye_at?: string | null;
   cible_commerciale?: string | null;
+  derniere_issue?: string | null;
+  multi_configuration?: boolean | null;
   created_at?: string;
 }
 
@@ -69,6 +79,7 @@ function etatInitial(lead: LeadIdentite) {
     delai_projet: lead.delai_projet ?? "",
     description_projet: lead.description_projet ?? "",
     cible_commerciale: lead.cible_commerciale ?? "",
+    derniere_issue: lead.derniere_issue ?? "",
     responsable: lead.responsable ?? "",
     prochain_rappel_at: versChampLocal(lead.prochain_rappel_at),
   };
@@ -163,6 +174,7 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
              cette conversion, vider le champ ferait échouer tout
              l'enregistrement de la fiche. */
           cible_commerciale: form.cible_commerciale || null,
+          derniere_issue: form.derniere_issue || null,
           total_estime: form.total_estime ? Number(form.total_estime) : null,
           responsable: form.responsable || null,
           // Horodate la prise en charge, et seulement quand elle change : sinon
@@ -223,6 +235,10 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
                qui a eu lieu, pas l'état du dossier. La relire ici évite qu'une
                donnée obligatoire à la saisie devienne invisible ensuite. */
             ["Cible commerciale", cibleCommerciale(lead.cible_commerciale)?.label ?? null],
+            /* Affiché seulement quand c'est vrai : « non » n'apprend rien, et la
+               liste ne rend que les valeurs non nulles. */
+            ["Configuration", lead.multi_configuration ? "Multi-Configuration — à arbitrer" : null],
+            ["Dernier appel — issue", issueAppel(lead.derniere_issue)?.label ?? null],
             ["Modèle", lead.produit],
             ["Pack", lead.pack_terrain],
             ["Budget terrain", lead.budget_terrain ? `${Number(lead.budget_terrain).toLocaleString("fr-FR")} €` : null],
@@ -470,14 +486,29 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
             « — Non renseignée » est proposé pour les leads nés sur le site
             public, qui n'en ont pas : ne pas l'offrir obligerait à inventer une
             cible pour pouvoir enregistrer la moindre autre correction. */}
-        <div>
-          <label className={labelCls}>Cible commerciale</label>
-          <select className={inputCls} value={form.cible_commerciale} onChange={set("cible_commerciale")}>
-            <option value="">— Non renseignée</option>
-            {CIBLES_COMMERCIALES.map((c) => (
-              <option key={c.id} value={c.id}>{c.numero}. {c.label}</option>
-            ))}
-          </select>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>Cible commerciale</label>
+            <select className={inputCls} value={form.cible_commerciale} onChange={set("cible_commerciale")}>
+              <option value="">— Non renseignée</option>
+              {CIBLES_COMMERCIALES.map((c) => (
+                <option key={c.id} value={c.id}>{c.numero}. {c.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* ⚠ Rattrapage, pas source. Le trigger repose cette valeur depuis
+              `lead_appels` au prochain appel journalisé : corriger ici règle
+              l'affichage du jour, journaliser l'appel règle l'historique. */}
+          <div>
+            <label className={labelCls}>Dernier appel — issue</label>
+            <select className={inputCls} value={form.derniere_issue} onChange={set("derniere_issue")}>
+              <option value="">— Jamais appelé</option>
+              {ISSUES_APPEL.map((i) => (
+                <option key={i.id} value={i.id}>{i.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Notes */}

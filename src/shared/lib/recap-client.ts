@@ -15,7 +15,7 @@ import type { ParamsBrevo } from "@/shared/lib/brevo-render";
 
 /** Colonnes lues sur `leads` — une seule liste, partagée par les deux routes. */
 export const SELECT_RECAP =
-  "prenom, nom, email, tel, produit, surface, house_total, delivery, grand_total, terrain_mode, pack_terrain, config_v2";
+  "prenom, nom, email, tel, produit, surface, house_total, delivery, grand_total, terrain_mode, pack_terrain, config_v2, multi_configuration";
 
 export type LeadRecap = {
   prenom: string | null;
@@ -30,7 +30,33 @@ export type LeadRecap = {
   terrain_mode: string | null;
   pack_terrain: string | null;
   config_v2: { distance_km?: number | null; prix?: { transport?: number | null } } | null;
+  /** Le prospect hésite entre plusieurs modèles : rien n'est chiffrable. */
+  multi_configuration?: boolean | null;
 };
+
+/**
+ * Quel template Brevo pour ce lead.
+ *
+ * Deux emails, deux situations. Le récapitulatif chiffré (`BREVO_TEMPLATE_RECAP`)
+ * suppose une configuration arrêtée ; quand le prospect hésite encore entre
+ * plusieurs modèles, il n'y a rien à chiffrer et l'envoyer reviendrait à
+ * communiquer un prix sur un choix que personne n'a fait — un prix communiqué ne
+ * se reprend pas. On envoie alors une présentation accompagnée de la plaquette
+ * (`BREVO_TEMPLATE_MULTICFG`).
+ *
+ * ⚠ Les deux variables se lisent **dans la fonction**, jamais au niveau du
+ * module : une constante de module arrive vide en production, et trois
+ * récapitulatifs s'étaient perdus ainsi le 2026-08-25.
+ *
+ * ⚠ Aucun repli codé en dur. Un identifiant de template deviné enverrait le
+ * mauvais email à un client — mieux vaut une erreur explicite qu'un envoi
+ * plausible. Les appelants renvoient un 500 quand la valeur est nulle.
+ */
+export function templateRecap(lead: Pick<LeadRecap, "multi_configuration">): number {
+  return lead.multi_configuration
+    ? Number(process.env.BREVO_TEMPLATE_MULTICFG ?? 0)
+    : Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
+}
 
 const PACK_LABELS: Record<string, string> = {
   essentiel: "Pack Essentiel — 4 900 € TTC",

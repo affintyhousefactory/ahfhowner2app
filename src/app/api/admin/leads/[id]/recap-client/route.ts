@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
 import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
-import { construireParamsRecap, SELECT_RECAP, type LeadRecap } from "@/shared/lib/recap-client";
+import {
+  construireParamsRecap,
+  SELECT_RECAP,
+  templateRecap,
+  type LeadRecap,
+} from "@/shared/lib/recap-client";
 
 /* ⚠ `BREVO_TEMPLATE_RECAP` se lit dans la fonction : au niveau du module, elle
    arrivait vide en production (constat du 2026-08-25). Ici le défaut se voyait
@@ -30,9 +35,12 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Lead introuvable ou sans email" }, { status: 404 });
   }
 
-  const templateId = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
+  /* Le template dépend du lead, pas de la route : présentation quand la
+     qualification n'a pas tranché, récapitulatif chiffré sinon. */
+  const templateId = templateRecap(lead);
   if (!templateId) {
-    return NextResponse.json({ error: "BREVO_TEMPLATE_RECAP non défini" }, { status: 500 });
+    const manquante = lead.multi_configuration ? "BREVO_TEMPLATE_MULTICFG" : "BREVO_TEMPLATE_RECAP";
+    return NextResponse.json({ error: `${manquante} non défini` }, { status: 500 });
   }
 
   try {

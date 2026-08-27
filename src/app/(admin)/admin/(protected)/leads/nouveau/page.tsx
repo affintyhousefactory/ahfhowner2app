@@ -77,6 +77,9 @@ export default function NouveauLeadPage() {
   const [usage, setUsage] = useState("");
   const [quantite, setQuantite] = useState("1");
   const [modele, setModele] = useState<ModeleId>("one");
+  /* Le prospect hésite entre plusieurs modèles : la qualification n'a pas
+     tranché. Rien n'est chiffrable, et le récapitulatif part en présentation. */
+  const [multiConfig, setMultiConfig] = useState(false);
   const [ambiance, setAmbiance] = useState(cfg.ambiances[0].id);
   const [terrasse, setTerrasse] = useState("sans");
   const [options, setOptions] = useState<string[]>([]);
@@ -202,7 +205,13 @@ export default function NouveauLeadPage() {
     const q = Math.max(1, Number(quantite) || 1);
 
     // Instantané fidèle + colonnes plates : voir ADR-035 §4.
-    const config_v2 = {
+    const config_v2 = multiConfig ? {
+      version: cfg.version,
+      multi_configuration: true,
+      usage: usage || null,
+      quantite: q,
+      saisi_par: "admin",
+    } : {
       version: cfg.version,
       usage: usage || null,
       quantite: q,
@@ -228,9 +237,14 @@ export default function NouveauLeadPage() {
       saisi_par: "admin",
     };
 
+    /* ⚠ En Multi-Configuration, les colonnes de modèle et de prix restent
+       **nulles** plutôt que de porter une valeur par défaut. Un décompte par
+       modèle, une moyenne ou un chiffre d'affaires prévisionnel ne doivent pas
+       ramasser une configuration que personne n'a arrêtée. */
     const body = {
       prenom, nom, email, tel: tel || null,
-      produit: calcul.m.nom,
+      produit: multiConfig ? "Multi-Configuration — à arbitrer" : calcul.m.nom,
+      multi_configuration: multiConfig,
 
       // Suivi CRM
       cible_commerciale: cible,
@@ -243,15 +257,15 @@ export default function NouveauLeadPage() {
       cfg_version: cfg.version,
       cfg_usage: usage || null,
       cfg_quantite: q,
-      cfg_modele: modele,
-      cfg_ambiance: ambiance,
-      cfg_terrasse: terrasse,
-      cfg_options: options,
-      cfg_prix_base: calcul.base,
-      cfg_prix_terrasse: calcul.prixTerrasse,
-      cfg_prix_options: calcul.prixOptions,
-      cfg_transport: calcul.transport,
-      cfg_total: calcul.total,
+      cfg_modele: multiConfig ? null : modele,
+      cfg_ambiance: multiConfig ? null : ambiance,
+      cfg_terrasse: multiConfig ? null : terrasse,
+      cfg_options: multiConfig ? [] : options,
+      cfg_prix_base: multiConfig ? null : calcul.base,
+      cfg_prix_terrasse: multiConfig ? null : calcul.prixTerrasse,
+      cfg_prix_options: multiConfig ? null : calcul.prixOptions,
+      cfg_transport: multiConfig ? null : calcul.transport,
+      cfg_total: multiConfig ? null : calcul.total,
       slot: slot ? Number(slot) : null,
 
       // Terrain
@@ -471,16 +485,16 @@ export default function NouveauLeadPage() {
           </div>
 
           <div className="mb-4">
-            <p className="mb-2 text-xs text-white/40">Maison</p>
-            <div className="flex gap-2">
+            <p className="mb-2 text-xs text-white/40">Modèle</p>
+            <div className="flex flex-wrap gap-2">
               {cfg.modeles.map((m) => (
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => changerModele(m.id)}
+                  onClick={() => { setMultiConfig(false); changerModele(m.id); }}
                   className={cn(
                     "flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors",
-                    modele === m.id
+                    !multiConfig && modele === m.id
                       ? "border-[#7469F4] bg-[#7469F4]/15 text-[#7469F4]"
                       : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10",
                   )}
@@ -489,9 +503,51 @@ export default function NouveauLeadPage() {
                   <span className="ml-1.5 text-xs opacity-60">{m.surface} m²</span>
                 </button>
               ))}
+
+              {/* Troisième choix, à parité avec les deux modèles : au téléphone,
+                  « je veux voir les deux » est une réponse aussi fréquente que
+                  l'une ou l'autre. La reléguer à une case à cocher plus bas
+                  reviendrait à demander au conseiller de trancher d'abord, puis
+                  de se dédire. */}
+              <button
+                type="button"
+                onClick={() => setMultiConfig(true)}
+                className={cn(
+                  "flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors",
+                  multiConfig
+                    ? "border-[#E2A03F] bg-[#E2A03F]/15 text-[#E2A03F]"
+                    : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10",
+                )}
+              >
+                Multi-Configuration
+                <span className="ml-1.5 text-xs opacity-60">plusieurs modèles</span>
+              </button>
             </div>
+
+            {multiConfig && (
+              <div className="mt-3 rounded-xl border border-[#E2A03F]/25 bg-[#E2A03F]/5 px-3 py-2.5">
+                <p className="text-xs leading-relaxed text-[#E2A03F]/90">
+                  <span className="font-semibold">Aucun prix ne sera calculé ni envoyé.</span> La
+                  qualification n&apos;a pas tranché : chiffrer une configuration que le client
+                  n&apos;a pas choisie reviendrait à lui communiquer un prix qu&apos;on ne pourrait
+                  plus reprendre.
+                </p>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-white/40">
+                  Le client recevra la présentation Howner accompagnée de la plaquette, et non le
+                  récapitulatif chiffré. Notez dans les notes d&apos;appel les modèles évoqués et ce
+                  qui reste à arbitrer.
+                </p>
+              </div>
+            )}
           </div>
 
+          {/* ⚠ Toute la configuration chiffrée disparaît en Multi-Configuration.
+              La griser ou la laisser visible aurait invité à la remplir « pour
+              information », et un total affiché finit toujours par être lu à voix
+              haute au téléphone. Ce qui n'a pas été arrêté ne doit pas être
+              chiffré. Les modèles évoqués se notent dans les notes d'appel. */}
+          {!multiConfig && (
+          <>
           <div className="mb-4">
             <p className="mb-2 text-xs text-white/40">Ambiance</p>
             <div className="flex flex-wrap gap-2">
@@ -625,6 +681,8 @@ export default function NouveauLeadPage() {
               <p className="mt-0.5 text-lg font-semibold text-white">{eur(calcul.total)}</p>
             </div>
           </div>
+          </>
+          )}
         </Section>
 
         {/* ── 4. Terrain ──────────────────────────────────────────────── */}

@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
 import { rendreTemplateBrevo } from "@/shared/lib/brevo-render";
-import { construireParamsRecap, SELECT_RECAP, type LeadRecap } from "@/shared/lib/recap-client";
+import {
+  construireParamsRecap,
+  SELECT_RECAP,
+  templateRecap,
+  type LeadRecap,
+} from "@/shared/lib/recap-client";
 
 /**
  * Aperçu du récapitulatif — ce que le client verra, avant de cliquer « Envoyer ».
@@ -35,11 +40,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Lead introuvable ou sans email" }, { status: 404 });
   }
 
-  const templateId = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
+  /* ⚠ Le **même** choix de template que l'envoi, par la même fonction. Un aperçu
+     qui montrerait le récapitulatif chiffré pendant que l'envoi expédie la
+     présentation serait pire que pas d'aperçu du tout. */
+  const templateId = templateRecap(lead);
   const apiKey = process.env.BREVO_API_KEY;
   if (!templateId || !apiKey) {
+    const manquante = lead.multi_configuration ? "BREVO_TEMPLATE_MULTICFG" : "BREVO_TEMPLATE_RECAP";
     return NextResponse.json(
-      { error: "BREVO_TEMPLATE_RECAP ou BREVO_API_KEY non défini" },
+      { error: `${manquante} ou BREVO_API_KEY non défini` },
       { status: 500 },
     );
   }

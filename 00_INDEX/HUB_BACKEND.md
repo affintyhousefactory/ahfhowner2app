@@ -14,10 +14,16 @@ Point d'entrée pour : Phase 4 — Supabase, Stripe, outil terrain, leads, email
 | `03_DECISIONS/ADR-007..014,017` | Décisions Phase 4 |
 | `src/components/site/Reservation.tsx` | Réservation/acompte/waitlist (à brancher) |
 | `src/components/site/LandTool.tsx` | Terrain : BAN réel, zonage à brancher |
+| `src/lib/crm.ts` | **Référentiels CRM** — 9 statuts, 5 cibles commerciales (+ codes NAF), conseillers. Jamais redéclarés dans un écran |
+| `src/shared/lib/recap-client.ts` | **Source unique** des paramètres du récapitulatif client — sert l'aperçu ET l'envoi |
+| `src/shared/lib/brevo-render.ts` | Rendu local d'un template Brevo (aperçu seulement, jamais l'envoi) |
+| `src/shared/lib/email.ts` | Brevo : envoi de template, ajout de contact, DOI (⚠ `addBrevoContactDOI` non appelé) |
 
 ## Décisions liées
 | ADR | Sujet | Statut | Faisabilité |
 |---|---|---|---|
+| 026 | **Emails Brevo** — templates dashboard, contacts, listes | **Livré** ; amendé 2026-08-26 : Prospects = CRM / Newsletter = consentement ; ⚠ DOI non câblé | ✅ |
+| 035 | **CRM interne** — leads, Kanban, journal d'appels, récapitulatif client | **En production** ; amendé 2026-08-27 : cible commerciale, statut de rebut, transport auto, relecture du récap | ✅ |
 | 007 | Supabase schémas + RLS (`ahfhownerdb`) | Proposé | ✅ |
 | 008 | Acompte Stripe + webhook | Proposé | 🟠 |
 | 009 | Jauge/slots Realtime | Proposé | 🟠 |
