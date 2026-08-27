@@ -24,6 +24,7 @@ import {
   type CibleCommercialeId,
 } from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
+import { RechercheIdentite } from "@/components/admin/RechercheIdentite";
 import { TRANSPORT } from "@/lib/site";
 import {
   distanceAtelierKm,
@@ -426,6 +427,21 @@ export default function NouveauLeadPage() {
 
         {/* ── 1. Identité ─────────────────────────────────────────────── */}
         <Section title="Identité">
+          {/* Avant la saisie, pas après : une fiche déjà existante doit se voir
+              pendant que ça sonne, quand le conseiller peut encore changer de
+              chemin. Découverte au moment d'enregistrer, elle arriverait trop
+              tard — le doublon serait déjà écrit. */}
+          <div className="mb-4">
+            <RechercheIdentite
+              onRemplir={({ prenom, nom, email, tel }) => {
+                setPrenom(prenom);
+                setNom(nom);
+                setEmail(email);
+                setTel(tel);
+              }}
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <Field label="Prénom *" value={prenom} onChange={setPrenom} required />
             <Field label="Nom *" value={nom} onChange={setNom} required />
