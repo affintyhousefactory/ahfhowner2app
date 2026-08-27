@@ -47,6 +47,7 @@ interface LeadIdentite {
   recap_envoye_at?: string | null;
   cible_commerciale?: string | null;
   derniere_issue?: string | null;
+  multi_configuration?: boolean | null;
   created_at?: string;
 }
 
@@ -234,6 +235,9 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
                qui a eu lieu, pas l'état du dossier. La relire ici évite qu'une
                donnée obligatoire à la saisie devienne invisible ensuite. */
             ["Cible commerciale", cibleCommerciale(lead.cible_commerciale)?.label ?? null],
+            /* Affiché seulement quand c'est vrai : « non » n'apprend rien, et la
+               liste ne rend que les valeurs non nulles. */
+            ["Configuration", lead.multi_configuration ? "Multi-Configuration — à arbitrer" : null],
             ["Dernier appel — issue", issueAppel(lead.derniere_issue)?.label ?? null],
             ["Modèle", lead.produit],
             ["Pack", lead.pack_terrain],

@@ -51,6 +51,11 @@ export async function POST(req: NextRequest) {
          aurait fait échouer leur enregistrement. La contrainte de valeur, elle,
          est bien en base : un identifiant inconnu est refusé. */
       cible_commerciale: (body.cible_commerciale as string) || null,
+      /* Le prospect hésite entre plusieurs modèles. `?? false` et non `|| false` :
+         la colonne est `not null`, et un `undefined` venu d'un appelant plus
+         ancien doit valoir « configuration unique », le seul cas qui existait
+         avant le 2026-08-27. */
+      multi_configuration: (body.multi_configuration as boolean) ?? false,
       responsable: (body.responsable as string) || null,
       responsable_at: body.responsable ? new Date().toISOString() : null,
       prochain_rappel_at: (body.prochain_rappel_at as string) || null,

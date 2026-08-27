@@ -32,6 +32,11 @@ const ALLOWED_FIELDS = [
      autant rouvrir le journal. Le trigger reprendra la main au prochain appel
      journalisé — c'est lui la source, la saisie n'est qu'un rattrapage. */
   "derniere_issue",
+  /* Corrigeable : un prospect qui hésitait au premier appel finit par choisir,
+     et c'est ce basculement qui rend son lead chiffrable. ⚠ Le repasser à
+     `false` ne recalcule rien — les colonnes de prix restent nulles tant qu'une
+     configuration n'a pas été saisie. */
+  "multi_configuration",
   // Suivi CRM — ADR-035 §1 et §2. `responsable` = conseiller AHF, sans rapport
   // avec `mandataire_id` (domaine suspendu, ADR-028).
   "responsable", "responsable_at", "prochain_rappel_at",
