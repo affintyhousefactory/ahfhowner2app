@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { loadGooglePlacesScript } from "@/shared/lib/google-places";
-import { CONSEILLERS, dateHeureFr, etatSuivi } from "@/lib/crm";
+import { CONSEILLERS, cibleCommerciale, dateHeureFr, etatSuivi } from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 
 interface LeadIdentite {
@@ -37,6 +37,7 @@ interface LeadIdentite {
      après — sans elle, la mention « déjà envoyé le… » ne s'affiche simplement
      pas. */
   recap_envoye_at?: string | null;
+  cible_commerciale?: string | null;
   created_at?: string;
 }
 
@@ -212,6 +213,10 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
 
         <dl className="space-y-2 text-sm">
           {([
+            /* La cible n'est saisissable qu'à la création : elle décrit l'appel
+               qui a eu lieu, pas l'état du dossier. La relire ici évite qu'une
+               donnée obligatoire à la saisie devienne invisible ensuite. */
+            ["Cible commerciale", cibleCommerciale(lead.cible_commerciale)?.label ?? null],
             ["Modèle", lead.produit],
             ["Pack", lead.pack_terrain],
             ["Budget terrain", lead.budget_terrain ? `${Number(lead.budget_terrain).toLocaleString("fr-FR")} €` : null],

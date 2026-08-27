@@ -16,7 +16,13 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
 import { FEATURES } from "@/lib/features";
-import { CONSEILLERS, STATUTS_COMMERCIAUX, eur } from "@/lib/crm";
+import {
+  CIBLES_COMMERCIALES,
+  CONSEILLERS,
+  STATUTS_COMMERCIAUX,
+  eur,
+  type CibleCommercialeId,
+} from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 import { TRANSPORT } from "@/lib/site";
 import {
@@ -51,6 +57,10 @@ export default function NouveauLeadPage() {
      perdre le fil de l'appel — le conseiller vient de raccrocher, c'est
      maintenant qu'il sait si ce qui part est juste. */
   const [leadCree, setLeadCree] = useState<string | null>(null);
+
+  /* Cible commerciale — obligatoire. Voir le bloc de saisie plus bas pour le
+     motif : elle dit avec quelle trame d'appel le contact a été mené. */
+  const [cible, setCible] = useState<CibleCommercialeId | "">("");
 
   // Identité
   const [prenom, setPrenom] = useState("");
@@ -176,6 +186,16 @@ export default function NouveauLeadPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!prenom || !nom || !email) return;
+
+    /* Garde-fou en plus du `required` du champ : la soumission peut venir d'un
+       navigateur qui ne valide pas, et surtout le message natif (« Veuillez
+       sélectionner un élément ») n'apprend rien à qui ne sait pas de quoi il
+       s'agit. */
+    if (!cible) {
+      setSubmitError("Sélectionnez la cible commerciale : elle dit avec quelle trame l'appel a été mené.");
+      return;
+    }
+
     setLoading(true);
     setSubmitError(null);
 
@@ -213,6 +233,7 @@ export default function NouveauLeadPage() {
       produit: calcul.m.nom,
 
       // Suivi CRM
+      cible_commerciale: cible,
       responsable: responsable || null,
       statut_commercial: statutCommercial,
       prochain_rappel_at: prochainRappel ? new Date(prochainRappel).toISOString() : null,
@@ -327,6 +348,68 @@ export default function NouveauLeadPage() {
       <h1 className="mb-6 mt-2 text-xl font-semibold text-white">Pré-qualification lead</h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* ── 0. Cible commerciale ───────────────────────────────────────
+            En tête, avant l'identité : c'est la question qu'on se pose avant
+            de composer le numéro, pas après avoir raccroché. Chaque cible a
+            sa trame d'appel — accroche, punch lines, objections propres — et
+            renseigner la cible, c'est enregistrer avec quelle trame le contact
+            a été mené. Un lead sans cible est un appel dont on ignore ce qui
+            a été dit. */}
+        <Section title="Cible commerciale *">
+          <div className="grid gap-2">
+            {CIBLES_COMMERCIALES.map((c) => {
+              const choisie = cible === c.id;
+              return (
+                <label
+                  key={c.id}
+                  className={cn(
+                    "flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2.5 transition-colors",
+                    choisie
+                      ? "border-[#7469F4]/60 bg-[#7469F4]/10"
+                      : "border-white/10 bg-white/[0.02] hover:border-white/25",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="cible_commerciale"
+                    value={c.id}
+                    checked={choisie}
+                    onChange={() => setCible(c.id)}
+                    required
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-[#7469F4]"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold", c.badge)}>
+                        {c.numero}
+                      </span>
+                      <span className="text-sm text-white/80">{c.label}</span>
+                    </span>
+
+                    {/* Les codes NAF ne sont pas décoratifs : ce sont eux qui
+                        relient le lead aux fichiers de prospection. Les
+                        afficher sous la cible évite d'avoir à les chercher
+                        ailleurs pendant l'appel. */}
+                    <span className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
+                      {c.naf.map((n) => (
+                        <span key={n.code} className="text-[11px] text-white/30" title={n.libelle}>
+                          <span className="font-mono text-white/45">{n.code}</span> {n.libelle}
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          <p className="mt-2 text-[11px] text-white/25">
+            Codes NAF rév. 2 — ceux que portent les entreprises jusqu&apos;au passage à la
+            NAF 2025, le 1<sup>er</sup> janvier 2027. Ils orientent, ils ne tranchent pas :
+            un camping exploité en société civile peut porter un code immobilier.
+          </p>
+        </Section>
+
         {/* ── 1. Identité ─────────────────────────────────────────────── */}
         <Section title="Identité">
           <div className="grid grid-cols-2 gap-4">
