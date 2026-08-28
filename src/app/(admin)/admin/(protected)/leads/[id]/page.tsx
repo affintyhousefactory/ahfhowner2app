@@ -9,6 +9,7 @@
 
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { TelephoneLien } from "@/shared/components/admin/TelephoneLien";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import AssignMandataire from "@/components/admin/AssignMandataire";
 import LeadMapClient from "@/components/admin/LeadMapClient";
@@ -19,6 +20,7 @@ import LeadClientDocuments from "@/components/admin/LeadClientDocuments";
 import LeadStatutCommercial from "@/components/admin/LeadStatutCommercial";
 import LeadConfiguration from "@/components/admin/LeadConfiguration";
 import LeadAppels from "@/components/admin/LeadAppels";
+import { LeadOnglets } from "@/components/admin/LeadOnglets";
 import { FEATURES } from "@/lib/features";
 import { etatSuivi, dateHeureFr } from "@/lib/crm";
 import { estAdmin } from "@/shared/lib/supabase-server";
@@ -49,7 +51,17 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
   // ADR-028 — les lectures `mandataires` / `fiches_terrain` n'alimentent que
   // les sous-sections d'affectation, masquées quand le domaine est suspendu :
   // on ne les interroge pas inutilement.
-  const [{ data: lead }, { data: mandatairesActifs }, { data: fichesActives }] = await Promise.all([
+  /* Les compteurs d'onglets sont lus ici, pas dans les composants : ils doivent
+     être connus **avant** l'ouverture de l'onglet — c'est tout leur intérêt,
+     éviter d'aller vérifier qu'il n'y a rien. `head: true` ne rapatrie que le
+     nombre, pas les lignes. */
+  const [
+    { data: lead },
+    { data: mandatairesActifs },
+    { data: fichesActives },
+    { count: nbAppels },
+    { count: nbPieces },
+  ] = await Promise.all([
     supabase.from("leads").select("*").eq("id", id).single(),
     FEATURES.mandataire
       ? supabase.from("mandataires").select("id, prenom, nom, zone_activite, lat, lon, rayon_intervention").eq("statut", "actif")
@@ -57,6 +69,8 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
     FEATURES.mandataire
       ? supabase.from("fiches_terrain").select("mandataire_id, statut").in("statut", ["disponible", "compromis"])
       : Promise.resolve({ data: [] as { mandataire_id: string; statut: string }[] }),
+    supabase.from("lead_appels").select("id", { count: "exact", head: true }).eq("lead_id", id),
+    supabase.from("lead_client_documents").select("id", { count: "exact", head: true }).eq("lead_id", id),
   ]);
 
   if (!lead) notFound();
@@ -82,7 +96,7 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
     <div className="p-8">
       {/* ── En-tête — identification du projet ─────────────────────────── */}
       <div className="mb-6">
-        <a href="/admin/leads" className="text-sm text-white/30 hover:text-white">← Leads</a>
+        <Link href="/admin/leads" className="text-sm text-white/30 hover:text-white">← Leads</Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-semibold text-white">{identifier}</h1>
           <LeadStatutCommercial
@@ -115,42 +129,36 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* ── Colonne 1 — projet, configuration, appels, GED Client ─────── */}
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-            <LeadEditIdentite lead={lead} />
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-            <LeadConfiguration lead={lead} />
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-            <LeadAppels
-              leadId={id}
-              tel={lead.tel ?? null}
-              responsable={lead.responsable ?? null}
-              statutCommercialActuel={lead.statut_commercial ?? null}
-            />
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-            <div className="mb-4">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
-                GED Client
-              </h2>
-              <p className="mt-1 text-xs text-white/25">
-                Pièces du dossier client — celles que nous déposons et celles que le client dépose.
-              </p>
-            </div>
-            <LeadClientDocuments leadId={id} />
-          </div>
-        </div>
-
-        {/* ── Colonne 2 — zone de recherche terrain (inchangée) ─────────── */}
-        <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-          <LeadEditLocalisation lead={lead} />
+      {/* Compartiments, à l'image de `/leads/nouveau` — mais des **onglets**, pas
+          des étapes : on ne progresse pas dans une fiche existante, on y revient.
+          Le journal d'appels cesse d'être en bas d'une colonne : c'est l'écran
+          qu'on ouvre le plus souvent, quand on rappelle quelqu'un. */}
+      <LeadOnglets
+        onglets={[
+          {
+            id: "contact",
+            titre: "Contact & société",
+            contenu: (
+              <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+                <LeadEditIdentite lead={lead} />
+              </div>
+            ),
+          },
+          {
+            id: "configuration",
+            titre: "Configuration",
+            contenu: (
+              <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+                <LeadConfiguration lead={lead} />
+              </div>
+            ),
+          },
+          {
+            id: "terrain",
+            titre: "Terrain",
+            contenu: (
+              <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+<LeadEditLocalisation lead={lead} />
 
           {lead.plu_lat && lead.plu_lon && (
             <LeadMapClient
@@ -184,8 +192,47 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
               </dl>
             </>
           )}
+              </div>
+            ),
+          },
+          {
+            id: "appels",
+            titre: "Appels",
+            compte: nbAppels ?? 0,
+            contenu: (
+              <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+                <LeadAppels
+                  leadId={id}
+                  tel={lead.tel ?? null}
+                  responsable={lead.responsable ?? null}
+                  statutCommercialActuel={lead.statut_commercial ?? null}
+                />
+              </div>
+            ),
+          },
+          {
+            id: "documents",
+            titre: "Documents",
+            compte: nbPieces ?? 0,
+            contenu: (
+              <div className="space-y-6">
+                <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+                  <div className="mb-4">
+                    <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                      GED Client
+                    </h2>
+                    <p className="mt-1 text-xs text-white/25">
+                      Pièces du dossier client — celles que nous déposons et celles que le client dépose.
+                    </p>
+                  </div>
+                  <LeadClientDocuments leadId={id} />
+                </div>
 
-          {/* Sous-sections Affectation + Dossier mandataire — masquées tant que
+                {/* Affectation et dossier mandataire — masqués tant que le
+                    domaine est suspendu (ADR-028). La GED Client ci-dessus reste
+                    active : elle ne dépend pas du mandataire. */}
+                <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+{/* Sous-sections Affectation + Dossier mandataire — masquées tant que
               le domaine mandataire est suspendu (ADR-028). La GED Client
               ci-dessus reste active : elle ne dépend pas du mandataire. */}
           {FEATURES.mandataire && (
@@ -238,8 +285,12 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
           </div>
           </>
           )}
-        </div>
-      </div>
+                </div>
+              </div>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }
