@@ -94,3 +94,45 @@ Les sous-sections « Affectation mandataire » (matching géo 200 km) et « Doss
 `affecter/recap`, `affecter/resend` et `documents`. **La GED Client est conservée** : elle ne
 dépend pas du mandataire. Le reliquat « placeholders Brevo `LEAD_DESCRIPTION` / `LEAD_PRODUIT`
 sur le template 15 » devient sans objet tant que la suspension tient.
+
+## Amendement du 2026-08-28 — l'autocomplétion Google n'a jamais fonctionné en production
+
+Constat du 2026-08-28, en ouvrant la nouvelle adresse de société sur `howner.fr` :
+
+```
+<gmp-place-autocomplete>: Requests from referer https://howner.fr/ are blocked.
+POST places.googleapis.com/…/AutocompletePlaces → 403
+```
+
+Vérifié en appelant l'API avec trois référents :
+
+| Référent | Réponse |
+|---|---|
+| `https://howner.fr/` | **403 — bloqué** |
+| `https://ahfhowner2app.vercel.app/` | 200 |
+| `http://localhost:3000/` | **403 — bloqué** |
+
+La clé `NEXT_PUBLIC_GOOGLE_PLACES_API_KEY` est restreinte **par référent HTTP**
+dans Google Cloud, et la liste autorise `*.vercel.app` sans `howner.fr`. Rien à
+corriger dans le code : la restriction est côté Google.
+
+⚠ **Le défaut est ancien, pas nouveau.** L'autocomplétion sert l'adresse du
+client depuis cet ADR, en juillet. Elle n'a donc vraisemblablement **jamais**
+fonctionné en production — elle échoue en silence, et les champs manuels prennent
+le relais sans rien dire. Elle marchait en Preview, ce qui a suffi à la croire
+opérante.
+
+**Leçon**, à ranger avec les précédentes : une restriction par référent fait
+qu'un service se comporte différemment en Preview et en production. Vérifier une
+intégration tierce sur une Preview ne prouve rien pour le domaine réel — c'est le
+pendant de la leçon du 2026-08-25 sur le SSO Vercel, par l'autre bout.
+
+**Correction attendue** (Google Cloud Console → Identifiants → clé Places →
+Référents HTTP) : ajouter `https://howner.fr/*` et `https://www.howner.fr/*`, en
+conservant `*.vercel.app/*` pour les Preview. Effet immédiat, sans
+redéploiement — la restriction est évaluée à chaque appel.
+
+**Ce qui fonctionne malgré tout** : les champs adresse, code postal et ville
+restent saisissables au clavier. Seule l'assistance est morte. `AdresseAutocomplete`
+(2026-08-27) a été écrit sur ce principe — sans clé, sans réseau ou sans
+autorisation, la saisie demeure.

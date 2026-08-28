@@ -116,6 +116,17 @@ Aucune config supplémentaire n'est nécessaire : `dev` est une branche Preview 
 > ⚠ La version publiée est destinée à l'écran (images JPEG, ~1755 px de large, soit
 > ~150 dpi en A4). **Garder l'original pour l'imprimeur** — il est sur le Drive AHF.
 
+> **`NEXT_PUBLIC_GOOGLE_PLACES_API_KEY`** — ⚠ **restreinte par référent HTTP** dans Google
+> Cloud. Au 2026-08-28, la liste autorise `*.vercel.app` **mais pas `howner.fr`** : l'autocomplétion
+> d'adresse répond 403 en production depuis sa mise en ligne (juillet), et échoue en silence — les
+> champs restent saisissables à la main, donc personne ne l'avait vu.
+>
+> À corriger dans Google Cloud Console → Identifiants → clé Places → Référents HTTP :
+> ajouter `https://howner.fr/*` et `https://www.howner.fr/*`, garder `*.vercel.app/*`.
+>
+> ⚠ **Une intégration tierce vérifiée sur une Preview ne prouve rien pour le domaine réel** quand
+> elle filtre par référent.
+
 > Stripe retiré du MVP (ADR-008 amendé 2026-06-27) — ne pas configurer `STRIPE_*`.
 
 ---

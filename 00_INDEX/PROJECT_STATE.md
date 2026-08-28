@@ -120,6 +120,19 @@ BREVO_LIST_PROSPECTS=8
 BREVO_LIST_NEWSLETTER=5            # posée le 2026-08-26 ; repli codé « 5 »
 BREVO_LIST_MANDATAIRES=7           # domaine suspendu (ADR-028)
 
+# Templates Brevo — ⚠ AUCUN repli codé : un identifiant deviné enverrait le mauvais
+# email à un client. Les routes renvoient un 500 nommant la variable manquante.
+BREVO_TEMPLATE_MULTICFG=17         # ⛔ À POSER — présentation + plaquette quand rien n'est
+                                   #    chiffrable (multi_configuration). Sans elle, la
+                                   #    fonctionnalité est livrée mais inerte en production.
+
+# Google Places — ⚠ restreinte par référent HTTP dans Google Cloud.
+# Au 2026-08-28 : `*.vercel.app` autorisé, `howner.fr` BLOQUÉ (403 vérifié).
+# L'autocomplétion d'adresse est donc morte en production depuis juillet — elle échoue
+# en silence, la saisie manuelle prend le relais. Ouvrir `https://howner.fr/*` et
+# `https://www.howner.fr/*` dans la console. Voir ADR-027 § Amendement du 2026-08-28.
+NEXT_PUBLIC_GOOGLE_PLACES_API_KEY= # serveur de clé Google, restrictions à corriger
+
 # Plaquette commerciale (ADR-026 § Amendement 2026-08-26)
 # Repli codé : public/documents/plaquette-howner-2026.pdf (1,7 Mo). La variable ne sert
 # qu'à pointer ailleurs. Vide = la ligne disparaît du récapitulatif (jamais de lien mort).
@@ -174,7 +187,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 024 | Bandeau consentement cookies + Cloudflare Turnstile | Accepté | ✅ |
 | 025 | Page `/rechercheterrain` — recherche personnalisée de parcelles | Accepté — **⏸ suspendue (028)** | ✅ |
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** ; **amendé le 2026-08-26** : deux listes (Prospects = CRM / Newsletter = consentement), `{{ unsubscribe_link }}` était un tag inexistant, plaquette jointe par lien ; ⚠ **double opt-in toujours non câblé** | ✅ |
-| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** | ✅ |
+| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** ; **amendé le 2026-08-28** : ⚠ l'autocomplétion Google Places n'a **jamais** fonctionné en production — clé restreinte par référent, `howner.fr` non autorisé | 🟠 |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
 | 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** | ✅ |
 | 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — livré** ; **amendé les 2026-08-02 puis 2026-08-20/21** (bardage renommé, ambiance intérieure, 9 sections, contrôles de saisie, socle du prix) ; bascule sur `/configurer` conditionnée à 031 | 🟠 |
@@ -182,7 +195,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |
 | 033 | Back-office des grilles tarifaires (`loadConfig()` → base) | Réservé — à écrire | ❓ |
 | 034 | Espace client (dépôt de pièces) | Réservé — à écrire ; GED prête côté CRM (`origine = 'client'`) | ❓ |
-| 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré et EN PRODUCTION** ; **amendé le 2026-08-04** (« Paiement réservé », blocage du numéro, Pennylane) puis **le 2026-08-27** : cible commerciale obligatoire (5 cibles + NAF rév. 2), statut « Erreur / Test / Doublon » hors Kanban, transport calculé depuis le PLU, relecture obligatoire du récapitulatif | ✅ |
+| 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré et EN PRODUCTION** ; **amendé le 2026-08-04** (« Paiement réservé », blocage du numéro, Pennylane) puis **le 2026-08-27** (cible commerciale + NAF rév. 2, statut « Erreur / Test / Doublon » hors Kanban, transport calculé depuis le PLU, relecture du récapitulatif) puis **le 2026-08-28** : recherche d'identité avant saisie, email facultatif, identité société, issue du dernier appel sur le lead, Multi-Configuration élargie aux demandes hors grille | ✅ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
 | 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — TERMINÉ : lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
@@ -223,6 +236,42 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-27/28 (CRM — l'écran d'appel devient un outil de phoning ; un défaut Google vieux d'un mois mis au jour)**
+
+**`main` = `c7a2b14d`.** Quatre PR fusionnées, cinq migrations passées en Preview **et** en production, chacune vérifiée par requête puis par écritures réelles annulées.
+
+| PR | Objet | Migrations |
+|---|---|---|
+| #105 | Issue du dernier appel sur le lead · doc du process commercial · consolidation | `derniere_issue_appel`, `multi_configuration` ✅ |
+| #106 | Recherche d'identité avant saisie | — |
+| #107 | Email facultatif · identité société · Multi-Configuration élargie | `lead_email_facultatif`, `lead_societe`, `multi_configuration_elargi` ✅ |
+| #102 | Trois migrations appliquées mais jamais versionnées | *(déjà appliquées)* |
+
+**L'écran de pré-qualification, avant et après.** Il était un formulaire de saisie ; c'est un outil d'appel : on cherche si le contact est connu, on choisit la cible commerciale, on note ce qui n'est pas chiffrable, le transport se calcule seul, l'issue de l'appel remonte sur le lead, et le récapitulatif se relit avant de partir.
+
+**Quatre décisions de Richard** — détail dans ADR-035 § Amendement du 2026-08-28 :
+- **Chercher avant de saisir.** La table comptait **6 leads pour 5 adresses** : le doublon n'était pas une hypothèse. Une fiche existante donne un lien vers elle et **ne pré-remplit rien**.
+- **L'email devient facultatif** — au téléphone, tout le monde ne donne pas son adresse. Mais une adresse **mal formée** est refusée, et signalée à la saisie.
+- **Identité de la société** : raison sociale, SIREN, site web, adresse — tous facultatifs. Distincte de l'adresse du client : le siège d'un camping et le domicile de son gérant ne sont pas au même endroit.
+- **« Multi-Configuration » couvre deux situations** : plusieurs modèles en balance, **ou** options et services personnalisés assujettis à devis complémentaires.
+
+**⚠ Le défaut le plus instructif de la session : l'autocomplétion Google n'a jamais fonctionné en production.** La clé est restreinte par référent HTTP et la liste autorise `*.vercel.app` sans `howner.fr` — 403 vérifié sur trois référents. Elle sert l'adresse client **depuis juillet** (ADR-027) et échoue en silence, les champs manuels prenant le relais. Elle marchait en Preview, ce qui a suffi à la croire opérante.
+
+> **Leçon, à ranger avec les précédentes** : une restriction par référent fait qu'un service se comporte différemment en Preview et en production. Vérifier une intégration tierce sur une Preview ne prouve rien pour le domaine réel — c'est le pendant de la leçon du 2026-08-25 sur le SSO Vercel, par l'autre bout.
+
+**Deux fautes de méthode commises et rattrapées dans la session**, notées parce qu'elles se reproduiront :
+1. J'ai d'abord corrigé un commentaire **dans une migration déjà appliquée**. Le dépôt aurait menti sur ce qui a tourné — le défaut même que la PR #102 rattrape. Fichier restauré, correction portée par une migration de plus.
+2. J'ai diagnostiqué « cache navigateur » sur l'absence apparente des champs société. C'était faux : la section s'affichait, c'est Google qui refusait. **Sonder plutôt que supposer**, y compris quand la supposition est plausible.
+
+**⚠ Points ouverts au 2026-08-28 :**
+- **Clé Google Places** — référents `howner.fr` à ouvrir dans Google Cloud Console. Sans cela, l'autocomplétion reste morte en production (saisie manuelle intacte).
+- **`BREVO_TEMPLATE_MULTICFG=17` non posée sur Vercel** — la Multi-Configuration est livrée mais **inerte en production** : l'aperçu et l'envoi renvoient un 500 nommant la variable. C'est le seul point qui laisse une fonctionnalité hors service.
+- **Aucun récapitulatif réel n'a encore été envoyé** — dernier maillon non éprouvé de la chaîne emails.
+- **Temps 2 du CRM (retour de rendez-vous) inexistant** : aucune des cinq issues d'appel ne décrit un rendez-vous. C'est le chaînon qui manque avant la qualification des services amont (`docs/CRM_PROCESS_COMMERCIAL.md`).
+- **Coordonnées exactes de l'atelier** toujours attendues.
+
+**Repo et bases enfin alignés.** 36 fichiers de migration ; plus aucun objet de la base n'est absent du dépôt. La base porte en plus trois **ré-applications** de fin juin (`mandataires_documents_bucket`, `mandataire_suspension_raison`, `20260630_mandataires_invitation` joué deux fois) — sans conséquence, ces migrations étant idempotentes, mais c'est la trace de la période où elles se passaient à la main.
 
 **2026-08-26/27 (CRM — l'écran d'appel devient utilisable ; emails — consentement et pied de page réparés)** — Quatre mises en production, quatre PR fusionnées, deux migrations passées en prod et vérifiées par requête **et** par essais fonctionnels annulés.
 
