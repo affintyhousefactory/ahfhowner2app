@@ -7,10 +7,12 @@ import {
   CIBLES_COMMERCIALES,
   CONSEILLERS,
   ISSUES_APPEL,
+  SOURCINGS,
   cibleCommerciale,
   dateHeureFr,
   etatSuivi,
   issueAppel,
+  sourcing,
 } from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 import { AdresseAutocomplete, type ValeursAdresse } from "@/components/admin/AdresseAutocomplete";
@@ -56,6 +58,7 @@ interface LeadIdentite {
   cible_commerciale?: string | null;
   derniere_issue?: string | null;
   multi_configuration?: boolean | null;
+  sourcing?: string | null;
   raison_sociale?: string | null;
   siren?: string | null;
   site_web?: string | null;
@@ -94,6 +97,7 @@ function etatInitial(lead: LeadIdentite) {
     description_projet: lead.description_projet ?? "",
     cible_commerciale: lead.cible_commerciale ?? "",
     derniere_issue: lead.derniere_issue ?? "",
+    sourcing: lead.sourcing ?? "",
     raison_sociale: lead.raison_sociale ?? "",
     siren: lead.siren ?? "",
     site_web: lead.site_web ?? "",
@@ -210,6 +214,7 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
           ville_societe: form.ville_societe || null,
           cible_commerciale: form.cible_commerciale || null,
           derniere_issue: form.derniere_issue || null,
+          sourcing: form.sourcing || null,
           total_estime: form.total_estime ? Number(form.total_estime) : null,
           responsable: form.responsable || null,
           // Horodate la prise en charge, et seulement quand elle change : sinon
@@ -274,6 +279,7 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
             ["Site web", lead.site_web],
             ["Adresse société", [lead.adresse_societe, lead.cp_societe, lead.ville_societe].filter(Boolean).join(" · ") || null],
             ["Cible commerciale", cibleCommerciale(lead.cible_commerciale)?.label ?? null],
+            ["Sourcing", sourcing(lead.sourcing)?.label ?? null],
             /* Affiché seulement quand c'est vrai : « non » n'apprend rien, et la
                liste ne rend que les valeurs non nulles. */
             ["Configuration", lead.multi_configuration ? "Multi-Configuration — à arbitrer" : null],
@@ -580,6 +586,16 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
               <option value="">— Non renseignée</option>
               {CIBLES_COMMERCIALES.map((c) => (
                 <option key={c.id} value={c.id}>{c.numero}. {c.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelCls}>Sourcing / Origine</label>
+            <select className={inputCls} value={form.sourcing} onChange={set("sourcing")}>
+              <option value="">— Non renseignée</option>
+              {SOURCINGS.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
               ))}
             </select>
           </div>

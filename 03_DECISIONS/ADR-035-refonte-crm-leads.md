@@ -314,6 +314,99 @@ reçoit deux fois le même devis. La date est écrite **après** l'envoi et son 
 ne le remet pas en cause (`horodate: false`) — une trace manquée ne doit jamais
 annuler un envoi réussi.
 
+## Amendement du 2026-08-28 — l'écran d'appel, suite : chercher, ne pas exiger, ne pas chiffrer
+
+Quatre décisions de Richard, toutes livrées en production le 2026-08-27.
+
+### 1. Chercher avant de saisir
+
+Un champ en tête de la section Identité : trois lettres suffisent, sur nom,
+prénom, email ou téléphone. **Placé avant la saisie, pas après** — une fiche
+existante doit se voir pendant que le conseiller peut encore changer de chemin.
+
+Le doublon n'était pas une hypothèse : la table comptait **6 leads pour 5
+adresses distinctes**. Le résultat se traite différemment selon sa source — un
+lead donne un lien vers sa fiche et **ne pré-remplit rien**, un contact donne un
+bouton « Reprendre l'identité ».
+
+⚠ **Brevo n'a pas de recherche.** Vérifié le 2026-08-27 : le paramètre `search`
+de l'API v3 est **ignoré** — il rend un contact non filtré — et
+`GET /v3/contacts/{email}` est le seul accès. Brevo ne porte d'ailleurs que
+`PRENOM`, `NOM`, `SMS` : strictement moins que la base. Il n'est donc interrogé
+qu'en dernier recours, sur une adresse complète.
+
+⚠ **La recherche par téléphone demande deux motifs.** Les séparateurs d'abord
+(`0612` → `%0%6%1%2%`, qui retrouve « 06 12 34 », « 06.12.34 » et la forme
+collée). L'indicatif ensuite : les formulaires publics passent par
+`react-phone-number-input`, qui produit du E.164 — **7 numéros sur 13** en base
+sont stockés `+336…`, sans zéro initial. Sans la seconde variante, la recherche
+en raterait plus de la moitié.
+
+### 2. L'email devient facultatif
+
+Au téléphone, tout le monde ne donne pas son adresse. L'exiger obligeait à en
+inventer une — qui finit par recevoir un devis — ou à renoncer à la fiche,
+c'est-à-dire à perdre l'appel.
+
+⚠ **Le blocage n'était pas dans l'écran.** `leads.email` était `not null` depuis
+`20260622_leads.sql` : retirer le `required` du formulaire aurait remplacé un
+refus clair par une erreur serveur. Quatre couches ont dû bouger.
+
+Ce que l'absence coûte est dit à l'écran : aucun récapitulatif ne peut partir, et
+le lead n'entre dans aucune liste Brevo. Deux avertissements, **aucun blocage** —
+« ni email ni téléphone » et « téléphone seul ».
+
+Les **formulaires publics ne sont pas ouverts** : `/api/contact` et le
+configurateur valident l'adresse côté serveur, indépendamment de la contrainte de
+base. Là-bas, l'email reste le seul canal de retour.
+
+En revanche, une adresse **mal formée** est désormais refusée, et signalée **à la
+saisie** : corriger pendant l'appel coûte une seconde, s'en apercevoir au retour
+Brevo coûte le prospect.
+
+⚠ Le motif d'email était écrit **trois fois** dans le dépôt, avec trois
+définitions différentes. `src/shared/lib/validation.ts` devient la source unique —
+même dérive qu'ADR-029 corrige pour le vocabulaire.
+
+### 3. Identité de la société
+
+Quatre des cinq cibles sont des personnes morales ; la raison sociale se
+retrouvait dans les notes d'appel, d'où l'on ne peut ni trier ni rapprocher des
+fichiers de prospection. Quatre champs, **tous facultatifs** : raison sociale,
+SIREN, site web, adresse de la société avec autocomplétion.
+
+⚠ **L'adresse de la société est distincte de celle du client.** Le siège d'un
+camping et le domicile de son gérant ne sont pas au même endroit, et c'est le
+premier qui reçoit le studio.
+
+⚠ **SIREN : avertir, jamais refuser.** La clé de Luhn est vérifiée et signalée,
+pas imposée — La Poste porte le 356 000 000, qui ne la respecte pas, et l'INSEE
+l'admet. La base ne refuse que ce qui n'est pas un SIREN (`^[0-9]{9}$`). Stocké
+sans séparateur : deux écritures d'un même numéro ne se rapprocheraient pas d'un
+fichier de prospection.
+
+### 4. L'issue du dernier appel remonte sur le lead
+
+Les cinq issues vivaient dans `lead_appels`, une ligne par appel. **Une colonne,
+pas un statut de plus** : `statut_commercial` dit où en est l'affaire, l'issue dit
+comment s'est terminé le dernier échange. Deux axes indépendants — un lead peut
+être « En discussion » et avoir eu un répondeur ce matin ; les fondre ferait
+perdre l'un des deux, et « Refus » ferait doublon avec « Non retenu ».
+
+Le trigger existant est **étendu, pas doublé**. L'issue retenue est celle du
+dernier appel **qui en porte une** : le formulaire accepte une note sans issue, et
+un commentaire ajouté après coup ne doit pas effacer le « Répondeur » de la veille.
+
+### 5. « Multi-Configuration » couvre deux situations
+
+Élargi le jour même : le prospect hésite entre plusieurs modèles, **ou** il
+demande des options et services personnalisés **assujettis à devis préalables
+complémentaires**. Deux causes, une conséquence — rien n'est chiffrable — et c'est
+la conséquence qui décide de l'email envoyé.
+
+La colonne ne bouge pas : le drapeau disait déjà la bonne chose. La cause se lit
+dans les notes d'appel.
+
 ## Faisabilité
 
 - **Verdict** : ✅ Élevée. Aucune API externe, aucune clé, aucun service nouveau. Une migration additive.

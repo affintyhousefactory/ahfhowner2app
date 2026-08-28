@@ -42,12 +42,37 @@ se disent.
 **0 · Cible commerciale — obligatoire.** En tête, avant l'identité : c'est la question qu'on se pose
 avant de composer le numéro, pas après avoir raccroché. Voir § 3.
 
-**1 · Identité** — prénom, nom, email, téléphone.
+**1 · Identité** — prénom, nom, email, téléphone. En tête, une **recherche** : trois lettres sur
+nom, prénom, email ou téléphone disent si le contact est déjà connu. Une fiche existante donne un
+lien vers elle et **ne pré-remplit rien** — en créer une seconde, c'est deux conseillers qui
+appellent et deux devis qui circulent. Un contact du site donne « Reprendre l'identité ».
+
+**L'email est facultatif** : au téléphone, tout le monde ne donne pas son adresse. Mais une adresse
+**mal formée** est refusée, signalée à la saisie. Sans adresse, aucun récapitulatif ne peut partir —
+l'écran le dit.
+
+**1 bis · Société (facultatif)** — raison sociale, SIREN, site web, et l'adresse de la société avec
+autocomplétion. ⚠ **Distincte de l'adresse du client** : le siège d'un camping et le domicile de son
+gérant ne sont pas au même endroit, et c'est le premier qui reçoit le studio. Le SIREN est contrôlé
+par la clé de Luhn, qui **avertit sans refuser** — La Poste porte le 356 000 000, exception admise
+par l'INSEE.
+
+⚠ **L'autocomplétion d'adresse ne fonctionne pas en production** au 2026-08-28 : la clé Google est
+restreinte par référent et `howner.fr` n'y figure pas. Les trois champs restent saisissables à la
+main. Voir ADR-027 § Amendement du 2026-08-28.
 
 **2 · Suivi** — conseiller responsable, statut commercial, prochain rappel.
 
 **3 · Configuration** — usage, quantité, modèle, bardage, terrasse, options. **Les grilles viennent
 toutes de `loadConfig()`** : aucun prix n'est écrit dans l'écran (guardrail ADR-030).
+
+Le sélecteur de modèle porte un **troisième choix, « Multi-Configuration »**, pour deux situations :
+le prospect hésite entre plusieurs modèles, **ou** il demande des options et services personnalisés
+*assujettis à devis préalables complémentaires*. Deux causes, une conséquence — rien n'est
+chiffrable — et c'est elle qui décide de l'email : la présentation accompagnée de la plaquette
+(`BREVO_TEMPLATE_MULTICFG`) au lieu du récapitulatif chiffré. Toute la configuration chiffrée
+disparaît alors de l'écran ; les modèles évoqués et les options demandées se notent dans les notes
+d'appel, **c'est de là que partira le devis complémentaire**.
 
 **4 · Terrain** — trois modes : aucun, « terrain identifié » (analyse PLU), ou pack terrain (masqué,
 domaine suspendu ADR-028).

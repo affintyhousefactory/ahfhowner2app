@@ -20,6 +20,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/shared/lib/cn";
+import { TelephoneLien } from "@/shared/components/admin/TelephoneLien";
 
 type Correspondance = {
   origine: "lead" | "contact" | "brevo";
@@ -129,7 +130,10 @@ export function RechercheIdentite({
                     {[c.prenom, c.nom].filter(Boolean).join(" ") || "(sans nom)"}
                   </p>
                   <p className="truncate text-[11px] text-white/35">
-                    {[c.email, c.tel].filter(Boolean).join(" · ") || "—"}
+                    {c.email}
+                    {c.email && c.tel ? " · " : ""}
+                    {c.tel && <TelephoneLien tel={c.tel} className="text-white/45" />}
+                    {!c.email && !c.tel ? "—" : ""}
                   </p>
                   <p className="mt-0.5 flex flex-wrap items-center gap-2">
                     <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-medium", o.badge)}>
