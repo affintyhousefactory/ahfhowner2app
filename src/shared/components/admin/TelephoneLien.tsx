@@ -12,6 +12,18 @@
  * forme collée. Les deux formes coexistent donc, et c'est voulu — normaliser
  * l'affichage aurait rendu les numéros plus durs à dicter à voix haute.
  *
+ * ⚠ **Aucun gestionnaire d'événement ici, et ce n'est pas un détail de style.**
+ * Ce composant est rendu depuis `leads/[id]/page.tsx`, qui est un **Server
+ * Component** : un `onClick` y fait échouer le rendu serveur entier. La première
+ * version en portait un — un `stopPropagation` par précaution — et la fiche
+ * tombait en « This page couldn't load » dès qu'un lead avait un numéro.
+ *
+ * La précaution était inutile : la ligne du tableau n'est pas cliquable, seul le
+ * « Voir → » de sa dernière cellule l'est. Le jour où un numéro devra vivre dans
+ * la carte du Kanban — dont le contenu est enveloppé d'un `<Link>` —, ce ne sera
+ * pas un `stopPropagation` qu'il faudra, mais sortir le lien du `<Link>` : un
+ * `<a>` dans un `<a>` est du HTML invalide.
+ *
  * ⚠ On ne reformate pas le numéro stocké. La base mélange trois écritures
  * (E.164 majoritaire, national collé, national espacé) et les réécrire à
  * l'affichage masquerait cette hétérogénéité au lieu de la traiter — c'est un
@@ -38,9 +50,6 @@ export function TelephoneLien({
   return (
     <a
       href={`tel:${numero}`}
-      /* Un numéro cliquable dans un tableau dont la ligne entière est un lien
-         doit rester atteignable pour lui-même. */
-      onClick={(e) => e.stopPropagation()}
       title={`Appeler ${brut}`}
       className={`underline decoration-dotted underline-offset-2 transition-colors hover:text-[#7469F4] ${className}`}
     >
