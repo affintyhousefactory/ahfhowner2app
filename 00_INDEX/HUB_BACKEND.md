@@ -14,7 +14,10 @@ Point d'entrée pour : Phase 4 — Supabase, Stripe, outil terrain, leads, email
 | `03_DECISIONS/ADR-007..014,017` | Décisions Phase 4 |
 | `src/components/site/Reservation.tsx` | Réservation/acompte/waitlist (à brancher) |
 | `src/components/site/LandTool.tsx` | Terrain : BAN réel, zonage à brancher |
-| `src/lib/crm.ts` | **Référentiels CRM** — 9 statuts, 5 cibles commerciales (+ codes NAF), conseillers. Jamais redéclarés dans un écran |
+| `src/lib/crm.ts` | **Référentiels CRM** — 9 statuts, 5 cibles (+ codes NAF), 8 sourcings, 5 issues d'appel, conseillers. Jamais redéclarés dans un écran |
+| `src/shared/lib/validation.ts` | **Source unique** des contrôles de saisie — email, SIREN (Luhn avertit sans refuser), site web |
+| `src/components/admin/LeadOnglets.tsx` | Compartiments de la fiche. ⚠ Montage à la première visite : Leaflet en `display:none` se dimensionne à zéro |
+| `src/shared/components/admin/TelephoneLien.tsx` | Numéro cliquable. ⚠ **Aucun gestionnaire d'événement** — rendu depuis des Server Components |
 | `src/shared/lib/recap-client.ts` | **Source unique** des paramètres du récapitulatif client — sert l'aperçu ET l'envoi |
 | `src/shared/lib/brevo-render.ts` | Rendu local d'un template Brevo (aperçu seulement, jamais l'envoi) |
 | `src/shared/lib/email.ts` | Brevo : envoi de template, ajout de contact, DOI (⚠ `addBrevoContactDOI` non appelé) |

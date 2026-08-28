@@ -3,63 +3,71 @@
 > Mémoire courte. Historique complet et backlog → `00_INDEX/PROJECT_STATE.md` § « Dernier point ».
 > Règle : 300–1200 tokens.
 
-## Décisions — 2026-08-27/28 (l'écran d'appel devient un outil de phoning)
+## Décisions — 2026-08-28 (l'écran d'appel prend sa forme)
 
-**`main` = `c7a2b14d`.** Quatre PR en production (#102, #105, #106, #107), **cinq migrations**
-passées en Preview puis en prod, chacune vérifiée par requête *et* par écritures réelles annulées.
+**`main` = `62250a24`.** Trois PR en production (#108, #109, #110), une migration (`lead_sourcing`).
 
-- **Chercher avant de saisir** — trois lettres sur nom, prénom, email ou téléphone, en tête de
-  l'Identité. La table comptait **6 leads pour 5 adresses** : le doublon n'était pas une hypothèse.
-  Une fiche existante donne un lien vers elle et **ne pré-remplit rien**.
-  ⚠ **Brevo n'a pas de recherche** (`search` ignoré) ; il ne porte que PRENOM/NOM/SMS, donc il
-  n'est interrogé qu'en dernier recours sur une adresse exacte.
-  ⚠ **Deux motifs pour le téléphone** : séparateurs *et* indicatif — **7 numéros sur 13** sont
-  stockés en E.164 (`+336…`), sans zéro initial.
-- **Email facultatif** — mais une adresse **mal formée** est refusée, signalée à la saisie. Le
-  blocage n'était pas dans l'écran : `leads.email` était `not null` depuis juin.
-  ⚠ Le motif d'email était écrit **trois fois** dans le dépôt → `shared/lib/validation.ts`.
-- **Identité société** — raison sociale, SIREN, site web, adresse. Tous facultatifs.
-  ⚠ Adresse **société ≠ client** : le siège d'un camping n'est pas le domicile de son gérant.
-  ⚠ SIREN : Luhn **avertit**, ne refuse pas (La Poste = 356000000, exception INSEE).
-- **Issue du dernier appel sur le lead** — colonne, **pas un statut de plus** : « où en est
-  l'affaire » et « comment s'est fini le dernier échange » sont deux axes. Trigger étendu, pas
-  doublé ; l'issue retenue est celle du dernier appel **qui en porte une**.
-- **Multi-Configuration élargie** — plusieurs modèles, **ou** options et services personnalisés
-  assujettis à devis préalables complémentaires. Deux causes, une conséquence.
+Le CRM tient désormais **le premier appel de bout en bout** : chercher si le contact est connu →
+cible et sourcing → ce qui n'est pas chiffrable → transport calculé seul → appel journalisé →
+récapitulatif relu avant envoi. Et la fiche se consulte par compartiments.
 
-## ⚠ Le défaut le plus instructif
-**L'autocomplétion Google n'a jamais fonctionné en production.** Clé restreinte par référent :
-`*.vercel.app` autorisé, **`howner.fr` bloqué** (403 vérifié sur trois référents). Elle sert
-l'adresse client **depuis juillet** et échoue en silence — les champs manuels prennent le relais.
-Elle marchait en Preview, ce qui a suffi à la croire opérante. → ADR-027 § Amendement.
+- **Étapes librement navigables** — Richard a retenu les étapes contre ma recommandation. Le risque
+  signalé (le prospect parle dans le désordre) est neutralisé : barre cliquable de bout en bout,
+  « Créer le lead » actif partout. **La structure guide, elle n'enferme pas.**
+- **Sourcing ≠ `source`** — le premier dit d'où vient le prospect (8 valeurs), le second comment la
+  ligne a été écrite (`admin`, `configurateur_v2`). C'est le sourcing qui dira si le phoning paie.
+- **Le premier appel entre au journal** — l'écran demandait un « prochain rappel » sans jamais
+  demander *quand* l'appel avait eu lieu (constat de Richard). Deux dates deviennent une : celle de
+  l'appel est **maintenant**. Son échec n'annule pas le lead (`appelJournalise`).
+- **Fiche en cinq onglets** avec compteurs — le journal d'appels cesse d'être en bas d'une colonne.
+- **Numéros cliquables** — premier pas vers Allo, **sans intégration** : le click-to-call passe par
+  l'extension Chrome. D'où les numéros visibles **dans la liste**, pas seulement sur la fiche : c'est
+  cette page que l'extension lit pour remplir le Power Dialer.
+- **Huit grilles étaient fixes** — sur 390 px, deux colonnes de champs sont des timbres-poste.
 
-## Deux fautes commises et rattrapées, notées car elles se reproduiront
-1. **Corriger un commentaire dans une migration déjà appliquée** — le dépôt aurait menti sur ce
-   qui a tourné, le défaut même que la PR #102 rattrape. Fichier restauré, correction portée par
-   une migration de plus.
-2. **Diagnostiquer « cache navigateur » sans sonder.** C'était faux : la section s'affichait,
-   c'est Google qui refusait. Sonder plutôt que supposer, même quand la supposition est plausible.
+## ⚠ Une régression introduite et fermée le jour même
+`TelephoneLien` portait un `onClick` **sans `"use client"`**, rendu depuis un **Server Component** :
+la fiche tombait en « This page couldn't load » — **mais seulement si le lead avait un numéro**.
+Signalée par Richard, corrigée (PR #109) en retirant le handler, inutile.
+
+> **Leçon** : un composant partagé destiné à des pages serveur ne porte **aucun** gestionnaire
+> d'événement. Vérifié ensuite sur tout le back-office — c'était le seul cas.
+
+> **Leçon évitée de justesse** : monter tous les onglets d'emblée aurait cassé la carte — Leaflet en
+> `display:none` se dimensionne à zéro. D'où le montage à la première visite, puis conservation.
+
+## ⚠ Une consolidation a voyagé dans une PR de fonctionnalité
+Le `/memory-sync` du matin est parti en production avec la **PR #108**, dont la description n'en
+disait rien : la branche de la fonctionnalité avait été créée depuis la branche docs. Sans
+conséquence, mais **repartir de `main` avant d'ouvrir une branche**.
+
+## Allo — étudié, rien engagé
+Click-to-call = **extension Chrome**, zéro code. L'API expose `/v2/api/crm/people` et
+`/v2/api/dialing-queues/current`, **aucun endpoint de déclenchement d'appel**. Trois inconnues avant
+de s'engager : scope d'écriture réel, événements de webhook, clé de rapprochement des identités.
+**Dépendance externe critique → ADR + alerte Albert avant tout code**, comme Pennylane (ADR-036).
 
 ## Leçons de méthode encore actives
-- **Un contrôle qui n'observe pas la sortie réelle ne contrôle rien** — sixième occurrence.
+- **Un contrôle qui n'observe pas la sortie réelle ne contrôle rien** — septième occurrence.
 - **Une intégration tierce vérifiée en Preview ne prouve rien pour le domaine réel** quand elle
-  filtre par référent. Pendant de la leçon du 2026-08-25 sur le SSO Vercel, par l'autre bout.
+  filtre par référent (clé Google Places).
 - **`success: true` d'une migration ne prouve rien** : vérifier par requête, puis tester la
   contrainte par des écritures réelles annulées.
-- **Une variable serveur se lit dans la fonction**, jamais en tête de fichier.
+- **Ne jamais réécrire une migration déjà appliquée** — le dépôt mentirait sur ce qui a tourné.
 - **Pas de test local.** Gate = `tsc` + `eslint` + `check:vocabulaire`, puis Preview.
 
 ## Prochaine action
-1. **Ouvrir `howner.fr/*` et `www.howner.fr/*`** dans les référents de la clé Google Places.
-2. **Poser `BREVO_TEMPLATE_MULTICFG=17`** sur les 3 scopes Vercel, puis redéployer — sans elle la
-   Multi-Configuration est livrée mais **inerte en production**.
-3. **Envoyer un récapitulatif réel** : dernier maillon non éprouvé de la chaîne emails.
-4. **Temps 2 du CRM** — aucune des cinq issues ne décrit un rendez-vous. C'est le chaînon qui
-   manque avant la qualification des services amont (`docs/CRM_PROCESS_COMMERCIAL.md`).
+1. **Poser `BREVO_TEMPLATE_MULTICFG=17`** sur les 3 scopes Vercel — sans elle, la Multi-Configuration
+   est livrée mais **inerte en production**.
+2. **Ouvrir `howner.fr/*` et `www.howner.fr/*`** dans les référents de la clé Google Places.
+3. **Envoyer un récapitulatif réel** — dernier maillon non éprouvé de la chaîne emails.
+4. **Temps 2 du CRM** — aucune issue d'appel ne décrit un rendez-vous ; c'est le chaînon qui manque
+   avant la qualification des services amont (`docs/CRM_PROCESS_COMMERCIAL.md`).
 
 ## Blockers / À fournir
 - **Coordonnées exactes de l'atelier** (le transport en dépend).
 - **Albert** — charte Affinity (ADR-002), repositionnement bi-produit (ADR-022), repositionnement
   « studio de jardin » du 2026-08-19, ouverture B2B de Biarritz, CGV rédigées en « maison ».
+  **À ajouter : Allo, si l'intégration est décidée.**
 - **Médiateur de la consommation non nommé** (art. L.616-1) — avant toute communication commerciale.
 - **ADR-028** — test de réversibilité jamais exécuté.
