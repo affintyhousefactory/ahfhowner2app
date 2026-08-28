@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
 import { NumeroSerieBadge } from "@/shared/components/admin/NumeroSerieBadge";
+import { TelephoneLien } from "@/shared/components/admin/TelephoneLien";
 import {
   STATUTS_COMMERCIAUX,
   STATUTS_KANBAN,
@@ -258,7 +259,7 @@ function Tableau({ leads }: { leads: LeadListe[] }) {
         <thead>
           <tr className="border-b border-white/10 text-left text-xs text-white/30">
             <th className="px-4 py-3 font-normal">Dossier</th>
-            <th className="px-4 py-3 font-normal">Email</th>
+            <th className="px-4 py-3 font-normal">Contact</th>
             <th className="px-4 py-3 font-normal">Modèle</th>
             <th className="px-4 py-3 font-normal">Total</th>
             <th className="px-4 py-3 font-normal">Commune</th>
@@ -282,7 +283,19 @@ function Tableau({ leads }: { leads: LeadListe[] }) {
                   )}
                   <span className="text-white">{l.prenom} {l.nom}</span>
                 </td>
-                <td className="px-4 py-3 text-white/50">{l.email}</td>
+                {/* Le numéro figure dans la liste, pas seulement sur la fiche :
+                    c'est cette page qu'on ouvre pour lancer une campagne, et
+                    c'est sur elle que l'extension Allo détecte les contacts à
+                    verser dans la file du Power Dialer. Une liste sans numéros
+                    l'obligerait à ouvrir 354 fiches. */}
+                <td className="px-4 py-3 text-white/50">
+                  <span className="block truncate">{l.email ?? <span className="text-white/20">—</span>}</span>
+                  {l.tel && (
+                    <span className="mt-0.5 block text-xs">
+                      <TelephoneLien tel={l.tel} className="text-white/40" />
+                    </span>
+                  )}
+                </td>
                 <td className="whitespace-nowrap px-4 py-3 text-white/50">
                   {modeleLabel(l)}
                   <NumeroSerieBadge slot={l.slot} statut={l.statut_commercial} />

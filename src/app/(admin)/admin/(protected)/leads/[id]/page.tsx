@@ -8,6 +8,7 @@
  */
 
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
+import { TelephoneLien } from "@/shared/components/admin/TelephoneLien";
 import { notFound } from "next/navigation";
 import AssignMandataire from "@/components/admin/AssignMandataire";
 import LeadMapClient from "@/components/admin/LeadMapClient";
@@ -100,7 +101,13 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
           )}
         </div>
         <p className="mt-1 text-sm text-white/40">
-          {lead.email} · {lead.tel}
+          {lead.email}
+          {lead.tel && (
+            <>
+              {" · "}
+              <TelephoneLien tel={lead.tel} className="text-white/60" />
+            </>
+          )}
           {lead.responsable && <span className="text-white/25"> · suivi par {lead.responsable}</span>}
           {lead.prochain_rappel_at && (
             <span className="text-white/25"> · rappel {dateHeureFr(lead.prochain_rappel_at)}</span>
