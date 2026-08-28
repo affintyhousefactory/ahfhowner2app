@@ -87,6 +87,38 @@ export function horsKanban(id: string | null | undefined): boolean {
 export const STATUTS_KANBAN = STATUTS_COMMERCIAUX.filter((s) => !("horsKanban" in s && s.horsKanban));
 
 /* ══════════════════════════════════════════════════════════════════════════ */
+/* Sourcing — d'où vient le prospect                                          */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Origine **commerciale** du lead, arrêtée avec Richard le 2026-08-28.
+ *
+ * ⚠ **À ne pas confondre avec `leads.source`**, qui porte le canal *technique*
+ * de création — `configurateur_v2`, `admin` : d'où la ligne a été écrite. Un
+ * lead saisi au back-office peut venir d'un fichier de prospection, d'un salon
+ * ou d'une recommandation ; trois efforts qui n'ont ni le même coût ni le même
+ * rendement, et que `source` confond en un seul « admin ».
+ *
+ * C'est ce champ qui dira si la prospection téléphonique paie.
+ */
+export const SOURCINGS = [
+  { id: "prospection_tel", numero: 1, label: "Prospection téléphonique", detail: "fichier HPA" },
+  { id: "appel_entrant",   numero: 2, label: "Appel entrant",            detail: "le prospect nous appelle" },
+  { id: "formulaire_site", numero: 3, label: "Formulaire du site",       detail: "/contact" },
+  { id: "configurateur",   numero: 4, label: "Configurateur en ligne",   detail: "demande de numéro" },
+  { id: "recommandation",  numero: 5, label: "Recommandation",           detail: "bouche-à-oreille" },
+  { id: "salon",           numero: 6, label: "Salon / événement",        detail: "" },
+  { id: "reseaux_sociaux", numero: 7, label: "Réseaux sociaux",          detail: "LinkedIn, Instagram" },
+  { id: "partenaire",      numero: 8, label: "Partenaire",               detail: "apporteur d'affaires" },
+] as const;
+
+export type SourcingId = (typeof SOURCINGS)[number]["id"];
+
+export function sourcing(id: string | null | undefined) {
+  return SOURCINGS.find((s) => s.id === id) ?? null;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
 /* Cibles commerciales                                                        */
 /* ══════════════════════════════════════════════════════════════════════════ */
 

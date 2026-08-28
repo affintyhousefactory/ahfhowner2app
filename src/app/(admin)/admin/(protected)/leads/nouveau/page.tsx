@@ -13,15 +13,20 @@
  */
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
 import { FEATURES } from "@/lib/features";
 import {
   CIBLES_COMMERCIALES,
   CONSEILLERS,
+  ISSUES_APPEL,
+  SOURCINGS,
   STATUTS_COMMERCIAUX,
   eur,
   type CibleCommercialeId,
+  type IssueAppel,
+  type SourcingId,
 } from "@/lib/crm";
 import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
 import { RechercheIdentite } from "@/components/admin/RechercheIdentite";
@@ -66,6 +71,22 @@ export default function NouveauLeadPage() {
      perdre le fil de l'appel — le conseiller vient de raccrocher, c'est
      maintenant qu'il sait si ce qui part est juste. */
   const [leadCree, setLeadCree] = useState<string | null>(null);
+
+  /* ⚠ **Étapes librement navigables**, pas un tunnel. Richard a retenu le
+     parcours par étapes ; le risque signalé — un prospect qui parle dans le
+     désordre — se neutralise en laissant cliquer n'importe quelle étape à tout
+     moment. La barre guide, elle n'enferme pas. Et « Créer le lead » reste
+     accessible de partout dès que le minimum est saisi : on ne force personne à
+     traverser cinq écrans pour enregistrer un nom et un numéro. */
+  const [etape, setEtape] = useState(0);
+
+  /* Origine commerciale — d'où vient ce prospect. À ne pas confondre avec
+     `leads.source`, canal technique de création. */
+  const [sourcingLead, setSourcingLead] = useState<SourcingId | "">("");
+
+  /* Premier appel : la fiche naît d'un échange qui vient d'avoir lieu. */
+  const [appelIssue, setAppelIssue] = useState<IssueAppel | "">("");
+  const [appelNote, setAppelNote] = useState("");
 
   /* Cible commerciale — obligatoire. Voir le bloc de saisie plus bas pour le
      motif : elle dit avec quelle trame d'appel le contact a été mené. */
@@ -287,6 +308,19 @@ export default function NouveauLeadPage() {
 
       // Suivi CRM
       cible_commerciale: cible,
+      sourcing: sourcingLead || null,
+
+      /* Le premier appel devient une entrée du journal, pas une note perdue :
+         le trigger remonte alors l'issue et la date sur le lead, et le compteur
+         de silence part du contact plutôt que de la création. La date n'est pas
+         demandée — c'est maintenant. */
+      premier_appel: (appelIssue || appelNote.trim())
+        ? {
+            issue: appelIssue || null,
+            note: appelNote.trim() || null,
+            prochain_rappel_at: prochainRappel ? new Date(prochainRappel).toISOString() : null,
+          }
+        : null,
       responsable: responsable || null,
       statut_commercial: statutCommercial,
       prochain_rappel_at: prochainRappel ? new Date(prochainRappel).toISOString() : null,
@@ -406,9 +440,43 @@ export default function NouveauLeadPage() {
   }
 
   return (
-    <div className="max-w-3xl p-8">
-      <a href="/admin/leads" className="text-sm text-white/30 hover:text-white">← Leads</a>
+    <div className="max-w-5xl p-6 sm:p-8">
+      <Link href="/admin/leads" className="text-sm text-white/30 hover:text-white">← Leads</Link>
       <h1 className="mb-6 mt-2 text-xl font-semibold text-white">Pré-qualification lead</h1>
+
+      {/* Barre d'étapes — cliquable de bout en bout. Elle dit où l'on est et ce
+          qui reste, sans interdire d'aller ailleurs : au téléphone, le prospect
+          donne son terrain avant son nom aussi souvent que l'inverse. */}
+      <nav aria-label="Étapes de la saisie" className="mb-5 flex flex-wrap gap-1.5">
+        {ETAPES.map((e, i) => {
+          const courante = etape === i;
+          return (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => setEtape(i)}
+              aria-current={courante ? "step" : undefined}
+              className={cn(
+                "flex items-center gap-2 rounded-xl border px-3 py-2 text-xs transition-colors",
+                courante
+                  ? "border-[#7469F4] bg-[#7469F4]/15 text-white"
+                  : "border-white/10 bg-white/5 text-white/45 hover:border-white/25 hover:text-white/70",
+              )}
+            >
+              <span
+                className={cn(
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold",
+                  courante ? "bg-[#7469F4] text-white" : "bg-white/10 text-white/40",
+                )}
+              >
+                {i + 1}
+              </span>
+              <span className="hidden sm:inline">{e.titre}</span>
+              {e.obligatoire && <span className="text-[#E2A03F]">*</span>}
+            </button>
+          );
+        })}
+      </nav>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* ── 0. Cible commerciale ───────────────────────────────────────
@@ -418,6 +486,7 @@ export default function NouveauLeadPage() {
             renseigner la cible, c'est enregistrer avec quelle trame le contact
             a été mené. Un lead sans cible est un appel dont on ignore ce qui
             a été dit. */}
+        {etape === 0 && (
         <Section title="Cible commerciale *">
           <div className="grid gap-2">
             {CIBLES_COMMERCIALES.map((c) => {
@@ -472,8 +541,10 @@ export default function NouveauLeadPage() {
             un camping exploité en société civile peut porter un code immobilier.
           </p>
         </Section>
+        )}
 
         {/* ── 1. Identité ─────────────────────────────────────────────── */}
+        {etape === 1 && (
         <Section title="Identité">
           {/* Avant la saisie, pas après : une fiche déjà existante doit se voir
               pendant que ça sonne, quand le conseiller peut encore changer de
@@ -490,7 +561,7 @@ export default function NouveauLeadPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Prénom *" value={prenom} onChange={setPrenom} required />
             <Field label="Nom *" value={nom} onChange={setNom} required />
             <Field label="Email" type="email" value={email} onChange={setEmail} />
@@ -523,6 +594,7 @@ export default function NouveauLeadPage() {
             </p>
           )}
         </Section>
+        )}
 
         {/* ── 1 bis. Société ──────────────────────────────────────────────
             Quatre des cinq cibles sont des personnes morales. La raison sociale
@@ -532,8 +604,9 @@ export default function NouveauLeadPage() {
             Tout est facultatif : la cinquième cible — investisseurs particuliers
             — n'a ni raison sociale ni SIREN, et un premier appel se termine
             rarement avec le SIREN sous la main. */}
+        {etape === 1 && (
         <Section title="Société (facultatif)">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Raison sociale" value={raisonSociale} onChange={setRaisonSociale} />
             <div>
               <label className="mb-1.5 block text-xs text-white/40">SIREN</label>
@@ -591,10 +664,13 @@ export default function NouveauLeadPage() {
             </p>
           </div>
         </Section>
+        )}
 
         {/* ── 2. Suivi ────────────────────────────────────────────────── */}
+        {etape === 4 && (
+        <>
         <Section title="Suivi commercial">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             <Select
               label="Conseiller"
               value={responsable}
@@ -607,8 +683,63 @@ export default function NouveauLeadPage() {
               onChange={setStatutCommercial}
               options={STATUTS_COMMERCIAUX.map((s) => ({ value: s.id, label: s.label }))}
             />
+            {/* ⚠ Sourcing ≠ `source`. Celui-ci dit **comment le prospect est
+                arrivé jusqu'à nous** — fichier de prospection, salon,
+                recommandation ; `source` garde le canal technique de création
+                (`admin`, `configurateur_v2`). Les confondre reviendrait à ne
+                plus pouvoir dire si la prospection téléphonique paie. */}
+            <Select
+              label="Sourcing / Origine"
+              value={sourcingLead}
+              onChange={(v) => setSourcingLead(v as SourcingId | "")}
+              options={[
+                { value: "", label: "Non renseignée" },
+                ...SOURCINGS.map((o) => ({
+                  value: o.id,
+                  label: o.detail ? `${o.label} — ${o.detail}` : o.label,
+                })),
+              ]}
+            />
+          </div>
+        </Section>
+
+        {/* ── 5 bis. Premier appel ────────────────────────────────────────
+            La fiche naît d'un échange qui vient d'avoir lieu. Le consigner ici
+            plutôt qu'en note libre a trois effets qu'une note n'a pas : l'issue
+            et la date remontent sur le lead par le trigger, le compteur de
+            silence part du **contact** et non de la création, et l'échange
+            rejoint l'historique que le conseiller suivant lira.
+
+            ⚠ **Deux dates devenaient une.** L'ancienne rubrique demandait un
+            « prochain rappel » sans jamais demander quand l'appel avait eu lieu
+            — si bien que le journal, lui, restait vide jusqu'à la première
+            modification. La date de cet appel-ci n'est pas demandée : c'est
+            maintenant. Ne reste que celle du prochain, à sa vraie place — au
+            bout du compte rendu, là où on la décide. */}
+        <Section title="Premier appel">
+          <p className="mb-4 text-[11px] leading-relaxed text-white/35">
+            Vous venez de raccrocher. Ce qui est noté ici entre au journal d&apos;appels du lead,
+            horodaté à maintenant — pas besoin de saisir la date. Laissez vide si vous créez la
+            fiche sans avoir eu personne au téléphone.
+          </p>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Select
+              label="Issue de l'appel"
+              value={appelIssue}
+              onChange={(v) => setAppelIssue(v as IssueAppel | "")}
+              options={[
+                { value: "", label: "Aucun appel passé" },
+                ...ISSUES_APPEL.map((i) => ({ value: i.id, label: i.label })),
+              ]}
+            />
             <div>
-              <label className="mb-1.5 block text-xs text-white/40">Prochain rappel</label>
+              <label className="mb-1.5 block text-xs text-white/40">
+                Prochain rappel
+                {(appelIssue === "rappel_demande" || appelIssue === "repondeur") && (
+                  <span className="ml-2 text-[#E2A03F]">à planifier</span>
+                )}
+              </label>
               <input
                 type="datetime-local"
                 value={prochainRappel}
@@ -617,9 +748,31 @@ export default function NouveauLeadPage() {
               />
             </div>
           </div>
+
+          <div className="mt-4">
+            <label className="mb-1.5 block text-xs text-white/40">Compte rendu de l&apos;appel</label>
+            <textarea
+              value={appelNote}
+              onChange={(e) => setAppelNote(e.target.value)}
+              rows={4}
+              placeholder="Ce qui a été dit, ce qui reste à arbitrer, les options évoquées…"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
+            />
+          </div>
+
+          {/* Un rappel demandé sans date, c'est un rappel qui n'aura pas lieu. */}
+          {appelIssue === "rappel_demande" && !prochainRappel && (
+            <p className="mt-2 text-[11px] leading-relaxed text-[#E2A03F]/80">
+              Le prospect a demandé à être rappelé, mais aucune date n&apos;est fixée — ce lead ne
+              remontera dans aucune alerte.
+            </p>
+          )}
         </Section>
+        </>
+        )}
 
         {/* ── 3. Configuration ────────────────────────────────────────── */}
+        {etape === 2 && (
         <Section title="Configuration">
           <div className="mb-4">
             <Select
@@ -740,7 +893,7 @@ export default function NouveauLeadPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             <Select
               label="Terrasse"
               value={terrasse}
@@ -805,7 +958,7 @@ export default function NouveauLeadPage() {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-4">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs text-white/40">
                 Transport (€ TTC)
@@ -854,8 +1007,10 @@ export default function NouveauLeadPage() {
           </>
           )}
         </Section>
+        )}
 
         {/* ── 4. Terrain ──────────────────────────────────────────────── */}
+        {etape === 3 && (
         <Section title="Situation terrain">
           <div className="mb-4 space-y-2">
             {modesTerrain.map((opt) => (
@@ -952,7 +1107,7 @@ export default function NouveauLeadPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid gap-3 sm:grid-cols-4">
                 <Field label="Code postal" value={codePostal} onChange={setCodePostal} />
                 <Field label="Commune" value={commune} onChange={setCommune} />
                 <Field label="Département" value={departement} onChange={setDepartement} />
@@ -971,7 +1126,7 @@ export default function NouveauLeadPage() {
               />
               <div>
                 <p className="mb-2 text-xs text-white/40">Zone de recherche</p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <Field label="Code postal" value={codePostal} onChange={setCodePostal} />
                   <Field label="Commune" value={commune} onChange={setCommune} />
                   <Field label="Département" value={departement} onChange={setDepartement} />
@@ -980,8 +1135,10 @@ export default function NouveauLeadPage() {
             </div>
           )}
         </Section>
+        )}
 
         {/* ── 5. Notes ────────────────────────────────────────────────── */}
+        {etape === 4 && (
         <Section title="Notes internes AHF">
           <textarea
             value={notes}
@@ -991,23 +1148,55 @@ export default function NouveauLeadPage() {
             className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#7469F4]"
           />
         </Section>
+        )}
 
         {submitError && <p className="text-sm text-red-400">{submitError}</p>}
 
-        <div className="flex gap-3 pt-1">
+        {/* Pied de navigation. « Créer le lead » y figure à **toutes** les
+            étapes, actif dès que le minimum est saisi : la structure guide, elle
+            ne retient pas en otage. Le total reste visible avec lui — c'est le
+            chiffre qu'on relit avant d'enregistrer. */}
+        <div className="sticky bottom-0 -mx-8 flex flex-wrap items-center gap-3 border-t border-white/10 bg-[#1a1a18]/95 px-8 py-4 backdrop-blur">
           <button
-            type="submit"
-            disabled={loading || !prenom || !nom}
-            className="rounded-xl bg-[#7469F4] px-6 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-40"
+            type="button"
+            onClick={() => setEtape((v) => Math.max(0, v - 1))}
+            disabled={etape === 0}
+            className="rounded-xl bg-white/5 px-4 py-2.5 text-sm text-white/50 transition-colors hover:bg-white/10 disabled:opacity-30"
           >
-            {loading ? "Création…" : "Créer le lead"}
+            ← Précédent
           </button>
-          <a
-            href="/admin/leads"
-            className="rounded-xl bg-white/5 px-6 py-2.5 text-sm text-white/40 transition-colors hover:bg-white/10"
-          >
-            Annuler
-          </a>
+
+          {etape < ETAPES.length - 1 && (
+            <button
+              type="button"
+              onClick={() => setEtape((v) => Math.min(ETAPES.length - 1, v + 1))}
+              className="rounded-xl bg-white/10 px-4 py-2.5 text-sm text-white/70 transition-colors hover:bg-white/15"
+            >
+              Suivant →
+            </button>
+          )}
+
+          {!multiConfig && (
+            <span className="ml-auto text-xs text-white/30">
+              Total TTC <span className="ml-1 text-sm font-semibold text-white">{eur(calcul.total)}</span>
+            </span>
+          )}
+
+          <div className={cn("flex gap-3", multiConfig && "ml-auto")}>
+            <Link
+              href="/admin/leads"
+              className="rounded-xl bg-white/5 px-4 py-2.5 text-sm text-white/40 transition-colors hover:bg-white/10"
+            >
+              Annuler
+            </Link>
+            <button
+              type="submit"
+              disabled={loading || !prenom || !nom || !cible}
+              className="rounded-xl bg-[#7469F4] px-6 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-40"
+            >
+              {loading ? "Création…" : "Créer le lead"}
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -1015,6 +1204,21 @@ export default function NouveauLeadPage() {
 }
 
 /* ── Sous-composants ─────────────────────────────────────────────────────── */
+
+/**
+ * Les cinq étapes de la saisie, dans l'ordre où un appel se déroule le plus
+ * souvent — sans que cet ordre soit imposé (la barre est cliquable).
+ *
+ * « Notes internes » rejoint « Appel & suivi » : les deux disent la même chose
+ * du même moment, et les séparer obligeait à écrire l'échange à deux endroits.
+ */
+const ETAPES = [
+  { id: "cible",   titre: "Cible",           obligatoire: true },
+  { id: "contact", titre: "Contact",         obligatoire: true },
+  { id: "projet",  titre: "Configuration",   obligatoire: false },
+  { id: "terrain", titre: "Terrain",         obligatoire: false },
+  { id: "appel",   titre: "Appel & suivi",   obligatoire: false },
+] as const;
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (

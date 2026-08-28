@@ -75,6 +75,9 @@ export async function POST(req: NextRequest) {
          ancien doit valoir « configuration unique », le seul cas qui existait
          avant le 2026-08-27. */
       multi_configuration: (body.multi_configuration as boolean) ?? false,
+      /* Origine COMMERCIALE. Distincte de `source` ci-dessous, qui reste le
+         canal technique de création — les confondre perdrait l'un des deux. */
+      sourcing: (body.sourcing as string) || null,
       responsable: (body.responsable as string) || null,
       responsable_at: body.responsable ? new Date().toISOString() : null,
       prochain_rappel_at: (body.prochain_rappel_at as string) || null,
@@ -107,6 +110,10 @@ export async function POST(req: NextRequest) {
     .select("id")
     .single();
 
+  /* ⚠ `prochain_rappel_at` n'est plus écrit ici quand un premier appel est
+     journalisé : c'est l'appel qui le porte, et la route `/appels` l'y recopie.
+     Deux écrivains sur la même valeur finissent toujours par diverger — même
+     règle que `dernier_appel_at`, maintenu par trigger. */
   if (error) {
     // 23505 = violation d'unicité. Le seul cas possible ici est le numéro de
     // série déjà pris : le dire, plutôt que de servir un message Postgres.
@@ -118,5 +125,39 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  return NextResponse.json({ id: data.id });
+  /* ── Premier appel ────────────────────────────────────────────────────
+     La fiche naît d'un appel qui vient d'avoir lieu. Le journaliser plutôt que
+     de le noter en texte libre a trois effets qu'une note n'a pas : le trigger
+     remonte `dernier_appel_at` et `derniere_issue` sur le lead, le compteur de
+     silence part du **contact** et non de la création, et l'échange rejoint
+     l'historique que le conseiller suivant lira.
+
+     ⚠ La date n'est pas demandée à l'écran : c'est maintenant. Un champ de plus
+     pour une valeur juste dans 95 % des cas ralentit chaque saisie ; elle se
+     corrige depuis la fiche dans les autres.
+
+     ⚠ Son échec n'annule pas le lead. Le lead est créé, c'est le fait
+     important ; perdre le compte rendu est regrettable, perdre le prospect ne
+     l'est pas. On le signale dans la réponse plutôt que de le taire — la leçon
+     du `notified: true` qui mentait, le 2026-08-25. */
+  const appel = body.premier_appel as
+    | { issue?: string | null; note?: string | null; prochain_rappel_at?: string | null }
+    | undefined;
+
+  let appelJournalise: boolean | undefined;
+  if (appel && (appel.issue || appel.note)) {
+    const { error: errAppel } = await getSupabaseAdmin().from("lead_appels").insert({
+      lead_id: data.id,
+      sens: "sortant",
+      issue: appel.issue || null,
+      note: appel.note || null,
+      auteur: (body.responsable as string) || null,
+      occurred_at: new Date().toISOString(),
+      prochain_rappel_at: appel.prochain_rappel_at || null,
+    });
+    appelJournalise = !errAppel;
+    if (errAppel) console.error("[admin/leads] premier appel non journalisé :", errAppel.message);
+  }
+
+  return NextResponse.json({ id: data.id, ...(appelJournalise !== undefined ? { appelJournalise } : {}) });
 }

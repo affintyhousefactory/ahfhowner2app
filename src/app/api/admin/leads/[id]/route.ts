@@ -42,6 +42,11 @@ const ALLOWED_FIELDS = [
      `false` ne recalcule rien — les colonnes de prix restent nulles tant qu'une
      configuration n'a pas été saisie. */
   "multi_configuration",
+  /* Origine commerciale. Corrigeable : le standard annonce « il vous a trouvés
+     sur le site », l'appel révèle une recommandation. ⚠ Ne pas confondre avec
+     `source`, absente de cette liste à dessein — le canal technique de création
+     ne se corrige pas, il constate. */
+  "sourcing",
   // Suivi CRM — ADR-035 §1 et §2. `responsable` = conseiller AHF, sans rapport
   // avec `mandataire_id` (domaine suspendu, ADR-028).
   "responsable", "responsable_at", "prochain_rappel_at",
