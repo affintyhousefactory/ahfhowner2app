@@ -407,6 +407,100 @@ la conséquence qui décide de l'email envoyé.
 La colonne ne bouge pas : le drapeau disait déjà la bonne chose. La cause se lit
 dans les notes d'appel.
 
+## Amendement du 2026-08-28 (soir) — l'écran d'appel prend sa forme
+
+### 1. Saisie par étapes — un choix de Richard, un garde-fou de ma main
+
+Le parcours par étapes a été retenu contre ma recommandation (je proposais deux
+colonnes avec panneau collant). J'avais signalé le risque : au téléphone, le
+prospect donne son terrain avant son nom aussi souvent que l'inverse, et un
+tunnel imposerait au conseiller l'ordre de l'écran.
+
+Le risque est neutralisé sans renier le choix : **la barre d'étapes est cliquable
+de bout en bout**, et **« Créer le lead » reste actif à toutes les étapes** dès
+que cible + prénom + nom sont saisis. La structure guide, elle n'enferme pas.
+
+Cinq étapes : **Cible · Contact · Configuration · Terrain · Appel & suivi**.
+« Notes internes » rejoint la dernière — les deux disaient la même chose du même
+moment.
+
+⚠ **Huit grilles étaient fixes** (`grid-cols-2`, `-3`, `-4`). Sur 390 px, deux
+colonnes de champs deviennent des timbres-poste. Elles empilent désormais en
+mobile.
+
+### 2. Sourcing — et pourquoi ce n'est pas `source`
+
+`leads.source` porte le canal **technique** de création (`admin`,
+`configurateur_v2`, `web_configurateur`). Un lead saisi au back-office peut venir
+d'un fichier de prospection, d'un salon ou d'une recommandation — trois efforts
+qui n'ont ni le même coût ni le même rendement, et que `source` confond en un
+seul « admin ». L'écraser aurait perdu la trace technique.
+
+D'où `leads.sourcing`, huit valeurs. **C'est ce champ qui dira si la prospection
+téléphonique paie.**
+
+### 3. Le premier appel devient une entrée du journal
+
+L'ancienne rubrique demandait un « prochain rappel » **sans jamais demander quand
+l'appel avait eu lieu**. Le journal restait donc vide jusqu'à la première
+modification, et le compteur de silence partait de la création plutôt que du
+contact. Constat de Richard, qui y voyait un doublon — c'en était un, dans
+l'autre sens.
+
+Le bloc « Premier appel » écrit une ligne dans `lead_appels` : le trigger remonte
+l'issue et la date sur le lead, et l'échange rejoint l'historique.
+
+⚠ **Deux dates deviennent une.** Celle de cet appel n'est pas demandée : c'est
+maintenant. ⚠ **Son échec n'annule pas le lead** — la réponse porte
+`appelJournalise` plutôt que de le taire (leçon du `notified: true` du
+2026-08-25).
+
+### 4. La fiche passe en compartiments
+
+Cinq onglets miroir de la création : **Contact & société · Configuration ·
+Terrain · Appels · Documents**, avec compteurs sur les deux derniers. Le journal
+d'appels cesse d'être en bas d'une colonne — c'est pourtant l'écran qu'on ouvre
+le plus souvent.
+
+**Des onglets, pas des étapes** : on ne progresse pas dans une fiche existante,
+on y revient. La barre de création numérote, celle-ci non.
+
+⚠ **Montage à la première visite, puis conservation.** Tout monter d'emblée
+cassait la carte — Leaflet initialisé dans un conteneur `display:none` se
+dimensionne à zéro. Tout démonter en sortant viderait un formulaire à demi
+rempli. Le compromis règle les deux.
+
+### 5. Numéros cliquables — premier pas vers Allo, sans intégration
+
+Un composant, `TelephoneLien`, sur la liste, la fiche et la recherche. La colonne
+« Email » de la liste devient « Contact » et porte le numéro : c'est cette page
+qu'on ouvre pour lancer une campagne, et c'est sur elle que l'extension Allo
+détecte les contacts à verser dans le Power Dialer.
+
+**Aucune donnée ne sort.** L'intégration API d'Allo (synchronisation des
+contacts, journal alimenté par webhook) reste à décider : dépendance externe
+critique, donc **ADR et alerte Albert avant tout code**, au même titre que
+Pennylane (ADR-036).
+
+Ce qui a été vérifié le 2026-08-28 : l'API Allo expose `/v2/api/crm/people` et
+`/companies` (créer, lire, mettre à jour) et `/v2/api/dialing-queues/current`
+pour remplir le Power Dialer ; **aucun endpoint de déclenchement d'appel** — le
+click-to-call passe par l'extension Chrome. Trois inconnues avant de s'engager :
+le scope d'écriture réel, les événements de webhook disponibles, et la clé de
+rapprochement des identités.
+
+### ⚠ Une régression introduite et corrigée le jour même
+
+`TelephoneLien` portait un `onClick` sans `"use client"`, et il est rendu depuis
+`leads/[id]/page.tsx`, un **Server Component** : le rendu serveur échouait.
+Symptôme exact — la fiche ne tombait **que si le lead avait un numéro**, puisque
+sans numéro le composant n'était pas appelé. Signalée par Richard, corrigée en
+retirant le handler (inutile : la ligne du tableau n'est pas cliquable).
+
+**Leçon** : un composant partagé destiné à des pages serveur ne doit porter aucun
+gestionnaire d'événement. Vérification faite sur tout le back-office —
+`TelephoneLien` était le seul cas.
+
 ## Faisabilité
 
 - **Verdict** : ✅ Élevée. Aucune API externe, aucune clé, aucun service nouveau. Une migration additive.

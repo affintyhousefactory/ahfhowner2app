@@ -126,6 +126,11 @@ BREVO_TEMPLATE_MULTICFG=17         # ⛔ À POSER — présentation + plaquette 
                                    #    chiffrable (multi_configuration). Sans elle, la
                                    #    fonctionnalité est livrée mais inerte en production.
 
+# Sourcing commercial (ADR-035 § Amendement 2026-08-28 soir) — aucune variable :
+# les 8 valeurs vivent dans src/lib/crm.ts et sont contraintes par leads_sourcing_check.
+# ⚠ Ne pas confondre `leads.sourcing` (origine commerciale) et `leads.source`
+#   (canal technique de création : admin, configurateur_v2, web_configurateur).
+
 # Google Places — ⚠ restreinte par référent HTTP dans Google Cloud.
 # Au 2026-08-28 : `*.vercel.app` autorisé, `howner.fr` BLOQUÉ (403 vérifié).
 # L'autocomplétion d'adresse est donc morte en production depuis juillet — elle échoue
@@ -195,7 +200,9 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |
 | 033 | Back-office des grilles tarifaires (`loadConfig()` → base) | Réservé — à écrire | ❓ |
 | 034 | Espace client (dépôt de pièces) | Réservé — à écrire ; GED prête côté CRM (`origine = 'client'`) | ❓ |
-| 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré et EN PRODUCTION** ; **amendé le 2026-08-04** (« Paiement réservé », blocage du numéro, Pennylane) puis **le 2026-08-27** (cible commerciale + NAF rév. 2, statut « Erreur / Test / Doublon » hors Kanban, transport calculé depuis le PLU, relecture du récapitulatif) puis **le 2026-08-28** : recherche d'identité avant saisie, email facultatif, identité société, issue du dernier appel sur le lead, Multi-Configuration élargie aux demandes hors grille | ✅ |
+| 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré et EN PRODUCTION** ; **amendé le 2026-08-04** (« Paiement réservé », blocage du numéro, Pennylane) puis **le 2026-08-27** (cible commerciale + NAF rév. 2, statut « Erreur / Test / Doublon » hors Kanban, transport calculé depuis le PLU, relecture du récapitulatif) puis **le 2026-08-28** (recherche d'identité, email facultatif, identité société, issue du dernier appel, Multi-Configuration élargie) puis **le 2026-08-28 au soir** : saisie par étapes, sourcing commercial, premier appel journalisé à la création, fiche en compartiments, numéros cliquables | ✅ |
+| 042 | **Multi-Configuration détaillée + gestion de chantier** — configurer plusieurs unités et des services personnalisés dans le CRM, puis connecter le logiciel de chantier [Costructor](https://costructor.readme.io/reference/introduction) | **Réservé — à écrire** ; chantier annoncé par Richard le 2026-08-29. Le drapeau `multi_configuration` en tient lieu en attendant : il **refuse de chiffrer** plutôt que de chiffrer faux. ⚠ Dépendance externe critique, **alerte Albert** | ❓ |
+| 043 | **Téléphonie Allo** — click-to-call (extension, sans code), synchronisation des contacts, journal d'appels alimenté par webhook | **Réservé — à écrire** ; faisabilité étudiée le 2026-08-28. ⚠ Dépendance externe critique, **alerte Albert** | ❓ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
 | 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — TERMINÉ : lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
@@ -236,6 +243,41 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-28 (soir) — l'écran d'appel prend sa forme ; une régression introduite et fermée le jour même**
+
+**`main` = `62250a24`.** Trois PR en production, une migration.
+
+| PR | Objet | Migration |
+|---|---|---|
+| #108 | Saisie par étapes · sourcing · premier appel journalisé · numéros cliquables | `lead_sourcing` ✅ |
+| #109 | **Correctif** — la fiche d'un lead avec téléphone ne se chargeait plus | — |
+| #110 | La fiche passe en compartiments | — |
+
+**Le CRM tient désormais le premier appel de bout en bout** : on cherche si le contact est connu, on choisit la cible et le sourcing, on note ce qui n'est pas chiffrable, le transport se calcule seul, l'appel est journalisé à la création, le récapitulatif se relit avant de partir — et la fiche se consulte par compartiments.
+
+**Quatre décisions** — détail dans ADR-035 § Amendement du 2026-08-28 (soir) :
+- **Étapes librement navigables.** Richard a retenu les étapes contre ma recommandation ; le risque du prospect qui parle dans le désordre est neutralisé par une barre cliquable de bout en bout et un « Créer le lead » actif partout.
+- **Sourcing ≠ `source`.** Le premier dit d'où vient le prospect, le second comment la ligne a été écrite. C'est le sourcing qui dira si la prospection téléphonique paie.
+- **Le premier appel entre au journal.** L'écran demandait un « prochain rappel » sans jamais demander quand l'appel avait eu lieu — constat de Richard. Deux dates deviennent une : celle de l'appel est *maintenant*.
+- **La fiche en cinq onglets**, avec compteurs. Le journal d'appels cesse d'être en bas d'une colonne.
+
+**⚠ Régression introduite et corrigée dans la journée.** `TelephoneLien` portait un `onClick` sans `"use client"` et était rendu depuis un **Server Component** : la fiche tombait en « This page couldn't load » — **mais seulement si le lead avait un numéro**, puisque sans numéro le composant n'était pas appelé. Signalée par Richard, fermée par la PR #109.
+
+> **Leçon** : un composant partagé destiné à des pages serveur ne doit porter **aucun** gestionnaire d'événement. Vérification faite sur tout le back-office après coup — `TelephoneLien` était le seul cas.
+
+> **Seconde leçon, évitée de justesse** : monter tous les onglets d'emblée aurait cassé la carte (Leaflet en `display:none` se dimensionne à zéro). D'où le montage à la première visite, puis conservation.
+
+**Allo — faisabilité étudiée, rien engagé.** Le click-to-call passe par l'**extension Chrome**, sans une ligne de code : elle détecte les numéros de n'importe quelle page et alimente le Power Dialer. C'est pourquoi les numéros sont désormais visibles **dans la liste**, pas seulement sur la fiche. L'API expose `/v2/api/crm/people` et `/v2/api/dialing-queues/current`, **aucun endpoint de déclenchement d'appel**. Trois inconnues avant de s'engager : scope d'écriture réel, événements de webhook, clé de rapprochement des identités. **Dépendance externe critique → ADR et alerte Albert avant tout code**, comme Pennylane (ADR-036).
+
+**⚠ Points ouverts, inchangés depuis ce matin et toujours bloquants :**
+- **`BREVO_TEMPLATE_MULTICFG=17` non posée sur Vercel** — la Multi-Configuration est en production mais **inerte**.
+- **Référents `howner.fr/*` absents de la clé Google Places** — l'autocomplétion d'adresse reste morte, y compris sur les nouveaux champs de société. Saisie manuelle intacte.
+- **Aucun récapitulatif réel envoyé** — dernier maillon non éprouvé de la chaîne emails.
+- **Temps 2 du CRM (retour de rendez-vous) inexistant** — aucune issue d'appel ne décrit un rendez-vous.
+- **Coordonnées exactes de l'atelier** toujours attendues.
+
+**⚠ Une consolidation a voyagé dans une PR de fonctionnalité.** Le `/memory-sync` du matin (`998e3587`) a été commité sur une branche depuis laquelle `feat/crm-saisie-par-etapes` a été créée : il est parti en production avec la **PR #108**, dont la description n'en disait rien. Sans conséquence — le contenu est juste et en place — mais la règle reste : repartir de `main` avant d'ouvrir une branche.
 
 **2026-08-27/28 (CRM — l'écran d'appel devient un outil de phoning ; un défaut Google vieux d'un mois mis au jour)**
 

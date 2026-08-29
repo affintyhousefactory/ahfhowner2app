@@ -114,7 +114,12 @@ export default function NouveauLeadPage() {
 
   // Configuration v2
   const [usage, setUsage] = useState("");
-  const [quantite, setQuantite] = useState("1");
+  /* ⚠ Plus de champ de saisie (décision de Richard, 2026-08-29) : il ne servait
+     à rien — le total ne multipliait pas par la quantité — et un projet à
+     plusieurs unités relève désormais de la Multi-Configuration, qui refuse
+     justement de chiffrer. La valeur reste envoyée à 1 : `cfg_quantite` existe
+     en base et porte l'historique des leads antérieurs. */
+  const quantite = "1";
   const [modele, setModele] = useState<ModeleId>("one");
   /* Le prospect hésite entre plusieurs modèles : la qualification n'a pas
      tranché. Rien n'est chiffrable, et le récapitulatif part en présentation. */
@@ -903,16 +908,6 @@ export default function NouveauLeadPage() {
                 label: p.prixTtc > 0 ? `${p.nom} — ${eur(p.prixTtc)}` : p.nom,
               }))}
             />
-            <div>
-              <label className="mb-1.5 block text-xs text-white/40">Nombre d&apos;unités</label>
-              <input
-                type="number"
-                min={1}
-                value={quantite}
-                onChange={(e) => setQuantite(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[#7469F4]"
-              />
-            </div>
             <Select
               label="Numéro de série"
               value={slot}
