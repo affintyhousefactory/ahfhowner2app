@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Configuration de la maison telle que le client l'a composée — ADR-035 §4.
+ * Configuration du studio telle que le client l'a composée — ADR-035 §4.
  *
  * Les libellés ne sont pas stockés sur le lead : ils sont résolus depuis
  * `loadConfig()`, seule source des grilles (ADR-030). En édition, les prix sont
@@ -32,6 +32,8 @@ type LeadConfig = LeadConfigV2 & {
   options_labels?: string[] | null;
   produit?: string | null;
   terrasse_m2?: number | null;
+  /** Rien n'est chiffrable : plusieurs modèles, ou demande hors grille. */
+  multi_configuration?: boolean | null;
 };
 
 export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
@@ -43,7 +45,15 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
 
   const [form, setForm] = useState({
     usage: lead.cfg_usage ?? "",
+    /* ⚠ La quantité n'a plus de champ de saisie (2026-08-29). Elle reste dans
+       l'état et repart telle quelle : les leads antérieurs en portent une, et
+       l'effacer à la première modification de la fiche perdrait une information
+       que personne n'a demandé à supprimer. Le besoin « plusieurs unités » passe
+       désormais par la Multi-Configuration. */
     quantite: String(lead.cfg_quantite ?? 1),
+    /* Rien n'est chiffrable : plusieurs modèles en balance, ou options et
+       services personnalisés assujettis à devis complémentaires. */
+    multiConfig: Boolean(lead.multi_configuration),
     modele: (lead.cfg_modele ?? "max") as ModeleId,
     ambiance: lead.cfg_ambiance ?? cfg.ambiances[0].id,
     terrasse: lead.cfg_terrasse ?? "sans",
@@ -52,7 +62,7 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
     slot: lead.slot != null ? String(lead.slot) : "",
   });
 
-  /* Les prix suivent la grille, jamais la saisie. Changer de maison purge les
+  /* Les prix suivent la grille, jamais la saisie. Changer de modèle purge les
      options devenues incompatibles — même règle que le parcours client. */
   const calcul = useMemo(() => {
     const modele = cfg.modeles.find((m) => m.id === form.modele) ?? cfg.modeles[0];
@@ -86,7 +96,13 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
 
     // L'instantané JSON conserve la grille utilisée : un lead d'aujourd'hui ne
     // doit pas se relire avec les prix de demain (ADR-035 §4).
-    const config_v2 = {
+    const config_v2 = form.multiConfig ? {
+      version: cfg.version,
+      multi_configuration: true,
+      usage: form.usage || null,
+      quantite,
+      saisi_par: "admin",
+    } : {
       version: cfg.version,
       usage: form.usage || null,
       quantite,
@@ -111,22 +127,28 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           config_v2,
+          multi_configuration: form.multiConfig,
           cfg_version: cfg.version,
           cfg_usage: form.usage || null,
           cfg_quantite: quantite,
-          cfg_modele: form.modele,
-          cfg_ambiance: form.ambiance,
-          cfg_terrasse: form.terrasse,
-          cfg_options: form.options,
-          cfg_prix_base: calcul.base,
-          cfg_prix_terrasse: calcul.terrasse,
-          cfg_prix_options: calcul.options,
-          cfg_transport: form.transport ? Number(form.transport) : null,
-          cfg_total: calcul.total,
+          /* ⚠ En Multi-Configuration, modèle et prix repassent à **null** —
+             y compris sur un lead qui portait une configuration chiffrée. Le
+             basculement dit précisément que ce chiffrage ne vaut plus ; le
+             garder ferait ressortir un total périmé dans les agrégats et, pire,
+             dans le récapitulatif client. */
+          cfg_modele: form.multiConfig ? null : form.modele,
+          cfg_ambiance: form.multiConfig ? null : form.ambiance,
+          cfg_terrasse: form.multiConfig ? null : form.terrasse,
+          cfg_options: form.multiConfig ? [] : form.options,
+          cfg_prix_base: form.multiConfig ? null : calcul.base,
+          cfg_prix_terrasse: form.multiConfig ? null : calcul.terrasse,
+          cfg_prix_options: form.multiConfig ? null : calcul.options,
+          cfg_transport: form.multiConfig ? null : (form.transport ? Number(form.transport) : null),
+          cfg_total: form.multiConfig ? null : calcul.total,
           slot,
           // Le champ texte reste alimenté : il sert les emails Brevo et la vue
           // mandataire, qui ne connaissent pas les identifiants de grille.
-          produit: calcul.modele.nom,
+          produit: form.multiConfig ? "Multi-Configuration — à arbitrer" : calcul.modele.nom,
         }),
       });
       if (!res.ok) {
@@ -178,7 +200,22 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
           </p>
         )}
 
-        {v2 ? (
+        {/* En Multi-Configuration, la vue de lecture ne montre pas un chiffrage
+            vide ligne à ligne — elle dit pourquoi il n'y en a pas. Une colonne
+            de tirets laisserait croire à une configuration incomplète, quand
+            c'est une configuration volontairement non arrêtée. */}
+        {lead.multi_configuration && (
+          <div className="mb-4 rounded-xl border border-[#E2A03F]/25 bg-[#E2A03F]/5 px-3 py-2.5">
+            <p className="text-xs font-semibold text-[#E2A03F]">Multi-Configuration — à arbitrer</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-white/40">
+              Plusieurs modèles en balance, ou options et services personnalisés assujettis à devis
+              préalables complémentaires. Aucun montant n&apos;est arrêté ; le récapitulatif client
+              part en présentation. Voir le journal d&apos;appels pour ce qui reste à trancher.
+            </p>
+          </div>
+        )}
+
+        {v2 && !lead.multi_configuration ? (
           <>
             <dl className="space-y-2 text-sm">
               <Ligne label="Usage" valeur={c.usage?.label ?? null} />
@@ -252,7 +289,7 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
 
             <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5">
               <dl className="space-y-1.5 text-sm">
-                <Ligne label="Maison" valeur={eur(c.prix.base)} discret />
+                <Ligne label="Studio" valeur={eur(c.prix.base)} discret />
                 <Ligne label="Terrasse" valeur={eur(c.prix.terrasse)} discret />
                 <Ligne label="Options" valeur={eur(c.prix.options)} discret />
                 <Ligne label="Transport" valeur={eur(c.prix.transport)} discret />
@@ -321,31 +358,73 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className={label}>Maison</label>
-            <select
-              value={form.modele}
-              onChange={(e) => changerModele(e.target.value as ModeleId)}
-              className={champ}
+        {/* ⚠ Le « Nombre d'unités » a disparu de la saisie (décision de Richard,
+            2026-08-29). Il ne servait à rien : le total ne le multipliait pas, et
+            un projet à plusieurs unités relève désormais de la
+            Multi-Configuration, qui refuse justement de chiffrer. La valeur des
+            leads antérieurs reste en base et s'affiche en lecture — on retire un
+            champ de saisie, pas une donnée. */}
+        <div>
+          <label className={label}>Modèle</label>
+          <div className="flex flex-wrap gap-2">
+            {cfg.modeles.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => { setForm((f) => ({ ...f, multiConfig: false })); changerModele(m.id); }}
+                className={cn(
+                  "flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors",
+                  !form.multiConfig && form.modele === m.id
+                    ? "border-[#7469F4] bg-[#7469F4]/15 text-[#7469F4]"
+                    : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10",
+                )}
+              >
+                {m.nom}
+                <span className="ml-1.5 text-xs opacity-60">{m.surface} m²</span>
+              </button>
+            ))}
+
+            {/* Même troisième choix qu'à la création, et pour les deux mêmes
+                situations. Un prospect qui hésitait finit par choisir — et
+                l'inverse arrive aussi : une demande simple se complique en
+                cours de route. La fiche doit pouvoir basculer dans les deux
+                sens. */}
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, multiConfig: true }))}
+              className={cn(
+                "flex-1 basis-full rounded-xl border px-4 py-2.5 text-left text-sm font-medium transition-colors md:basis-0",
+                form.multiConfig
+                  ? "border-[#E2A03F] bg-[#E2A03F]/15 text-[#E2A03F]"
+                  : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10",
+              )}
             >
-              {cfg.modeles.map((m) => (
-                <option key={m.id} value={m.id}>{m.nom} — {m.surface} m²</option>
-              ))}
-            </select>
+              Multi-Configuration
+              <span className="mt-0.5 block text-xs font-normal leading-snug opacity-60">
+                Plusieurs modèles, ou options et services personnalisés assujettis à devis
+                préalables complémentaires
+              </span>
+            </button>
           </div>
-          <div>
-            <label className={label}>Nombre d&apos;unités</label>
-            <input
-              type="number"
-              min={1}
-              value={form.quantite}
-              onChange={(e) => setForm((f) => ({ ...f, quantite: e.target.value }))}
-              className={champ}
-            />
-          </div>
+
+          {form.multiConfig && (
+            <div className="mt-3 rounded-xl border border-[#E2A03F]/25 bg-[#E2A03F]/5 px-3 py-2.5">
+              <p className="text-xs leading-relaxed text-[#E2A03F]/90">
+                <span className="font-semibold">Le chiffrage sera effacé.</span> Modèle, ambiance,
+                terrasse, options et prix repassent à vide : basculer ici dit précisément que la
+                configuration enregistrée ne vaut plus. Le récapitulatif client partira en
+                présentation, sans montant.
+              </p>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-white/40">
+                Notez dans les appels les modèles évoqués et les options demandées — c&apos;est de
+                là que partira le devis complémentaire.
+              </p>
+            </div>
+          )}
         </div>
 
+        {!form.multiConfig && (
+        <>
         <div>
           <label className={label}>Ambiance</label>
           <div className="flex flex-wrap gap-2">
@@ -385,7 +464,7 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
 
         <div>
           <label className={label}>
-            Options <span className="text-white/25">— filtrées selon la maison</span>
+            Options <span className="text-white/25">— filtrées selon le modèle</span>
           </label>
           <div className="space-y-1">
             {calcul.dispo.map((o) => (
@@ -456,7 +535,7 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
 
         <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
           <dl className="space-y-1.5 text-sm">
-            <Ligne label="Maison" valeur={eur(calcul.base)} discret />
+            <Ligne label="Studio" valeur={eur(calcul.base)} discret />
             <Ligne label="Terrasse" valeur={eur(calcul.terrasse)} discret />
             <Ligne label="Options" valeur={eur(calcul.options)} discret />
             <Ligne label="Transport" valeur={eur(calcul.transport)} discret />
@@ -469,6 +548,8 @@ export default function LeadConfiguration({ lead }: { lead: LeadConfig }) {
             Recalculé depuis la grille {cfg.version} — les montants ne se saisissent pas.
           </p>
         </div>
+        </>
+        )}
 
         {erreur && <p className="text-xs text-red-400">{erreur}</p>}
       </div>
