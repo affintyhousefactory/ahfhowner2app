@@ -66,6 +66,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | **CRM — liste + Kanban** | `(admin)/admin/(protected)/leads/page.tsx`, `components/admin/LeadsVue.tsx` | ✅ livré (branche) — colonne « Affectation » retirée, `?vue=kanban` | — | 035, 028 |
 | **CRM — journal d'appels** | `components/admin/LeadAppels.tsx`, `api/admin/leads/[id]/appels` | ✅ livré (branche) — table `lead_appels`, trigger `dernier_appel_at` | migration à appliquer | 035 |
 | **CRM — configuration v2 sur le lead** | `components/admin/LeadConfiguration.tsx`, `src/lib/crm.ts` | ✅ livré (branche) — `config_v2` + `cfg_*`, libellés résolus par `loadConfig()` | alimenté par ADR-031 | 035, 030 |
+| **CRM — récapitulatif d'appel par cible** | `src/lib/crm.ts` (`choixEmailRecap`), `shared/lib/recap-client.ts`, `api/admin/leads/[id]/recap-client{,/apercu}` | ✅ livré (branche) — 7 modèles, l'écran annonce lequel part et sous quel objet | vérifier en Preview | 035, 026 |
 | **CRM — GED Client double origine** | `components/admin/LeadClientDocuments.tsx` | ✅ livré (branche) — `origine` ahf/client, `categorie`, pièces manquantes | dépôt client = ADR-034 | 035, 027 |
 | Email confirmations contact | `src/app/api/contact/route.ts`, `src/lib/email.ts` | ✅ Brevo template `10` — câblé | — | 026 |
 | Email recap configurateur/terrain | `src/app/api/recherche-terrain/route.ts` | ✅ Brevo template `9` — câblé | — | 026 |
@@ -122,9 +123,21 @@ BREVO_LIST_MANDATAIRES=7           # domaine suspendu (ADR-028)
 
 # Templates Brevo — ⚠ AUCUN repli codé : un identifiant deviné enverrait le mauvais
 # email à un client. Les routes renvoient un 500 nommant la variable manquante.
-BREVO_TEMPLATE_MULTICFG=17         # ⛔ À POSER — présentation + plaquette quand rien n'est
-                                   #    chiffrable (multi_configuration). Sans elle, la
-                                   #    fonctionnalité est livrée mais inerte en production.
+BREVO_TEMPLATE_MULTICFG=17         # ✅ posée sur Preview + Production le 2026-08-27
+                                   #    Présentation générique quand rien n'est chiffrable
+                                   #    et que le lead n'a pas de cible commerciale.
+
+# Présentations sectorielles du récapitulatif d'appel (ADR-035 § Amendement 2026-08-31).
+# ✅ posées sur Preview + Production le 2026-08-31. Une cible = un email, et seulement
+# quand `multi_configuration` est vrai : ces cinq modèles ne portent AUCUN montant, ils
+# ne remplacent jamais le récapitulatif chiffré.
+BREVO_TEMPLATE_CAMPING=18          # cible 1 — campings et hôtellerie de plein air
+BREVO_TEMPLATE_HOTEL=20            # cible 2 — hôtels, domaines, gîtes  ⚠ 20, pas 19
+BREVO_TEMPLATE_MEDICO=19           # cible 3 — EHPAD, résidences seniors, médico-social
+BREVO_TEMPLATE_COLLECTIVITE=21     # cible 4 — collectivités, employeurs, saisonniers
+BREVO_TEMPLATE_INVESTISSEUR=22     # cible 5 — particuliers investisseurs
+# ⚠ Les modèles 18 à 21 ouvrent leur **objet** sur `ETABLISSEMENT` (raison sociale) ;
+#   le 22 annonce « il reste N numéros sur les 6 », compté en base à l'envoi.
 
 # Sourcing commercial (ADR-035 § Amendement 2026-08-28 soir) — aucune variable :
 # les 8 valeurs vivent dans src/lib/crm.ts et sont contraintes par leads_sourcing_check.

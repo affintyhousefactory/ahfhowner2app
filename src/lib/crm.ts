@@ -209,6 +209,80 @@ export function cibleCommerciale(id: string | null | undefined): CibleCommercial
   return CIBLES_COMMERCIALES.find((c) => c.id === id) ?? null;
 }
 
+/* ── Quel email récapitulatif part ────────────────────────────────────────── */
+
+/** Les sept emails possibles à l'issue d'un appel. */
+export type CleEmailRecap = "recap" | "multicfg" | CibleCommercialeId;
+
+/**
+ * Quel email pour ce lead — **la règle**, ici et nulle part ailleurs.
+ *
+ * Deux situations, et une seule d'entre elles connaît un prix.
+ *
+ * 1. **Une configuration est arrêtée** → le récapitulatif chiffré : modèle,
+ *    terrasse, options, transport, total. C'est le document de l'appel.
+ * 2. **Rien n'est chiffrable** — modèles encore en balance, ou options hors
+ *    grille assujetties à devis complémentaire. Chiffrer reviendrait à
+ *    communiquer un prix sur un choix que personne n'a fait, et un prix
+ *    communiqué ne se reprend pas. Part alors une **présentation**, choisie sur
+ *    la cible du script de phoning : le camping ne lit pas le même argument que
+ *    l'EHPAD, et ces cinq emails sont écrits pour ces cinq populations. Sans
+ *    cible — cas des leads nés sur le site public, où personne n'a répondu au
+ *    téléphone — c'est la présentation générique.
+ *
+ * ⚠ **La cible ne remplace jamais le récapitulatif chiffré.** Les cinq
+ * présentations sectorielles ne portent aucun montant : les servir à un lead
+ * dont la configuration est arrêtée priverait le client du chiffrage qu'on
+ * vient de lui annoncer au téléphone. Décision de Richard, 2026-08-31.
+ *
+ * ⚠ **Fonction pure, sans `process.env`.** L'écran d'appel s'en sert pour
+ * annoncer au conseiller ce qui partira, et il tourne dans le navigateur ; les
+ * identifiants de template, eux, restent côté serveur
+ * (`@/shared/lib/recap-client`). La règle est ici, sa traduction en numéro de
+ * template est là-bas — jamais l'inverse.
+ */
+export type ChoixEmailRecap = {
+  cle: CleEmailRecap;
+  /** Ce que le conseiller lit avant d'envoyer. */
+  libelle: string;
+  /**
+   * L'**objet** de l'email s'ouvre sur la raison sociale — « {Camping des Pins}
+   * — on travaille sur vos locatifs ». Sans elle, il commencerait par un tiret :
+   * l'écran doit le dire avant l'envoi, pas après.
+   */
+  objetPorteRaisonSociale: boolean;
+  /**
+   * L'email annonce combien de numéros de la série restent. Le compte se prend
+   * en base au moment de l'envoi : un chiffre faux sur la rareté vaut moins que
+   * pas d'email du tout.
+   */
+  annonceNumerosRestants: boolean;
+};
+
+export function choixEmailRecap(lead: {
+  multi_configuration?: boolean | null;
+  cible_commerciale?: string | null;
+}): ChoixEmailRecap {
+  const base = { objetPorteRaisonSociale: false, annonceNumerosRestants: false };
+
+  if (!lead.multi_configuration) {
+    return { ...base, cle: "recap", libelle: "Récapitulatif chiffré" };
+  }
+
+  const cible = cibleCommerciale(lead.cible_commerciale);
+  if (!cible) return { ...base, cle: "multicfg", libelle: "Présentation générique" };
+
+  return {
+    cle: cible.id,
+    libelle: `Présentation — ${cible.label}`,
+    /* Quatre cibles sur cinq sont des personnes morales ; la cinquième — les
+       particuliers investisseurs — n'a pas de raison sociale, et son email
+       ouvre sur la disponibilité de la série au lieu d'un nom. */
+    objetPorteRaisonSociale: cible.id !== "investisseurs",
+    annonceNumerosRestants: cible.id === "investisseurs",
+  };
+}
+
 /* ══════════════════════════════════════════════════════════════════════════ */
 /* Numéro de série — deux niveaux de prise (ADR-035 § Amendement 2026-08-04)   */
 /* ══════════════════════════════════════════════════════════════════════════ */

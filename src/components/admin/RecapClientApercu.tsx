@@ -9,6 +9,19 @@
  * premier appel retranscrit à la volée, ce qui part porte un prix, une distance
  * et un nom : trois choses qu'on ne rattrape pas après coup.
  *
+ * ⚠ **Sept emails sont désormais possibles** — le récapitulatif chiffré, la
+ * présentation générique, et les cinq présentations sectorielles (camping,
+ * hôtellerie, médico-social, collectivités, investisseurs). Lequel part se
+ * déduit du lead, pas d'un choix du conseiller ; encore faut-il qu'il le lise
+ * **avant** de cliquer. Le nom du modèle s'affiche donc d'emblée, dérivé du lead
+ * par `choixEmailRecap()` — sans appel réseau, puisque la règle est la même de
+ * part et d'autre.
+ *
+ * L'**objet** de l'email, lui, ne s'obtient que du template Brevo peuplé : il
+ * arrive avec l'aperçu (`?meta=1`), au clic. Il compte double sur les
+ * présentations sectorielles, dont l'objet s'ouvre sur la raison sociale — et
+ * aucun rendu du corps ne le montre.
+ *
  * Le rendu est celui du vrai template Brevo, peuplé des valeurs du lead
  * (`/api/admin/leads/[id]/recap-client/apercu`). Il est affiché dans une
  * `iframe` : un email est du HTML de courrier, avec ses propres styles, et
@@ -16,23 +29,74 @@
  */
 
 import { useState } from "react";
+import { choixEmailRecap } from "@/lib/crm";
+
+type MetaApercu = {
+  modele: string;
+  template: number | null;
+  objet?: string;
+  destinataire?: string;
+  /** Ce qui empêche l'envoi — variable absente, template illisible. */
+  bloquants: string[];
+  /** Ce qui l'abîme sans l'empêcher — raison sociale manquante. */
+  avertissements: string[];
+};
 
 export function RecapClientApercu({
   leadId,
   email,
   dejaEnvoyeLe,
+  multiConfiguration,
+  cibleCommerciale,
+  raisonSociale,
   onEnvoye,
 }: {
   leadId: string;
   email: string | null;
   /** ISO. Rend visible qu'un récap est déjà parti — et quand. */
   dejaEnvoyeLe?: string | null;
+  /** Les trois champs qui décident du modèle d'email et de son objet. */
+  multiConfiguration?: boolean | null;
+  cibleCommerciale?: string | null;
+  raisonSociale?: string | null;
   onEnvoye?: () => void;
 }) {
   const [ouvert, setOuvert] = useState(false);
   const [envoi, setEnvoi] = useState(false);
   const [envoye, setEnvoye] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [meta, setMeta] = useState<MetaApercu | null>(null);
+
+  /* La même règle que le serveur, appelée sur les mêmes champs : l'écran ne
+     devine pas ce qui partira, il le déduit. */
+  const choix = choixEmailRecap({
+    multi_configuration: multiConfiguration,
+    cible_commerciale: cibleCommerciale,
+  });
+  const raisonSocialeManquante = choix.objetPorteRaisonSociale && !raisonSociale?.trim();
+
+  /**
+   * Ouvre l'aperçu et va chercher, une fois, ce que le rendu ne montre pas :
+   * l'objet réel de l'email et ce qui l'empêcherait de partir.
+   *
+   * ⚠ **Au clic, jamais dans un effet.** React 19 refuse qu'un effet déclenche
+   * un `setState` — et il a raison ici : rien n'oblige à interroger Brevo à
+   * chaque fiche ouverte, alors que le conseiller ne relit qu'au moment
+   * d'envoyer.
+   */
+  async function basculerApercu() {
+    const ouvrir = !ouvert;
+    setOuvert(ouvrir);
+    if (!ouvrir || meta) return;
+
+    const res = await fetch(`/api/admin/leads/${leadId}/recap-client/apercu?meta=1`).catch(
+      () => null,
+    );
+    const body = res?.ok ? await res.json().catch(() => null) : null;
+    /* L'objet est une aide à la relecture : son absence n'empêche pas de lire
+       l'aperçu, qui reste la preuve de ce qui partira. */
+    if (body) setMeta(body as MetaApercu);
+  }
 
   async function envoyer() {
     setEnvoi(true);
@@ -57,6 +121,8 @@ export function RecapClientApercu({
       </p>
     );
   }
+
+  const bloque = (meta?.bloquants.length ?? 0) > 0;
 
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
@@ -84,11 +150,39 @@ export function RecapClientApercu({
 
         <button
           type="button"
-          onClick={() => setOuvert((v) => !v)}
+          onClick={basculerApercu}
           className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/60 transition-colors hover:border-white/25 hover:text-white"
         >
           {ouvert ? "Masquer l'aperçu" : "Relire avant envoi"}
         </button>
+      </div>
+
+      {/* Quel email part — visible sans ouvrir l'aperçu, puisque le conseiller
+          ne choisit pas : il constate. */}
+      <div className="mt-3 rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2.5">
+        <p className="text-[11px] text-white/30">
+          Modèle retenu <span className="text-white/70">{choix.libelle}</span>
+          {meta?.template ? <span className="text-white/25"> · template {meta.template}</span> : null}
+        </p>
+
+        {meta?.objet && (
+          <p className="mt-1 text-[11px] text-white/30">
+            Objet <span className="text-white/60">{meta.objet}</span>
+          </p>
+        )}
+
+        {raisonSocialeManquante && (
+          <p className="mt-1.5 text-[11px] text-[#E2A03F]/90">
+            ⚠ Raison sociale absente — l&apos;objet de cet email s&apos;ouvre dessus, il dira
+            « Votre établissement ».
+          </p>
+        )}
+
+        {meta?.bloquants.map((b) => (
+          <p key={b} className="mt-1.5 text-[11px] text-[#E2555A]">
+            ⛔ {b} — envoi impossible tant que ce point n&apos;est pas réglé.
+          </p>
+        ))}
       </div>
 
       {ouvert && (
@@ -113,13 +207,13 @@ export function RecapClientApercu({
         <button
           type="button"
           onClick={envoyer}
-          disabled={envoi || envoye}
+          disabled={envoi || envoye || bloque}
           className="rounded-lg bg-[#7469F4] px-4 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           {envoye ? "Récapitulatif envoyé" : envoi ? "Envoi…" : "Envoyer le récapitulatif"}
         </button>
 
-        {!ouvert && !envoye && (
+        {!ouvert && !envoye && !bloque && (
           <span className="text-[11px] text-white/30">Relire l&apos;aperçu avant d&apos;envoyer.</span>
         )}
         {erreur && <span className="text-[11px] text-[#E2555A]">{erreur}</span>}
