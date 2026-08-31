@@ -355,6 +355,12 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
             leadId={lead.id}
             email={lead.email}
             dejaEnvoyeLe={lead.recap_envoye_at ?? null}
+            /* Les trois champs qui décident du modèle d'email et de son objet :
+               la cible sectorise la présentation, la Multi-Configuration dit
+               qu'il n'y a rien à chiffrer, la raison sociale ouvre l'objet. */
+            multiConfiguration={lead.multi_configuration}
+            cibleCommerciale={lead.cible_commerciale}
+            raisonSociale={lead.raison_sociale}
             onEnvoye={() => router.refresh()}
           />
         </div>

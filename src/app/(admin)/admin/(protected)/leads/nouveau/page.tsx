@@ -421,7 +421,13 @@ export default function NouveauLeadPage() {
         </p>
 
         <div className="mt-6">
-          <RecapClientApercu leadId={leadCree} email={email} />
+          <RecapClientApercu
+            leadId={leadCree}
+            email={email}
+            multiConfiguration={multiConfig}
+            cibleCommerciale={cible}
+            raisonSociale={raisonSociale}
+          />
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
