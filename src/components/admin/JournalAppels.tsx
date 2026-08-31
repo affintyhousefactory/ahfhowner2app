@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Journal d'appels et de notes — ADR-035 §3.
+ * Journal d'appels et de notes — ADR-035 §3, généralisé par ADR-044 §8.
  *
  * Une timeline unique pour les appels entrants, sortants et les notes libres :
  * les séparer obligerait à lire deux colonnes pour reconstituer une relation.
@@ -10,6 +10,16 @@
  * Rien n'est enregistré tant que le conseiller ne valide pas — un journal qui
  * se remplit tout seul se remplit d'appels qui n'ont pas eu lieu, et perd toute
  * valeur de preuve.
+ *
+ * ⚠ **Il servait les leads, il sert aussi les agents partenaires.** Ce qui
+ * changeait d'un domaine à l'autre tient en trois choses, passées en propriétés
+ * plutôt que dupliquées sur trois cents lignes : l'URL du journal, la liste de
+ * statuts que l'écran peut faire évoluer, et le nom du champ qui les porte.
+ * Le reste — sens, issues, timeline, antidatage, suppression — est identique
+ * parce que la conversation téléphonique l'est.
+ *
+ * Les référentiels partagés (`SENS_APPEL`, `ISSUES_APPEL`, `CONSEILLERS`)
+ * restent dans `src/lib/crm.ts` : ils décrivent un appel, pas un lead.
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -19,12 +29,18 @@ import {
   CONSEILLERS,
   ISSUES_APPEL,
   SENS_APPEL,
-  STATUTS_COMMERCIAUX,
   dateHeureFr,
   issueAppel,
   type IssueAppel,
   type SensAppel,
 } from "@/lib/crm";
+
+/**
+ * Ce qu'un statut doit exposer pour être proposé ici. Volontairement minimal :
+ * les statuts commerciaux d'un lead et ceux d'un partenariat n'ont ni les mêmes
+ * couleurs, ni les mêmes règles — seul leur libellé est utile au menu déroulant.
+ */
+export type StatutProposable = { id: string; label: string };
 
 type Appel = {
   id: string;
@@ -58,19 +74,26 @@ const vide = (auteur: string) => ({
   auteur,
   occurred_at: versChampLocal(new Date()),
   prochain_rappel_at: "",
-  statut_commercial: "",
+  statut: "",
 });
 
-export default function LeadAppels({
-  leadId,
+export default function JournalAppels({
+  endpoint,
   tel,
   responsable,
-  statutCommercialActuel,
+  statuts,
+  statutActuel,
+  statutChamp,
 }: {
-  leadId: string;
+  /** Racine du journal — `/api/admin/leads/<id>/appels` ou `.../agents/...`. */
+  endpoint: string;
   tel: string | null;
   responsable: string | null;
-  statutCommercialActuel: string | null;
+  /** Statuts que l'écran peut faire évoluer depuis la fiche d'appel. */
+  statuts: readonly StatutProposable[];
+  statutActuel: string | null;
+  /** Nom du champ attendu par la route : `statut_commercial`, `statut_partenariat`… */
+  statutChamp: string;
 }) {
   const router = useRouter();
   const [appels, setAppels] = useState<Appel[]>([]);
@@ -85,12 +108,12 @@ export default function LeadAppels({
   // déclencherait un rendu en cascade pour rien.
   const charger = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/leads/${leadId}/appels`);
+      const res = await fetch(endpoint);
       if (res.ok) setAppels((await res.json()) as Appel[]);
     } finally {
       setChargement(false);
     }
-  }, [leadId]);
+  }, [endpoint]);
 
   useEffect(() => { charger(); }, [charger]);
 
@@ -115,7 +138,7 @@ export default function LeadAppels({
     setEnvoi(true);
     setErreur(null);
     try {
-      const res = await fetch(`/api/admin/leads/${leadId}/appels`, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -128,7 +151,9 @@ export default function LeadAppels({
           // Clé toujours présente : une valeur vide EFFACE l'échéance courante
           // du lead, ce qui est le comportement voulu après un appel abouti.
           prochain_rappel_at: versIso(form.prochain_rappel_at),
-          statut_commercial: form.statut_commercial || undefined,
+          /* Clé nommée par l'appelant : la route des leads attend
+             `statut_commercial`, celle des agents `statut_partenariat`. */
+          [statutChamp]: form.statut || undefined,
         }),
       });
       if (!res.ok) {
@@ -147,7 +172,7 @@ export default function LeadAppels({
 
   async function supprimer(appelId: string) {
     if (!confirm("Supprimer cette entrée du journal ?")) return;
-    const res = await fetch(`/api/admin/leads/${leadId}/appels`, {
+    const res = await fetch(endpoint, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ appelId }),
@@ -291,16 +316,19 @@ export default function LeadAppels({
           </div>
 
           <div>
-            <label className={label}>Faire évoluer le statut commercial</label>
+            <label className={label}>Faire évoluer le statut</label>
             <select
-              value={form.statut_commercial}
-              onChange={(e) => setForm((f) => ({ ...f, statut_commercial: e.target.value }))}
+              value={form.statut}
+              onChange={(e) => setForm((f) => ({ ...f, statut: e.target.value }))}
               className={champ}
             >
+              {/* Le repli sur le premier statut vaut pour les deux domaines :
+                  « Nouveau » côté leads, « À contacter » côté agents — dans les
+                  deux cas la valeur par défaut de la colonne. */}
               <option value="">
-                Inchangé — {STATUTS_COMMERCIAUX.find((s) => s.id === (statutCommercialActuel ?? "nouveau"))?.label}
+                Inchangé — {(statuts.find((s) => s.id === statutActuel) ?? statuts[0])?.label}
               </option>
-              {STATUTS_COMMERCIAUX.map((s) => (
+              {statuts.map((s) => (
                 <option key={s.id} value={s.id}>{s.label}</option>
               ))}
             </select>
