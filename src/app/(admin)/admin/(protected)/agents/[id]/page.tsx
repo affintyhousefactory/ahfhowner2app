@@ -6,8 +6,9 @@
  * d'une colonne. `LeadOnglets` est réemployé tel quel — il ne connaît rien des
  * leads malgré son nom, il n'affiche que ce qu'on lui passe.
  *
- * ⚠ L'onglet « Emails » arrive avec le lot 3 : il lira l'historique Brevo du
- * contact. Ne pas l'esquisser ici — un onglet vide se lit comme une panne.
+ * L'onglet « Emails » lit l'historique Brevo en direct (lot 3) : ce qui est
+ * parti, ce qui a été délivré, ouvert, rejeté — et permet d'envoyer la
+ * présentation partenaire après un aperçu.
  */
 
 import Link from "next/link";
@@ -17,6 +18,7 @@ import { estAdmin } from "@/shared/lib/supabase-server";
 import { LeadOnglets } from "@/components/admin/LeadOnglets";
 import JournalAppels from "@/components/admin/JournalAppels";
 import AgentIdentite, { type AgentFiche } from "@/components/admin/AgentIdentite";
+import AgentEmails from "@/components/admin/AgentEmails";
 import { TelephoneLien } from "@/shared/components/admin/TelephoneLien";
 import { dateFr, etatSuivi, issueAppel, statutCommercial } from "@/lib/crm";
 import { STATUTS_PARTENARIAT, statutPartenariat } from "@/lib/agents";
@@ -142,6 +144,15 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
                   statutActuel={agent.statut_partenariat}
                   statutChamp="statut_partenariat"
                 />
+              </div>
+            ),
+          },
+          {
+            id: "emails",
+            titre: "Emails",
+            contenu: (
+              <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
+                <AgentEmails agentId={id} />
               </div>
             ),
           },

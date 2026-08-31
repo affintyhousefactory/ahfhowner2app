@@ -85,6 +85,10 @@ export default function AgentsVue({ agents: initial, vue }: { agents: AgentListe
   const [issue, setIssue] = useState("");
   const [retardSeul, setRetardSeul] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [sync, setSync] = useState<{ etat: "idle" | "encours"; message: string | null }>({
+    etat: "idle",
+    message: null,
+  });
 
   /* Le département est le filtre du terrain : les zones de livraison sont 33,
      40 et 64, et une campagne de phoning se mène département par département. */
@@ -168,6 +172,32 @@ export default function AgentsVue({ agents: initial, vue }: { agents: AgentListe
     }
   }
 
+  /**
+   * Rafraîchit la colonne « dernier email » — **un seul appel Brevo pour toutes
+   * les agences**. Lire l'historique agence par agence ferait autant de requêtes
+   * que de lignes ; c'est la raison d'être de la dénormalisation (§4).
+   */
+  async function rafraichirEmails() {
+    setSync({ etat: "encours", message: null });
+    try {
+      const res = await fetch("/api/admin/agents/sync-emails", { method: "POST" });
+      const body = (await res.json()) as {
+        error?: string;
+        misAJour?: number;
+        adressesVuesChezBrevo?: number;
+      };
+      if (!res.ok) throw new Error(body.error ?? "Rafraîchissement refusé");
+      setSync({
+        etat: "idle",
+        message: `${body.misAJour ?? 0} fiche(s) mise(s) à jour — ${body.adressesVuesChezBrevo ?? 0} adresse(s) vue(s) chez Brevo.`,
+      });
+      router.refresh();
+    } catch (e) {
+      setSync({ etat: "idle", message: null });
+      setErreur(e instanceof Error ? e.message : "Erreur");
+    }
+  }
+
   const href = (v: Vue) => (v === "tableau" ? "/admin/agents" : "/admin/agents?vue=kanban");
 
   return (
@@ -231,6 +261,16 @@ export default function AgentsVue({ agents: initial, vue }: { agents: AgentListe
           En retard
         </button>
 
+        <button
+          type="button"
+          onClick={rafraichirEmails}
+          disabled={sync.etat === "encours"}
+          title="Relit chez Brevo le dernier email reçu par chaque agence"
+          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/50 transition-colors hover:bg-white/10 disabled:opacity-40"
+        >
+          {sync.etat === "encours" ? "Lecture…" : "↻ Emails"}
+        </button>
+
         <div className="flex overflow-hidden rounded-xl border border-white/10">
           {(["tableau", "kanban"] as Vue[]).map((v) => (
             <Link
@@ -253,6 +293,7 @@ export default function AgentsVue({ agents: initial, vue }: { agents: AgentListe
         {" · "}silence signalé au-delà de {SLA_JOURS} jours
       </p>
 
+      {sync.message && <p className="mb-3 text-xs text-white/40">{sync.message}</p>}
       {erreur && <p className="mb-3 text-sm text-red-400">{erreur}</p>}
 
       {vue === "kanban" ? (

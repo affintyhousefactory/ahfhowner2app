@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:vocabulaire": "node scripts/check-vocabulaire.mjs",
+    "check:vocabulaire:brevo": "node --env-file-if-exists=.env.local scripts/check-vocabulaire-brevo.mjs",
     "check:echeancier": "node scripts/check-echeancier.mjs",
     "build:cgv": "node scripts/build-cgv.mjs",
     "build:emails": "node scripts/build-email-brevo.mjs"

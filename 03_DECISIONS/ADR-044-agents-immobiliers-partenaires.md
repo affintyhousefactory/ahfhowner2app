@@ -141,7 +141,9 @@ Rendre `lead_appels.lead_id` nullable, poser un CHECK d'exclusivité et réécri
 
 `npm run check:vocabulaire` **ne peut pas les voir** : il scanne `src/`, et ces textes vivent chez Brevo. C'est la huitième occurrence de « un contrôle qui n'observe pas la sortie réelle ne contrôle rien » — et cette fois le texte non contrôlé est celui qu'un client lit.
 
-**Décision** : le script gagne un mode `--brevo` qui lit les templates par l'API et leur applique la même blocklist. Il n'entre **pas** dans la porte de PR (il exige `BREVO_API_KEY`, absente du poste de contrôle) : il se lance à la main avant toute campagne, et c'est cette obligation qui compte.
+**Décision** : un second script, `scripts/check-vocabulaire-brevo.mjs`, lit les templates par l'API et leur applique la même blocklist. Celle-ci sort dans `scripts/vocabulaire-proscrits.mjs`, importée par les deux — la dupliquer aurait recréé exactement ce qu'ADR-029 combat. Il n'entre **pas** dans la porte de PR : il exige `BREVO_API_KEY`, absente du poste de contrôle, et un template se corrige dans Brevo sans qu'aucun commit ne l'accompagne — un échec de CI serait alors indéchiffrable. Il se lance à la main avant toute campagne et après toute retouche, et c'est cette obligation qui compte. Seuls les templates **actifs** sont contrôlés : faire échouer le garde-fou sur des brouillons abandonnés, c'est le condamner à ne plus être lancé.
+
+**Premier passage, 2026-08-31 au soir : 11 occurrences sur 12 templates actifs** — 22 (« maison »), 23 et 24 (« maison » ×4 chacun, « clé en main »). Les 23 et 24 avaient été réécrits dans la journée : « catalogue » et « résidence principale » ont disparu, « constructeur de maisons compactes » et « clé en main » sont apparus. C'est l'argument du contrôle automatique — une relecture humaine ne tient pas ce rythme.
 
 Les corrections de texte relèvent de Richard, dans le dashboard Brevo — les templates ne sont pas versionnés dans le dépôt et le code n'a pas à réécrire un message commercial.
 

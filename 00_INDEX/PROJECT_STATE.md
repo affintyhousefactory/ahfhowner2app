@@ -71,6 +71,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | **Agents immo — liste + Kanban** | `(admin)/admin/(protected)/agents/page.tsx`, `components/admin/AgentsVue.tsx`, `src/lib/agents.ts` | ✅ lot 1 écrit (branche) — 7 statuts de partenariat, filtre département, colonne « dernier email », leads apportés | ✅ migration `20260831_agents_immo` **appliquée Preview le 2026-08-31** (`20260831145326`), vérifiée par requête + écritures réelles annulées, `get_advisors` propre. Prod à la fusion | 044 |
 | **Agents immo — vivier Brevo** | `(admin)/…/agents/vivier/page.tsx`, `components/admin/VivierBrevo.tsx`, `shared/lib/brevo-agents.ts`, `api/admin/agents/brevo` | ✅ lot 2 (branche) — liste 9 lue côté serveur, moins les agences suivies ; « Suivre » crée la fiche pré-remplie en un clic | vérifier en Preview | 044 |
 | **Agents immo — fiche + journal d'appels** | `(admin)/…/agents/[id]/page.tsx`, `AgentIdentite.tsx`, `JournalAppels.tsx`, `api/admin/agents{,/[id]{,/appels}}` | ✅ lot 2 (branche) — 3 onglets (identité, appels, leads apportés) ; `LeadAppels` généralisé en `JournalAppels`, la fiche lead bascule dessus | vérifier en Preview | 044, 035 |
+| **Agents immo — emails Brevo** | `AgentEmails.tsx`, `shared/lib/{brevo-emails,presentation-agence}.ts`, `api/admin/agents/[id]/{emails,presentation{,/apercu}}`, `api/admin/agents/sync-emails` | ✅ lot 3 (branche) — historique lu en direct (envois + événements), envoi du template 23 après aperçu obligatoire, rafraîchissement global en 1 appel | ⚠ `BREVO_TEMPLATE_AGENCES` absente → envoi inerte | 044, 026 |
 | Email confirmations contact | `src/app/api/contact/route.ts`, `src/lib/email.ts` | ✅ Brevo template `10` — câblé | — | 026 |
 | Email recap configurateur/terrain | `src/app/api/recherche-terrain/route.ts` | ✅ Brevo template `9` — câblé | — | 026 |
 | Analyse terrain (adresse + PLU) | `src/components/site/ParcelleAnalyse.tsx`, `src/app/api/parcelle/route.ts` | BAN → apicarto geom → GPU coords | — | 011,025 |
@@ -146,6 +147,9 @@ BREVO_TEMPLATE_INVESTISSEUR=22     # cible 5 — particuliers investisseurs
 # Deux templates, deux gestes : ils ne sont PAS interchangeables.
 BREVO_TEMPLATE_AGENCES=23          # transactionnel (`params.*`) — envoi unitaire
                                    #   depuis la fiche agent, après un appel.
+                                   # ⚠ ABSENTE des 3 scopes au 2026-08-31 : l'onglet
+                                   #   Emails lit bien l'historique, mais le bouton
+                                   #   « Envoyer » reste désactivé et le dit à l'écran.
 BREVO_TEMPLATE_AGENCES_CAMPAGNE=24 # campagne (`contact.AGENCE_OU_ENSEIGNE`) —
                                    #   envoi de masse sur la liste 9, lancé
                                    #   DEPUIS BREVO, pas par notre code.
@@ -156,6 +160,11 @@ BREVO_TEMPLATE_AGENCES_CAMPAGNE=24 # campagne (`contact.AGENCE_OU_ENSEIGNE`) —
 # Liste « Agents » (id 9, 167 contacts au 2026-08-31) — repli codé « 9 » :
 # se tromper de liste ne fait rien partir, au pire le vivier est vide.
 # NEXT_PUBLIC_BREVO_LIST_AGENTS=9
+# Rafraîchissement planifié du « dernier email » (ADR-044 §4) — facultatif.
+# Absente = le chemin sans session est FERMÉ, seul l'écran peut rafraîchir.
+# Aucun cron n'est déclaré : le projet n'a pas de vercel.json, en poser un est
+# une décision de déploiement à prendre séparément.
+# CRON_SECRET=
 
 # Sourcing commercial (ADR-035 § Amendement 2026-08-28 soir) — aucune variable :
 # les 8 valeurs vivent dans src/lib/crm.ts et sont contraintes par leads_sourcing_check.
