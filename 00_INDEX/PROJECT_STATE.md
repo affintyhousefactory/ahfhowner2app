@@ -68,11 +68,11 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | **CRM — configuration v2 sur le lead** | `components/admin/LeadConfiguration.tsx`, `src/lib/crm.ts` | ✅ livré (branche) — `config_v2` + `cfg_*`, libellés résolus par `loadConfig()` | alimenté par ADR-031 | 035, 030 |
 | **CRM — récapitulatif d'appel par cible** | `src/lib/crm.ts` (`choixEmailRecap`), `shared/lib/recap-client.ts`, `api/admin/leads/[id]/recap-client{,/apercu}` | ✅ livré (branche) — 7 modèles, l'écran annonce lequel part et sous quel objet | vérifier en Preview | 035, 026 |
 | **CRM — GED Client double origine** | `components/admin/LeadClientDocuments.tsx` | ✅ livré (branche) — `origine` ahf/client, `categorie`, pièces manquantes | dépôt client = ADR-034 | 035, 027 |
-| **Agents immo — liste + Kanban** | `(admin)/admin/(protected)/agents/page.tsx`, `components/admin/AgentsVue.tsx`, `src/lib/agents.ts` | ✅ lot 1 écrit (branche) — 7 statuts de partenariat, filtre département, colonne « dernier email », leads apportés | ✅ migration `20260831_agents_immo` **appliquée Preview le 2026-08-31** (`20260831145326`), vérifiée par requête + écritures réelles annulées, `get_advisors` propre. Prod à la fusion | 044 |
-| **Agents immo — vivier Brevo** | `(admin)/…/agents/vivier/page.tsx`, `components/admin/VivierBrevo.tsx`, `shared/lib/brevo-agents.ts`, `api/admin/agents/brevo` | ✅ lot 2 (branche) — liste 9 lue côté serveur, moins les agences suivies ; « Suivre » crée la fiche pré-remplie en un clic | vérifier en Preview | 044 |
-| **Agents immo — fiche + journal d'appels** | `(admin)/…/agents/[id]/page.tsx`, `AgentIdentite.tsx`, `JournalAppels.tsx`, `api/admin/agents{,/[id]{,/appels}}` | ✅ lot 2 (branche) — 3 onglets (identité, appels, leads apportés) ; `LeadAppels` généralisé en `JournalAppels`, la fiche lead bascule dessus | vérifier en Preview | 044, 035 |
-| **Agents immo — emails Brevo** | `AgentEmails.tsx`, `shared/lib/{brevo-emails,presentation-agence}.ts`, `api/admin/agents/[id]/{emails,presentation{,/apercu}}`, `api/admin/agents/sync-emails` | ✅ lot 3 (branche) — historique lu en direct (envois + événements), envoi du template 23 après aperçu obligatoire, rafraîchissement global en 1 appel | ⚠ `BREVO_TEMPLATE_AGENCES` absente → envoi inerte | 044, 026 |
-| **Agents immo — apporteur sur le lead** | `leads/nouveau/page.tsx`, `LeadEditIdentite.tsx`, `(admin)/admin/(protected)/page.tsx`, `api/admin/agents` (GET), `api/admin/leads{,/[id]}` | ✅ lot 4 (branche) — sélecteur d'agence quand `sourcing = partenaire`, agence lisible sur la fiche, bande « Agences partenaires » au dashboard (hors compteurs de leads) | vérifier en Preview | 044, 035 |
+| **Agents immo — liste + Kanban** | `(admin)/admin/(protected)/agents/page.tsx`, `components/admin/AgentsVue.tsx`, `src/lib/agents.ts` | ✅ **en production** — 7 statuts de partenariat, filtre département, colonne « dernier email », leads apportés | ✅ **EN PRODUCTION** — migration `20260831_agents_immo` appliquée **Preview et Prod** le 2026-08-31, vérifiée par requête puis par écritures réelles annulées (7 contrôles), `get_advisors` propre, 12 leads intacts | 044 |
+| **Agents immo — vivier Brevo** | `(admin)/…/agents/vivier/page.tsx`, `components/admin/VivierBrevo.tsx`, `shared/lib/brevo-agents.ts`, `api/admin/agents/brevo` | ✅ **en production** — liste 9 lue côté serveur, moins les agences suivies ; « Suivre » crée la fiche pré-remplie en un clic | ✅ en production (PR #114) | 044 |
+| **Agents immo — fiche + journal d'appels** | `(admin)/…/agents/[id]/page.tsx`, `AgentIdentite.tsx`, `JournalAppels.tsx`, `api/admin/agents{,/[id]{,/appels}}` | ✅ **en production** — 3 onglets (identité, appels, leads apportés) ; `LeadAppels` généralisé en `JournalAppels`, la fiche lead bascule dessus | ✅ en production (PR #114) | 044, 035 |
+| **Agents immo — emails Brevo** | `AgentEmails.tsx`, `shared/lib/{brevo-emails,presentation-agence}.ts`, `api/admin/agents/[id]/{emails,presentation{,/apercu}}`, `api/admin/agents/sync-emails` | ✅ **en production** — historique lu en direct (envois + événements), envoi du template 23 après aperçu obligatoire, rafraîchissement global en 1 appel | ✅ en production — `BREVO_TEMPLATE_AGENCES=23` posée sur les 3 scopes le 2026-08-31 | 044, 026 |
+| **Agents immo — apporteur sur le lead** | `leads/nouveau/page.tsx`, `LeadEditIdentite.tsx`, `(admin)/admin/(protected)/page.tsx`, `api/admin/agents` (GET), `api/admin/leads{,/[id]}` | ✅ **en production** (PR #114) — sélecteur d'agence quand `sourcing = partenaire`, agence lisible sur la fiche, bande « Agences partenaires » au dashboard (hors compteurs de leads) | — | 044, 035 |
 | Email confirmations contact | `src/app/api/contact/route.ts`, `src/lib/email.ts` | ✅ Brevo template `10` — câblé | — | 026 |
 | Email recap configurateur/terrain | `src/app/api/recherche-terrain/route.ts` | ✅ Brevo template `9` — câblé | — | 026 |
 | Analyse terrain (adresse + PLU) | `src/components/site/ParcelleAnalyse.tsx`, `src/app/api/parcelle/route.ts` | BAN → apicarto geom → GPU coords | — | 011,025 |
@@ -144,13 +144,11 @@ BREVO_TEMPLATE_INVESTISSEUR=22     # cible 5 — particuliers investisseurs
 # ⚠ Les modèles 18 à 21 ouvrent leur **objet** sur `ETABLISSEMENT` (raison sociale) ;
 #   le 22 annonce « il reste N numéros sur les 6 », compté en base à l'envoi.
 
-# Agents immobiliers partenaires (ADR-044) — ⏳ À POSER sur les 3 scopes.
+# Agents immobiliers partenaires (ADR-044) — ✅ POSÉES sur les 3 scopes le 2026-08-31.
 # Deux templates, deux gestes : ils ne sont PAS interchangeables.
 BREVO_TEMPLATE_AGENCES=23          # transactionnel (`params.*`) — envoi unitaire
                                    #   depuis la fiche agent, après un appel.
-                                   # ⚠ ABSENTE des 3 scopes au 2026-08-31 : l'onglet
-                                   #   Emails lit bien l'historique, mais le bouton
-                                   #   « Envoyer » reste désactivé et le dit à l'écran.
+                                   # ✅ posée sur les 3 scopes le 2026-08-31.
 BREVO_TEMPLATE_AGENCES_CAMPAGNE=24 # campagne (`contact.AGENCE_OU_ENSEIGNE`) —
                                    #   envoi de masse sur la liste 9, lancé
                                    #   DEPUIS BREVO, pas par notre code.
@@ -203,6 +201,39 @@ ANTHROPIC_API_KEY=                 # optionnel (ADR-017)
 ```
 Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO_BASE_EUR`) — ADR-003.
 
+## Dernier point — 2026-08-31 (soir)
+
+**`main` = `dfe8f653`.** ADR-044 livrée de bout en bout : quatre lots, deux PR (#113 → `dev`, #114 → `main`), migration appliquée **sur les deux bases**.
+
+Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se mélangent nulle part — ni en table, ni au Kanban, ni au dashboard.
+
+- **Un agent immobilier n'est pas un lead** — il prescrit, il n'achète pas. Verser 167 agences dans `leads` aurait noyé les prospects et détruit l'entonnoir. Arbitrage de Richard, énoncé deux fois.
+- **Les 167 contacts ne sont pas copiés.** Brevo reste le fichier de prospection ; la base ne porte que les agences prises en suivi. Le vivier fait la soustraction à la volée.
+- **`leads.agent_id` est l'assiette de la future commission**, pas un champ de confort — et il s'efface si le sourcing change.
+- **Deux templates, deux gestes.** Le 23 (`params.*`) part à l'unité depuis la fiche ; le 24 (`contact.*`) est une campagne lancée depuis Brevo. Les intervertir enverrait un email aux variables vides.
+
+## ⚠ Le garde-fou vocabulaire avait un angle mort — fermé
+
+`check-vocabulaire.mjs` scanne `src/`. **Les textes que les clients lisent le plus vivent chez Brevo.** Premier passage du nouveau `check:vocabulaire:brevo` : **11 infractions sur 12 templates actifs**, dont le 22 qui partait en production ce matin-là. Corrigées (12 reprises), et **un treizième template créé entre deux passages portait déjà la même faute**.
+
+> **Règle** : lancer `npm run check:vocabulaire:brevo` **après chaque template créé ou retouché**. La porte de PR ne verra jamais ces textes — ils ne sont pas dans le dépôt.
+
+## Leçons de la session
+
+- **Une URL Vercel à hash fige un commit.** Redéployer `670f9x3r0` a renvoyé Richard sur le lot 2, sans onglet Emails. **Toujours donner l'alias de branche**, jamais l'URL à hash.
+- **`vercel redeploy` rejoue le code de CE déploiement**, pas la tête de branche : vérifier le `githubCommitSha` avant.
+- **Une valeur d'env de Preview/Production ne se relit pas** par l'API (chiffrée) — la preuve est à l'écran, pas dans `vercel env pull`.
+- **`now()` est figé sur toute une transaction** : un test de trigger `updated_at` dans un bloc unique conclut à tort qu'il est inerte. Tester par écrasement d'une date antidatée.
+- **ESLint refuse un `setState` atteignable de façon synchrone dans un effet** — `Promise.allSettled` ne convainc pas l'analyseur ; reprendre la forme de `JournalAppels`.
+- Un contrôle qui n'observe pas la sortie réelle ne contrôle rien — **huitième occurrence**.
+
+## Prochaine action
+
+1. **🔴 Alerte Albert / avocat** — les templates 23 et 24 promettent une **commission d'apporteur** à 167 agences immobilières sans cadre juridique. Loi Hoguet, carte professionnelle, information du client de l'agent. **Le volet « contrat d'apporteur » ne démarre pas avant.**
+2. Ouvrir `howner.fr/*` et `www.howner.fr/*` dans les référents de la clé Google Places.
+3. Cron de rafraîchissement des emails — un `vercel.json` + `CRON_SECRET`, à décider.
+4. **Temps 2 du CRM** — aucune issue d'appel ne décrit un rendez-vous.
+
 ## Index ADR (`03_DECISIONS/`)
 
 | ADR | Titre | Statut | Faisabilité |
@@ -250,7 +281,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 039 | **Authentification réelle du back-office** — session en cookie, garde au proxy, gardes serveur sur 10 pages et 26 handlers, policies RLS corrigées | **Accepté — livré et VÉRIFIÉ EN PRODUCTION le 2026-08-25** (PR #89) ; fuite fermée, migration appliquée | ✅ |
 | 040 | **Pages produit « Heure bleue »** — refonte des deux pages produit, fond sombre, quatre moments framer-motion, copy réécrit (amende 002) | **Accepté — livré, à vérifier en Preview** ; **alerte Albert** (écart assumé à la charte Affinity) | ✅ |
 | 041 | **Charte « Heure bleue »** — deux registres, accent chaud, teintes en tokens (remplace 002) | **Accepté — socle livré, application par lots** ; **alerte Albert** | ✅ |
-| 044 | **Domaine « Agents immobiliers partenaires »** — table dédiée `agents_immo` (≠ leads), vivier lu dans la liste Brevo `Agents` (id 9, 167 contacts), journal d'appels, suivi du dernier email, `leads.agent_id` comme assiette de la future commission | **Accepté — à construire (4 lots)** ; templates **23** (unitaire) et **24** (campagne) rédigés. ⚠ **alerte Albert** : le template 24 promet une commission d'apporteur avant tout cadre juridique (loi Hoguet) ; **4 templates Brevo actifs violent ADR-029**, dont le 22 en production | ✅ |
+| 044 | **Domaine « Agents immobiliers partenaires »** — table dédiée `agents_immo` (≠ leads), vivier lu dans la liste Brevo `Agents` (id 9, 167 contacts), journal d'appels, suivi du dernier email, `leads.agent_id` comme assiette de la future commission | **Accepté — LIVRÉ ET EN PRODUCTION le 2026-08-31** (PR #113 → `dev`, #114 → `main`), 4 lots ; templates **23** (unitaire) et **24** (campagne) rédigés. ⚠ **alerte Albert** : le template 24 promet une commission d'apporteur avant tout cadre juridique (loi Hoguet) ; **4 templates Brevo actifs violent ADR-029**, dont le 22 en production | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
