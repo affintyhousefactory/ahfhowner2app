@@ -30,7 +30,7 @@ export default async function AgentsPage({
   const supabase = getSupabaseAdmin();
 
   /* `error` est lu, et pas seulement `data` : cette requête nomme des colonnes
-     que seule la migration `20260901_agents_immo` crée. Tant qu'elle n'est pas
+     que seule la migration `20260831_agents_immo` crée. Tant qu'elle n'est pas
      appliquée, PostgREST rejette la requête en bloc (`42703`) et `data ?? []`
      afficherait sereinement « aucune agence » — c'est arrivé en production sur
      les leads. */
