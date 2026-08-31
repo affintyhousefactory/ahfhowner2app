@@ -501,6 +501,107 @@ retirant le handler (inutile : la ligne du tableau n'est pas cliquable).
 gestionnaire d'événement. Vérification faite sur tout le back-office —
 `TelephoneLien` était le seul cas.
 
+## Amendement du 2026-08-31 — un email par cible commerciale
+
+Le récapitulatif d'appel n'avait que deux formes : **chiffré** quand une
+configuration était arrêtée, **générique** quand rien ne l'était (drapeau
+`multi_configuration`, amendement du 2026-08-28, point 5). Cette seconde forme
+parlait à tout le monde de la même manière. Cinq modèles ont été écrits chez
+Brevo, un par cible du script de phoning ; ils prennent sa place quand la cible
+est connue.
+
+### 1. La règle — la cible sectorise la présentation, elle ne décide pas du prix
+
+```
+multi_configuration = true ?
+  ├─ hpa            → 18  Camping         ├─ collectivites → 21  Collectivité
+  ├─ tourisme       → 20  Hôtel           ├─ investisseurs → 22  Investisseur
+  ├─ medico_social  → 19  Médico-social   └─ cible absente → 17  Générique
+sinon               →  9  Récapitulatif chiffré
+```
+
+**Deux lectures de la demande étaient possibles**, et elles ne donnaient pas le
+même produit. Ou bien la cible prime toujours — un lead « camping » reçoit
+l'email camping, chiffrage ou pas ; ou bien elle ne sectorise que le cas où il
+n'y a rien à chiffrer. **Richard a tranché pour la seconde le 2026-08-31.**
+
+Le motif est dans les modèles eux-mêmes : les cinq présentations sectorielles ne
+portent **aucun montant**. Les servir à un lead dont la configuration est
+arrêtée priverait le client du prix qu'on vient de lui annoncer au téléphone —
+et le seul document écrit de cet appel disparaîtrait. La cible dit *à qui* on
+parle ; `multi_configuration` dit *s'il y a un prix*. Deux questions distinctes,
+deux axes qui ne se recouvrent pas.
+
+Corollaire : une cible commerciale renseignée ne change **rien** pour un lead
+chiffré. C'est voulu, et c'est ce qui rend la règle sûre — aucun réglage
+commercial ne peut faire disparaître un chiffrage.
+
+### 2. Où vit la règle, et pourquoi pas ailleurs
+
+`choixEmailRecap()` est dans `src/lib/crm.ts`, **pure et sans `process.env`** :
+l'écran d'appel s'en sert pour annoncer au conseiller ce qui partira, et il
+tourne dans le navigateur. `src/shared/lib/recap-client.ts` la complète du
+numéro de template, qui ne quitte pas le serveur. La règle est écrite une fois,
+sa traduction en identifiant une autre — jamais l'inverse.
+
+La table des templates est un `Record<CleEmailRecap, …>`, **exhaustif par
+construction**. Le jour où une sixième cible sera ajoutée à
+`CIBLES_COMMERCIALES`, ce fichier cessera de compiler tant que son email n'aura
+pas été décidé. Un `switch` avec un `default` aurait silencieusement envoyé la
+présentation générique à la nouvelle cible — c'est-à-dire livré une régression
+sans le dire.
+
+### 3. L'écran cesse de deviner
+
+Sept modèles possibles : personne ne peut plus savoir de tête lequel part. La
+fiche affiche donc **le modèle retenu sans appel réseau** — même règle des deux
+côtés — et **l'objet réel de l'email** à l'ouverture de l'aperçu
+(`?meta=1`, qui rend le sujet du template peuplé des valeurs du lead).
+
+L'objet compte double ici : celui des quatre présentations « personne morale »
+s'ouvre sur la raison sociale (`{{ params.ETABLISSEMENT }} — une suite de plus,
+sans fermer une journée`), et **aucun rendu du corps ne le montrait**. Une
+variable de template absente du scope Vercel se dit maintenant *avant* le clic,
+plus en 500 après.
+
+⚠ Le chargement se fait **au clic, jamais dans un effet**. React 19 refuse qu'un
+effet déclenche un `setState`, et il a raison : rien n'oblige à interroger Brevo
+à chaque fiche ouverte, alors que le conseiller ne relit qu'au moment d'envoyer.
+
+### 4. Deux façons de mentir, deux refus
+
+- **Raison sociale absente.** L'objet commencerait par un tiret. Repli neutre
+  « Votre établissement », et l'écran signale l'absence pour qu'on la comble
+  plutôt que de la subir. On n'a pas bloqué l'envoi : au téléphone, la raison
+  sociale exacte n'est pas toujours obtenue au premier appel — c'est la même
+  raison qui a rendu l'email facultatif (amendement du 2026-08-28, point 2).
+- **Numéros restants introuvables.** Le modèle « investisseur » annonce « il
+  reste N numéros sur les 6 de la série ». Une base muette donnerait un zéro
+  inventé, qui **déclarerait la série épuisée** à un prospect prêt à acheter.
+  L'envoi est refusé (503) plutôt que faux. La rareté est un argument de vente :
+  elle se dit juste, ou pas du tout.
+
+Le comptage sort du tunnel public (`/api/configurateur/reservation`) vers
+`src/shared/lib/numeros-serie.ts`. Deux définitions de « numéro pris » auraient
+fini par diverger — l'une refusant un numéro que l'autre annonce libre dans un
+email. `null` y signifie « on ne sait pas », et **ce n'est pas zéro** : le tunnel
+ne propose alors aucun numéro, le récapitulatif refuse de partir.
+
+### 5. Ce qui reste ouvert
+
+⚠ **Le modèle 22 écrit « sur les 6 de la série » en dur chez Brevo.** Seul le
+nombre restant est une variable. Si le volume de la Série 01 change — il est
+passé de 12 à 6 le 2026-08-04 — l'email mentira sans que le code puisse l'en
+empêcher, alors que `SERIE_TOTAL` (`src/lib/site.ts`) est la source unique côté
+site. À corriger dans l'éditeur Brevo en ajoutant une seconde variable.
+
+⚠ **Les identifiants ne sont pas vérifiables depuis la CLI Vercel** — les
+valeurs chiffrées ne sont pas restituées. La présence des cinq variables est
+confirmée sur Preview et Production (2026-08-31) ; leur **valeur** se contrôle
+en Preview, où l'écran affiche « template N » à côté du modèle retenu. Attention
+au couple contre-intuitif : cible 2 (hôtels) → **20**, cible 3 (médico-social) →
+**19**.
+
 ## Faisabilité
 
 - **Verdict** : ✅ Élevée. Aucune API externe, aucune clé, aucun service nouveau. Une migration additive.
