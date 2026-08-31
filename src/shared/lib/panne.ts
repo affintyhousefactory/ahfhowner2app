@@ -58,6 +58,12 @@ export type SourcePanne =
   | "contact/brevo"
   | "admin/leads"
   | "admin/dashboard"
+  /* Domaine « Agents immobiliers partenaires » (ADR-044) — lecture de la table
+     et interrogation de la liste Brevo, qui n'échouent pas pour les mêmes
+     raisons : la première dit que la migration manque, la seconde que le
+     fichier de prospection est hors d'atteinte. */
+  | "admin/agents"
+  | "admin/agents/brevo"
   /* Soumission du configurateur v2 — ADR-031. Le type est fermé à dessein :
      une source non déclarée ne compile pas, ce qui empêche un journal de
      panne d'apparaître sous un nom improvisé et de devenir infiltrable. */

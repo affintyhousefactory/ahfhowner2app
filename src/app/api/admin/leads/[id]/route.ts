@@ -47,6 +47,14 @@ const ALLOWED_FIELDS = [
      `source`, absente de cette liste à dessein — le canal technique de création
      ne se corrige pas, il constate. */
   "sourcing",
+  /* Agence apporteuse (ADR-044 §5). Corrigeable après coup : le conseiller
+     apprend souvent en fin d'appel *qui* a recommandé Howner, et cette colonne
+     est l'assiette de la future commission — la laisser fausse coûterait plus
+     qu'un champ de plus dans la liste blanche.
+
+     ⚠ À ne confondre ni avec `mandataire_id` (domaine suspendu, ADR-028), ni
+     avec `responsable` (le conseiller AHF). Trois notions, trois colonnes. */
+  "agent_id",
   // Suivi CRM — ADR-035 §1 et §2. `responsable` = conseiller AHF, sans rapport
   // avec `mandataire_id` (domaine suspendu, ADR-028).
   "responsable", "responsable_at", "prochain_rappel_at",

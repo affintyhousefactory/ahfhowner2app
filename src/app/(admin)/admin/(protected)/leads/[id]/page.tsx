@@ -19,10 +19,10 @@ import LeadDocuments from "@/components/admin/LeadDocuments";
 import LeadClientDocuments from "@/components/admin/LeadClientDocuments";
 import LeadStatutCommercial from "@/components/admin/LeadStatutCommercial";
 import LeadConfiguration from "@/components/admin/LeadConfiguration";
-import LeadAppels from "@/components/admin/LeadAppels";
+import JournalAppels from "@/components/admin/JournalAppels";
 import { LeadOnglets } from "@/components/admin/LeadOnglets";
 import { FEATURES } from "@/lib/features";
-import { etatSuivi, dateHeureFr } from "@/lib/crm";
+import { etatSuivi, dateHeureFr, STATUTS_COMMERCIAUX } from "@/lib/crm";
 import { estAdmin } from "@/shared/lib/supabase-server";
 import { redirect } from "next/navigation";
 
@@ -74,6 +74,15 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
   ]);
 
   if (!lead) notFound();
+
+  /* Nom de l'agence apporteuse (ADR-044 §5). Requête séparée et conditionnelle
+     plutôt qu'une jointure : `agent_id` est nul sur l'immense majorité des
+     leads, et une jointure la paierait sur chacun. Un échec est sans gravité —
+     la fiche affiche alors le rattachement comme absent, jamais faux. */
+  const agentId = (lead as { agent_id?: string | null }).agent_id ?? null;
+  const { data: agentApporteur } = agentId
+    ? await supabase.from("agents_immo").select("agence").eq("id", agentId).maybeSingle()
+    : { data: null };
 
   // Exclusivité territoriale (ADR-026/CGU) : ≥10 fiches terrain actives publiées
   const nbActivesParMandataire = new Map<string, number>();
@@ -140,7 +149,10 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
             titre: "Contact & société",
             contenu: (
               <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-                <LeadEditIdentite lead={lead} />
+                <LeadEditIdentite
+                  lead={lead}
+                  agenceApporteuse={(agentApporteur as { agence?: string } | null)?.agence ?? null}
+                />
               </div>
             ),
           },
@@ -201,11 +213,13 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
             compte: nbAppels ?? 0,
             contenu: (
               <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-                <LeadAppels
-                  leadId={id}
+                <JournalAppels
+                  endpoint={`/api/admin/leads/${id}/appels`}
                   tel={lead.tel ?? null}
                   responsable={lead.responsable ?? null}
-                  statutCommercialActuel={lead.statut_commercial ?? null}
+                  statuts={STATUTS_COMMERCIAUX}
+                  statutActuel={lead.statut_commercial ?? null}
+                  statutChamp="statut_commercial"
                 />
               </div>
             ),
