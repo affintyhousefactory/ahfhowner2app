@@ -59,6 +59,9 @@ interface LeadIdentite {
   derniere_issue?: string | null;
   multi_configuration?: boolean | null;
   sourcing?: string | null;
+  /* Agence apporteuse (ADR-044 §5). Optionnelle : la colonne arrive avec
+     `20260831_agents_immo.sql`, et le code tourne avant comme après. */
+  agent_id?: string | null;
   raison_sociale?: string | null;
   siren?: string | null;
   site_web?: string | null;
@@ -98,6 +101,7 @@ function etatInitial(lead: LeadIdentite) {
     cible_commerciale: lead.cible_commerciale ?? "",
     derniere_issue: lead.derniere_issue ?? "",
     sourcing: lead.sourcing ?? "",
+    agent_id: lead.agent_id ?? "",
     raison_sociale: lead.raison_sociale ?? "",
     siren: lead.siren ?? "",
     site_web: lead.site_web ?? "",
@@ -122,9 +126,19 @@ const STATUTS = [
   "qualifié", "affecté", "en_cours", "finalisé", "perdu",
 ];
 
-export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
+export default function LeadEditIdentite({
+  lead,
+  /** Nom de l'agence apporteuse, résolu par la page (ADR-044 §5). */
+  agenceApporteuse = null,
+}: {
+  lead: LeadIdentite;
+  agenceApporteuse?: string | null;
+}) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
+  /* Agences apporteuses (ADR-044 §5) — chargées quand le sourcing les réclame,
+     pas à l'ouverture de la fiche : huit sourcings sur neuf n'en ont pas besoin. */
+  const [agences, setAgences] = useState<{ id: string; agence: string; commune: string | null }[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const containerRef    = useRef<HTMLDivElement>(null);
@@ -215,6 +229,10 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
           cible_commerciale: form.cible_commerciale || null,
           derniere_issue: form.derniere_issue || null,
           sourcing: form.sourcing || null,
+          /* Rattaché seulement si le sourcing le dit : un `agent_id` laissé
+             derrière un changement d'avis attribuerait une commission à qui
+             n'a rien apporté. */
+          agent_id: form.sourcing === "partenaire" ? form.agent_id || null : null,
           total_estime: form.total_estime ? Number(form.total_estime) : null,
           responsable: form.responsable || null,
           // Horodate la prise en charge, et seulement quand elle change : sinon
@@ -280,6 +298,10 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
             ["Adresse société", [lead.adresse_societe, lead.cp_societe, lead.ville_societe].filter(Boolean).join(" · ") || null],
             ["Cible commerciale", cibleCommerciale(lead.cible_commerciale)?.label ?? null],
             ["Sourcing", sourcing(lead.sourcing)?.label ?? null],
+            /* Résolu par la page, pas stocké sur le lead : le nom d'une agence
+               change, son identifiant non. Même règle que les libellés de
+               configuration (ADR-035 §4) — stocker un libellé, c'est le figer. */
+            ["Agence apporteuse", agenceApporteuse],
             /* Affiché seulement quand c'est vrai : « non » n'apprend rien, et la
                liste ne rend que les valeurs non nulles. */
             ["Configuration", lead.multi_configuration ? "Multi-Configuration — à arbitrer" : null],
@@ -598,13 +620,48 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
 
           <div>
             <label className={labelCls}>Sourcing / Origine</label>
-            <select className={inputCls} value={form.sourcing} onChange={set("sourcing")}>
+            <select
+              className={inputCls}
+              value={form.sourcing}
+              onChange={(e) => {
+                const choix = e.target.value;
+                setForm((f) => ({ ...f, sourcing: choix }));
+                if (choix === "partenaire" && agences.length === 0) {
+                  fetch("/api/admin/agents")
+                    .then((r) => (r.ok ? r.json() : { agents: [] }))
+                    .then((b) => setAgences(b.agents ?? []))
+                    .catch(() => {
+                      /* Une liste indisponible ne bloque pas l'enregistrement :
+                         le champ reste vide, le reste de la fiche s'écrit. */
+                    });
+                }
+              }}
+            >
               <option value="">— Non renseignée</option>
               {SOURCINGS.map((o) => (
                 <option key={o.id} value={o.id}>{o.label}</option>
               ))}
             </select>
           </div>
+
+          {/* ⚠ N'apparaît que sur « Partenaire ». Ce rattachement est l'assiette
+              d'une future commission d'apporteur (ADR-044 §5) : reconstituer
+              après coup qui a présenté qui serait impossible. */}
+          {form.sourcing === "partenaire" && (
+            <div>
+              <label className={labelCls}>Agence apporteuse</label>
+              <select className={inputCls} value={form.agent_id} onChange={set("agent_id")}>
+                <option value="">
+                  {agences.length ? "— À rattacher plus tard" : "Chargement…"}
+                </option>
+                {agences.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {[a.agence, a.commune].filter(Boolean).join(" — ")}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* ⚠ Rattrapage, pas source. Le trigger repose cette valeur depuis
               `lead_appels` au prochain appel journalisé : corriger ici règle

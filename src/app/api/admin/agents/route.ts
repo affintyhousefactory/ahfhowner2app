@@ -23,6 +23,34 @@ const CHAMPS = [
 
 const STATUTS = STATUTS_PARTENARIAT.map((s) => s.id) as readonly string[];
 
+/**
+ * Liste légère des agences — sert le sélecteur d'apporteur de l'écran de
+ * pré-qualification (ADR-044 §5).
+ *
+ * Volontairement pauvre : trois colonnes, pas la fiche. Le sélecteur a besoin
+ * de reconnaître une agence, pas de la décrire.
+ *
+ * ⚠ Les agences closes ne sont pas retirées. Un lead peut avoir été apporté par
+ * une agence devenue inactive, et le rattachement doit rester possible — c'est
+ * l'assiette d'une commission, pas une liste de démarchage. Le statut est rendu
+ * pour que l'écran le signale.
+ */
+export async function GET() {
+  const refus = await refuserSiPasAdmin();
+  if (refus) return refus;
+
+  const { data, error } = await getSupabaseAdmin()
+    .from("agents_immo")
+    .select("id, agence, commune, departement, statut_partenariat")
+    .order("agence", { ascending: true });
+
+  if (error) {
+    signalerPanne("admin/agents", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json({ agents: data ?? [] });
+}
+
 export async function POST(req: NextRequest) {
   const refus = await refuserSiPasAdmin();
   if (refus) return refus;

@@ -78,6 +78,9 @@ export async function POST(req: NextRequest) {
       /* Origine COMMERCIALE. Distincte de `source` ci-dessous, qui reste le
          canal technique de création — les confondre perdrait l'un des deux. */
       sourcing: (body.sourcing as string) || null,
+      /* Agence apporteuse (ADR-044 §5) — se lit avec `sourcing = 'partenaire'`.
+         Nulle partout ailleurs : un lead venu du site n'a pas d'apporteur. */
+      agent_id: (body.agent_id as string) || null,
       responsable: (body.responsable as string) || null,
       responsable_at: body.responsable ? new Date().toISOString() : null,
       prochain_rappel_at: (body.prochain_rappel_at as string) || null,

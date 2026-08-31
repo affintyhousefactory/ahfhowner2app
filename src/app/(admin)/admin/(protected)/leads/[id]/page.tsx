@@ -75,6 +75,15 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
 
   if (!lead) notFound();
 
+  /* Nom de l'agence apporteuse (ADR-044 §5). Requête séparée et conditionnelle
+     plutôt qu'une jointure : `agent_id` est nul sur l'immense majorité des
+     leads, et une jointure la paierait sur chacun. Un échec est sans gravité —
+     la fiche affiche alors le rattachement comme absent, jamais faux. */
+  const agentId = (lead as { agent_id?: string | null }).agent_id ?? null;
+  const { data: agentApporteur } = agentId
+    ? await supabase.from("agents_immo").select("agence").eq("id", agentId).maybeSingle()
+    : { data: null };
+
   // Exclusivité territoriale (ADR-026/CGU) : ≥10 fiches terrain actives publiées
   const nbActivesParMandataire = new Map<string, number>();
   for (const f of fichesActives ?? []) {
@@ -140,7 +149,10 @@ export default async function LeadFiche({ params }: { params: Promise<{ id: stri
             titre: "Contact & société",
             contenu: (
               <div className="rounded-2xl border border-white/10 bg-[#252521] p-6">
-                <LeadEditIdentite lead={lead} />
+                <LeadEditIdentite
+                  lead={lead}
+                  agenceApporteuse={(agentApporteur as { agence?: string } | null)?.agence ?? null}
+                />
               </div>
             ),
           },

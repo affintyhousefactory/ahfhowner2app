@@ -83,6 +83,14 @@ export default function NouveauLeadPage() {
   /* Origine commerciale — d'où vient ce prospect. À ne pas confondre avec
      `leads.source`, canal technique de création. */
   const [sourcingLead, setSourcingLead] = useState<SourcingId | "">("");
+  /* Agence apporteuse (ADR-044 §5) — chargée seulement quand le sourcing la
+     réclame : la liste ne sert à rien sur les huit autres origines, et un
+     appel réseau à l'ouverture de l'écran ralentirait tous les appels pour
+     servir un cas sur neuf. */
+  const [agentId, setAgentId] = useState("");
+  const [agences, setAgences] = useState<
+    { id: string; agence: string; commune: string | null; statut_partenariat: string | null }[]
+  >([]);
 
   /* Premier appel : la fiche naît d'un échange qui vient d'avoir lieu. */
   const [appelIssue, setAppelIssue] = useState<IssueAppel | "">("");
@@ -314,6 +322,9 @@ export default function NouveauLeadPage() {
       // Suivi CRM
       cible_commerciale: cible,
       sourcing: sourcingLead || null,
+      /* Rattaché seulement si le sourcing le dit : un `agent_id` laissé derrière
+         un changement d'avis attribuerait une commission à qui n'a rien apporté. */
+      agent_id: sourcingLead === "partenaire" ? agentId || null : null,
 
       /* Le premier appel devient une entrée du journal, pas une note perdue :
          le trigger remonte alors l'issue et la date sur le lead, et le compteur
@@ -702,7 +713,25 @@ export default function NouveauLeadPage() {
             <Select
               label="Sourcing / Origine"
               value={sourcingLead}
-              onChange={(v) => setSourcingLead(v as SourcingId | "")}
+              onChange={(v) => {
+                const choix = v as SourcingId | "";
+                setSourcingLead(choix);
+                /* Chargée au moment où elle sert, pas à l'ouverture de l'écran :
+                   huit sourcings sur neuf n'en ont pas besoin, et cet écran
+                   s'ouvre pendant que ça sonne. Chargée une seule fois — le
+                   conseiller peut hésiter sans relancer la requête. */
+                if (choix === "partenaire" && agences.length === 0) {
+                  fetch("/api/admin/agents")
+                    .then((r) => (r.ok ? r.json() : { agents: [] }))
+                    .then((b) => setAgences(b.agents ?? []))
+                    .catch(() => {
+                      /* Une liste indisponible ne bloque pas la création : le
+                         sélecteur reste sur « À rattacher plus tard », et le
+                         lead s'enregistre. Perdre l'appel pour un rattachement
+                         serait un mauvais échange. */
+                    });
+                }
+              }}
               options={[
                 { value: "", label: "Non renseignée" },
                 ...SOURCINGS.map((o) => ({
@@ -711,6 +740,28 @@ export default function NouveauLeadPage() {
                 })),
               ]}
             />
+            {/* ⚠ N'apparaît que sur « Partenaire ». C'est ce rattachement qui
+                fera l'assiette d'une future commission d'apporteur (ADR-044 §5) :
+                reconstituer après coup qui a présenté qui serait impossible.
+                Le champ reste facultatif — on sait parfois qu'un partenaire a
+                envoyé le prospect avant de savoir lequel. */}
+            {sourcingLead === "partenaire" && (
+              <Select
+                label="Agence apporteuse"
+                value={agentId}
+                onChange={setAgentId}
+                options={[
+                  {
+                    value: "",
+                    label: agences.length ? "À rattacher plus tard" : "Chargement…",
+                  },
+                  ...agences.map((a) => ({
+                    value: a.id,
+                    label: [a.agence, a.commune].filter(Boolean).join(" — "),
+                  })),
+                ]}
+              />
+            )}
           </div>
         </Section>
 
