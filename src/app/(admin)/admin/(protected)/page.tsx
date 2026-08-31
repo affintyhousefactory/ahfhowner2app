@@ -32,6 +32,7 @@ import {
   SLA_JOURS,
   dateFr,
 } from "@/lib/crm";
+import { statutPartenariat } from "@/lib/agents";
 
 export const dynamic = "force-dynamic";
 
@@ -80,7 +81,17 @@ export default async function AdminDashboard() {
   // `leadsRaw = null`, donc `leads = []`, donc un tableau de bord entièrement
   // à zéro — indiscernable d'un démarrage à vide. Constaté en production le
   // 2026-08-18.
-  const [{ data: leadsRaw, error: leadsError }, { data: dossiers }, { data: mandataires }] = await Promise.all([
+  /* ⚠ Les agences ne rejoignent PAS les indicateurs des leads (ADR-044 §1).
+     Deux populations, deux cycles : les mêler ferait un « total » qui ne
+     répondrait à aucune question — 167 agences noieraient les prospects, et le
+     taux de conversion ne voudrait plus rien dire. Elles ont leur propre carte,
+     avec leur propre définition du retard. */
+  const [
+    { data: leadsRaw, error: leadsError },
+    { data: dossiers },
+    { data: mandataires },
+    { data: agentsRaw, error: agentsError },
+  ] = await Promise.all([
     supabase
       .from("leads")
       .select(
@@ -93,6 +104,9 @@ export default async function AdminDashboard() {
     FEATURES.mandataire
       ? supabase.from("mandataires").select("id, prenom, nom, statut")
       : Promise.resolve({ data: [] as Mandataire[] }),
+    supabase
+      .from("agents_immo")
+      .select("id, statut_partenariat, created_at, dernier_appel_at, prochain_rappel_at"),
   ]);
 
   if (leadsError) {
@@ -109,6 +123,42 @@ export default async function AdminDashboard() {
   }
 
   const leads = (leadsRaw ?? []) as LeadRow[];
+
+  /* ── Agences partenaires (ADR-044) ────────────────────────────────────────
+     `error` est lu séparément : tant que la migration `20260901_agents_immo`
+     n'est pas appliquée sur l'environnement, PostgREST rejette cette requête —
+     et une carte à zéro serait indiscernable d'un fichier vide. La carte se
+     retire alors au lieu de mentir ; le reste du tableau de bord, qui ne dépend
+     pas des agences, continue de servir. */
+  const agents = (agentsRaw ?? []) as unknown as {
+    id: string;
+    statut_partenariat: string | null;
+    created_at: string;
+    dernier_appel_at: string | null;
+    prochain_rappel_at: string | null;
+  }[];
+  if (agentsError) signalerPanne("admin/agents", agentsError.message);
+
+  const agentsSuivis = agents.map((a) => ({
+    agent: a,
+    /* Même calcul du retard que les leads, par la même fonction : un partenariat
+       qui s'éteint faute de contact s'éteint de la même façon. Le statut est
+       traduit en « clos / actif » parce que `etatSuivi()` lit celui d'un lead. */
+    etat: etatSuivi({
+      statut_commercial: statutPartenariat(a.statut_partenariat).actif ? "nouveau" : "signe",
+      created_at: a.created_at,
+      dernier_appel_at: a.dernier_appel_at,
+      prochain_rappel_at: a.prochain_rappel_at,
+    }),
+  }));
+
+  const agentsAContacter = agents.filter(
+    (a) => statutPartenariat(a.statut_partenariat).id === "a_contacter",
+  );
+  const agentsRappelsDepasses = agentsSuivis.filter((s) => s.etat.rappelDepasse);
+  const agentsActifs = agents.filter((a) =>
+    ["partenaire", "sous_contrat"].includes(statutPartenariat(a.statut_partenariat).id),
+  );
 
   /* ── Suivi : l'état est calculé une fois, puis réutilisé partout ───────── */
   const suivis = leads.map((l) => ({ lead: l, etat: etatSuivi(l) }));
@@ -215,6 +265,49 @@ export default async function AdminDashboard() {
         />
         <KpiCard label="Non attribués" value={String(nonAttribues.length)} sub="sans conseiller" />
       </div>
+
+      {/* ── Agences partenaires (ADR-044) ─────────────────────────────────
+          Une bande à part, jamais fondue dans les compteurs de leads : ce sont
+          des partenaires qui apportent, pas des prospects qui achètent. */}
+      {!agentsError && (
+        <div className="mb-8 rounded-2xl border border-white/10 bg-[#252521] px-6 py-5">
+          <div className="mb-4 flex items-baseline justify-between">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/70">
+              Agences partenaires
+            </h3>
+            <Link href="/admin/agents" className="text-xs text-[#7469F4] hover:underline">
+              Toutes les agences →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <KpiCard label="Suivies" value={String(agents.length)} sub="fiches ouvertes" />
+            <KpiCard
+              label="À contacter"
+              value={String(agentsAContacter.length)}
+              sub="jamais appelées"
+            />
+            <KpiCard
+              label="Rappels dépassés"
+              value={String(agentsRappelsDepasses.length)}
+              sub="échéance passée"
+            />
+            <KpiCard
+              label="Partenaires"
+              value={String(agentsActifs.length)}
+              sub="accord verbal ou contrat"
+            />
+          </div>
+          {agents.length === 0 && (
+            <p className="mt-4 text-xs text-white/25">
+              Aucune agence suivie.{" "}
+              <Link href="/admin/agents/vivier" className="text-[#7469F4] underline underline-offset-2">
+                Piocher dans la liste Brevo
+              </Link>
+              .
+            </p>
+          )}
+        </div>
+      )}
 
       {/* ── À traiter en priorité ────────────────────────────────────────── */}
       <div className="mb-8 overflow-hidden rounded-2xl border border-white/10 bg-[#252521]">

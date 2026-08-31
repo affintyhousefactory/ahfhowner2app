@@ -72,6 +72,60 @@ Aucune config supplémentaire n'est nécessaire : `dev` est une branche Preview 
 | `BREVO_API_KEY` | ✅ | ✅ | local |
 | `BREVO_TEMPLATE_CONTACT` | 10 | 10 | 10 |
 | `BREVO_TEMPLATE_RECAP` | 9 | 9 | 9 |
+| `BREVO_TEMPLATE_MULTICFG` | **à poser** | **à poser** | **à poser** |
+| `BREVO_LIST_PROSPECTS` | 8 | 8 | 8 |
+| `BREVO_LIST_NEWSLETTER` | 5 | 5 | 5 |
+| `NEXT_PUBLIC_PLAQUETTE_URL` | *(repli code)* | *(repli code)* | *(repli code)* |
+
+> **`BREVO_TEMPLATE_MULTICFG` = 17** (2026-08-27) — présentation Howner + plaquette, envoyée
+> quand le lead porte `multi_configuration` : le prospect hésite entre plusieurs modèles, il n'y a
+> rien à chiffrer. Le récapitulatif chiffré (`BREVO_TEMPLATE_RECAP`) suppose une configuration
+> arrêtée ; l'envoyer reviendrait à communiquer un prix sur un choix que personne n'a fait, et un
+> prix communiqué ne se reprend pas.
+>
+> ⚠ **Aucun repli codé en dur pour les deux identifiants de template.** Un identifiant deviné
+> enverrait le mauvais email à un client : les routes d'envoi et d'aperçu renvoient un 500 explicite
+> quand la variable manque. **Tant que `BREVO_TEMPLATE_MULTICFG` n'est pas posée, un lead
+> Multi-Configuration ne peut pas recevoir son email** — l'aperçu le dira avant l'envoi.
+
+> **Les deux listes ne jouent pas le même rôle** (2026-08-26). `BREVO_LIST_PROSPECTS`
+> (« Prospects ») reçoit tout visiteur du formulaire de contact : c'est le CRM.
+> `BREVO_LIST_NEWSLETTER` (« AHF – Newsletter ») ne reçoit que ceux qui cochent la case
+> d'acceptation : c'est le consentement marketing. **Une campagne se cible sur
+> `BREVO_LIST_NEWSLETTER`, jamais sur `BREVO_LIST_PROSPECTS`.**
+>
+> Les deux ont un repli codé en dur (`?? "8"` et `?? "5"`), donc une variable absente ne
+> casse rien — mais elle rend l'environnement muet sur son propre câblage. Les définir.
+
+> **`NEXT_PUBLIC_PLAQUETTE_URL`** (2026-08-26) — lien vers la plaquette commerciale
+> jointe au récapitulatif d'appel. **Un lien, pas une pièce jointe** : une pièce jointe
+> alourdit l'email, dégrade la délivrabilité et ne dit rien, là où un lien se mesure
+> dans Brevo. **Un fichier désigné, pas « le dernier d'un dossier »** : prendre
+> automatiquement le fichier le plus récemment modifié, c'est envoyer un brouillon le
+> jour où quelqu'un rouvre un document pour corriger une virgule.
+>
+> Le fichier est servi par le dépôt : `public/documents/plaquette-howner-2026.pdf`
+> (1,7 Mo, 28 pages). La variable n'a donc pas à être posée — elle ne sert qu'à pointer
+> ailleurs (stockage objet, version datée) sans toucher au code. La vider fait
+> disparaître la ligne du récapitulatif : un lien mort vaut moins que pas de lien. Le
+> template Brevo porte la ligne sous `{% if params.PLAQUETTE_URL %}`.
+>
+> ⚠ L'URL envoyée est **absolue** (`SITE_URL` + chemin) : un email n'a pas d'origine à
+> laquelle rapporter un chemin relatif.
+>
+> ⚠ La version publiée est destinée à l'écran (images JPEG, ~1755 px de large, soit
+> ~150 dpi en A4). **Garder l'original pour l'imprimeur** — il est sur le Drive AHF.
+
+> **`NEXT_PUBLIC_GOOGLE_PLACES_API_KEY`** — ⚠ **restreinte par référent HTTP** dans Google
+> Cloud. Au 2026-08-28, la liste autorise `*.vercel.app` **mais pas `howner.fr`** : l'autocomplétion
+> d'adresse répond 403 en production depuis sa mise en ligne (juillet), et échoue en silence — les
+> champs restent saisissables à la main, donc personne ne l'avait vu.
+>
+> À corriger dans Google Cloud Console → Identifiants → clé Places → Référents HTTP :
+> ajouter `https://howner.fr/*` et `https://www.howner.fr/*`, garder `*.vercel.app/*`.
+>
+> ⚠ **Une intégration tierce vérifiée sur une Preview ne prouve rien pour le domaine réel** quand
+> elle filtre par référent.
 
 > Stripe retiré du MVP (ADR-008 amendé 2026-06-27) — ne pas configurer `STRIPE_*`.
 

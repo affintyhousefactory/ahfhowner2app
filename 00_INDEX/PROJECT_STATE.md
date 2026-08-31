@@ -66,7 +66,13 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | **CRM — liste + Kanban** | `(admin)/admin/(protected)/leads/page.tsx`, `components/admin/LeadsVue.tsx` | ✅ livré (branche) — colonne « Affectation » retirée, `?vue=kanban` | — | 035, 028 |
 | **CRM — journal d'appels** | `components/admin/LeadAppels.tsx`, `api/admin/leads/[id]/appels` | ✅ livré (branche) — table `lead_appels`, trigger `dernier_appel_at` | migration à appliquer | 035 |
 | **CRM — configuration v2 sur le lead** | `components/admin/LeadConfiguration.tsx`, `src/lib/crm.ts` | ✅ livré (branche) — `config_v2` + `cfg_*`, libellés résolus par `loadConfig()` | alimenté par ADR-031 | 035, 030 |
+| **CRM — récapitulatif d'appel par cible** | `src/lib/crm.ts` (`choixEmailRecap`), `shared/lib/recap-client.ts`, `api/admin/leads/[id]/recap-client{,/apercu}` | ✅ livré (branche) — 7 modèles, l'écran annonce lequel part et sous quel objet | vérifier en Preview | 035, 026 |
 | **CRM — GED Client double origine** | `components/admin/LeadClientDocuments.tsx` | ✅ livré (branche) — `origine` ahf/client, `categorie`, pièces manquantes | dépôt client = ADR-034 | 035, 027 |
+| **Agents immo — liste + Kanban** | `(admin)/admin/(protected)/agents/page.tsx`, `components/admin/AgentsVue.tsx`, `src/lib/agents.ts` | ✅ lot 1 écrit (branche) — 7 statuts de partenariat, filtre département, colonne « dernier email », leads apportés | ✅ migration `20260831_agents_immo` **appliquée Preview le 2026-08-31** (`20260831145326`), vérifiée par requête + écritures réelles annulées, `get_advisors` propre. Prod à la fusion | 044 |
+| **Agents immo — vivier Brevo** | `(admin)/…/agents/vivier/page.tsx`, `components/admin/VivierBrevo.tsx`, `shared/lib/brevo-agents.ts`, `api/admin/agents/brevo` | ✅ lot 2 (branche) — liste 9 lue côté serveur, moins les agences suivies ; « Suivre » crée la fiche pré-remplie en un clic | vérifier en Preview | 044 |
+| **Agents immo — fiche + journal d'appels** | `(admin)/…/agents/[id]/page.tsx`, `AgentIdentite.tsx`, `JournalAppels.tsx`, `api/admin/agents{,/[id]{,/appels}}` | ✅ lot 2 (branche) — 3 onglets (identité, appels, leads apportés) ; `LeadAppels` généralisé en `JournalAppels`, la fiche lead bascule dessus | vérifier en Preview | 044, 035 |
+| **Agents immo — emails Brevo** | `AgentEmails.tsx`, `shared/lib/{brevo-emails,presentation-agence}.ts`, `api/admin/agents/[id]/{emails,presentation{,/apercu}}`, `api/admin/agents/sync-emails` | ✅ lot 3 (branche) — historique lu en direct (envois + événements), envoi du template 23 après aperçu obligatoire, rafraîchissement global en 1 appel | ⚠ `BREVO_TEMPLATE_AGENCES` absente → envoi inerte | 044, 026 |
+| **Agents immo — apporteur sur le lead** | `leads/nouveau/page.tsx`, `LeadEditIdentite.tsx`, `(admin)/admin/(protected)/page.tsx`, `api/admin/agents` (GET), `api/admin/leads{,/[id]}` | ✅ lot 4 (branche) — sélecteur d'agence quand `sourcing = partenaire`, agence lisible sur la fiche, bande « Agences partenaires » au dashboard (hors compteurs de leads) | vérifier en Preview | 044, 035 |
 | Email confirmations contact | `src/app/api/contact/route.ts`, `src/lib/email.ts` | ✅ Brevo template `10` — câblé | — | 026 |
 | Email recap configurateur/terrain | `src/app/api/recherche-terrain/route.ts` | ✅ Brevo template `9` — câblé | — | 026 |
 | Analyse terrain (adresse + PLU) | `src/components/site/ParcelleAnalyse.tsx`, `src/app/api/parcelle/route.ts` | BAN → apicarto geom → GPU coords | — | 011,025 |
@@ -110,6 +116,73 @@ BREVO_SENDER_NAME=Howner - By Affinity House Factory
 BREVO_TO_AHF=contact@affinityhousefactory.com
 BREVO_TEMPLATE_CONTACT=10
 BREVO_TEMPLATE_RECAP=9
+# ⚠ Deux listes, deux rôles (ADR-026 § Amendement 2026-08-26) :
+#   PROSPECTS   = CRM, reçoit TOUT visiteur d'un formulaire, coche ou pas.
+#   NEWSLETTER  = consentement marketing, ne reçoit QUE ceux qui cochent.
+#   Une campagne se cible sur NEWSLETTER, JAMAIS sur PROSPECTS.
+# ⚠ Ne pas confondre : chez Brevo, templates et listes ont des numérotations
+#   indépendantes. La liste 5 est « AHF – Newsletter », le template 5 est tout autre chose.
+BREVO_LIST_PROSPECTS=8
+BREVO_LIST_NEWSLETTER=5            # posée le 2026-08-26 ; repli codé « 5 »
+BREVO_LIST_MANDATAIRES=7           # domaine suspendu (ADR-028)
+
+# Templates Brevo — ⚠ AUCUN repli codé : un identifiant deviné enverrait le mauvais
+# email à un client. Les routes renvoient un 500 nommant la variable manquante.
+BREVO_TEMPLATE_MULTICFG=17         # ✅ posée sur Preview + Production le 2026-08-27
+                                   #    Présentation générique quand rien n'est chiffrable
+                                   #    et que le lead n'a pas de cible commerciale.
+
+# Présentations sectorielles du récapitulatif d'appel (ADR-035 § Amendement 2026-08-31).
+# ✅ posées sur Preview + Production le 2026-08-31. Une cible = un email, et seulement
+# quand `multi_configuration` est vrai : ces cinq modèles ne portent AUCUN montant, ils
+# ne remplacent jamais le récapitulatif chiffré.
+BREVO_TEMPLATE_CAMPING=18          # cible 1 — campings et hôtellerie de plein air
+BREVO_TEMPLATE_HOTEL=20            # cible 2 — hôtels, domaines, gîtes  ⚠ 20, pas 19
+BREVO_TEMPLATE_MEDICO=19           # cible 3 — EHPAD, résidences seniors, médico-social
+BREVO_TEMPLATE_COLLECTIVITE=21     # cible 4 — collectivités, employeurs, saisonniers
+BREVO_TEMPLATE_INVESTISSEUR=22     # cible 5 — particuliers investisseurs
+# ⚠ Les modèles 18 à 21 ouvrent leur **objet** sur `ETABLISSEMENT` (raison sociale) ;
+#   le 22 annonce « il reste N numéros sur les 6 », compté en base à l'envoi.
+
+# Agents immobiliers partenaires (ADR-044) — ⏳ À POSER sur les 3 scopes.
+# Deux templates, deux gestes : ils ne sont PAS interchangeables.
+BREVO_TEMPLATE_AGENCES=23          # transactionnel (`params.*`) — envoi unitaire
+                                   #   depuis la fiche agent, après un appel.
+                                   # ⚠ ABSENTE des 3 scopes au 2026-08-31 : l'onglet
+                                   #   Emails lit bien l'historique, mais le bouton
+                                   #   « Envoyer » reste désactivé et le dit à l'écran.
+BREVO_TEMPLATE_AGENCES_CAMPAGNE=24 # campagne (`contact.AGENCE_OU_ENSEIGNE`) —
+                                   #   envoi de masse sur la liste 9, lancé
+                                   #   DEPUIS BREVO, pas par notre code.
+# ⚠ Le 24 ne peut pas être envoyé unitairement (pas de `params`), et le 23 ne
+#   peut pas servir de campagne (ses `params` ne sont pas alimentés).
+# ⚠ Aucun repli codé, comme pour MULTICFG : la route renvoie un 500 qui nomme
+#   la variable. Un identifiant deviné enverrait le mauvais email à un partenaire.
+# Liste « Agents » (id 9, 167 contacts au 2026-08-31) — repli codé « 9 » :
+# se tromper de liste ne fait rien partir, au pire le vivier est vide.
+# NEXT_PUBLIC_BREVO_LIST_AGENTS=9
+# Rafraîchissement planifié du « dernier email » (ADR-044 §4) — facultatif.
+# Absente = le chemin sans session est FERMÉ, seul l'écran peut rafraîchir.
+# Aucun cron n'est déclaré : le projet n'a pas de vercel.json, en poser un est
+# une décision de déploiement à prendre séparément.
+# CRON_SECRET=
+
+# Sourcing commercial (ADR-035 § Amendement 2026-08-28 soir) — aucune variable :
+# les 8 valeurs vivent dans src/lib/crm.ts et sont contraintes par leads_sourcing_check.
+# ⚠ Ne pas confondre `leads.sourcing` (origine commerciale) et `leads.source`
+#   (canal technique de création : admin, configurateur_v2, web_configurateur).
+
+# Google Places — ⚠ restreinte par référent HTTP dans Google Cloud.
+# Au 2026-08-28 : `*.vercel.app` autorisé, `howner.fr` BLOQUÉ (403 vérifié).
+# L'autocomplétion d'adresse est donc morte en production depuis juillet — elle échoue
+# en silence, la saisie manuelle prend le relais. Ouvrir `https://howner.fr/*` et
+# `https://www.howner.fr/*` dans la console. Voir ADR-027 § Amendement du 2026-08-28.
+NEXT_PUBLIC_GOOGLE_PLACES_API_KEY= # serveur de clé Google, restrictions à corriger
+
+# Plaquette commerciale (ADR-026 § Amendement 2026-08-26)
+# Repli codé : public/documents/plaquette-howner-2026.pdf (1,7 Mo). La variable ne sert
+# qu'à pointer ailleurs. Vide = la ligne disparaît du récapitulatif (jamais de lien mort).
+# NEXT_PUBLIC_PLAQUETTE_URL=
 
 # Transport livraison (valeurs par défaut dans site.ts)
 NEXT_PUBLIC_DELIVERY_GRUTAGE_EUR=1440
@@ -159,8 +232,8 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 023 | Déploiement production Vercel | Proposé | ✅ |
 | 024 | Bandeau consentement cookies + Cloudflare Turnstile | Accepté | ✅ |
 | 025 | Page `/rechercheterrain` — recherche personnalisée de parcelles | Accepté — **⏸ suspendue (028)** | ✅ |
-| 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** | ✅ |
-| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** | ✅ |
+| 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** ; **amendé le 2026-08-26** : deux listes (Prospects = CRM / Newsletter = consentement), `{{ unsubscribe_link }}` était un tag inexistant, plaquette jointe par lien ; ⚠ **double opt-in toujours non câblé** | ✅ |
+| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** ; **amendé le 2026-08-28** : ⚠ l'autocomplétion Google Places n'a **jamais** fonctionné en production — clé restreinte par référent, `howner.fr` non autorisé | 🟠 |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
 | 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** | ✅ |
 | 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — livré** ; **amendé les 2026-08-02 puis 2026-08-20/21** (bardage renommé, ambiance intérieure, 9 sections, contrôles de saisie, socle du prix) ; bascule sur `/configurer` conditionnée à 031 | 🟠 |
@@ -168,13 +241,16 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |
 | 033 | Back-office des grilles tarifaires (`loadConfig()` → base) | Réservé — à écrire | ❓ |
 | 034 | Espace client (dépôt de pièces) | Réservé — à écrire ; GED prête côté CRM (`origine = 'client'`) | ❓ |
-| 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré sur `feat/adr-035-crm-leads` (2026-08-04)** ; **amendé le 2026-08-04** : « Lead chaud » → « Paiement réservé », règle de blocage du numéro de série, connecteur Pennylane à écrire | ✅ |
+| 035 | **Refonte du CRM interne** — suivi commercial, journal d'appels, capture configurateur v2, Kanban, GED double origine | **Accepté — livré et EN PRODUCTION** ; **amendé le 2026-08-04** (« Paiement réservé », blocage du numéro, Pennylane) puis **le 2026-08-27** (cible commerciale + NAF rév. 2, statut « Erreur / Test / Doublon » hors Kanban, transport calculé depuis le PLU, relecture du récapitulatif) puis **le 2026-08-28** (recherche d'identité, email facultatif, identité société, issue du dernier appel, Multi-Configuration élargie) puis **le 2026-08-28 au soir** (saisie par étapes, sourcing commercial, premier appel journalisé à la création, fiche en compartiments, numéros cliquables) puis **le 2026-08-31** : un email de récapitulatif par cible commerciale (5 présentations sectorielles), l'écran annonce le modèle retenu et l'objet réel | ✅ |
+| 042 | **Multi-Configuration détaillée + gestion de chantier** — configurer plusieurs unités et des services personnalisés dans le CRM, puis connecter le logiciel de chantier [Costructor](https://costructor.readme.io/reference/introduction) | **Réservé — à écrire** ; chantier annoncé par Richard le 2026-08-29. Le drapeau `multi_configuration` en tient lieu en attendant : il **refuse de chiffrer** plutôt que de chiffrer faux. ⚠ Dépendance externe critique, **alerte Albert** | ❓ |
+| 043 | **Téléphonie Allo** — click-to-call (extension, sans code), synchronisation des contacts, journal d'appels alimenté par webhook | **Réservé — à écrire** ; faisabilité étudiée le 2026-08-28. ⚠ Dépendance externe critique, **alerte Albert** | ❓ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
 | 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — TERMINÉ : lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
 | 039 | **Authentification réelle du back-office** — session en cookie, garde au proxy, gardes serveur sur 10 pages et 26 handlers, policies RLS corrigées | **Accepté — livré et VÉRIFIÉ EN PRODUCTION le 2026-08-25** (PR #89) ; fuite fermée, migration appliquée | ✅ |
 | 040 | **Pages produit « Heure bleue »** — refonte des deux pages produit, fond sombre, quatre moments framer-motion, copy réécrit (amende 002) | **Accepté — livré, à vérifier en Preview** ; **alerte Albert** (écart assumé à la charte Affinity) | ✅ |
 | 041 | **Charte « Heure bleue »** — deux registres, accent chaud, teintes en tokens (remplace 002) | **Accepté — socle livré, application par lots** ; **alerte Albert** | ✅ |
+| 044 | **Domaine « Agents immobiliers partenaires »** — table dédiée `agents_immo` (≠ leads), vivier lu dans la liste Brevo `Agents` (id 9, 167 contacts), journal d'appels, suivi du dernier email, `leads.agent_id` comme assiette de la future commission | **Accepté — à construire (4 lots)** ; templates **23** (unitaire) et **24** (campagne) rédigés. ⚠ **alerte Albert** : le template 24 promet une commission d'apporteur avant tout cadre juridique (loi Hoguet) ; **4 templates Brevo actifs violent ADR-029**, dont le 22 en production | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
@@ -209,6 +285,113 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 Rotation tokens GitHub + Supabase **différée** → `memory/token-rotation-pending.md`.
 
 ## Dernier point
+
+**2026-08-28 (soir) — l'écran d'appel prend sa forme ; une régression introduite et fermée le jour même**
+
+**`main` = `62250a24`.** Trois PR en production, une migration.
+
+| PR | Objet | Migration |
+|---|---|---|
+| #108 | Saisie par étapes · sourcing · premier appel journalisé · numéros cliquables | `lead_sourcing` ✅ |
+| #109 | **Correctif** — la fiche d'un lead avec téléphone ne se chargeait plus | — |
+| #110 | La fiche passe en compartiments | — |
+
+**Le CRM tient désormais le premier appel de bout en bout** : on cherche si le contact est connu, on choisit la cible et le sourcing, on note ce qui n'est pas chiffrable, le transport se calcule seul, l'appel est journalisé à la création, le récapitulatif se relit avant de partir — et la fiche se consulte par compartiments.
+
+**Quatre décisions** — détail dans ADR-035 § Amendement du 2026-08-28 (soir) :
+- **Étapes librement navigables.** Richard a retenu les étapes contre ma recommandation ; le risque du prospect qui parle dans le désordre est neutralisé par une barre cliquable de bout en bout et un « Créer le lead » actif partout.
+- **Sourcing ≠ `source`.** Le premier dit d'où vient le prospect, le second comment la ligne a été écrite. C'est le sourcing qui dira si la prospection téléphonique paie.
+- **Le premier appel entre au journal.** L'écran demandait un « prochain rappel » sans jamais demander quand l'appel avait eu lieu — constat de Richard. Deux dates deviennent une : celle de l'appel est *maintenant*.
+- **La fiche en cinq onglets**, avec compteurs. Le journal d'appels cesse d'être en bas d'une colonne.
+
+**⚠ Régression introduite et corrigée dans la journée.** `TelephoneLien` portait un `onClick` sans `"use client"` et était rendu depuis un **Server Component** : la fiche tombait en « This page couldn't load » — **mais seulement si le lead avait un numéro**, puisque sans numéro le composant n'était pas appelé. Signalée par Richard, fermée par la PR #109.
+
+> **Leçon** : un composant partagé destiné à des pages serveur ne doit porter **aucun** gestionnaire d'événement. Vérification faite sur tout le back-office après coup — `TelephoneLien` était le seul cas.
+
+> **Seconde leçon, évitée de justesse** : monter tous les onglets d'emblée aurait cassé la carte (Leaflet en `display:none` se dimensionne à zéro). D'où le montage à la première visite, puis conservation.
+
+**Allo — faisabilité étudiée, rien engagé.** Le click-to-call passe par l'**extension Chrome**, sans une ligne de code : elle détecte les numéros de n'importe quelle page et alimente le Power Dialer. C'est pourquoi les numéros sont désormais visibles **dans la liste**, pas seulement sur la fiche. L'API expose `/v2/api/crm/people` et `/v2/api/dialing-queues/current`, **aucun endpoint de déclenchement d'appel**. Trois inconnues avant de s'engager : scope d'écriture réel, événements de webhook, clé de rapprochement des identités. **Dépendance externe critique → ADR et alerte Albert avant tout code**, comme Pennylane (ADR-036).
+
+**⚠ Points ouverts, inchangés depuis ce matin et toujours bloquants :**
+- **`BREVO_TEMPLATE_MULTICFG=17` non posée sur Vercel** — la Multi-Configuration est en production mais **inerte**.
+- **Référents `howner.fr/*` absents de la clé Google Places** — l'autocomplétion d'adresse reste morte, y compris sur les nouveaux champs de société. Saisie manuelle intacte.
+- **Aucun récapitulatif réel envoyé** — dernier maillon non éprouvé de la chaîne emails.
+- **Temps 2 du CRM (retour de rendez-vous) inexistant** — aucune issue d'appel ne décrit un rendez-vous.
+- **Coordonnées exactes de l'atelier** toujours attendues.
+
+**⚠ Une consolidation a voyagé dans une PR de fonctionnalité.** Le `/memory-sync` du matin (`998e3587`) a été commité sur une branche depuis laquelle `feat/crm-saisie-par-etapes` a été créée : il est parti en production avec la **PR #108**, dont la description n'en disait rien. Sans conséquence — le contenu est juste et en place — mais la règle reste : repartir de `main` avant d'ouvrir une branche.
+
+**2026-08-27/28 (CRM — l'écran d'appel devient un outil de phoning ; un défaut Google vieux d'un mois mis au jour)**
+
+**`main` = `c7a2b14d`.** Quatre PR fusionnées, cinq migrations passées en Preview **et** en production, chacune vérifiée par requête puis par écritures réelles annulées.
+
+| PR | Objet | Migrations |
+|---|---|---|
+| #105 | Issue du dernier appel sur le lead · doc du process commercial · consolidation | `derniere_issue_appel`, `multi_configuration` ✅ |
+| #106 | Recherche d'identité avant saisie | — |
+| #107 | Email facultatif · identité société · Multi-Configuration élargie | `lead_email_facultatif`, `lead_societe`, `multi_configuration_elargi` ✅ |
+| #102 | Trois migrations appliquées mais jamais versionnées | *(déjà appliquées)* |
+
+**L'écran de pré-qualification, avant et après.** Il était un formulaire de saisie ; c'est un outil d'appel : on cherche si le contact est connu, on choisit la cible commerciale, on note ce qui n'est pas chiffrable, le transport se calcule seul, l'issue de l'appel remonte sur le lead, et le récapitulatif se relit avant de partir.
+
+**Quatre décisions de Richard** — détail dans ADR-035 § Amendement du 2026-08-28 :
+- **Chercher avant de saisir.** La table comptait **6 leads pour 5 adresses** : le doublon n'était pas une hypothèse. Une fiche existante donne un lien vers elle et **ne pré-remplit rien**.
+- **L'email devient facultatif** — au téléphone, tout le monde ne donne pas son adresse. Mais une adresse **mal formée** est refusée, et signalée à la saisie.
+- **Identité de la société** : raison sociale, SIREN, site web, adresse — tous facultatifs. Distincte de l'adresse du client : le siège d'un camping et le domicile de son gérant ne sont pas au même endroit.
+- **« Multi-Configuration » couvre deux situations** : plusieurs modèles en balance, **ou** options et services personnalisés assujettis à devis complémentaires.
+
+**⚠ Le défaut le plus instructif de la session : l'autocomplétion Google n'a jamais fonctionné en production.** La clé est restreinte par référent HTTP et la liste autorise `*.vercel.app` sans `howner.fr` — 403 vérifié sur trois référents. Elle sert l'adresse client **depuis juillet** (ADR-027) et échoue en silence, les champs manuels prenant le relais. Elle marchait en Preview, ce qui a suffi à la croire opérante.
+
+> **Leçon, à ranger avec les précédentes** : une restriction par référent fait qu'un service se comporte différemment en Preview et en production. Vérifier une intégration tierce sur une Preview ne prouve rien pour le domaine réel — c'est le pendant de la leçon du 2026-08-25 sur le SSO Vercel, par l'autre bout.
+
+**Deux fautes de méthode commises et rattrapées dans la session**, notées parce qu'elles se reproduiront :
+1. J'ai d'abord corrigé un commentaire **dans une migration déjà appliquée**. Le dépôt aurait menti sur ce qui a tourné — le défaut même que la PR #102 rattrape. Fichier restauré, correction portée par une migration de plus.
+2. J'ai diagnostiqué « cache navigateur » sur l'absence apparente des champs société. C'était faux : la section s'affichait, c'est Google qui refusait. **Sonder plutôt que supposer**, y compris quand la supposition est plausible.
+
+**⚠ Points ouverts au 2026-08-28 :**
+- **Clé Google Places** — référents `howner.fr` à ouvrir dans Google Cloud Console. Sans cela, l'autocomplétion reste morte en production (saisie manuelle intacte).
+- **`BREVO_TEMPLATE_MULTICFG=17` non posée sur Vercel** — la Multi-Configuration est livrée mais **inerte en production** : l'aperçu et l'envoi renvoient un 500 nommant la variable. C'est le seul point qui laisse une fonctionnalité hors service.
+- **Aucun récapitulatif réel n'a encore été envoyé** — dernier maillon non éprouvé de la chaîne emails.
+- **Temps 2 du CRM (retour de rendez-vous) inexistant** : aucune des cinq issues d'appel ne décrit un rendez-vous. C'est le chaînon qui manque avant la qualification des services amont (`docs/CRM_PROCESS_COMMERCIAL.md`).
+- **Coordonnées exactes de l'atelier** toujours attendues.
+
+**Repo et bases enfin alignés.** 36 fichiers de migration ; plus aucun objet de la base n'est absent du dépôt. La base porte en plus trois **ré-applications** de fin juin (`mandataires_documents_bucket`, `mandataire_suspension_raison`, `20260630_mandataires_invitation` joué deux fois) — sans conséquence, ces migrations étant idempotentes, mais c'est la trace de la période où elles se passaient à la main.
+
+**2026-08-26/27 (CRM — l'écran d'appel devient utilisable ; emails — consentement et pied de page réparés)** — Quatre mises en production, quatre PR fusionnées, deux migrations passées en prod et vérifiées par requête **et** par essais fonctionnels annulés.
+
+**`main` = `d60e2cb3`.**
+
+| PR | Objet | Migration |
+|---|---|---|
+| #100 | Accueil — « Voir les studios » renvoie à `#produits` au lieu de quitter la page | — |
+| #101 | Brevo — « Prospects » pour tous, « AHF – Newsletter » pour ceux qui consentent | — |
+| #103 | CRM — distance en direct, relecture du récapitulatif, plaquette jointe | `recap_envoye_at` ✅ Preview + Prod |
+| #104 | CRM — cible commerciale obligatoire, statut « Erreur / Test / Doublon » | `cible_commerciale` + rebut ✅ Preview + Prod |
+| #102 | Trois migrations appliquées mais jamais versionnées | **ouverte** — documentaire |
+
+**Ce qui était cassé et qu'on ne voyait pas.** Trois défauts ont vécu en production sans qu'aucun contrôle ne bronche, et tous les trois ne se voyaient qu'en **sondant la sortie réelle** :
+
+1. **`{{ unsubscribe_link }}` n'est pas un tag Brevo.** Brevo le remplaçait par une chaîne vide : le HTML délivré portait `<a href="">Se désinscrire</a>`. Le template source, lui, paraissait normal. Le tag correct est `{{ unsubscribe }}`. → ADR-026 § Amendement du 2026-08-26.
+2. **« Supprimer mon compte » menait à une page de maintenance.** `affinityhousefactory.com` sert la même page à toute URL avec un `200` — empreinte identique à celle d'une URL absurde testée sur le même domaine. Un droit à l'effacement annoncé qui ne mène nulle part vaut moins que pas d'annonce.
+3. **La liste « AHF – Newsletter » n'était jamais alimentée**, et un visiteur qui ne cochait pas la case n'entrait dans **aucune** liste. Sa demande vivait en base, le CRM Brevo l'ignorait.
+
+**Trois migrations tournaient en production sans exister dans le repo** (`create_mandataires_table`, `mandataires_email_unique`, `admin_tables_safe`), passées à la main fin juin. Versées en PR #102, **SQL recopié tel qu'enregistré en base, sans retouche** — un rattrapage qui « améliore » ce qui tourne ne documente plus rien. Vérifié au passage : prod et Preview étaient déjà alignées (grants `anon` et `search_path` identiques).
+
+**Décisions de Richard** — détail dans les amendements d'ADR-026 et d'ADR-035 :
+- **Deux listes Brevo, deux rôles** : « Prospects » = CRM (tout le monde), « Newsletter » = consentement marketing. **Une campagne se cible sur la seconde, jamais sur la première.**
+- **Plaquette : un lien, un fichier désigné** — pas de pièce jointe, pas de « dernier fichier du dossier ».
+- **Cible commerciale obligatoire** à la création d'un lead, corrigeable ensuite depuis la fiche.
+- **Statut « Erreur / Test / Doublon »**, retiré du Kanban mais jamais supprimé.
+
+**⚠ Points ouverts nés de cette session :**
+- **Le double opt-in n'est pas en service.** `addBrevoContactDOI()` existe mais **n'est appelé nulle part** — les six routes font de l'ajout direct. Légal en France, mais le nom de la fonction laisse croire le contraire.
+- **Codes NAF rév. 2** — la NAF 2025 ne codera les APE qu'au **1er janvier 2027**. Les cinq cibles devront être revues à la bascule.
+- **`TRANSPORT.usine` toujours approximatif** (43.4933, −1.4748). Sur 300 km c'est dans le bruit ; sur un client à 15 km, ça se voit. **Coordonnées réelles de l'atelier attendues.**
+- **La plaquette publiée vise l'écran** (~150 dpi en A4). **L'original 64,6 Mo reste le fichier d'impression**, sur le Drive AHF.
+- **Les 5 leads de production n'ont pas de cible** et n'en auront jamais : les premiers chiffres par cible ne porteront que sur les appels saisis à partir du 2026-08-27.
+- **Aucune Preview n'a été parcourue avant fusion** sur ces quatre PR — choix de Richard, consigné.
+
+**Leçon de méthode confirmée, quatrième occurrence** : un contrôle qui n'observe pas la sortie réelle ne contrôle rien. Ici, un template Brevo ne se vérifie pas sur sa source (un tag inconnu y est indiscernable d'un tag valide) et un `200` ne prouve pas qu'un fichier est servi (486 Ko de HTML au lieu d'un PDF de 1,7 Mo).
 
 **2026-08-20 (configurateur v2 — bardage renommé, rubrique « Ambiance intérieure », PR #84)** — Demande de Richard. Deux mouvements, tous deux pilotés par `config.ts` : **aucun libellé ni visuel en dur dans un composant** (guardrail ADR-030).
 

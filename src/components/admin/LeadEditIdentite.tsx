@@ -3,7 +3,26 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { loadGooglePlacesScript } from "@/shared/lib/google-places";
-import { CONSEILLERS, dateHeureFr, etatSuivi } from "@/lib/crm";
+import {
+  CIBLES_COMMERCIALES,
+  CONSEILLERS,
+  ISSUES_APPEL,
+  SOURCINGS,
+  cibleCommerciale,
+  dateHeureFr,
+  etatSuivi,
+  issueAppel,
+  sourcing,
+} from "@/lib/crm";
+import { RecapClientApercu } from "@/components/admin/RecapClientApercu";
+import { AdresseAutocomplete, type ValeursAdresse } from "@/components/admin/AdresseAutocomplete";
+import {
+  emailMalForme,
+  normaliserSiteWeb,
+  sirenChiffres,
+  sirenFormate,
+  sirenValide,
+} from "@/shared/lib/validation";
 
 interface LeadIdentite {
   id: string;
@@ -31,6 +50,24 @@ interface LeadIdentite {
   prochain_rappel_at?: string | null;
   dernier_appel_at?: string | null;
   statut_commercial?: string | null;
+  /* Date du dernier récapitulatif envoyé au client. Optionnelle : la colonne
+     arrive avec `20260826_recap_envoye_at.sql` et le code tourne avant comme
+     après — sans elle, la mention « déjà envoyé le… » ne s'affiche simplement
+     pas. */
+  recap_envoye_at?: string | null;
+  cible_commerciale?: string | null;
+  derniere_issue?: string | null;
+  multi_configuration?: boolean | null;
+  sourcing?: string | null;
+  /* Agence apporteuse (ADR-044 §5). Optionnelle : la colonne arrive avec
+     `20260831_agents_immo.sql`, et le code tourne avant comme après. */
+  agent_id?: string | null;
+  raison_sociale?: string | null;
+  siren?: string | null;
+  site_web?: string | null;
+  adresse_societe?: string | null;
+  cp_societe?: string | null;
+  ville_societe?: string | null;
   created_at?: string;
 }
 
@@ -61,6 +98,16 @@ function etatInitial(lead: LeadIdentite) {
     ville_client: lead.ville_client ?? "",
     delai_projet: lead.delai_projet ?? "",
     description_projet: lead.description_projet ?? "",
+    cible_commerciale: lead.cible_commerciale ?? "",
+    derniere_issue: lead.derniere_issue ?? "",
+    sourcing: lead.sourcing ?? "",
+    agent_id: lead.agent_id ?? "",
+    raison_sociale: lead.raison_sociale ?? "",
+    siren: lead.siren ?? "",
+    site_web: lead.site_web ?? "",
+    adresse_societe: lead.adresse_societe ?? "",
+    cp_societe: lead.cp_societe ?? "",
+    ville_societe: lead.ville_societe ?? "",
     responsable: lead.responsable ?? "",
     prochain_rappel_at: versChampLocal(lead.prochain_rappel_at),
   };
@@ -79,14 +126,21 @@ const STATUTS = [
   "qualifié", "affecté", "en_cours", "finalisé", "perdu",
 ];
 
-export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
+export default function LeadEditIdentite({
+  lead,
+  /** Nom de l'agence apporteuse, résolu par la page (ADR-044 §5). */
+  agenceApporteuse = null,
+}: {
+  lead: LeadIdentite;
+  agenceApporteuse?: string | null;
+}) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
+  /* Agences apporteuses (ADR-044 §5) — chargées quand le sourcing les réclame,
+     pas à l'ouverture de la fiche : huit sourcings sur neuf n'en ont pas besoin. */
+  const [agences, setAgences] = useState<{ id: string; agence: string; commune: string | null }[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [recapLoading, setRecapLoading] = useState(false);
-  const [recapDone, setRecapDone] = useState(false);
-  const [recapError, setRecapError] = useState<string | null>(null);
   const containerRef    = useRef<HTMLDivElement>(null);
   const placeElementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
 
@@ -153,6 +207,32 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
         body: JSON.stringify({
           ...form,
           budget_terrain: form.budget_terrain ? Number(form.budget_terrain) : null,
+          /* ⚠ La chaîne vide n'est pas `null` pour Postgres : le `check` de
+             `cible_commerciale` accepte l'absence de valeur, jamais `''`. Sans
+             cette conversion, vider le champ ferait échouer tout
+             l'enregistrement de la fiche. */
+          /* ⚠ Vidé, le champ envoie `""`, pas `null`. Depuis que la colonne est
+             nullable (2026-08-27), une chaîne vide s'enregistrerait telle quelle
+             et passerait les tests `lead.email ?` un peu partout : l'écran
+             croirait à une adresse, l'envoi échouerait chez Brevo. */
+          email: form.email || null,
+          /* Mêmes règles qu'à la création : le SIREN perd ses espaces, le site
+             gagne son schéma. Deux écritures d'un même numéro ne se
+             rapprocheraient pas d'un fichier de prospection, et une URL sans
+             schéma devient un lien relatif au back-office. */
+          raison_sociale: form.raison_sociale || null,
+          siren: sirenChiffres(form.siren) || null,
+          site_web: normaliserSiteWeb(form.site_web),
+          adresse_societe: form.adresse_societe || null,
+          cp_societe: form.cp_societe || null,
+          ville_societe: form.ville_societe || null,
+          cible_commerciale: form.cible_commerciale || null,
+          derniere_issue: form.derniere_issue || null,
+          sourcing: form.sourcing || null,
+          /* Rattaché seulement si le sourcing le dit : un `agent_id` laissé
+             derrière un changement d'avis attribuerait une commission à qui
+             n'a rien apporté. */
+          agent_id: form.sourcing === "partenaire" ? form.agent_id || null : null,
           total_estime: form.total_estime ? Number(form.total_estime) : null,
           responsable: form.responsable || null,
           // Horodate la prise en charge, et seulement quand elle change : sinon
@@ -175,23 +255,6 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleSendRecap() {
-    setRecapLoading(true);
-    setRecapError(null);
-    try {
-      const res = await fetch(`/api/admin/leads/${lead.id}/recap-client`, { method: "POST" });
-      if (!res.ok) {
-        const body = (await res.json()) as { error?: string };
-        throw new Error(body.error ?? "Erreur serveur");
-      }
-      setRecapDone(true);
-    } catch (e) {
-      setRecapError(e instanceof Error ? e.message : "Erreur");
-    } finally {
-      setRecapLoading(false);
     }
   }
 
@@ -226,6 +289,23 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
 
         <dl className="space-y-2 text-sm">
           {([
+            /* La cible n'est saisissable qu'à la création : elle décrit l'appel
+               qui a eu lieu, pas l'état du dossier. La relire ici évite qu'une
+               donnée obligatoire à la saisie devienne invisible ensuite. */
+            ["Raison sociale", lead.raison_sociale],
+            ["SIREN", lead.siren ? sirenFormate(lead.siren) : null],
+            ["Site web", lead.site_web],
+            ["Adresse société", [lead.adresse_societe, lead.cp_societe, lead.ville_societe].filter(Boolean).join(" · ") || null],
+            ["Cible commerciale", cibleCommerciale(lead.cible_commerciale)?.label ?? null],
+            ["Sourcing", sourcing(lead.sourcing)?.label ?? null],
+            /* Résolu par la page, pas stocké sur le lead : le nom d'une agence
+               change, son identifiant non. Même règle que les libellés de
+               configuration (ADR-035 §4) — stocker un libellé, c'est le figer. */
+            ["Agence apporteuse", agenceApporteuse],
+            /* Affiché seulement quand c'est vrai : « non » n'apprend rien, et la
+               liste ne rend que les valeurs non nulles. */
+            ["Configuration", lead.multi_configuration ? "Multi-Configuration — à arbitrer" : null],
+            ["Dernier appel — issue", issueAppel(lead.derniere_issue)?.label ?? null],
             ["Modèle", lead.produit],
             ["Pack", lead.pack_terrain],
             ["Budget terrain", lead.budget_terrain ? `${Number(lead.budget_terrain).toLocaleString("fr-FR")} €` : null],
@@ -289,15 +369,22 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
           </p>
         </div>
 
+        {/* ⚠ Ce bouton envoyait autrefois le récapitulatif d'un seul clic, sans
+            que personne ait vu ce qui partait. Il passe par la relecture :
+            ce qui part porte un prix, une distance et un nom. */}
         <div className="mt-4">
-          <button
-            onClick={handleSendRecap}
-            disabled={recapLoading || !lead.email}
-            className="w-full rounded-xl border border-white/10 py-2.5 text-sm text-white/70 transition-colors hover:border-[#7469F4]/50 hover:text-white disabled:opacity-40"
-          >
-            {recapLoading ? "Envoi…" : recapDone ? "✓ Récap envoyé" : "✉️ Envoyer récap au client"}
-          </button>
-          {recapError && <p className="mt-1 text-xs text-red-400">{recapError}</p>}
+          <RecapClientApercu
+            leadId={lead.id}
+            email={lead.email}
+            dejaEnvoyeLe={lead.recap_envoye_at ?? null}
+            /* Les trois champs qui décident du modèle d'email et de son objet :
+               la cible sectorise la présentation, la Multi-Configuration dit
+               qu'il n'y a rien à chiffrer, la raison sociale ouvre l'objet. */
+            multiConfiguration={lead.multi_configuration}
+            cibleCommerciale={lead.cible_commerciale}
+            raisonSociale={lead.raison_sociale}
+            onEnvoye={() => router.refresh()}
+          />
         </div>
       </>
     );
@@ -343,7 +430,55 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
         <div>
           <label className={labelCls}>Email</label>
           <input className={inputCls} type="email" value={form.email} onChange={set("email")} />
+          {/* Facultatif depuis le 2026-08-27, mais s'il est rempli il doit
+              pouvoir fonctionner : une adresse mal formée ne se découvre
+              autrement qu'au retour Brevo. */}
+          {emailMalForme(form.email) && (
+            <p className="mt-1 text-[11px] text-[#E2555A]">
+              Cette adresse ne peut pas fonctionner — vérifiez l&apos;arobase et le domaine.
+            </p>
+          )}
         </div>
+
+        {/* Société — la personne morale, distincte du contact ci-dessus. */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>Raison sociale</label>
+            <input className={inputCls} value={form.raison_sociale} onChange={set("raison_sociale")} />
+          </div>
+          <div>
+            <label className={labelCls}>SIREN</label>
+            <input className={inputCls} value={form.siren} onChange={set("siren")} inputMode="numeric" />
+            {sirenChiffres(form.siren).length === 9 && !sirenValide(form.siren) && (
+              <p className="mt-1 text-[11px] text-[#E2A03F]/80">
+                Clé de contrôle inhabituelle — certains organismes publics font exception.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className={labelCls}>Site web</label>
+          <input className={inputCls} value={form.site_web} onChange={set("site_web")} placeholder="camping-des-pins.fr" />
+        </div>
+
+        <AdresseAutocomplete
+          id="fiche-societe"
+          libelle="Adresse de la société"
+          valeurs={{
+            adresse: form.adresse_societe,
+            cp: form.cp_societe,
+            ville: form.ville_societe,
+          }}
+          onChange={(v: ValeursAdresse) =>
+            setForm((prev) => ({
+              ...prev,
+              adresse_societe: v.adresse,
+              cp_societe: v.cp,
+              ville_societe: v.ville,
+            }))
+          }
+        />
 
         <div>
           <label className={labelCls}>Téléphone</label>
@@ -458,6 +593,86 @@ export default function LeadEditIdentite({ lead }: { lead: LeadIdentite }) {
             <select className={inputCls} value={form.delai_projet} onChange={set("delai_projet")}>
               <option value="">—</option>
               {DELAIS_PROJET.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {/* ⚠ Corrigeable, contrairement à ce que laissait croire la première
+            version : une cible se choisit au premier appel, et c'est justement
+            le moment où l'on se trompe — le « gérant de camping » annoncé par
+            le standard tient en fait un domaine. La liste déroulante suffit
+            ici : les radios détaillées avec codes NAF servent à choisir avant
+            l'appel, corriger après ne demande que de retrouver le bon libellé.
+
+            « — Non renseignée » est proposé pour les leads nés sur le site
+            public, qui n'en ont pas : ne pas l'offrir obligerait à inventer une
+            cible pour pouvoir enregistrer la moindre autre correction. */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>Cible commerciale</label>
+            <select className={inputCls} value={form.cible_commerciale} onChange={set("cible_commerciale")}>
+              <option value="">— Non renseignée</option>
+              {CIBLES_COMMERCIALES.map((c) => (
+                <option key={c.id} value={c.id}>{c.numero}. {c.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelCls}>Sourcing / Origine</label>
+            <select
+              className={inputCls}
+              value={form.sourcing}
+              onChange={(e) => {
+                const choix = e.target.value;
+                setForm((f) => ({ ...f, sourcing: choix }));
+                if (choix === "partenaire" && agences.length === 0) {
+                  fetch("/api/admin/agents")
+                    .then((r) => (r.ok ? r.json() : { agents: [] }))
+                    .then((b) => setAgences(b.agents ?? []))
+                    .catch(() => {
+                      /* Une liste indisponible ne bloque pas l'enregistrement :
+                         le champ reste vide, le reste de la fiche s'écrit. */
+                    });
+                }
+              }}
+            >
+              <option value="">— Non renseignée</option>
+              {SOURCINGS.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* ⚠ N'apparaît que sur « Partenaire ». Ce rattachement est l'assiette
+              d'une future commission d'apporteur (ADR-044 §5) : reconstituer
+              après coup qui a présenté qui serait impossible. */}
+          {form.sourcing === "partenaire" && (
+            <div>
+              <label className={labelCls}>Agence apporteuse</label>
+              <select className={inputCls} value={form.agent_id} onChange={set("agent_id")}>
+                <option value="">
+                  {agences.length ? "— À rattacher plus tard" : "Chargement…"}
+                </option>
+                {agences.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {[a.agence, a.commune].filter(Boolean).join(" — ")}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* ⚠ Rattrapage, pas source. Le trigger repose cette valeur depuis
+              `lead_appels` au prochain appel journalisé : corriger ici règle
+              l'affichage du jour, journaliser l'appel règle l'historique. */}
+          <div>
+            <label className={labelCls}>Dernier appel — issue</label>
+            <select className={inputCls} value={form.derniere_issue} onChange={set("derniere_issue")}>
+              <option value="">— Jamais appelé</option>
+              {ISSUES_APPEL.map((i) => (
+                <option key={i.id} value={i.id}>{i.label}</option>
+              ))}
             </select>
           </div>
         </div>

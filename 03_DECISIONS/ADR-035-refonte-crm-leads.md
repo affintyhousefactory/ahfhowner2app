@@ -193,6 +193,415 @@ fréquence de synchronisation, comportement en cas de remboursement), donc une
 alerte Albert au sens de `CLAUDE.md`. Rien n'est engagé ici hors le nom du
 statut.
 
+## Amendement du 2026-08-27 — l'écran d'appel : cible, distance, relecture
+
+Quatre décisions de Richard, prises en travaillant l'écran de pré-qualification.
+Toutes livrées en production.
+
+### 1. Cible commerciale — obligatoire, en tête de l'écran
+
+Les **cinq cibles du script de phoning** (`PITCHS_PAR_CIBLE.md`, projet
+AHF_MARKETING), dans l'ordre du document et avec ses libellés exacts. Ce ne sont
+pas des catégories inventées après coup : chacune a sa trame d'appel — accroche,
+punch lines, objections propres. Renseigner la cible, c'est enregistrer **avec
+quelle trame le contact a été mené**. Un lead sans cible est un appel dont on
+ignore ce qui a été dit.
+
+L'encart est placé **avant l'identité** : c'est la question qu'on se pose avant
+de composer le numéro, pas après avoir raccroché.
+
+Chaque cible porte ses **codes NAF**, affichés sous elle — ce sont eux qui
+relient le lead aux fichiers de prospection HPA.
+
+| | Cible | NAF rév. 2 |
+|---|---|---|
+| 1 | Campings et hôtellerie de plein air | `55.30Z` |
+| 2 | Hôtels, domaines, gîtes et hébergements touristiques | `55.10Z` · `55.20Z` |
+| 3 | EHPAD, résidences services seniors, médico-social | `87.10A` · `87.30A` · `87.10C` · `87.30B` |
+| 4 | Collectivités, employeurs et logement des saisonniers | `84.11Z` · `55.90Z` · `68.20B` |
+| 5 | Particuliers investisseurs disposant de fonds | `68.20A` — **seulement en SCI** |
+
+⚠ **NAF rév. 2, pas NAF 2025.** Chaque libellé vérifié un à un sur insee.fr le
+2026-08-27, et d'abord la nomenclature elle-même : la NAF 2025 est publiée mais
+**ne codera les APE qu'au 1er janvier 2027**. Jusque-là, les codes portés par les
+entreprises et par les fichiers de prospection sont ceux de la rév. 2. **À revoir
+à la bascule.**
+
+La cinquième cible ne reçoit **pas** de code par défaut : un particulier n'exerce
+pas d'activité enregistrée. En inventer un aurait rendu la colonne inexploitable
+pour le ciblage.
+
+⚠ **Colonne `nullable` malgré l'obligation à la saisie.** Le back-office l'exige
+du conseiller, mais les leads nés sur le site public n'ont personne pour la
+renseigner : un `not null` aurait fait échouer leur enregistrement, c'est-à-dire
+perdu un lead pour cause de champ administratif. L'obligation est là où elle a du
+sens — dans l'écran d'appel. La contrainte de **valeur** est bien en base
+(`leads_cible_commerciale_check`).
+
+**Corrigeable depuis la fiche** (décision du 2026-08-27) : une cible se choisit au
+premier appel, et c'est là qu'on se trompe. La chaîne vide est convertie en
+`null` à l'envoi — le `check` accepte l'absence de valeur, jamais `''`.
+
+### 2. Statut « Erreur / Test / Doublon » — le rebut a son statut
+
+Une saisie de test, un doublon, une frappe ratée : des lignes qui existent en base
+mais ne décrivent personne. « Non retenu » ne convenait pas — il dit qu'un
+prospect a dit non, ce qui est une **information commerciale**. Celui-ci dit qu'il
+n'y a jamais eu de prospect.
+
+`horsKanban: true` le prive de colonne : mêlées aux vraies, ces lignes faussent
+les compteurs. **Retiré du Kanban, jamais supprimé** — la ligne reste en base et
+dans la vue tableau, d'où on peut lui rendre un statut.
+
+Deux garde-fous, parce qu'une carte qui s'évanouit se lit comme une suppression :
+une **confirmation** qui dit ce qui va se passer *et* où le lead se retrouvera ;
+un **compteur sous le Kanban** avec le lien vers la vue tableau. Sans lui, le
+rebut serait un trou noir.
+
+⚠ Ici, **l'écran et la base doivent avancer ensemble** : la contrainte
+`leads_statut_commercial_check` est **remplacée**, Postgres n'ajoutant pas une
+valeur à un `check` en place. Les huit valeurs précédentes sont reprises à
+l'identique — les retirer invaliderait les lignes existantes.
+
+### 3. Le transport se calcule pendant l'appel
+
+Le conseiller le saisissait de tête. Le calcul existait pourtant
+(`transportEur()`), mais n'était câblé que sur le configurateur public.
+
+Dès que l'analyse PLU rend des coordonnées, l'écran affiche la distance **et le
+détail** : `412 km depuis l'atelier de Bayonne · grutage 1 440 € + 412 km ×
+2,16 €/km (9 t) = 2 330 €`. Le détail, pas seulement le résultat — un conseiller
+qui annonce un prix au téléphone doit pouvoir dire d'où il sort.
+
+**Sans terrain identifié, rien n'est calculé**, et l'écran le dit : un zéro se
+lirait comme une livraison offerte.
+
+**Le champ reste une surcharge, pas un pré-remplissage.** Pré-remplir aurait été
+plus simple à écrire et plus faux à l'usage : au moindre changement de modèle le
+poids change, donc le prix, et une correction saisie deux minutes plus tôt serait
+écrasée sans que personne le voie.
+
+`distanceAtelierKm()` rejoint `transportEur()` dans `lib/configurateur/config.ts`.
+Elle vivait en copie privée dans le configurateur public et nulle part côté
+back-office : deux calculs pour un même prix, c'est un jour où le devis du site
+et celui de l'appel ne tombent plus pareil.
+
+`distance_km` est figée dans l'instantané `config_v2` — pas recalculée. Un client
+à qui on a annoncé 412 km au téléphone doit lire 412 km dans son email.
+
+⚠ **`TRANSPORT.usine` reste approximatif** — « à affiner avec adresse exacte
+atelier », dit `site.ts` depuis l'origine. Sur 300 km l'écart est dans le bruit ;
+sur un client à 15 km, il se voit. **Coordonnées réelles toujours attendues.**
+
+### 4. Le récapitulatif se relit avant de partir
+
+Il s'envoyait d'un clic depuis la fiche, sans que personne ait vu ce qui partait.
+Sur un premier appel retranscrit à la volée, ce qui part porte un prix, une
+distance et un nom.
+
+`RecapClientApercu` affiche le **vrai template Brevo** peuplé des valeurs du lead,
+dans une iframe (`sandbox=""` : on l'affiche, on ne l'exécute pas). Le template
+est lu **chez Brevo**, pas dans le repo — c'est Brevo qui enverra, donc c'est son
+template qui fait foi. Une copie locale aurait divergé dès la première retouche
+dans l'éditeur ; le 2026-08-26 en donne deux exemples.
+
+**Une seule construction des valeurs** : `construireParamsRecap()` sert l'aperçu
+et l'envoi. Deux constructions pour un même email, c'est un écran qui finit par
+montrer autre chose que ce qui part — et il montrerait des prix.
+
+`leads.recap_envoye_at` trace l'envoi : sans elle, à deux conseillers, le client
+reçoit deux fois le même devis. La date est écrite **après** l'envoi et son échec
+ne le remet pas en cause (`horodate: false`) — une trace manquée ne doit jamais
+annuler un envoi réussi.
+
+## Amendement du 2026-08-28 — l'écran d'appel, suite : chercher, ne pas exiger, ne pas chiffrer
+
+Quatre décisions de Richard, toutes livrées en production le 2026-08-27.
+
+### 1. Chercher avant de saisir
+
+Un champ en tête de la section Identité : trois lettres suffisent, sur nom,
+prénom, email ou téléphone. **Placé avant la saisie, pas après** — une fiche
+existante doit se voir pendant que le conseiller peut encore changer de chemin.
+
+Le doublon n'était pas une hypothèse : la table comptait **6 leads pour 5
+adresses distinctes**. Le résultat se traite différemment selon sa source — un
+lead donne un lien vers sa fiche et **ne pré-remplit rien**, un contact donne un
+bouton « Reprendre l'identité ».
+
+⚠ **Brevo n'a pas de recherche.** Vérifié le 2026-08-27 : le paramètre `search`
+de l'API v3 est **ignoré** — il rend un contact non filtré — et
+`GET /v3/contacts/{email}` est le seul accès. Brevo ne porte d'ailleurs que
+`PRENOM`, `NOM`, `SMS` : strictement moins que la base. Il n'est donc interrogé
+qu'en dernier recours, sur une adresse complète.
+
+⚠ **La recherche par téléphone demande deux motifs.** Les séparateurs d'abord
+(`0612` → `%0%6%1%2%`, qui retrouve « 06 12 34 », « 06.12.34 » et la forme
+collée). L'indicatif ensuite : les formulaires publics passent par
+`react-phone-number-input`, qui produit du E.164 — **7 numéros sur 13** en base
+sont stockés `+336…`, sans zéro initial. Sans la seconde variante, la recherche
+en raterait plus de la moitié.
+
+### 2. L'email devient facultatif
+
+Au téléphone, tout le monde ne donne pas son adresse. L'exiger obligeait à en
+inventer une — qui finit par recevoir un devis — ou à renoncer à la fiche,
+c'est-à-dire à perdre l'appel.
+
+⚠ **Le blocage n'était pas dans l'écran.** `leads.email` était `not null` depuis
+`20260622_leads.sql` : retirer le `required` du formulaire aurait remplacé un
+refus clair par une erreur serveur. Quatre couches ont dû bouger.
+
+Ce que l'absence coûte est dit à l'écran : aucun récapitulatif ne peut partir, et
+le lead n'entre dans aucune liste Brevo. Deux avertissements, **aucun blocage** —
+« ni email ni téléphone » et « téléphone seul ».
+
+Les **formulaires publics ne sont pas ouverts** : `/api/contact` et le
+configurateur valident l'adresse côté serveur, indépendamment de la contrainte de
+base. Là-bas, l'email reste le seul canal de retour.
+
+En revanche, une adresse **mal formée** est désormais refusée, et signalée **à la
+saisie** : corriger pendant l'appel coûte une seconde, s'en apercevoir au retour
+Brevo coûte le prospect.
+
+⚠ Le motif d'email était écrit **trois fois** dans le dépôt, avec trois
+définitions différentes. `src/shared/lib/validation.ts` devient la source unique —
+même dérive qu'ADR-029 corrige pour le vocabulaire.
+
+### 3. Identité de la société
+
+Quatre des cinq cibles sont des personnes morales ; la raison sociale se
+retrouvait dans les notes d'appel, d'où l'on ne peut ni trier ni rapprocher des
+fichiers de prospection. Quatre champs, **tous facultatifs** : raison sociale,
+SIREN, site web, adresse de la société avec autocomplétion.
+
+⚠ **L'adresse de la société est distincte de celle du client.** Le siège d'un
+camping et le domicile de son gérant ne sont pas au même endroit, et c'est le
+premier qui reçoit le studio.
+
+⚠ **SIREN : avertir, jamais refuser.** La clé de Luhn est vérifiée et signalée,
+pas imposée — La Poste porte le 356 000 000, qui ne la respecte pas, et l'INSEE
+l'admet. La base ne refuse que ce qui n'est pas un SIREN (`^[0-9]{9}$`). Stocké
+sans séparateur : deux écritures d'un même numéro ne se rapprocheraient pas d'un
+fichier de prospection.
+
+### 4. L'issue du dernier appel remonte sur le lead
+
+Les cinq issues vivaient dans `lead_appels`, une ligne par appel. **Une colonne,
+pas un statut de plus** : `statut_commercial` dit où en est l'affaire, l'issue dit
+comment s'est terminé le dernier échange. Deux axes indépendants — un lead peut
+être « En discussion » et avoir eu un répondeur ce matin ; les fondre ferait
+perdre l'un des deux, et « Refus » ferait doublon avec « Non retenu ».
+
+Le trigger existant est **étendu, pas doublé**. L'issue retenue est celle du
+dernier appel **qui en porte une** : le formulaire accepte une note sans issue, et
+un commentaire ajouté après coup ne doit pas effacer le « Répondeur » de la veille.
+
+### 5. « Multi-Configuration » couvre deux situations
+
+Élargi le jour même : le prospect hésite entre plusieurs modèles, **ou** il
+demande des options et services personnalisés **assujettis à devis préalables
+complémentaires**. Deux causes, une conséquence — rien n'est chiffrable — et c'est
+la conséquence qui décide de l'email envoyé.
+
+La colonne ne bouge pas : le drapeau disait déjà la bonne chose. La cause se lit
+dans les notes d'appel.
+
+## Amendement du 2026-08-28 (soir) — l'écran d'appel prend sa forme
+
+### 1. Saisie par étapes — un choix de Richard, un garde-fou de ma main
+
+Le parcours par étapes a été retenu contre ma recommandation (je proposais deux
+colonnes avec panneau collant). J'avais signalé le risque : au téléphone, le
+prospect donne son terrain avant son nom aussi souvent que l'inverse, et un
+tunnel imposerait au conseiller l'ordre de l'écran.
+
+Le risque est neutralisé sans renier le choix : **la barre d'étapes est cliquable
+de bout en bout**, et **« Créer le lead » reste actif à toutes les étapes** dès
+que cible + prénom + nom sont saisis. La structure guide, elle n'enferme pas.
+
+Cinq étapes : **Cible · Contact · Configuration · Terrain · Appel & suivi**.
+« Notes internes » rejoint la dernière — les deux disaient la même chose du même
+moment.
+
+⚠ **Huit grilles étaient fixes** (`grid-cols-2`, `-3`, `-4`). Sur 390 px, deux
+colonnes de champs deviennent des timbres-poste. Elles empilent désormais en
+mobile.
+
+### 2. Sourcing — et pourquoi ce n'est pas `source`
+
+`leads.source` porte le canal **technique** de création (`admin`,
+`configurateur_v2`, `web_configurateur`). Un lead saisi au back-office peut venir
+d'un fichier de prospection, d'un salon ou d'une recommandation — trois efforts
+qui n'ont ni le même coût ni le même rendement, et que `source` confond en un
+seul « admin ». L'écraser aurait perdu la trace technique.
+
+D'où `leads.sourcing`, huit valeurs. **C'est ce champ qui dira si la prospection
+téléphonique paie.**
+
+### 3. Le premier appel devient une entrée du journal
+
+L'ancienne rubrique demandait un « prochain rappel » **sans jamais demander quand
+l'appel avait eu lieu**. Le journal restait donc vide jusqu'à la première
+modification, et le compteur de silence partait de la création plutôt que du
+contact. Constat de Richard, qui y voyait un doublon — c'en était un, dans
+l'autre sens.
+
+Le bloc « Premier appel » écrit une ligne dans `lead_appels` : le trigger remonte
+l'issue et la date sur le lead, et l'échange rejoint l'historique.
+
+⚠ **Deux dates deviennent une.** Celle de cet appel n'est pas demandée : c'est
+maintenant. ⚠ **Son échec n'annule pas le lead** — la réponse porte
+`appelJournalise` plutôt que de le taire (leçon du `notified: true` du
+2026-08-25).
+
+### 4. La fiche passe en compartiments
+
+Cinq onglets miroir de la création : **Contact & société · Configuration ·
+Terrain · Appels · Documents**, avec compteurs sur les deux derniers. Le journal
+d'appels cesse d'être en bas d'une colonne — c'est pourtant l'écran qu'on ouvre
+le plus souvent.
+
+**Des onglets, pas des étapes** : on ne progresse pas dans une fiche existante,
+on y revient. La barre de création numérote, celle-ci non.
+
+⚠ **Montage à la première visite, puis conservation.** Tout monter d'emblée
+cassait la carte — Leaflet initialisé dans un conteneur `display:none` se
+dimensionne à zéro. Tout démonter en sortant viderait un formulaire à demi
+rempli. Le compromis règle les deux.
+
+### 5. Numéros cliquables — premier pas vers Allo, sans intégration
+
+Un composant, `TelephoneLien`, sur la liste, la fiche et la recherche. La colonne
+« Email » de la liste devient « Contact » et porte le numéro : c'est cette page
+qu'on ouvre pour lancer une campagne, et c'est sur elle que l'extension Allo
+détecte les contacts à verser dans le Power Dialer.
+
+**Aucune donnée ne sort.** L'intégration API d'Allo (synchronisation des
+contacts, journal alimenté par webhook) reste à décider : dépendance externe
+critique, donc **ADR et alerte Albert avant tout code**, au même titre que
+Pennylane (ADR-036).
+
+Ce qui a été vérifié le 2026-08-28 : l'API Allo expose `/v2/api/crm/people` et
+`/companies` (créer, lire, mettre à jour) et `/v2/api/dialing-queues/current`
+pour remplir le Power Dialer ; **aucun endpoint de déclenchement d'appel** — le
+click-to-call passe par l'extension Chrome. Trois inconnues avant de s'engager :
+le scope d'écriture réel, les événements de webhook disponibles, et la clé de
+rapprochement des identités.
+
+### ⚠ Une régression introduite et corrigée le jour même
+
+`TelephoneLien` portait un `onClick` sans `"use client"`, et il est rendu depuis
+`leads/[id]/page.tsx`, un **Server Component** : le rendu serveur échouait.
+Symptôme exact — la fiche ne tombait **que si le lead avait un numéro**, puisque
+sans numéro le composant n'était pas appelé. Signalée par Richard, corrigée en
+retirant le handler (inutile : la ligne du tableau n'est pas cliquable).
+
+**Leçon** : un composant partagé destiné à des pages serveur ne doit porter aucun
+gestionnaire d'événement. Vérification faite sur tout le back-office —
+`TelephoneLien` était le seul cas.
+
+## Amendement du 2026-08-31 — un email par cible commerciale
+
+Le récapitulatif d'appel n'avait que deux formes : **chiffré** quand une
+configuration était arrêtée, **générique** quand rien ne l'était (drapeau
+`multi_configuration`, amendement du 2026-08-28, point 5). Cette seconde forme
+parlait à tout le monde de la même manière. Cinq modèles ont été écrits chez
+Brevo, un par cible du script de phoning ; ils prennent sa place quand la cible
+est connue.
+
+### 1. La règle — la cible sectorise la présentation, elle ne décide pas du prix
+
+```
+multi_configuration = true ?
+  ├─ hpa            → 18  Camping         ├─ collectivites → 21  Collectivité
+  ├─ tourisme       → 20  Hôtel           ├─ investisseurs → 22  Investisseur
+  ├─ medico_social  → 19  Médico-social   └─ cible absente → 17  Générique
+sinon               →  9  Récapitulatif chiffré
+```
+
+**Deux lectures de la demande étaient possibles**, et elles ne donnaient pas le
+même produit. Ou bien la cible prime toujours — un lead « camping » reçoit
+l'email camping, chiffrage ou pas ; ou bien elle ne sectorise que le cas où il
+n'y a rien à chiffrer. **Richard a tranché pour la seconde le 2026-08-31.**
+
+Le motif est dans les modèles eux-mêmes : les cinq présentations sectorielles ne
+portent **aucun montant**. Les servir à un lead dont la configuration est
+arrêtée priverait le client du prix qu'on vient de lui annoncer au téléphone —
+et le seul document écrit de cet appel disparaîtrait. La cible dit *à qui* on
+parle ; `multi_configuration` dit *s'il y a un prix*. Deux questions distinctes,
+deux axes qui ne se recouvrent pas.
+
+Corollaire : une cible commerciale renseignée ne change **rien** pour un lead
+chiffré. C'est voulu, et c'est ce qui rend la règle sûre — aucun réglage
+commercial ne peut faire disparaître un chiffrage.
+
+### 2. Où vit la règle, et pourquoi pas ailleurs
+
+`choixEmailRecap()` est dans `src/lib/crm.ts`, **pure et sans `process.env`** :
+l'écran d'appel s'en sert pour annoncer au conseiller ce qui partira, et il
+tourne dans le navigateur. `src/shared/lib/recap-client.ts` la complète du
+numéro de template, qui ne quitte pas le serveur. La règle est écrite une fois,
+sa traduction en identifiant une autre — jamais l'inverse.
+
+La table des templates est un `Record<CleEmailRecap, …>`, **exhaustif par
+construction**. Le jour où une sixième cible sera ajoutée à
+`CIBLES_COMMERCIALES`, ce fichier cessera de compiler tant que son email n'aura
+pas été décidé. Un `switch` avec un `default` aurait silencieusement envoyé la
+présentation générique à la nouvelle cible — c'est-à-dire livré une régression
+sans le dire.
+
+### 3. L'écran cesse de deviner
+
+Sept modèles possibles : personne ne peut plus savoir de tête lequel part. La
+fiche affiche donc **le modèle retenu sans appel réseau** — même règle des deux
+côtés — et **l'objet réel de l'email** à l'ouverture de l'aperçu
+(`?meta=1`, qui rend le sujet du template peuplé des valeurs du lead).
+
+L'objet compte double ici : celui des quatre présentations « personne morale »
+s'ouvre sur la raison sociale (`{{ params.ETABLISSEMENT }} — une suite de plus,
+sans fermer une journée`), et **aucun rendu du corps ne le montrait**. Une
+variable de template absente du scope Vercel se dit maintenant *avant* le clic,
+plus en 500 après.
+
+⚠ Le chargement se fait **au clic, jamais dans un effet**. React 19 refuse qu'un
+effet déclenche un `setState`, et il a raison : rien n'oblige à interroger Brevo
+à chaque fiche ouverte, alors que le conseiller ne relit qu'au moment d'envoyer.
+
+### 4. Deux façons de mentir, deux refus
+
+- **Raison sociale absente.** L'objet commencerait par un tiret. Repli neutre
+  « Votre établissement », et l'écran signale l'absence pour qu'on la comble
+  plutôt que de la subir. On n'a pas bloqué l'envoi : au téléphone, la raison
+  sociale exacte n'est pas toujours obtenue au premier appel — c'est la même
+  raison qui a rendu l'email facultatif (amendement du 2026-08-28, point 2).
+- **Numéros restants introuvables.** Le modèle « investisseur » annonce « il
+  reste N numéros sur les 6 de la série ». Une base muette donnerait un zéro
+  inventé, qui **déclarerait la série épuisée** à un prospect prêt à acheter.
+  L'envoi est refusé (503) plutôt que faux. La rareté est un argument de vente :
+  elle se dit juste, ou pas du tout.
+
+Le comptage sort du tunnel public (`/api/configurateur/reservation`) vers
+`src/shared/lib/numeros-serie.ts`. Deux définitions de « numéro pris » auraient
+fini par diverger — l'une refusant un numéro que l'autre annonce libre dans un
+email. `null` y signifie « on ne sait pas », et **ce n'est pas zéro** : le tunnel
+ne propose alors aucun numéro, le récapitulatif refuse de partir.
+
+### 5. Ce qui reste ouvert
+
+⚠ **Le modèle 22 écrit « sur les 6 de la série » en dur chez Brevo.** Seul le
+nombre restant est une variable. Si le volume de la Série 01 change — il est
+passé de 12 à 6 le 2026-08-04 — l'email mentira sans que le code puisse l'en
+empêcher, alors que `SERIE_TOTAL` (`src/lib/site.ts`) est la source unique côté
+site. À corriger dans l'éditeur Brevo en ajoutant une seconde variable.
+
+⚠ **Les identifiants ne sont pas vérifiables depuis la CLI Vercel** — les
+valeurs chiffrées ne sont pas restituées. La présence des cinq variables est
+confirmée sur Preview et Production (2026-08-31) ; leur **valeur** se contrôle
+en Preview, où l'écran affiche « template N » à côté du modèle retenu. Attention
+au couple contre-intuitif : cible 2 (hôtels) → **20**, cible 3 (médico-social) →
+**19**.
+
 ## Faisabilité
 
 - **Verdict** : ✅ Élevée. Aucune API externe, aucune clé, aucun service nouveau. Une migration additive.

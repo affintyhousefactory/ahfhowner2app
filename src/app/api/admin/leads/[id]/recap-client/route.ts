@@ -2,16 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { sendBrevoTemplate } from "@/shared/lib/email";
 import { refuserSiPasAdmin } from "@/shared/lib/supabase-server";
+import { compterNumerosLibres } from "@/shared/lib/numeros-serie";
+import {
+  choisirEmailRecap,
+  construireParamsRecap,
+  SELECT_RECAP,
+  type ContexteRecap,
+  type LeadRecap,
+} from "@/shared/lib/recap-client";
 
-/* ⚠ `BREVO_TEMPLATE_RECAP` se lit dans la fonction : au niveau du module, elle
-   arrivait vide en production (constat du 2026-08-25). Ici le défaut se voyait
-   — la route renvoie un 500 explicite — mais la cause était la même. */
+/* ⚠ Les identifiants de template se lisent dans la fonction : au niveau du
+   module, ils arrivaient vides en production (constat du 2026-08-25). Ici le
+   défaut se voyait — la route renvoie un 500 explicite — mais la cause était la
+   même. `choisirEmailRecap()` lit à l'appel, jamais à l'import.
 
-const PACK_LABELS: Record<string, string> = {
-  essentiel: "Pack Essentiel — 4 900 € TTC",
-  etendu: "Pack Étendu — 7 300 € TTC",
-  departement: "Pack Département — 11 200 € TTC",
-};
+   ⚠ Les paramètres ne sont pas fabriqués ici : `construireParamsRecap()` est la
+   seule source, partagée avec la route d'aperçu. Deux constructions pour un même
+   email, c'est un écran qui finit par montrer autre chose que ce qui part — et
+   il montrerait des prix. Le **choix du modèle** obéit à la même règle, par
+   `choisirEmailRecap()`. */
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const refus = await refuserSiPasAdmin();
@@ -22,60 +31,41 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
   const { data: lead } = await supabase
     .from("leads")
-    .select("prenom, nom, email, tel, produit, surface, house_total, delivery, grand_total, terrain_mode, pack_terrain")
+    .select(SELECT_RECAP)
     .eq("id", id)
-    .single();
+    .single<LeadRecap>();
 
   if (!lead?.email) {
     return NextResponse.json({ error: "Lead introuvable ou sans email" }, { status: 404 });
   }
 
-  const templateId = Number(process.env.BREVO_TEMPLATE_RECAP ?? 0);
-  if (!templateId) {
-    return NextResponse.json({ error: "BREVO_TEMPLATE_RECAP non défini" }, { status: 500 });
+  /* Le modèle dépend du lead, pas de la route : récapitulatif chiffré quand la
+     configuration est arrêtée, présentation du secteur du prospect sinon. */
+  const email = choisirEmailRecap(lead);
+  if (!email.id) {
+    return NextResponse.json({ error: `${email.variable} non défini` }, { status: 500 });
   }
 
-  const terrainLabel =
-    lead.terrain_mode === "pack" && lead.pack_terrain
-      ? PACK_LABELS[lead.pack_terrain] ?? "Pack Terrain Affinity"
-      : lead.terrain_mode === "have"
-        ? "J'ai un terrain"
-        : "Non renseigné";
-
-  const livraisonLabel =
-    lead.terrain_mode === "pack"
-      ? "Via pack terrain"
-      : lead.delivery != null
-        ? `${lead.delivery.toLocaleString("fr-FR")} €`
-        : "À estimer";
-
-  const totalEstime =
-    lead.grand_total && lead.grand_total > 0
-      ? `${lead.grand_total.toLocaleString("fr-FR")} €`
-      : lead.house_total
-        ? `${lead.house_total.toLocaleString("fr-FR")} €`
-        : "";
+  /* ⚠ La présentation « investisseur » annonce combien de numéros restent. Une
+     base muette donnerait « il reste  numéros » — ou pire, un zéro inventé qui
+     déclarerait la série épuisée. On refuse d'envoyer plutôt que de se tromper
+     sur la rareté : elle est un argument de vente, pas un remplissage. */
+  const contexte: ContexteRecap = {};
+  if (email.annonceNumerosRestants) {
+    contexte.numerosLibres = await compterNumerosLibres();
+    if (contexte.numerosLibres === null) {
+      return NextResponse.json(
+        { error: "Numéros disponibles introuvables — envoi refusé plutôt qu'un compte faux" },
+        { status: 503 },
+      );
+    }
+  }
 
   try {
     await sendBrevoTemplate({
-      templateId,
+      templateId: email.id,
       to: [{ email: lead.email, name: `${lead.prenom ?? ""} ${lead.nom ?? ""}`.trim() }],
-      params: {
-        PRENOM: lead.prenom ?? "",
-        NOM: lead.nom ?? "",
-        EMAIL: lead.email ?? "",
-        TEL: lead.tel ?? "",
-        /* Le paramètre de montant a été renommé en `STUDIO_TTC` le 2026-08-22
-           et `PRODUIT` retiré : le template Brevo est reconstruit au même
-           moment par `scripts/build-email-brevo.mjs`, ce que le commentaire
-           précédent attendait pour renommer sans vider le montant. `PRODUIT`
-           faisait doublon avec `MODELE`, qui portait déjà la même valeur. */
-        STUDIO_TTC: lead.house_total ? `${lead.house_total.toLocaleString("fr-FR")} €` : "",
-        LIVRAISON: livraisonLabel,
-        TERRAIN: terrainLabel,
-        MODELE: `${lead.produit ?? ""} ${lead.surface ?? ""}`.trim(),
-        TOTAL_ESTIME: totalEstime,
-      },
+      params: construireParamsRecap(lead, contexte),
     });
   } catch (err) {
     return NextResponse.json(
@@ -84,5 +74,15 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     );
   }
 
-  return NextResponse.json({ ok: true });
+  /* La date d'envoi est posée après coup, jamais avant : un `recap_envoye_at`
+     écrit d'abord aurait affirmé qu'un email est parti alors que Brevo venait
+     de refuser — c'est la faute exacte qui a laissé croire pendant trois jours
+     que les récapitulatifs partaient (2026-08-25). L'échec de cette écriture
+     n'annule pas l'envoi : l'email est parti, on le dit. */
+  const { error: majErr } = await supabase
+    .from("leads")
+    .update({ recap_envoye_at: new Date().toISOString() })
+    .eq("id", id);
+
+  return NextResponse.json({ ok: true, horodate: !majErr, modele: email.libelle });
 }

@@ -44,6 +44,20 @@ export const STATUTS_COMMERCIAUX = [
   { id: "paiement_reserve", label: "Paiement réservé", badge: "bg-teal-500/20 text-teal-300",    dot: "bg-teal-300",    couleur: "#2dd4bf", actif: true  },
   { id: "signe",         label: "Signé",         badge: "bg-green-500/20 text-green-400",        dot: "bg-green-400",   couleur: "#4ade80", actif: false },
   { id: "perdu",         label: "Non retenu",    badge: "bg-red-500/10 text-red-400/60",         dot: "bg-red-400/60",  couleur: "#6b7280", actif: false },
+
+  /* Rebut : ni un prospect, ni une affaire perdue. Une saisie de test, un
+     doublon, une erreur de frappe — des lignes qui existent en base mais ne
+     décrivent personne.
+
+     `horsKanban` les retire du tableau de bord : mêlées aux vraies, elles
+     faussent les compteurs de colonne, et « Non retenu » ne convenait pas — il
+     dit qu'un prospect a dit non, ce qui est une information commerciale.
+     Celui-ci dit qu'il n'y a jamais eu de prospect.
+
+     ⚠ Retiré du Kanban, **pas supprimé** : la ligne reste en base et visible
+     dans la vue tableau. Un statut qui efface pour de bon n'aurait pas sa place
+     dans un menu déroulant qu'on manipule d'une main en parlant au téléphone. */
+  { id: "erreur_test_doublon", label: "Erreur / Test / Doublon", badge: "bg-white/5 text-white/30", dot: "bg-white/20", couleur: "#4b5563", actif: false, horsKanban: true },
 ] as const;
 
 export type StatutCommercialId = (typeof STATUTS_COMMERCIAUX)[number]["id"];
@@ -56,6 +70,217 @@ export function statutCommercial(id: string | null | undefined): StatutCommercia
 /** `actif: false` = affaire close. Ni relance, ni alerte de silence. */
 export function estClos(id: string | null | undefined): boolean {
   return !statutCommercial(id).actif;
+}
+
+/**
+ * Statuts qui ne paraissent pas au Kanban — le rebut, pas les affaires closes.
+ *
+ * `estClos()` et celui-ci ne se recouvrent pas : « Signé » est clos et bien
+ * visible, c'est même la colonne qu'on regarde en premier.
+ */
+export function horsKanban(id: string | null | undefined): boolean {
+  const statut = statutCommercial(id);
+  return "horsKanban" in statut && statut.horsKanban === true;
+}
+
+/** Colonnes du Kanban — l'ordre d'avancement, sans le rebut. */
+export const STATUTS_KANBAN = STATUTS_COMMERCIAUX.filter((s) => !("horsKanban" in s && s.horsKanban));
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* Sourcing — d'où vient le prospect                                          */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Origine **commerciale** du lead, arrêtée avec Richard le 2026-08-28.
+ *
+ * ⚠ **À ne pas confondre avec `leads.source`**, qui porte le canal *technique*
+ * de création — `configurateur_v2`, `admin` : d'où la ligne a été écrite. Un
+ * lead saisi au back-office peut venir d'un fichier de prospection, d'un salon
+ * ou d'une recommandation ; trois efforts qui n'ont ni le même coût ni le même
+ * rendement, et que `source` confond en un seul « admin ».
+ *
+ * C'est ce champ qui dira si la prospection téléphonique paie.
+ */
+export const SOURCINGS = [
+  { id: "prospection_tel", numero: 1, label: "Prospection téléphonique", detail: "fichier HPA" },
+  { id: "appel_entrant",   numero: 2, label: "Appel entrant",            detail: "le prospect nous appelle" },
+  { id: "formulaire_site", numero: 3, label: "Formulaire du site",       detail: "/contact" },
+  { id: "configurateur",   numero: 4, label: "Configurateur en ligne",   detail: "demande de numéro" },
+  { id: "recommandation",  numero: 5, label: "Recommandation",           detail: "bouche-à-oreille" },
+  { id: "salon",           numero: 6, label: "Salon / événement",        detail: "" },
+  { id: "reseaux_sociaux", numero: 7, label: "Réseaux sociaux",          detail: "LinkedIn, Instagram" },
+  { id: "partenaire",      numero: 8, label: "Partenaire",               detail: "apporteur d'affaires" },
+] as const;
+
+export type SourcingId = (typeof SOURCINGS)[number]["id"];
+
+export function sourcing(id: string | null | undefined) {
+  return SOURCINGS.find((s) => s.id === id) ?? null;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* Cibles commerciales                                                        */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Les cinq cibles du script de phoning, dans l'ordre du document.
+ *
+ * Elles ne sont pas une catégorisation a posteriori : ce sont les cinq
+ * populations pour lesquelles une trame d'appel distincte a été écrite —
+ * accroche, punch lines, objections propres. Demander la cible à la création du
+ * lead, c'est demander **avec quelle trame l'appel a été mené**. D'où le
+ * caractère obligatoire : un lead sans cible est un appel dont on ignore ce qui
+ * a été dit.
+ *
+ * ⚠ **Codes NAF rév. 2 (2008)**, vérifiés un à un sur insee.fr le 2026-08-27.
+ * La NAF 2025 a beau être publiée, elle ne sert à coder les APE qu'à partir du
+ * 1er janvier 2027 : d'ici là, les codes portés par les entreprises — et par
+ * les fichiers de prospection — sont ceux-ci. Ils devront être revus à la
+ * bascule.
+ *
+ * Les codes servent au ciblage et au rapprochement avec les fichiers de
+ * prospection ; ils ne sont pas exhaustifs et ne valent pas règle : un camping
+ * exploité en SCI peut porter un code immobilier. C'est le conseiller qui
+ * tranche, la liste l'aide.
+ */
+export const CIBLES_COMMERCIALES = [
+  {
+    id: "hpa",
+    numero: 1,
+    label: "Campings et hôtellerie de plein air",
+    court: "Camping / HPA",
+    badge: "bg-emerald-500/15 text-emerald-300",
+    naf: [{ code: "55.30Z", libelle: "Terrains de camping et parcs pour caravanes ou véhicules de loisirs" }],
+  },
+  {
+    id: "tourisme",
+    numero: 2,
+    label: "Hôtels, domaines, gîtes et hébergements touristiques",
+    court: "Hôtel / tourisme",
+    badge: "bg-sky-500/15 text-sky-300",
+    naf: [
+      { code: "55.10Z", libelle: "Hôtels et hébergement similaire" },
+      { code: "55.20Z", libelle: "Hébergement touristique et autre hébergement de courte durée" },
+    ],
+  },
+  {
+    id: "medico_social",
+    numero: 3,
+    label: "EHPAD, résidences services seniors, médico-social",
+    court: "Médico-social",
+    badge: "bg-violet-500/15 text-violet-300",
+    naf: [
+      { code: "87.10A", libelle: "Hébergement médicalisé pour personnes âgées" },
+      { code: "87.30A", libelle: "Hébergement social pour personnes âgées" },
+      { code: "87.10C", libelle: "Hébergement médicalisé pour adultes handicapés et autre hébergement médicalisé" },
+      { code: "87.30B", libelle: "Hébergement social pour handicapés physiques" },
+    ],
+  },
+  {
+    id: "collectivites",
+    numero: 4,
+    label: "Collectivités, employeurs et logement des saisonniers",
+    court: "Collectivité / employeur",
+    badge: "bg-amber-500/15 text-amber-300",
+    naf: [
+      { code: "84.11Z", libelle: "Administration publique générale" },
+      { code: "55.90Z", libelle: "Autres hébergements" },
+      { code: "68.20B", libelle: "Location de terrains et d'autres biens immobiliers" },
+    ],
+  },
+  {
+    id: "investisseurs",
+    numero: 5,
+    label: "Particuliers investisseurs disposant de fonds",
+    court: "Investisseur",
+    badge: "bg-rose-500/15 text-rose-300",
+    /* Un particulier n'a pas de code NAF — il n'exerce pas d'activité
+       économique enregistrée. Le seul cas où un code apparaît est celui d'une
+       société civile immobilière. Écrire ici un code « par défaut » aurait
+       rendu la colonne inexploitable pour le ciblage. */
+    naf: [{ code: "68.20A", libelle: "Location de logements — seulement si le lead investit via une SCI" }],
+  },
+] as const;
+
+export type CibleCommercialeId = (typeof CIBLES_COMMERCIALES)[number]["id"];
+export type CibleCommerciale = (typeof CIBLES_COMMERCIALES)[number];
+
+export function cibleCommerciale(id: string | null | undefined): CibleCommerciale | null {
+  return CIBLES_COMMERCIALES.find((c) => c.id === id) ?? null;
+}
+
+/* ── Quel email récapitulatif part ────────────────────────────────────────── */
+
+/** Les sept emails possibles à l'issue d'un appel. */
+export type CleEmailRecap = "recap" | "multicfg" | CibleCommercialeId;
+
+/**
+ * Quel email pour ce lead — **la règle**, ici et nulle part ailleurs.
+ *
+ * Deux situations, et une seule d'entre elles connaît un prix.
+ *
+ * 1. **Une configuration est arrêtée** → le récapitulatif chiffré : modèle,
+ *    terrasse, options, transport, total. C'est le document de l'appel.
+ * 2. **Rien n'est chiffrable** — modèles encore en balance, ou options hors
+ *    grille assujetties à devis complémentaire. Chiffrer reviendrait à
+ *    communiquer un prix sur un choix que personne n'a fait, et un prix
+ *    communiqué ne se reprend pas. Part alors une **présentation**, choisie sur
+ *    la cible du script de phoning : le camping ne lit pas le même argument que
+ *    l'EHPAD, et ces cinq emails sont écrits pour ces cinq populations. Sans
+ *    cible — cas des leads nés sur le site public, où personne n'a répondu au
+ *    téléphone — c'est la présentation générique.
+ *
+ * ⚠ **La cible ne remplace jamais le récapitulatif chiffré.** Les cinq
+ * présentations sectorielles ne portent aucun montant : les servir à un lead
+ * dont la configuration est arrêtée priverait le client du chiffrage qu'on
+ * vient de lui annoncer au téléphone. Décision de Richard, 2026-08-31.
+ *
+ * ⚠ **Fonction pure, sans `process.env`.** L'écran d'appel s'en sert pour
+ * annoncer au conseiller ce qui partira, et il tourne dans le navigateur ; les
+ * identifiants de template, eux, restent côté serveur
+ * (`@/shared/lib/recap-client`). La règle est ici, sa traduction en numéro de
+ * template est là-bas — jamais l'inverse.
+ */
+export type ChoixEmailRecap = {
+  cle: CleEmailRecap;
+  /** Ce que le conseiller lit avant d'envoyer. */
+  libelle: string;
+  /**
+   * L'**objet** de l'email s'ouvre sur la raison sociale — « {Camping des Pins}
+   * — on travaille sur vos locatifs ». Sans elle, il commencerait par un tiret :
+   * l'écran doit le dire avant l'envoi, pas après.
+   */
+  objetPorteRaisonSociale: boolean;
+  /**
+   * L'email annonce combien de numéros de la série restent. Le compte se prend
+   * en base au moment de l'envoi : un chiffre faux sur la rareté vaut moins que
+   * pas d'email du tout.
+   */
+  annonceNumerosRestants: boolean;
+};
+
+export function choixEmailRecap(lead: {
+  multi_configuration?: boolean | null;
+  cible_commerciale?: string | null;
+}): ChoixEmailRecap {
+  const base = { objetPorteRaisonSociale: false, annonceNumerosRestants: false };
+
+  if (!lead.multi_configuration) {
+    return { ...base, cle: "recap", libelle: "Récapitulatif chiffré" };
+  }
+
+  const cible = cibleCommerciale(lead.cible_commerciale);
+  if (!cible) return { ...base, cle: "multicfg", libelle: "Présentation générique" };
+
+  return {
+    cle: cible.id,
+    libelle: `Présentation — ${cible.label}`,
+    /* Quatre cibles sur cinq sont des personnes morales ; la cinquième — les
+       particuliers investisseurs — n'a pas de raison sociale, et son email
+       ouvre sur la disponibilité de la série au lieu d'un nom. */
+    objetPorteRaisonSociale: cible.id !== "investisseurs",
+    annonceNumerosRestants: cible.id === "investisseurs",
+  };
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */

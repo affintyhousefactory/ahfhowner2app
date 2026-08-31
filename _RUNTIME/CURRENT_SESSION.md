@@ -1,174 +1,73 @@
 # CURRENT_SESSION — Howner / ARKO
 
-## Décisions — 2026-08-25 (MISE EN PRODUCTION — PR #89)
-- **`main` = `5ed78a4d`.** Emails du configurateur réparés + back-office authentifié (ADR-039). Migration RLS appliquée en prod et vérifiée par requête.
-- **Fuite fermée, prouvée sur le corps servi** : `/admin/*` en 307 vers la connexion, **zéro email dans le corps** ; `/api/admin/*` en 401.
-- **La garde laisse passer un admin — l'autre moitié de la vérification.** Turnstile bloquant le formulaire en automatisé, session obtenue par l'API puis **cookie `@supabase/ssr` reconstitué à la main** : `/admin/leads` → 200 avec son écran. Une garde qui bloque tout le monde a l'air de marcher ; il faut prouver les deux sens.
-- **⚠ Une Preview protégée par le SSO Vercel ne peut pas servir à vérifier une garde d'authentification** — sa racine répond 302 vers `vercel.com/sso-api`, on ne distingue plus sa protection de la nôtre. Vérification faite en production, retour arrière prêt.
-- **Site public intact** : 27 URLs au sitemap, `/arko-one` toujours en 308, `/admin/auth/*` accessibles.
-- **⚠ Reste** : définir les mots de passe (SMTP Supabase, pas Brevo — lent et souvent en indésirables) · **vérifier que les deux boîtes `@howner.fr` existent côté Google Workspace** · rejouer les 3 récapitulatifs (validera le correctif email) · 2FA à décider · déclarer `*.vercel.app` dans Turnstile pour rendre les Preview testables.
+> Mémoire courte. Historique complet et backlog → `00_INDEX/PROJECT_STATE.md` § « Dernier point ».
+> Règle : 300–1200 tokens.
 
-## Décisions — 2026-08-25 (ADR-039 — le back-office n'avait aucune authentification serveur)
-- **`/admin/leads` répondait 200 sans session**, données des prospects dans le HTML. **17 routes `/api/admin/*` sur 19 sans aucune vérification.** RGPD art. 33.
-- **Même cause qu'ADR-028, vue par l'autre bout** : un layout **client** devant la garde ; il redirige après que le serveur a répondu.
-- **La session vivait dans le `localStorage`** — invisible au serveur. Toute garde serveur exigeait d'abord de passer la session en **cookies** (`@supabase/ssr`). Mon premier plan (« garde au proxy ») était faux tel quel.
-- **Quatre couches** : cookies · proxy (`getUser()`, pas `getSession()`) · `estAdmin()` sur 10 pages · `refuserSiPasAdmin()` sur 26 handlers.
-- **Les 6 policies RLS `admin_*` n'avaient jamais rien accordé** (`auth.jwt() ->> 'role'` = `authenticated`). Prouvé sur un jeton réel. Corrigées, **Preview seulement**.
-- ⚠ **`revoke from public` ne retire pas `anon`** : Supabase l'accorde par privilège par défaut. Se vérifie dans `proacl`, pas dans le texte de la migration.
-- **Filtrage par IP écarté par Richard** — qualifier les leads depuis n'importe quel coworking. Comptes créés **avant** la garde pour ne pas s'enfermer dehors.
-- **`richard@howner.fr` et `albert@howner.fr`** créés en production, rôle admin, **connexion prouvée**. Albert n'avait aucun compte. ⚠ Les boîtes doivent exister côté Google Workspace.
-- **ADR-035 validé en réel** par l'appel journalisé de Richard (trigger OK, statut propagé). Kanban/GED/badges : non vérifiables sans navigateur.
-- **⚠ Reste** : vérification Preview · migration Prod à la validation `dev` → `main` · 2FA et protection mots de passe compromis à décider.
+## Décisions — 2026-08-28 (l'écran d'appel prend sa forme)
 
-## Décisions — 2026-08-25 (correctif — les emails du configurateur ne partaient pas)
-- **Trois demandes de numéro sans récapitulatif** (24 et 25 août). Brevo : `requests: 0` sur 24 h. Journal de production : `[email] templateId manquant`.
-- **La variable existait, c'est l'endroit de lecture qui était faux.** Constante de module = valeur vide en production. **Règle : toute variable serveur se lit dans la fonction**, jamais en tête de fichier. Les routes qui le faisaient déjà (`/api/contact`) n'ont jamais cessé de fonctionner — d'où le symptôme « le contact arrive, le configurateur non ».
-- **`BREVO_TO_AHF` avait le même défaut** : sans le correctif complet, Howner n'aurait pas été en copie.
-- **`notified: true` a menti trois fois.** `sendBrevoTemplate` sortait sur `console.warn` + `return` : **un chemin qui ne jette pas ne se rattrape pas**. Les deux gardes lèvent désormais.
-- **`fetch failed` n'était pas le réseau** mais un `addBrevoContact` sans `await` : le fetch mourait avec la fonction, après le `return`.
-- **Côté Brevo, rien à corriger** — compte, expéditeur, DKIM/SPF de `howner.fr`, templates 9 et 10, quota : tous vérifiés bons.
-- **Domaine suspendu non touché** (ADR-028) ; ses deux appels sans `catch` sont coupés en 404 avant l'appel — vérifié, à reprendre à la réactivation.
-- **⚠ Reste à faire** : rejouer les trois récapitulatifs perdus depuis la fiche lead, **après validation explicite** (aucun email envoyé sans accord).
+**`main` = `62250a24`.** Trois PR en production (#108, #109, #110), une migration (`lead_sourcing`).
 
-## Décisions — 2026-08-22 (MISE EN PRODUCTION : configurateur branché, prix Arko One, CGV validées)
-- **`main` = `e4165729`** (PR #86, après PR #85). **PR #86** : `contact@howner.fr` sur `/mentions-legales`, `/confidentialite` et le **JSON-LD** — les deux pages étaient déjà sans « maison » ni terme proscrit, seule l'adresse était celle de l'éditeur. `CONTACT.email` devient la source unique (elle était en dur à 25 endroits). Aucune migration.
-- **`main` = `c993ee1c`** (PR #85). PR #84 fusionnée dans `dev` au préalable — 26 commits depuis le 19 août.
-- **Le configurateur crée enfin un lead.** Le CTA final n'avait pas de handler depuis le 19/08. Prix **recalculé côté serveur** ; conflit de numéro en 409 avec les numéros encore libres.
-- **Arko One : 69 900 € TTC.** ⚠ Richard annonçait un départ de 79 900 € ; le montant servi était **77 900 €** (vérifié en production, aucune occurrence de 79 900 dans le dépôt). Version de grille incrémentée dans le même geste.
-- **ADR-015 levé.** CGV du 2026-08-22 réputées relues et valides. Page **générée** depuis `docs/legal/`, fidélité vérifiée mot à mot. Échéancier **5 étapes**. « Acompte » → **« versement initial de réservation »** (art. 1590 C. civ.).
-- **ADR-003 appliqué** : neuf variables `NEXT_PUBLIC_*` posées — aucune n'existait. Prouvé lu en faisant varier la valeur, pas supposé. ⚠ Un montant se change sans commit, **pas sans redéploiement** (Next inline au build).
-- **Migration ADR-031 en production**, table vide, règle éprouvée dans une transaction annulée.
-- **Le contrôle de vocabulaire était partiellement aveugle** (blancs non normalisés, `\b` non-Unicode) : corrigé, trois infractions réelles démasquées.
+Le CRM tient désormais **le premier appel de bout en bout** : chercher si le contact est connu →
+cible et sourcing → ce qui n'est pas chiffrable → transport calculé seul → appel journalisé →
+récapitulatif relu avant envoi. Et la fiche se consulte par compartiments.
 
-### ⚠ Alerte Albert ouverte — avant toute communication commerciale
-Le **médiateur de la consommation n'est pas nommé** (art. L.616-1 : coordonnées à publier **sur le site**, pas au devis) ; idem assureurs RC pro et décennale (L.111-1). Les CGV sont publiables, la mention ne l'est pas encore. Second point : **aucun encaissement n'est branché** (ADR-008).
+- **Étapes librement navigables** — Richard a retenu les étapes contre ma recommandation. Le risque
+  signalé (le prospect parle dans le désordre) est neutralisé : barre cliquable de bout en bout,
+  « Créer le lead » actif partout. **La structure guide, elle n'enferme pas.**
+- **Sourcing ≠ `source`** — le premier dit d'où vient le prospect (8 valeurs), le second comment la
+  ligne a été écrite (`admin`, `configurateur_v2`). C'est le sourcing qui dira si le phoning paie.
+- **Le premier appel entre au journal** — l'écran demandait un « prochain rappel » sans jamais
+  demander *quand* l'appel avait eu lieu (constat de Richard). Deux dates deviennent une : celle de
+  l'appel est **maintenant**. Son échec n'annule pas le lead (`appelJournalise`).
+- **Fiche en cinq onglets** avec compteurs — le journal d'appels cesse d'être en bas d'une colonne.
+- **Numéros cliquables** — premier pas vers Allo, **sans intégration** : le click-to-call passe par
+  l'extension Chrome. D'où les numéros visibles **dans la liste**, pas seulement sur la fiche : c'est
+  cette page que l'extension lit pour remplir le Power Dialer.
+- **Huit grilles étaient fixes** — sur 390 px, deux colonnes de champs sont des timbres-poste.
 
-### Reste ouvert des sessions précédentes
-- Section B2B de la page Biarritz — alerte Albert non traitée.
-- `/configurer` v1 toujours servi.
+## ⚠ Une régression introduite et fermée le jour même
+`TelephoneLien` portait un `onClick` **sans `"use client"`**, rendu depuis un **Server Component** :
+la fiche tombait en « This page couldn't load » — **mais seulement si le lead avait un numéro**.
+Signalée par Richard, corrigée (PR #109) en retirant le handler, inutile.
 
-## Décisions — 2026-08-20 (ADR-038 TERMINÉ — 19 pages en production, 27 URLs)
-- **`main` = `33cb51bb`.** Lots 0 à 4 livrés et vérifiés en ligne. Sitemap **8 → 27 URLs**.
-- **Les 4 pages locales sont réellement différenciées** : recouvrement lexical **44-48 %** entre elles (une duplication tournerait à 90 %). Socle commun (`SOCLE_LOCAL`) écrit une fois, angle propre par ville.
-- **Méthode qui a tenu tout le chantier** : vérifier le HTML servi en Preview, **puis** publier via le `statut` du registre. Le sitemap n'a jamais annoncé une URL sans page.
-- **⚠ Assumé par Richard le 2026-08-20** : des **faits locaux datés** partent sans vérification indépendante (SRU Biarritz, dispositif meublés, PLUi Côte Basque-Adour et Sud Basse Navarre). Attribués à leur source, **date de vérification affichée sur chaque page**.
-- **⚠ Alerte Albert non traitée** : la section « plusieurs unités » de Biarritz ouvre un **discours B2B** (opérateurs, bailleurs) qu'aucun ADR ne prévoit — incompatible en l'état avec une série limitée à 6 exemplaires.
-- **⚠ Restent au dossier avocat** : les 9 guides réglementaires, et surtout les **CGV toujours rédigées en « maison » avec renvoi au CCMI** (lot 1) — elles annulent en pratique le bénéfice juridique du repositionnement.
-- **Écart à signaler à Albert** : concurrent nommé + tarif retirés de sa spec du guide « Prix » (ADR-029 §67, publicité comparative, péremption).
-- **Les `<h1>` du classeur ont été écartés** sur les 4 pages locales au profit de ceux des specs (les premiers étaient quasi identiques). Arbitrage laissé ouvert à Richard.
+> **Leçon** : un composant partagé destiné à des pages serveur ne porte **aucun** gestionnaire
+> d'événement. Vérifié ensuite sur tout le back-office — c'était le seul cas.
 
-## Décisions — 2026-08-20 (ADR-038 — lots 0 à 3 livrés, 15 pages publiées)
-- **PR empilées #77 → #78 → #79 → #80.** ⚠ **#79 ne doit pas partir en production sans #80** : le correctif du libellé « tiny house » vit dans #80, le défaut vient de #79.
-- **Sitemap 8 → 23 URLs.** Reste le lot 4 (4 pages locales, **en attente de matière locale de Richard**).
-- **Ordre non négociable : vérifier le HTML servi, puis publier.** Le `statut` du registre existe pour ça.
-- **⚠ Trois défauts trouvés par la vérification, aucun par le code lui-même** : (1) les 5 pages du lot 2 auraient été **orphelines** sans la colonne « Usages » du pied de page ; (2) la barre de menu restait **transparente sur fond sombre**, rendant les libellés invisibles au chargement ; (3) **« tiny house » s'affichait sur les 10 pages du lot 3** via le pied de page, sans qu'aucun contrôle ne bronche.
-- **Le troisième est le plus instructif : il venait de mon propre garde-fou.** L'exception `sauf` posée sur `registry.ts` pour le `h1` couvrait aussi `libelle` et `resume` — or ceux-là sont **lus sur toutes les pages**. **Règle actée : sous exception, seul un `h1` peut porter le terme.** Une exception se juge sur la **portée du texte**, pas sur le fichier qui l'héberge.
-- **La barre d'en-tête ne réserve plus d'espace au bandeau de série** : les deux sont empilés, le bandeau absent ne pousse rien. Deux composants n'ont plus à s'accorder sur un chiffre.
-- **⚠ Concurrent nommé retiré** de la spec du guide « Prix » (nom + tarif public) : ADR-029 §67, régime de la publicité comparative (L122-1 s. code conso), et péremption d'un prix recopié. **À signaler à Albert** — écart assumé à sa spec.
-- **Prudence réglementaire tenue sur les 9 guides** : formulations au principe, 6 sources officielles affichées et datées, avertissement constant, « sans permis » jamais employé comme argument. Aucun montant Howner.
+> **Leçon évitée de justesse** : monter tous les onglets d'emblée aurait cassé la carte — Leaflet en
+> `display:none` se dimensionne à zéro. D'où le montage à la première visite, puis conservation.
 
-## Décisions — 2026-08-20 (chantier ADR-038 — lot 2 livré, 5 pages d'usage en ligne)
-- **PR #79** (empilée sur #78 → #77). **5 pages publiées**, sitemap **8 → 13 URLs**, vérifié sur le HTML servi.
-- **Ordre non négociable : vérifier en Preview, puis publier.** Le `statut` du registre existe pour ça — les pages ont d'abord été servies **sans être déclarées** au sitemap.
-- **Le maillage et la colonne « Usages » du pied de page dérivent du registre.** Ils ne rendent rien tant que la famille est vide, et s'étoffent seuls à chaque lot. **Sans ce lien entrant, les 5 pages auraient été orphelines** — au sitemap mais référencées par personne.
-- **Navigation principale non touchée** : 19 entrées ne tiennent pas dans une barre. **Arbitrage de présentation en attente de Richard** (méga-menu « Nos Studios » ?).
-- **Le garde-fou vocabulaire m'a repris 3 fois** pendant l'écriture, dont 2 sur mes propres commentaires. Un contrôle ne vaut que s'il s'applique à celui qui l'écrit.
-- **L'exception « tiny house » a dû être étendue** au fichier de contenu (`src/lib/pages/contenu/`), qu'elle ignorait. ADR-029 amendée : **une exception suit le texte là où il est écrit.**
-- ⚠ **`/bureau-de-jardin` et `/bureau-pour-teletravail` se ressemblent** — partage documenté (l'objet / la situation), section constructive liée et non dupliquée. **À rejuger sur le rendu**, fusion ouverte. Même réserve que les guides 01/04/07 du lot 3.
-- **Visuels Arko One non traités** (demande de Richard : pas de visuels pour l'instant). Les 5 pages servent des assets déjà au dépôt. **Lot média à prévoir.**
-- **Reste** : lot 3 (hub + 9 guides), lot 4 (4 pages locales, **en attente de matière locale de Richard**).
+## ⚠ Une consolidation a voyagé dans une PR de fonctionnalité
+Le `/memory-sync` du matin est parti en production avec la **PR #108**, dont la description n'en
+disait rien : la branche de la fonctionnalité avait été créée depuis la branche docs. Sans
+conséquence, mais **repartir de `main` avant d'ouvrir une branche**.
 
-## Décisions — 2026-08-20 (chantier ADR-038 — 19 pages éditoriales)
-- **Lot 0 livré, PR #77 → `dev`** (fondations, aucune page publiée). **Lot 1 livré, empilé dessus** : audit de conformité seul, **visuels non touchés** (demande de Richard).
-- **Quatre arbitrages de Richard** : copy réécrit plutôt que garde-fou assoupli · « tiny house » autorisé sur la seule page qui compare (ADR-029 amendée) · pages locales à 30-40 % de contenu propre · livraison lot par lot.
-- **Le registre `src/lib/pages/registry.ts` est la seule source de routes.** Une page ne passe à `"publiee"` qu'après vérification en Preview — sinon le sitemap annonce des 404.
-- **`sauf` ≠ `EXCLUS`** dans `check-vocabulaire.mjs` : le premier lève **un terme sur un chemin**, le second sort **un fichier entier** du contrôle. N'employer `sauf` que pour une exception écrite dans un ADR. Garde-fou **re-testé** après modification (3 essais).
-- **⚠ Les CGV parlent encore de « maisons légères ARKO » (39 occurrences, terme contractuel défini) et citent le CCMI.** Le repositionnement du 19/08 éloignait le site de ce régime ; **le contrat, lui, l'y ramène** — et c'est le contrat qui est lu en cas de litige. **Non corrigé à dessein** (document contractuel non validé par l'avocat, ADR-015). **Alerte Albert, à joindre au dossier CGV.**
-- **Aucun garde-fou automatique ne surveille le vocabulaire des pages légales** — elles sont hors périmètre de `check:vocabulaire`. L'exclusion est légitime, sa conséquence doit être connue.
-- **Reste du chantier** : lot 2 (5 pages d'usage), lot 3 (hub + 9 guides), lot 4 (4 pages locales, **en attente de matière locale de Richard**).
-
-## Décisions — 2026-08-19 (soir — visuels Arko Max en production, PR #76)
-- **`main` = `4b2fb554`, production déployée et vérifiée en ligne.** Trois commits média, **aucune migration**. Détail dans « Dernier point » de `PROJECT_STATE.md`.
-- **Les composants de page produit se paramètrent, ils ne se dupliquent pas.** `RevealScrub` et `Discover` servent les deux produits : leurs médias passent en props (`frames`, `panels`), les données dans `src/lib/media/arko-max.ts`. Sans prop, comportement inchangé — c'est ce qui a permis de refondre l'Arko Max sans toucher l'Arko One, vérifié sur le HTML servi des deux pages.
-- **« La Révélation » de l'Arko Max n'est plus une vidéo** mais une séquence d'images scrubée. La vue extérieure y est jouée **deux fois** (pose, puis zoom d'entrée) avec un raccord continu : `to` du premier plan = `from` du second. **Toucher un `at` sans reprendre le chevauchement voisin casse le fondu.**
-- **`sizes` suit l'échelle maximale du plan**, sinon Next sert une image au format écran et le zoom la rend molle. Une seule source encodée en 3840 px, les sept autres en 2560 px.
-- **« L'heure bleue » retirée** de Découvrir (7 → 6 vues) : le film de crépuscule ne montre pas l'Arko Max.
-- **L'Arko One sert toujours des visuels 40 m²** (vidéo produit + les six médias génériques). Mention « visuel provisoire » maintenue. **Prochain lot naturel** : ses propres rendus, à brancher par les mêmes props.
-
-## Décisions — 2026-08-04 (soir — amendement ADR-035 + volume de série)
-- **« Pack prêt à louer » (1 990 €) retiré de la grille** — offre non viable après étude (Richard). Contenu à `config.ts`, aucun lead ne la portait (vérifié). **Écart de plus à la spec §5 → à porter à Albert.**
-- **`version` de grille incrémentée** `v1` → **`2026-08-04`** (format daté : la version des *grilles* n'est pas celle du *configurateur*). **Règle : tout mouvement de prix, palier ou option incrémente `version`**, sinon `grillePerimee` ne garde rien.
-- **« Lead chaud » → « Paiement réservé »** (`chaud` → `paiement_reserve`, **identifiant renommé en base**, pas seulement le libellé). Constate un **fait comptable**, plus une appréciation. Migration `20260804_statut_paiement_reserve.sql` ✅ Preview, vérifiée par requête. Prod : 0 lead, à passer avec l'autre.
-- **Numéro de série — deux niveaux** : rien avant devis · **réservé** au devis envoyé (reprenable) · **bloqué** à l'encaissement (seul état qui décrémente le compteur). Codé une fois dans `etatNumeroPourStatut()`. Badge `N° x` à côté du modèle dans la liste et le Kanban.
-- **⚠ `leads_slot_unique` contredit cette règle** — il bloque le numéro dès le premier lead, quel que soit son statut. Dormant tant qu'ADR-031 n'écrit pas ; **bloquant au premier doublon**. Idem `leads_slot_check` (encore 1→12). Non corrigés, à trancher avec ADR-031.
-- **Série 01 = 6 exemplaires** — annule l'arbitrage du 02/08. Appliqué **partout**, pas au seul configurateur : `BRAND.total` et `PRODUCTS.*.total` dérivent de `SERIE_TOTAL`, les 3 derniers littéraux interpolés.
-- **Pennylane** posera ce statut automatiquement — **ADR-036 réservée**, dépendance externe critique, **alerte Albert**.
-
-## Décisions — 2026-08-04 (ADR-035 — CRM interne, chantier prioritaire)
-Détail : **ADR-035** et « Dernier point » de `PROJECT_STATE.md`. Ici, ce qui doit rester présent à l'esprit.
-
-- **Branche `feat/adr-035-crm-leads` poussée — PR #73 → `dev` ouverte**, en attente de revue. `dev` reste à `96f084f0`.
-- **Le CRM est refait AVANT ADR-031, à dessein** : il pose le contrat de données (`config_v2` + `cfg_*` + `slot`) que la soumission du configurateur remplira. Dans l'autre ordre, ADR-031 aurait improvisé un format.
-- **Numérotation 035** — 031→034 sont réservés et cités dans ADR-030 et dans le code. Priorité ≠ numéro.
-- **« Affectation » = conseiller AHF** (`responsable`), **sans rapport avec `mandataire_id`**. La colonne « Affectation » (champ `statut`) est retirée de la liste ; le champ reste en base.
-- **Deux retards distincts** : rappel daté dépassé (rouge) · silence > 7 j sur lead actif (orange). Un lead **jamais appelé** compte depuis sa **création**.
-- **Journal d'appels manuel** : « Appeler » ouvre `tel:` et pré-ouvre la fiche, mais **rien n'est enregistré sans validation**.
-- **Migration `20260804_crm_leads.sql` ✅ appliquée sur Preview** (`ahfhownerdb-preprod`), structure et **trigger vérifiés fonctionnellement**, données de test retirées. **Toujours PAS sur Prod** — à la validation de la PR `dev` → `main`.
-- **⚠ Défaut de sécurité introduit puis corrigé** : fonctions du trigger en `SECURITY DEFINER` dans `public` = exposées en `/rest/v1/rpc/` au rôle `anon`, donc écriture sur `leads.dernier_appel_at` hors RLS. Corrigé (`security invoker` + `revoke`), audit Supabase propre. **Règle : dans Supabase, une fonction `SECURITY DEFINER` dans `public` est une route API publique tant qu'on ne lui retire pas l'exécution.**
-- **Gate** : `tsc` propre · vocabulaire conforme · eslint admin **21 → 20 erreurs** (pas de régression).
-
-## Focus actuel
-`dev` est à **`e284cac4`** (2026-08-03) — 6 commits mergés en fast-forward depuis `b7339d44`, aucune migration. **`main` reste à `4d34ed26`.** Contenu : ligne d'appel (site + tunnel + `/contact`) et **bascule « module » → « maison »**. Le configurateur v2 vit toujours sur `/configurer/v2` (`noindex`) ; `/configurer` sert le v1, qu'aucun CTA n'atteint.
-
-Trois risques 🔴 :
-- **CGV non confirmées avocat, live en prod** (ADR-015, depuis le 2026-07-13).
-- **L'entonnoir de réservation entier mène au v2, dont le CTA final n'a pas de handler.** Cet état **ne doit pas atteindre `main`** avant ADR-031.
-- **Vocabulaire « maison » non validé juridiquement** — exposition CCMI, à joindre au dossier avocat des CGV (voir ci-dessous).
-
-## Décisions — 2026-08-02
-Détail et motifs : **ADR-030 § Amendement du 2026-08-02**, ADR-029 § Amendement, et « Dernier point » de `PROJECT_STATE.md`. Ici, seulement ce qui doit rester présent à l'esprit.
-
-**Mise en œuvre du configurateur v2**
-- **Colonne de sections dépliantes, pas un stepper** — l'écran 0 est descendu en section 05, le stepper n'avait plus d'avantage.
-- **Coque de tunnel** dans le groupe de routes `(configurateur)` : ni nav ni pied de page. Une mise en page imbriquée ne peut pas retirer la `<Nav>` de sa parente — d'où le groupe.
-- **Grilles, visuels et teintes d'ambiance dans `config.ts`**, jamais dans un composant (règle ADR-030).
-- **Mobile 390 px** : l'en-tête s'efface au défilement, la scène garde 232 px constants (le rétrécissement coupait le pied du module).
-- **`?produit=` lu côté serveur** — `useSearchParams` impose une frontière Suspense et fait échouer le prerender de production.
-
-**Arbitrages de Richard**
-- **Série 01 reste à 12 unités** — amende ADR-029 et le §5 de la spec (qui fixaient 6). `SERIE_TOTAL` et `serie.unites` alignés.
-- **Réservation à 2 000 €** partout — `DEPOSIT_EUR` 5 000 → 2 000, textes éditoriaux désormais **interpolés** sur la constante. Variable Vercel absente des 3 scopes (vérifié) : le fallback sert en production.
-- **Tous les CTA « Réserver » mènent au v2**, via `reserverHref()` pour que la bascule future tienne en une ligne. « Tester mon terrain » retiré de l'accueil et des pages produit.
-- **Alerte Albert traitée verbalement** — 4 écarts à la spec assumés (§8, §6-§7, §5 transport, §5 série) plus le parti « colonne de sections ».
-- **« Et si je n'ai pas encore de terrain ? » conservée** en FAQ — ⚠ contredit sciemment ADR-029 sur la page la plus lue.
-- **Échéancier 40/50/10 % non tranché**, laissé intact : territoire CGV, non confirmé par l'avocat.
-
-**⚠ Un terme proscrit était servi en production**
-« clé en main » s'affichait sur `/arko-one` et `/arko-max` pendant que `check:vocabulaire` annonçait « conforme » : le contrôle lisait le source ligne à ligne, le terme était coupé par un retour à la ligne JSX. Le script lit désormais le **texte rendu**. Seule occurrence du dépôt.
-
-## Décisions — 2026-08-03
-- **Ligne d'appel** `+33 (0)5 64 37 37 14` en en-tête du site et du tunnel, encadré « Contacter un conseiller » sur `/contact` (Lu–Ve 9 h–12 h / 14 h–18 h). Source unique `CONTACT` (`site.ts`, surchargeable par `NEXT_PUBLIC_CONTACT_PHONE` — **absente de Vercel, c'est le repli qui sert**), `PhoneLink` sans JS, JSON-LD enrichi. Le numéro a changé en cours de session : une seule ligne à toucher, tout le reste en dérive.
-- **⚠ « module » → « maison »** sur tout le site client — **décision de Richard**, alerte formulée avant exécution et **maintenue**. 70 occurrences, accord au féminin. `maisons?` retiré du contrôle, `maisons? individuelles?` mis à sa place. **ADR-029 amendée**, `CLAUDE.md` / `AGENTS.md` réécrits.
-- **Le cadre de vente ne bouge pas** : annexe sur parcelle bâtie ou hébergement professionnel, terrain nu fermé. Seul le mot change.
-- **Accord au féminin propagé** : `BRAND.madeIn` → « Fabriquée au Pays-Basque » (4 surfaces), bas de page « Conçue ». Reste au masculin, à raison : `/arko-one` où « livré prêt / Fabriqué » s'accorde à **studio**.
-- **Risque non levé** : exposition au régime **CCMI** (loi du 19 déc. 1990). Lecture de Claude, pas d'un avocat — à confirmer avec les CGV (ADR-015). **À remonter à Albert.**
+## Allo — étudié, rien engagé
+Click-to-call = **extension Chrome**, zéro code. L'API expose `/v2/api/crm/people` et
+`/v2/api/dialing-queues/current`, **aucun endpoint de déclenchement d'appel**. Trois inconnues avant
+de s'engager : scope d'écriture réel, événements de webhook, clé de rapprochement des identités.
+**Dépendance externe critique → ADR + alerte Albert avant tout code**, comme Pennylane (ADR-036).
 
 ## Leçons de méthode encore actives
-- **Un garde-fou qui n'observe pas la sortie réelle ne contrôle rien.** Trois occurrences : un 404 ne prouvait pas un masquage (ADR-028, 31/07) ; un contrôle vocabulaire vert ne prouvait pas la conformité du rendu (ADR-029, 02/08) ; une Preview a renvoyé `200` en servant la page de login Vercel, jeton de partage périmé (03/08). **Sonder le corps servi, jamais le seul code HTTP.**
-- **Une garde `notFound()` n'est fiable que si aucun layout client ne la précède** — sinon couper au proxy (`src/proxy.ts`).
-- **Pas de test local** : HMR aveugle sur `/mnt/d`, laptop lent. Gate = `tsc` + `eslint` + `check:vocabulaire`, puis Preview Vercel. Revers assumé — une classe d'erreurs ne se voit qu'au prerender de production.
+- **Un contrôle qui n'observe pas la sortie réelle ne contrôle rien** — septième occurrence.
+- **Une intégration tierce vérifiée en Preview ne prouve rien pour le domaine réel** quand elle
+  filtre par référent (clé Google Places).
+- **`success: true` d'une migration ne prouve rien** : vérifier par requête, puis tester la
+  contrainte par des écritures réelles annulées.
+- **Ne jamais réécrire une migration déjà appliquée** — le dépôt mentirait sur ce qui a tourné.
+- **Pas de test local.** Gate = `tsc` + `eslint` + `check:vocabulaire`, puis Preview.
 
 ## Prochaine action
-1. **ADR-035** — **PR #73 ouverte**, migration Preview appliquée et trigger vérifié. Reste : contrôler le **Kanban**, le **journal d'appels** et la **GED double origine** sur la Preview Vercel, puis merger. La migration Prod (correctif de sécurité inclus) part à la validation `dev` → `main`.
-2. **ADR-031** — soumission de la demande de numéro. Toujours bloquante pour `main` : elle conditionne la bascule sur `/configurer`, la levée du `noindex`, le retrait du v1 et la sortie de `/configurer` du sitemap. Elle écrit désormais dans le contrat posé par ADR-035.
+1. **Poser `BREVO_TEMPLATE_MULTICFG=17`** sur les 3 scopes Vercel — sans elle, la Multi-Configuration
+   est livrée mais **inerte en production**.
+2. **Ouvrir `howner.fr/*` et `www.howner.fr/*`** dans les référents de la clé Google Places.
+3. **Envoyer un récapitulatif réel** — dernier maillon non éprouvé de la chaîne emails.
+4. **Temps 2 du CRM** — aucune issue d'appel ne décrit un rendez-vous ; c'est le chaînon qui manque
+   avant la qualification des services amont (`docs/CRM_PROCESS_COMMERCIAL.md`).
 
 ## Blockers / À fournir
-- **CGV + légal** — version `f3de62fe` en attente confirmation avocat (ADR-015). **Y joindre la question CCMI** ouverte par la bascule « maison » du 03/08 : même texte, même interlocuteur.
-- **Albert** — charte Affinity (ADR-002), repositionnement bi-produit (ADR-022), **bascule « module » → « maison » du 03/08 (non remontée)**. Écarts ADR-030 ✅ traités.
-- **Arko Max pricing grid** — données métier attendues (ne concerne plus que le v1).
-- **Coordonnées atelier** — placeholder Bayonne (43.4933, −1.4748) ; sert le transport du v2.
-- **Asset vidéo Arko One** — absent, fallback provisoire sur le footage Max.
-- **ADR-028** — test de réversibilité (`NEXT_PUBLIC_FEATURE_MANDATAIRE=true` sur une Preview) jamais exécuté.
-
-## Règle
-Court : 300–1200 tokens. Historique complet et backlog → `00_INDEX/PROJECT_STATE.md`.
+- **Coordonnées exactes de l'atelier** (le transport en dépend).
+- **Albert** — charte Affinity (ADR-002), repositionnement bi-produit (ADR-022), repositionnement
+  « studio de jardin » du 2026-08-19, ouverture B2B de Biarritz, CGV rédigées en « maison ».
+  **À ajouter : Allo, si l'intégration est décidée.**
+- **Médiateur de la consommation non nommé** (art. L.616-1) — avant toute communication commerciale.
+- **ADR-028** — test de réversibilité jamais exécuté.

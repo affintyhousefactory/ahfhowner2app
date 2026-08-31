@@ -8,8 +8,13 @@ const ALLOWED_FIELDS = [
   // Projet
   "produit", "source", "statut", "pack_terrain",
   "budget_terrain", "total_estime", "notes_ahf",
-  // Adresse client
+  // Adresse client — la personne physique
   "adresse_postale_client", "cp_client", "ville_client",
+  /* Société — la personne morale. Distincte de l'adresse client : le siège d'un
+     camping et le domicile de son gérant ne sont pas au même endroit, et c'est
+     le premier qui reçoit le studio. */
+  "raison_sociale", "siren", "site_web",
+  "adresse_societe", "cp_societe", "ville_societe",
   // Zone de recherche terrain
   "adresse_recherche", "commune", "code_postal", "departement",
   // Données PLU
@@ -21,6 +26,35 @@ const ALLOWED_FIELDS = [
   "delai_projet", "description_projet",
   // Suivi commercial (indépendant du statut d'affectation)
   "statut_commercial",
+  /* Corrigeable après coup : une cible se choisit au premier appel, et c'est
+     précisément le moment où l'on se trompe — l'interlocuteur annoncé comme
+     gérant de camping tient en fait un domaine. La valeur reste contrainte par
+     la base (`leads_cible_commerciale_check`), qui refuse tout identifiant hors
+     des cinq. */
+  "cible_commerciale",
+  /* Corrigeable à la main, bien qu'un trigger la maintienne : une issue se note
+     à la volée pendant l'appel, et se corrige après coup sans qu'on veuille pour
+     autant rouvrir le journal. Le trigger reprendra la main au prochain appel
+     journalisé — c'est lui la source, la saisie n'est qu'un rattrapage. */
+  "derniere_issue",
+  /* Corrigeable : un prospect qui hésitait au premier appel finit par choisir,
+     et c'est ce basculement qui rend son lead chiffrable. ⚠ Le repasser à
+     `false` ne recalcule rien — les colonnes de prix restent nulles tant qu'une
+     configuration n'a pas été saisie. */
+  "multi_configuration",
+  /* Origine commerciale. Corrigeable : le standard annonce « il vous a trouvés
+     sur le site », l'appel révèle une recommandation. ⚠ Ne pas confondre avec
+     `source`, absente de cette liste à dessein — le canal technique de création
+     ne se corrige pas, il constate. */
+  "sourcing",
+  /* Agence apporteuse (ADR-044 §5). Corrigeable après coup : le conseiller
+     apprend souvent en fin d'appel *qui* a recommandé Howner, et cette colonne
+     est l'assiette de la future commission — la laisser fausse coûterait plus
+     qu'un champ de plus dans la liste blanche.
+
+     ⚠ À ne confondre ni avec `mandataire_id` (domaine suspendu, ADR-028), ni
+     avec `responsable` (le conseiller AHF). Trois notions, trois colonnes. */
+  "agent_id",
   // Suivi CRM — ADR-035 §1 et §2. `responsable` = conseiller AHF, sans rapport
   // avec `mandataire_id` (domaine suspendu, ADR-028).
   "responsable", "responsable_at", "prochain_rappel_at",

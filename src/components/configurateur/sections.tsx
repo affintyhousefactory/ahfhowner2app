@@ -32,7 +32,7 @@ import {
   URBANISME_GENERIQUE,
   CONTACT_TERRAIN_NU,
 } from "@/lib/configurateur/mentions";
-import { prixOption } from "@/lib/configurateur/config";
+import { distanceAtelierKm, prixOption } from "@/lib/configurateur/config";
 import { chargerNumeros, estSelectionnable, nbDisponibles } from "@/lib/configurateur/numeros";
 import { useConfigurateur, eur, surfaceFr } from "./store";
 import { Choix, Eyebrow, Mention, Section } from "./ui";
@@ -345,19 +345,6 @@ const USAGES: Record<UsageId, { titre: string; detail: string }> = {
   logement_nu: { titre: "Comme logement indépendant", detail: "Sur un terrain nu" },
 };
 
-/** Haversine × roadFactor — même modèle que le configurateur actuel. */
-function distanceDepuisAtelier(lat: number, lon: number): number {
-  const R = 6371;
-  const dLat = ((lat - TRANSPORT.usine.lat) * Math.PI) / 180;
-  const dLon = ((lon - TRANSPORT.usine.lon) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((TRANSPORT.usine.lat * Math.PI) / 180) *
-      Math.cos((lat * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return Math.round(2 * R * Math.asin(Math.sqrt(a)) * TRANSPORT.roadFactor);
-}
-
 export function SectionTerrain() {
   const c = useConfigurateur();
 
@@ -377,7 +364,7 @@ export function SectionTerrain() {
           adresse: d.address_label ?? "",
           zone: d.zone_urba ?? null,
           parcelle: d.parcelle ?? null,
-          distanceKm: d.lat != null && d.lon != null ? distanceDepuisAtelier(d.lat, d.lon) : null,
+          distanceKm: distanceAtelierKm(d.lat ?? null, d.lon ?? null),
         });
         /* Verdict calculé par la pré-analyse elle-même, pas recalculé ici :
            deux règles pour une même question finissent toujours par diverger. */

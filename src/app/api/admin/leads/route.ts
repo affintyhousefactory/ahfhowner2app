@@ -9,8 +9,14 @@ export async function POST(req: NextRequest) {
   const body = (await req.json()) as Record<string, unknown>;
 
   const { prenom, nom, email } = body as { prenom?: string; nom?: string; email?: string };
-  if (!prenom || !nom || !email) {
-    return NextResponse.json({ error: "Champs requis : prénom, nom, email" }, { status: 400 });
+  /* ⚠ L'email n'est plus requis (2026-08-27). Au téléphone, tout le monde ne
+     donne pas son adresse : l'exiger obligeait à en inventer une — qui finit par
+     recevoir un devis — ou à renoncer à la fiche, c'est-à-dire à perdre l'appel.
+     Sans elle, aucun récapitulatif ne partira ; c'est le seul effet, et l'écran
+     le dit. La colonne a été relâchée par `20260827_lead_email_facultatif.sql` :
+     sans cette migration, l'insertion échouerait ici en erreur serveur. */
+  if (!prenom || !nom) {
+    return NextResponse.json({ error: "Champs requis : prénom, nom" }, { status: 400 });
   }
 
   const { data, error } = await getSupabaseAdmin()
@@ -18,8 +24,21 @@ export async function POST(req: NextRequest) {
     .insert({
       prenom,
       nom,
-      email,
+      /* Chaîne vide → null : le formulaire envoie "" quand le champ est laissé
+         libre, et une adresse vide stockée telle quelle passerait les tests
+         `lead.email ?` un peu partout. */
+      email: email || null,
       tel: (body.tel as string) || null,
+
+      /* Société — tous facultatifs (`20260827_lead_societe.sql`). L'écran
+         normalise déjà : SIREN réduit à neuf chiffres, site web préfixé. La
+         base ne refuse qu'un SIREN qui n'en est pas un. */
+      raison_sociale: (body.raison_sociale as string) || null,
+      siren: (body.siren as string) || null,
+      site_web: (body.site_web as string) || null,
+      adresse_societe: (body.adresse_societe as string) || null,
+      cp_societe: (body.cp_societe as string) || null,
+      ville_societe: (body.ville_societe as string) || null,
       produit: (body.produit as string) || null,
       pack_terrain: (body.pack_terrain as string) || null,
       terrain_mode: (body.terrain_mode as string) || null,
@@ -45,6 +64,23 @@ export async function POST(req: NextRequest) {
       notes_ahf: (body.notes_ahf as string) || null,
 
       // ── Suivi CRM (ADR-035 §1 et §2) ────────────────────────────────────
+      /* Cible commerciale : obligatoire côté écran, tolérée nulle ici. Les
+         leads venus du site public (configurateur, formulaire de contact)
+         n'ont personne pour la renseigner — imposer la colonne `not null`
+         aurait fait échouer leur enregistrement. La contrainte de valeur, elle,
+         est bien en base : un identifiant inconnu est refusé. */
+      cible_commerciale: (body.cible_commerciale as string) || null,
+      /* Le prospect hésite entre plusieurs modèles. `?? false` et non `|| false` :
+         la colonne est `not null`, et un `undefined` venu d'un appelant plus
+         ancien doit valoir « configuration unique », le seul cas qui existait
+         avant le 2026-08-27. */
+      multi_configuration: (body.multi_configuration as boolean) ?? false,
+      /* Origine COMMERCIALE. Distincte de `source` ci-dessous, qui reste le
+         canal technique de création — les confondre perdrait l'un des deux. */
+      sourcing: (body.sourcing as string) || null,
+      /* Agence apporteuse (ADR-044 §5) — se lit avec `sourcing = 'partenaire'`.
+         Nulle partout ailleurs : un lead venu du site n'a pas d'apporteur. */
+      agent_id: (body.agent_id as string) || null,
       responsable: (body.responsable as string) || null,
       responsable_at: body.responsable ? new Date().toISOString() : null,
       prochain_rappel_at: (body.prochain_rappel_at as string) || null,
@@ -77,6 +113,10 @@ export async function POST(req: NextRequest) {
     .select("id")
     .single();
 
+  /* ⚠ `prochain_rappel_at` n'est plus écrit ici quand un premier appel est
+     journalisé : c'est l'appel qui le porte, et la route `/appels` l'y recopie.
+     Deux écrivains sur la même valeur finissent toujours par diverger — même
+     règle que `dernier_appel_at`, maintenu par trigger. */
   if (error) {
     // 23505 = violation d'unicité. Le seul cas possible ici est le numéro de
     // série déjà pris : le dire, plutôt que de servir un message Postgres.
@@ -88,5 +128,39 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  return NextResponse.json({ id: data.id });
+  /* ── Premier appel ────────────────────────────────────────────────────
+     La fiche naît d'un appel qui vient d'avoir lieu. Le journaliser plutôt que
+     de le noter en texte libre a trois effets qu'une note n'a pas : le trigger
+     remonte `dernier_appel_at` et `derniere_issue` sur le lead, le compteur de
+     silence part du **contact** et non de la création, et l'échange rejoint
+     l'historique que le conseiller suivant lira.
+
+     ⚠ La date n'est pas demandée à l'écran : c'est maintenant. Un champ de plus
+     pour une valeur juste dans 95 % des cas ralentit chaque saisie ; elle se
+     corrige depuis la fiche dans les autres.
+
+     ⚠ Son échec n'annule pas le lead. Le lead est créé, c'est le fait
+     important ; perdre le compte rendu est regrettable, perdre le prospect ne
+     l'est pas. On le signale dans la réponse plutôt que de le taire — la leçon
+     du `notified: true` qui mentait, le 2026-08-25. */
+  const appel = body.premier_appel as
+    | { issue?: string | null; note?: string | null; prochain_rappel_at?: string | null }
+    | undefined;
+
+  let appelJournalise: boolean | undefined;
+  if (appel && (appel.issue || appel.note)) {
+    const { error: errAppel } = await getSupabaseAdmin().from("lead_appels").insert({
+      lead_id: data.id,
+      sens: "sortant",
+      issue: appel.issue || null,
+      note: appel.note || null,
+      auteur: (body.responsable as string) || null,
+      occurred_at: new Date().toISOString(),
+      prochain_rappel_at: appel.prochain_rappel_at || null,
+    });
+    appelJournalise = !errAppel;
+    if (errAppel) console.error("[admin/leads] premier appel non journalisé :", errAppel.message);
+  }
+
+  return NextResponse.json({ id: data.id, ...(appelJournalise !== undefined ? { appelJournalise } : {}) });
 }

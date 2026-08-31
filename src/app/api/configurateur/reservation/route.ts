@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { signalerPanne } from "@/shared/lib/panne";
 import { loadConfig, getModele, paliersPourModele, prixOption, optionsPourModele, type ModeleId } from "@/lib/configurateur/config";
 import { SERIE_TOTAL } from "@/lib/site";
+import { numerosLibres as numerosLibresBase } from "@/shared/lib/numeros-serie";
 import type { ParcelleData } from "@/shared/types/plu";
 
 /**
@@ -39,9 +40,6 @@ import type { ParcelleData } from "@/shared/types/plu";
  */
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-/** Statuts où le numéro est réellement pris (ADR-035, ADR-031 §2). */
-const STATUTS_CONFIRMES = ["paiement_reserve", "signe"];
 
 type Charge = {
   contact: {
@@ -288,10 +286,17 @@ export async function POST(req: NextRequest) {
      Brevo mourait en vol — d'où les `fetch failed` du 22 au 25 août, qui
      n'étaient pas une panne réseau mais un cycle de vie. Le contact CRM
      n'était jamais créé. */
+  /* Deux listes aux rôles distincts — même règle que `/api/contact`, où elle est
+     expliquée en entier : « Prospects » reçoit tout le monde (le CRM), « AHF –
+     Newsletter » ne reçoit que ceux qui cochent (le consentement marketing), et
+     une campagne se cible sur la seconde. La case du configurateur porte
+     `OPTIN_TEXTE`, mot pour mot celle du formulaire de contact. */
+  const listeProspects = parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8");
+  const listeNewsletter = parseInt(process.env.BREVO_LIST_NEWSLETTER ?? "5");
   await addBrevoContact(
     c.email,
     { PRENOM: c.prenom, NOM: c.nom, SMS: c.tel || undefined, HOWNER_GROUP: "Lead_Configurateur_v2" },
-    body.optIn ? [parseInt(process.env.BREVO_LIST_PROSPECTS ?? "8")] : [],
+    body.optIn ? [listeProspects, listeNewsletter] : [listeProspects],
     { emailBlacklisted: !body.optIn },
   ).catch((err) => signalerPanne("configurateur/reservation/brevo-contact", err));
 
@@ -307,24 +312,20 @@ export async function POST(req: NextRequest) {
  *
  * Interrogé au moment du conflit seulement : le compteur public reste servi
  * par `chargerNumeros()` tant qu'ADR-009 n'a pas branché le temps réel.
+ *
+ * ⚠ Le comptage lui-même vit dans `@/shared/lib/numeros-serie` depuis que le
+ * récapitulatif sectoriel annonce, lui aussi, combien de numéros restent. Ici
+ * on ne garde que la conduite propre au tunnel : une base muette ne propose
+ * rien plutôt qu'un numéro peut-être déjà pris — le visiteur reverrait la même
+ * erreur.
  */
 async function numerosLibres(): Promise<number[]> {
-  const tous = Array.from({ length: SERIE_TOTAL }, (_, i) => i + 1);
-  try {
-    const { data, error } = await getSupabaseAdmin()
-      .from("leads")
-      .select("slot")
-      .in("statut_commercial", STATUTS_CONFIRMES)
-      .not("slot", "is", null);
-    if (error) throw error;
-    const pris = new Set((data ?? []).map((l) => l.slot as number));
-    return tous.filter((n) => !pris.has(n));
-  } catch (err) {
-    signalerPanne("configurateur/reservation/numeros-libres", err);
-    /* On ne sait pas : mieux vaut ne rien proposer que proposer un numéro
-       peut-être déjà pris — le visiteur reverrait la même erreur. */
+  const libres = await numerosLibresBase();
+  if (libres === null) {
+    signalerPanne("configurateur/reservation/numeros-libres", "comptage indisponible");
     return [];
   }
+  return libres;
 }
 
 /** Date d'approbation du document d'urbanisme, en format français. */

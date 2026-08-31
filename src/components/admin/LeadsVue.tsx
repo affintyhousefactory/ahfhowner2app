@@ -19,9 +19,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
 import { NumeroSerieBadge } from "@/shared/components/admin/NumeroSerieBadge";
+import { TelephoneLien } from "@/shared/components/admin/TelephoneLien";
 import {
   STATUTS_COMMERCIAUX,
+  STATUTS_KANBAN,
+  horsKanban,
   statutCommercial,
+  ISSUES_APPEL,
+  issueAppel,
   etatSuivi,
   urgence,
   SLA_JOURS,
@@ -44,6 +49,11 @@ export type LeadListe = {
   commune: string | null;
   created_at: string;
   dernier_appel_at: string | null;
+  /* Issue du dernier appel qui en porte une. Répond à « comment s'est terminé le
+     dernier échange », là où `statut_commercial` répond à « où en est l'affaire » :
+     deux axes indépendants, un lead peut être « En discussion » et avoir eu un
+     répondeur ce matin. Maintenue par trigger depuis `lead_appels`. */
+  derniere_issue?: string | null;
   prochain_rappel_at: string | null;
   cfg_modele: string | null;
   cfg_total: number | null;
@@ -67,6 +77,10 @@ export default function LeadsVue({ leads: initial, vue }: { leads: LeadListe[]; 
   const [q, setQ] = useState("");
   const [conseiller, setConseiller] = useState("");
   const [retardSeul, setRetardSeul] = useState(false);
+  /* « Tous les répondeurs à relancer » est le geste d'une campagne de phoning :
+     c'est pour lui que l'issue remonte sur le lead plutôt que de rester une ligne
+     du journal. */
+  const [issue, setIssue] = useState("");
   const [erreur, setErreur] = useState<string | null>(null);
 
   const conseillersPresents = useMemo(
@@ -80,6 +94,7 @@ export default function LeadsVue({ leads: initial, vue }: { leads: LeadListe[]; 
       if (conseiller === "__aucun__" ? Boolean(l.responsable) : conseiller && l.responsable !== conseiller) {
         return false;
       }
+      if (issue && (l.derniere_issue ?? "") !== issue) return false;
       if (retardSeul) {
         const e = etatSuivi(l);
         if (!e.rappelDepasse && !e.silencieux) return false;
@@ -89,12 +104,35 @@ export default function LeadsVue({ leads: initial, vue }: { leads: LeadListe[]; 
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(terme));
     });
-  }, [leads, q, conseiller, retardSeul]);
+  }, [leads, q, conseiller, retardSeul, issue]);
+
+  /** Comptés sur les leads filtrés : le chiffre suit la recherche en cours. */
+  const rebutes = useMemo(
+    () => filtres.filter((l) => horsKanban(l.statut_commercial)).length,
+    [filtres],
+  );
 
   /** Déplacement Kanban — optimiste, annulé si la route refuse. */
   async function changerStatut(leadId: string, statut: StatutCommercialId) {
     const avant = leads.find((l) => l.id === leadId)?.statut_commercial ?? null;
     if (avant === statut) return;
+
+    /* ⚠ Le rebut n'a pas de colonne : la carte va disparaître de l'écran sous
+       les yeux de celui qui la déplace. Une disparition sans préavis se lit
+       comme une suppression, et fait chercher un bouton d'annulation qui
+       n'existe pas — d'où la confirmation, qui dit à la fois ce qui va se
+       passer et où le lead se retrouvera. */
+    if (horsKanban(statut)) {
+      const lead = leads.find((l) => l.id === leadId);
+      const nom = lead ? `${lead.prenom ?? ""} ${lead.nom ?? ""}`.trim() || "Ce lead" : "Ce lead";
+      const ok = window.confirm(
+        `${nom} va passer en « Erreur / Test / Doublon ».\n\n` +
+          `Il disparaîtra du Kanban : ce statut n'a pas de colonne, pour ne pas fausser les compteurs.\n\n` +
+          `Il n'est pas supprimé — vous le retrouverez dans la vue Tableau, et pourrez lui rendre un statut de là.`,
+      );
+      if (!ok) return;
+    }
+
     setErreur(null);
     setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, statut_commercial: statut } : l)));
     try {
@@ -136,6 +174,18 @@ export default function LeadsVue({ leads: initial, vue }: { leads: LeadListe[]; 
           ))}
         </select>
 
+        <select
+          value={issue}
+          onChange={(e) => setIssue(e.target.value)}
+          aria-label="Filtrer par issue du dernier appel"
+          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#7469F4] [color-scheme:dark]"
+        >
+          <option value="">Toutes les issues</option>
+          {ISSUES_APPEL.map((i) => (
+            <option key={i.id} value={i.id}>{i.label}</option>
+          ))}
+        </select>
+
         <button
           type="button"
           onClick={() => setRetardSeul((v) => !v)}
@@ -174,7 +224,23 @@ export default function LeadsVue({ leads: initial, vue }: { leads: LeadListe[]; 
       {erreur && <p className="mb-3 text-sm text-red-400">{erreur}</p>}
 
       {vue === "kanban" ? (
-        <Kanban leads={filtres} onMove={changerStatut} />
+        <>
+          <Kanban leads={filtres} onMove={changerStatut} />
+
+          {/* Un lead retiré du Kanban ne doit pas être un lead oublié : le
+              compte reste affiché, avec le chemin pour aller le voir. Sans
+              cette ligne, le rebut deviendrait un trou noir. */}
+          {rebutes > 0 && (
+            <p className="mt-3 text-[11px] text-white/30">
+              {rebutes} lead{rebutes > 1 ? "s" : ""} en « Erreur / Test / Doublon » —
+              hors Kanban pour ne pas fausser les compteurs.{" "}
+              <Link href="/admin/leads" className="text-white/50 underline underline-offset-2 hover:text-white">
+                Visible{rebutes > 1 ? "s" : ""} dans la vue Tableau
+              </Link>
+              .
+            </p>
+          )}
+        </>
       ) : (
         <Tableau leads={filtres} />
       )}
@@ -193,8 +259,8 @@ function Tableau({ leads }: { leads: LeadListe[] }) {
         <thead>
           <tr className="border-b border-white/10 text-left text-xs text-white/30">
             <th className="px-4 py-3 font-normal">Dossier</th>
-            <th className="px-4 py-3 font-normal">Email</th>
-            <th className="px-4 py-3 font-normal">Maison</th>
+            <th className="px-4 py-3 font-normal">Contact</th>
+            <th className="px-4 py-3 font-normal">Modèle</th>
             <th className="px-4 py-3 font-normal">Total</th>
             <th className="px-4 py-3 font-normal">Commune</th>
             <th className="px-4 py-3 font-normal">Conseiller</th>
@@ -217,7 +283,19 @@ function Tableau({ leads }: { leads: LeadListe[] }) {
                   )}
                   <span className="text-white">{l.prenom} {l.nom}</span>
                 </td>
-                <td className="px-4 py-3 text-white/50">{l.email}</td>
+                {/* Le numéro figure dans la liste, pas seulement sur la fiche :
+                    c'est cette page qu'on ouvre pour lancer une campagne, et
+                    c'est sur elle que l'extension Allo détecte les contacts à
+                    verser dans la file du Power Dialer. Une liste sans numéros
+                    l'obligerait à ouvrir 354 fiches. */}
+                <td className="px-4 py-3 text-white/50">
+                  <span className="block truncate">{l.email ?? <span className="text-white/20">—</span>}</span>
+                  {l.tel && (
+                    <span className="mt-0.5 block text-xs">
+                      <TelephoneLien tel={l.tel} className="text-white/40" />
+                    </span>
+                  )}
+                </td>
                 <td className="whitespace-nowrap px-4 py-3 text-white/50">
                   {modeleLabel(l)}
                   <NumeroSerieBadge slot={l.slot} statut={l.statut_commercial} />
@@ -228,7 +306,19 @@ function Tableau({ leads }: { leads: LeadListe[] }) {
                   {l.responsable ?? <span className="text-white/20">non attribué</span>}
                 </td>
                 <td className="px-4 py-3 text-xs">
-                  <SilenceBadge etat={e} date={l.dernier_appel_at} />
+                  {/* L'issue est logée dans la cellule « Dernier appel » plutôt que
+                      dans une colonne de plus : elle qualifie cet appel-là, et le
+                      tableau tient déjà onze colonnes. */}
+                  <div className="flex flex-col gap-1">
+                    <SilenceBadge etat={e} date={l.dernier_appel_at} />
+                    {issueAppel(l.derniere_issue) && (
+                      <span
+                        className={`w-fit rounded-full px-2 py-0.5 text-[10px] font-medium ${issueAppel(l.derniere_issue)!.badge}`}
+                      >
+                        {issueAppel(l.derniere_issue)!.label}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-xs">
                   <RappelBadge etat={e} date={l.prochain_rappel_at} />
@@ -297,7 +387,7 @@ function Kanban({
 
   return (
     <div className="flex gap-3 overflow-x-auto pb-4">
-      {STATUTS_COMMERCIAUX.map((s) => {
+      {STATUTS_KANBAN.map((s) => {
         const colonne = leads
           .filter((l) => statutCommercial(l.statut_commercial).id === s.id)
           .sort((a, b) => urgence(etatSuivi(b)) - urgence(etatSuivi(a)));
@@ -373,6 +463,16 @@ function Carte({
       </Link>
 
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        {/* L'issue passe avant les badges de retard : sur une carte de Kanban en
+            campagne, savoir qu'on est tombé trois fois sur un répondeur oriente
+            plus sûrement le prochain geste que le nombre de jours écoulés. */}
+        {issueAppel(lead.derniere_issue) && (
+          <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${issueAppel(lead.derniere_issue)!.badge}`}
+          >
+            {issueAppel(lead.derniere_issue)!.label}
+          </span>
+        )}
         {e.rappelDepasse && (
           <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-medium text-red-400">
             rappel +{e.joursRetardRappel} j

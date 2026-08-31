@@ -14,10 +14,19 @@ Point d'entrée pour : Phase 4 — Supabase, Stripe, outil terrain, leads, email
 | `03_DECISIONS/ADR-007..014,017` | Décisions Phase 4 |
 | `src/components/site/Reservation.tsx` | Réservation/acompte/waitlist (à brancher) |
 | `src/components/site/LandTool.tsx` | Terrain : BAN réel, zonage à brancher |
+| `src/lib/crm.ts` | **Référentiels CRM** — 9 statuts, 5 cibles (+ codes NAF), 8 sourcings, 5 issues d'appel, conseillers. Jamais redéclarés dans un écran |
+| `src/shared/lib/validation.ts` | **Source unique** des contrôles de saisie — email, SIREN (Luhn avertit sans refuser), site web |
+| `src/components/admin/LeadOnglets.tsx` | Compartiments de la fiche. ⚠ Montage à la première visite : Leaflet en `display:none` se dimensionne à zéro |
+| `src/shared/components/admin/TelephoneLien.tsx` | Numéro cliquable. ⚠ **Aucun gestionnaire d'événement** — rendu depuis des Server Components |
+| `src/shared/lib/recap-client.ts` | **Source unique** des paramètres du récapitulatif client — sert l'aperçu ET l'envoi |
+| `src/shared/lib/brevo-render.ts` | Rendu local d'un template Brevo (aperçu seulement, jamais l'envoi) |
+| `src/shared/lib/email.ts` | Brevo : envoi de template, ajout de contact, DOI (⚠ `addBrevoContactDOI` non appelé) |
 
 ## Décisions liées
 | ADR | Sujet | Statut | Faisabilité |
 |---|---|---|---|
+| 026 | **Emails Brevo** — templates dashboard, contacts, listes | **Livré** ; amendé 2026-08-26 : Prospects = CRM / Newsletter = consentement ; ⚠ DOI non câblé | ✅ |
+| 035 | **CRM interne** — leads, Kanban, journal d'appels, récapitulatif client | **En production** ; amendé 2026-08-27 : cible commerciale, statut de rebut, transport auto, relecture du récap | ✅ |
 | 007 | Supabase schémas + RLS (`ahfhownerdb`) | Proposé | ✅ |
 | 008 | Acompte Stripe + webhook | Proposé | 🟠 |
 | 009 | Jauge/slots Realtime | Proposé | 🟠 |

@@ -98,6 +98,95 @@ TURNSTILE_SECRET_KEY=             # 1x0000000000000000000000000000000AA en dev
 - **Débloque ADR-008** (confirmation Stripe utilisera `sendBrevoTemplate`)
 - RGPD : Brevo déjà déclaré dans `/confidentialite` — aucune mise à jour requise
 
+## Amendement du 2026-08-26 — consentement, listes, et ce que porte le récapitulatif
+
+Trois constats faits en production, trois corrections.
+
+### 1. La liste « AHF – Newsletter » n'était jamais alimentée
+
+Aucune des six routes qui écrivent des contacts Brevo ne la citait. Pire, un
+visiteur qui **ne cochait pas** la case d'acceptation n'entrait dans **aucune**
+liste : sa demande vivait en base Supabase, l'email de confirmation partait,
+mais le CRM Brevo l'ignorait. Compteurs au moment du constat : liste 8
+« Prospects » → 1 contact, liste 5 « AHF – Newsletter » → 0, liste 7
+« Mandataires » → 0.
+
+**Deux listes, deux rôles, décidés par Richard :**
+
+- **« Prospects » (8) reçoit tout le monde**, coche ou pas. C'est le CRM :
+  tracer qui a écrit relève de l'intérêt légitime, pas de la communication.
+- **« AHF – Newsletter » (5) ne reçoit que ceux qui cochent.** C'est là que vit
+  le consentement marketing.
+- **Une campagne se cible sur « Newsletter », jamais sur « Prospects ».** Règle
+  écrite dans `docs/deployment.md`, à côté des deux variables.
+
+`emailBlacklisted: !optIn` est conservé : seconde barrière au niveau du contact,
+pour qu'une campagne mal ciblée n'atteigne personne qui n'a pas consenti.
+
+Appliqué aux **trois** formulaires — `/api/contact`, `/api/reservation`,
+`/api/configurateur/reservation` — qui posent la même question, mot pour mot
+(`OPTIN_TEXTE`). Trois formulaires qui recueillent le même consentement et le
+rangent de trois façons, c'est un fichier contact qu'on ne sait plus lire.
+`/api/recherche-terrain` garde l'ancien schéma : domaine suspendu (ADR-028).
+
+⚠ **Effet de bord assumé, écrit dans le code.** Brevo ajoute aux listes mais n'en
+retire jamais. Un contact qui coche puis revient sans cocher reste dans
+« Newsletter » tout en repassant blocklisté : l'envoi est bloqué, mais les deux
+signaux se contredisent dans l'interface. Le retrait de consentement doit passer
+par le lien de désinscription, pas par une case laissée vide sur un second
+message.
+
+⚠ **Le double opt-in n'est toujours pas en service.** `addBrevoContactDOI()`
+existe dans `src/shared/lib/email.ts` mais **n'est appelé nulle part** — les six
+routes utilisent l'ajout direct. L'opt-in simple est légal en France ; le nom de
+la fonction laisse croire le contraire, d'où cette mention.
+
+### 2. Le lien de désinscription était mort depuis l'origine
+
+`{{ unsubscribe_link }}` **n'est pas un tag Brevo.** Brevo le remplaçait par une
+chaîne vide, sans erreur ni avertissement : le HTML réellement délivré portait
+`<a href="">Se désinscrire</a>`. Vérifié sur un email de production du
+2026-08-22, récupéré par l'API — pas sur le template source, qui ne montre rien.
+
+Le tag correct est **`{{ unsubscribe }}`**. `{{ update_profile }}`, lui,
+fonctionnait déjà.
+
+Troisième lien du pied de page, « Supprimer mon compte », pointait vers
+`affinityhousefactory.com/compte/supprimer` : ce site est **en maintenance** et
+sert la même page à toute URL avec un `200` trompeur — empreinte identique à
+celle d'une URL absurde testée sur le même domaine. Un droit à l'effacement
+annoncé qui ne mène nulle part vaut moins que pas d'annonce. Redirigé vers
+`howner.fr/confidentialite`, dont le §11 décrit les modalités réelles.
+
+**Templates 9 et 10 corrigés à la main par Richard le 2026-08-26**, vérifiés par
+l'API.
+
+**Leçon de méthode** : un template Brevo ne se contrôle pas sur sa source. Un tag
+inconnu y est indiscernable d'un tag valide — il faut lire le HTML **délivré**.
+
+### 3. La plaquette commerciale part avec le récapitulatif
+
+**Un lien, pas une pièce jointe.** Une pièce jointe alourdit l'email, dégrade la
+délivrabilité et ne dit rien, là où un lien se mesure dans Brevo.
+
+**Un fichier désigné, pas « le dernier d'un dossier ».** Prendre automatiquement
+le fichier le plus récemment modifié d'un répertoire Drive, c'est envoyer un
+brouillon le jour où quelqu'un rouvre un document pour corriger une virgule.
+
+Fichier servi par le dépôt : `public/documents/plaquette-howner-2026.pdf`, lié
+sous `{% if params.PLAQUETTE_URL %}` — variable vide = ligne absente, jamais de
+lien mort. L'URL envoyée est **absolue** (`SITE_URL` + chemin) : un email n'a pas
+d'origine à laquelle rapporter un chemin relatif.
+
+⚠ **Le fichier d'origine pesait 64,6 Mo** pour 28 pages — export en
+`FlateDecode`, compression sans perte qui ne compresse presque rien sur des
+photos. Ré-exporté par Richard : **1,69 Mo**, 38 fois moins, 28 pages et 29
+images conservées, 27 désormais en JPEG. La version publiée vise l'écran
+(~150 dpi en A4) ; **l'original reste le fichier d'impression**, sur le Drive AHF.
+
+⚠ **Nommage** : `check:vocabulaire` a refusé « catalogue », proscrit par ADR-029.
+Le terme retenu est **plaquette**.
+
 ## Sources
 
 `src/lib/email.ts`, `src/app/api/contact/route.ts`, `src/app/api/recherche-terrain/route.ts`, `src/components/site/ContactForm.tsx`, `src/components/site/Configurator.tsx`, `supabase/migrations/20260620_contacts.sql`, `docs/brief-artefact-email-templates.md`, ADR-007, ADR-014, ADR-003, ADR-024.
