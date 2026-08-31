@@ -12,6 +12,10 @@ import { FEATURES } from "@/lib/features";
 const NAV: { href: string; label: string; sub?: boolean; mandataire?: boolean }[] = [
   { href: "/admin",              label: "Dashboard" },
   { href: "/admin/leads",        label: "Leads" },
+  /* ADR-044 — partenaires apporteurs d'affaires. Domaine distinct des leads
+     (ils ne réservent pas) et du domaine mandataire suspendu (ils ne sont pas
+     sous-traitants) : il naît actif, sans feature flag. */
+  { href: "/admin/agents",       label: "Agents immo" },
   { href: "/admin/affectations", label: "En attente",   sub: true, mandataire: true },
   { href: "/admin/ged",          label: "GED Dossiers", sub: true, mandataire: true },
   { href: "/admin/mandataires",  label: "Mandataires",             mandataire: true },
