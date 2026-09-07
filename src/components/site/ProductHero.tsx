@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { BRAND, reserverHref, type Product } from "@/lib/site";
+import { BRAND, reserverHref, type Product, RESERVER_LABEL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Gauge } from "@/components/ui/Gauge";
 import { HeroBackdrop, type HeroBackdropVariant } from "@/components/effects/HeroBackdrop";
@@ -135,7 +135,7 @@ export function ProductHero({
                 section 05. */}
             <div className="flex flex-wrap items-center gap-3 md:justify-end">
               <Button href={reserverHref(product.key)} variant="accent">
-                Réserver — {BRAND.deposit.toLocaleString("fr-FR")} €
+                {RESERVER_LABEL}
                 <Arrow />
               </Button>
             </div>

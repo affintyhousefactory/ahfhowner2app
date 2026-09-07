@@ -37,6 +37,7 @@ export function Section({
   ouvertParDefaut,
   saillant,
   badge,
+  onOuvrir,
   children,
 }: {
   n: number;
@@ -55,11 +56,23 @@ export function Section({
   saillant?: boolean;
   /** Court libellé posé à droite du titre — ex. « Gratuit · immédiat ». */
   badge?: string;
+  /**
+   * Appelé quand la section **s'ouvre** — jamais quand elle se referme.
+   *
+   * Sert aux sections dont l'ouverture doit préparer la scène : déplier
+   * « Ambiance intérieure » sans montrer l'intérieur laisserait choisir à
+   * l'aveugle. `onToggle` du `<details>` se déclenche dans les deux sens, d'où
+   * le filtre sur `open`.
+   */
+  onOuvrir?: () => void;
   children: ReactNode;
 }) {
   return (
     <details
       open={ouvertParDefaut}
+      onToggle={(e) => {
+        if (e.currentTarget.open) onOuvrir?.();
+      }}
       className={cn(
         "border-b border-line",
         saillant && "border-l-2 border-l-accent bg-accent/[0.035]",
@@ -191,6 +204,7 @@ export function Scene({
   vuesInterieures,
   interieurs,
   ambianceInterieureActive,
+  signalInterieur,
 }: {
   nom: string;
   sous: string;
@@ -218,6 +232,14 @@ export function Scene({
    */
   interieurs: { id: string; nom: string; vues: VueInterieure[] }[];
   ambianceInterieureActive: string;
+  /**
+   * Incrémenté à chaque ouverture de la section « Ambiance intérieure ».
+   *
+   * La scène montre alors l'intérieur, même si l'ambiance n'a pas changé — le
+   * cas courant, l'ambiance par défaut étant déjà posée. Un simple booléen ne
+   * suffirait pas : rouvrir la section n'aurait plus rien à observer.
+   */
+  signalInterieur: number;
 }) {
   /**
    * Face montrée — extérieur ou intérieur.
@@ -241,6 +263,23 @@ export function Scene({
     }
     setFace("interieur");
   }, [ambianceInterieureActive]);
+
+  /* Ouverture de la rubrique : on montre ce qu'elle fait choisir. Distinct de
+     l'effet ci-dessus, qui ne se déclenche qu'au **changement** d'ambiance —
+     or l'ambiance par défaut est déjà posée au dépliement, donc rien ne
+     changerait et la scène resterait sur le bardage.
+
+     Comparaison à une ref, et non `if (signal === 0)` : ESLint refuse un
+     `setState` qu'il peut atteindre de façon synchrone dans un effet, et une
+     garde sur la prop ne le convainc pas — c'est la forme des deux effets
+     ci-dessus (`premierRendu`), reprise ici pour la même raison. Elle est
+     aussi plus juste : au montage les deux valent 0, aucune bascule. */
+  const dernierSignal = useRef(0);
+  useEffect(() => {
+    if (dernierSignal.current === signalInterieur) return;
+    dernierSignal.current = signalInterieur;
+    setFace("interieur");
+  }, [signalInterieur]);
 
   /* Vue courante du défilement intérieur. Bornée à la longueur réelle : passer
      de l'Arko Max (4 vues) à l'Arko One (3) ne doit pas laisser un index mort. */

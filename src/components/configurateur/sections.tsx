@@ -188,6 +188,12 @@ export function SectionAmbianceInterieure() {
       n={3}
       titre="Ambiance intérieure"
       resume={`${a?.nom ?? ""} · incluse`}
+      /* Déplier la rubrique pose l'ambiance par défaut — « Ambiance bois », la
+         première de la grille — et bascule la scène sur l'intérieur (décision
+         de Richard, 2026-09-07). Sans cela, on choisissait une finition en
+         regardant le bardage. Un choix déjà fait n'est jamais écrasé : seule
+         la face change à la réouverture. */
+      onOuvrir={c.ouvrirInterieur}
     >
       <div
         role="tablist"

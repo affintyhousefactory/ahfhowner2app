@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { PRODUCT_LIST, reserverHref, type Product } from "@/lib/site";
+import { PRODUCT_LIST, reserverHref, type Product, RESERVER_LABEL } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { useTilt } from "@/components/effects/useTilt";
 import { Button, Arrow } from "@/components/ui/Button";
 import { contenuProduit } from "@/lib/produits/heure-bleue";
 
-/* Accueil — entrée vers les deux modèles (parcours Découvrir / Réserver).
+/* Accueil — entrée vers les deux modèles (parcours Découvrir / Configurer).
    Tilt 3D suivi-souris sur chaque carte (perf-safe, framer spring). */
 export function ProductsShowcase() {
   return (
@@ -86,7 +86,7 @@ function ProductCard({ p }: { p: Product }) {
             Découvrir
           </Button>
           <Button href={reserverHref(p.key)} size="sm" magnetic={false}>
-            Réserver
+            {RESERVER_LABEL}
             <Arrow />
           </Button>
         </div>

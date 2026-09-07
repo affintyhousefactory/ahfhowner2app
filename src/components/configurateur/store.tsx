@@ -149,6 +149,24 @@ type Ctx = {
   setAmbiance: (a: string) => void;
   ambianceInterieure: string;
   setAmbianceInterieure: (a: string) => void;
+  /**
+   * L'ouverture de la section « Ambiance intérieure » prépare la scène.
+   *
+   * Deux gestes en un, appelés au dépliement (décision de Richard,
+   * 2026-09-07) : poser l'ambiance par défaut si le visiteur n'en a pas encore
+   * choisi une, et **montrer l'intérieur**. Déplier la rubrique en laissant le
+   * bardage à l'écran ferait choisir à l'aveugle — le rendu est le seul
+   * argument de ce choix.
+   */
+  ouvrirInterieur: () => void;
+  /**
+   * Compteur d'appels à `ouvrirInterieur()`, lu par la scène.
+   *
+   * Un compteur et non un booléen : rouvrir la section une troisième fois doit
+   * agir comme la deuxième. Un booléen resterait à `true` et la scène, déjà
+   * revenue à l'extérieur entre-temps, n'aurait aucun changement à observer.
+   */
+  signalInterieur: number;
   /** Vues intérieures du modèle courant, pour l'ambiance sélectionnée. */
   vuesInterieures: VueInterieure[];
   /** Toutes les ambiances intérieures, vues déjà résolues pour ce modèle. */
@@ -258,6 +276,11 @@ export function ConfigurateurProvider({
     cfg.ambiancesInterieures[0].id,
   );
   const [terrasse, setTerrasse] = useState<PalierId>("sans");
+  /* Le visiteur a-t-il touché au sélecteur d'ambiance intérieure ? Sert à ne
+     poser le défaut qu'une fois : rouvrir la section ne doit pas effacer un
+     choix délibéré pour lui substituer le premier de la liste. */
+  const [interieurChoisi, setInterieurChoisi] = useState(false);
+  const [signalInterieur, setSignalInterieur] = useState(0);
   const [options, setOptions] = useState<string[]>([]);
   const [preAnalyse, setPreAnalyse] = useState<PreAnalyse | null>(null);
   const [eligibilite, setEligibilite] = useState<Eligibilite>(null);
@@ -290,6 +313,18 @@ export function ConfigurateurProvider({
     },
     [cfg],
   );
+
+  /* Le choix manuel se distingue du défaut : c'est lui qui rend l'ambiance
+     intransigeante à la réouverture. */
+  const choisirInterieur = useCallback((id: string) => {
+    setInterieurChoisi(true);
+    setAmbianceInterieure(id);
+  }, []);
+
+  const ouvrirInterieur = useCallback(() => {
+    if (!interieurChoisi) setAmbianceInterieure(cfg.ambiancesInterieures[0].id);
+    setSignalInterieur((n) => n + 1);
+  }, [cfg, interieurChoisi]);
 
   const toggleOption = useCallback((id: string) => {
     setOptions((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -442,7 +477,9 @@ export function ConfigurateurProvider({
       ambiance,
       setAmbiance,
       ambianceInterieure,
-      setAmbianceInterieure,
+      setAmbianceInterieure: choisirInterieur,
+      ouvrirInterieur,
+      signalInterieur,
       /* Résolu ici et non dans la scène : le modèle décide des vues
          disponibles (l'Arko Max a un salon, l'Arko One non), et un composant
          qui irait les chercher lui-même finirait par indexer en dur. */
@@ -489,7 +526,7 @@ export function ConfigurateurProvider({
       transportDetailPerKm: transportPerKm(m),
       total,
     };
-  }, [cfg, bardagesPublics, usage, quantite, modele, setModele, ambiance, ambianceInterieure, terrasse, options, toggleOption, preAnalyse, eligibilite, contact, setContact, optin, cgv, envoi, soumettre, prix]);
+  }, [cfg, bardagesPublics, usage, quantite, modele, setModele, ambiance, ambianceInterieure, choisirInterieur, ouvrirInterieur, signalInterieur, terrasse, options, toggleOption, preAnalyse, eligibilite, contact, setContact, optin, cgv, envoi, soumettre, prix]);
 
   return <ConfigCtx.Provider value={value}>{children}</ConfigCtx.Provider>;
 }

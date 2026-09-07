@@ -430,7 +430,7 @@ export type Product = (typeof PRODUCTS)[ProductKey];
 export const PRODUCT_LIST = [PRODUCTS.one, PRODUCTS.max] as const;
 
 /**
- * Destination de tous les CTA « Réserver » du site public (ADR-030).
+ * Destination de tous les CTA menant au configurateur (ADR-030).
  *
  * Une constante et non huit chaînes en dur : le tunnel v2 vit sur
  * `/configurer/v2` le temps de la validation, et la bascule vers `/configurer`
@@ -445,6 +445,23 @@ export const RESERVER_PATH = "/configurer/v2";
 export function reserverHref(produit?: ProductKey) {
   return produit ? `${RESERVER_PATH}?produit=${produit}` : RESERVER_PATH;
 }
+
+/**
+ * Libellé de tous les CTA menant au configurateur — **« Configurer »** depuis
+ * le 2026-09-07 (décision de Richard).
+ *
+ * « Réserver » et « Réserver un numéro » annonçaient un acte que le parcours
+ * n'accomplit pas : aucun numéro n'est retenu, aucun paiement n'est pris
+ * (ADR-008), et le bouton au bout du tunnel demande désormais un rappel
+ * (ADR-030 § Amendement du 2026-09-07, point 6). Le CTA dit maintenant ce vers
+ * quoi il mène — un configurateur — plutôt qu'un engagement qui n'existe pas.
+ *
+ * ⚠ **Une constante et non treize chaînes en dur**, pour la même raison que
+ * `RESERVER_PATH` juste au-dessus : le libellé venait d'être réécrit dans onze
+ * composants, et rien ne garantissait qu'ils disent tous la même chose. Le
+ * prochain changement tient en une ligne. Ne pas recopier le texte.
+ */
+export const RESERVER_LABEL = "Configurer";
 
 export const getProduct = (key: string | null | undefined): Product =>
   key === "one" ? PRODUCTS.one : PRODUCTS.max;

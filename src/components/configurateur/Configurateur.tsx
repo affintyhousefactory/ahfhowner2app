@@ -92,6 +92,7 @@ function Parcours() {
         vuesInterieures={c.vuesInterieures}
         interieurs={c.interieurs}
         ambianceInterieureActive={c.ambianceInterieure}
+        signalInterieur={c.signalInterieur}
       />
 
       <div className="flex min-w-0 flex-col bg-surface">
