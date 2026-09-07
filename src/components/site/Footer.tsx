@@ -8,6 +8,7 @@ import {
   INFO_NAV,
   PRODUCT_LIST,
   reserverHref,
+  RESERVER_LABEL,
 } from "@/lib/site";
 import { pagesDeFamille } from "@/lib/pages/registry";
 import { FEATURES } from "@/lib/features";
@@ -32,7 +33,7 @@ export function Footer() {
               href={reserverHref()}
               className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-canvas/55 transition-colors hover:text-canvas"
             >
-              Réserver →
+              {RESERVER_LABEL} →
             </Link>
           </div>
 

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
-import { reserverHref, type ProductKey } from "@/lib/site";
+import { reserverHref, type ProductKey, RESERVER_LABEL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { contenuProduit, prixBase, numerosLibres } from "@/lib/produits/heure-bleue";
 
@@ -100,7 +100,7 @@ export function HeroHeureBleue({ produit }: { produit: ProductKey }) {
 
             <Reveal delay={0.42} className="flex flex-col gap-3 md:mt-8 md:flex-row md:flex-wrap md:items-center md:gap-5">
               <Button href={reserverHref(produit)} variant="lumiere" className="w-full md:w-auto">
-                Réserver un numéro
+                {RESERVER_LABEL}
                 <Arrow />
               </Button>
               <span className="text-[0.85rem] text-nuit-muted md:text-sm">

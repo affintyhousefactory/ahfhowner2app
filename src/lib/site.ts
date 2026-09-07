@@ -430,7 +430,7 @@ export type Product = (typeof PRODUCTS)[ProductKey];
 export const PRODUCT_LIST = [PRODUCTS.one, PRODUCTS.max] as const;
 
 /**
- * Destination de tous les CTA « Réserver » du site public (ADR-030).
+ * Destination de tous les CTA menant au configurateur (ADR-030).
  *
  * Une constante et non huit chaînes en dur : le tunnel v2 vit sur
  * `/configurer/v2` le temps de la validation, et la bascule vers `/configurer`
@@ -446,6 +446,23 @@ export function reserverHref(produit?: ProductKey) {
   return produit ? `${RESERVER_PATH}?produit=${produit}` : RESERVER_PATH;
 }
 
+/**
+ * Libellé de tous les CTA menant au configurateur — **« Configurer »** depuis
+ * le 2026-09-07 (décision de Richard).
+ *
+ * « Réserver » et « Réserver un numéro » annonçaient un acte que le parcours
+ * n'accomplit pas : aucun numéro n'est retenu, aucun paiement n'est pris
+ * (ADR-008), et le bouton au bout du tunnel demande désormais un rappel
+ * (ADR-030 § Amendement du 2026-09-07, point 6). Le CTA dit maintenant ce vers
+ * quoi il mène — un configurateur — plutôt qu'un engagement qui n'existe pas.
+ *
+ * ⚠ **Une constante et non treize chaînes en dur**, pour la même raison que
+ * `RESERVER_PATH` juste au-dessus : le libellé venait d'être réécrit dans onze
+ * composants, et rien ne garantissait qu'ils disent tous la même chose. Le
+ * prochain changement tient en une ligne. Ne pas recopier le texte.
+ */
+export const RESERVER_LABEL = "Configurer";
+
 export const getProduct = (key: string | null | undefined): Product =>
   key === "one" ? PRODUCTS.one : PRODUCTS.max;
 
@@ -456,6 +473,22 @@ export const getProduct = (key: string | null | undefined): Product =>
    ============================================================ */
 export const SERIES_DEADLINE_ISO = "2026-07-17T23:59:59+02:00";
 export const SERIES_DEADLINE_LABEL = "Fin des réservations Série 01";
+
+/**
+ * Titre du bloc « En confiance » — reformulé le 2026-09-07.
+ *
+ * Il s'ouvrait sur « Réserver, sans rien risquer en deux étapes », au moment
+ * où tous les CTA du site cessaient de dire « Réserver » (`RESERVER_LABEL`).
+ * Le titre promettait donc un geste que plus aucun bouton ne proposait, et que
+ * le parcours n'accomplit pas : la réservation vient **après** l'entretien et
+ * le devis — c'est exactement ce que décrivent les deux étapes numérotées
+ * juste en dessous.
+ *
+ * Il vit ici et non dans le composant, avec les deux listes qu'il chapeaute :
+ * elles se relisent ensemble ou pas du tout.
+ */
+export const REASSURANCE_TITRE =
+  "Configurer, puis décider — en deux étapes, sans rien risquer.";
 
 export const REASSURANCE_INTRO = [
   {

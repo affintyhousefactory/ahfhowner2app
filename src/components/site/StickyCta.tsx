@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BRAND, reserverHref } from "@/lib/site";
+import { BRAND, reserverHref, RESERVER_LABEL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Gauge } from "@/components/ui/Gauge";
 import { useConfig, eur } from "./config-store";
@@ -60,7 +60,7 @@ export function StickyCta() {
                 magnetic={false}
                 className="px-5 py-2.5 text-sm"
               >
-                Réserver
+                {RESERVER_LABEL}
                 <Arrow />
               </Button>
             </div>

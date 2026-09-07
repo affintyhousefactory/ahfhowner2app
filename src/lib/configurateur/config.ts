@@ -88,6 +88,22 @@ export type Ambiance = {
    * ce que le libellé ne dit pas — « Basque » ne se devine pas.
    */
   teinte: string;
+  /**
+   * Teinte **retirée du sélecteur public**, obtenue après entretien (décision
+   * de Richard, 2026-09-07).
+   *
+   * Un drapeau plutôt qu'une suppression : la teinte reste dans la grille, donc
+   * les leads antérieurs qui la portent se relisent normalement (`loadConfig()`
+   * résout toujours leur libellé), et la rouvrir est un booléen — pas une
+   * réécriture. C'est exactement ce que §12 de la spec demande des grilles :
+   * « elles bougeront ».
+   *
+   * ⚠ Conséquence à tenir : la première ambiance **non** marquée est le défaut
+   * du parcours. Marquer toutes les teintes serait donc une grille sans
+   * bardage — `ambiancesPubliques()` le refuse plutôt que de servir un
+   * sélecteur vide.
+   */
+  surDemande?: boolean;
 };
 /**
  * Ambiance intérieure — rubrique ajoutée le 2026-08-20 (demande de Richard).
@@ -259,6 +275,7 @@ const CONFIG_V1: ConfigurateurConfig = {
          qu'à ce moment de la journée. Valeurs à confirmer par Richard, qui
          connaît celles appliquées à ses rendus. */
       teinte: "#9b9b9b",
+      surDemande: true,
     },
     {
       id: "gris_anthracite",
@@ -279,6 +296,7 @@ const CONFIG_V1: ConfigurateurConfig = {
         max: "/assets/arko/skins/max-skin-vert.avif",
       },
       teinte: "#5a6a43",
+      surDemande: true,
     },
   ],
 
@@ -426,6 +444,21 @@ export function optionsPourModele(cfg: ConfigurateurConfig, modele: ModeleId): O
 
 export function prixOption(o: Option, modele: ModeleId): number {
   return o.prixTtc[modele] ?? 0;
+}
+
+/**
+ * Teintes de bardage proposées au visiteur — celles qui ne sont pas « sur
+ * demande ».
+ *
+ * Passe par cette fonction et jamais par `cfg.ambiances` directement : c'est
+ * elle qui garantit qu'un sélecteur vide est impossible. Une grille où toutes
+ * les teintes seraient marquées rendrait la première quand même, plutôt que de
+ * laisser le parcours sans bardage — le défaut sûr est ici de montrer trop,
+ * pas de ne rien montrer.
+ */
+export function ambiancesPubliques(cfg: ConfigurateurConfig): Ambiance[] {
+  const publiques = cfg.ambiances.filter((a) => !a.surDemande);
+  return publiques.length > 0 ? publiques : cfg.ambiances.slice(0, 1);
 }
 
 export function paliersPourModele(cfg: ConfigurateurConfig, modele: ModeleId): Palier[] {

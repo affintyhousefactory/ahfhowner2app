@@ -3,12 +3,10 @@ import { sendBrevoTemplate, addBrevoContact } from "@/shared/lib/email";
 import { getSupabaseAdmin } from "@/shared/lib/supabase";
 import { signalerPanne } from "@/shared/lib/panne";
 import { loadConfig, getModele, paliersPourModele, prixOption, optionsPourModele, type ModeleId } from "@/lib/configurateur/config";
-import { SERIE_TOTAL } from "@/lib/site";
-import { numerosLibres as numerosLibresBase } from "@/shared/lib/numeros-serie";
 import type { ParcelleData } from "@/shared/types/plu";
 
 /**
- * Soumission de la demande de numéro — ADR-031.
+ * Soumission de la demande de rappel — ADR-031.
  *
  * Route distincte de `/api/reservation`, qui sert le tunnel v1 : deux formats
  * de charge utile dans une même route obligeraient à distinguer l'appelant à
@@ -16,12 +14,12 @@ import type { ParcelleData } from "@/shared/types/plu";
  *
  * Trois principes tiennent tout le fichier :
  *
- * 1. **Le conflit de numéro n'est pas une panne.** Si le numéro vient d'être
- *    confirmé par un autre client, c'est une réponse métier — 409, avec les
- *    numéros encore libres. On n'envoie alors aucun email : le visiteur doit
- *    rechoisir, et un récapitulatif portant un numéro perdu l'embrouillerait.
+ * 1. **Le visiteur ne choisit plus son exemplaire** (2026-09-07). Le lead entre
+ *    donc avec `slot` à `null`, et le conseiller l'attribue depuis le CRM après
+ *    avoir vérifié la disponibilité réelle. La route n'a plus de course à
+ *    arbitrer : le 409 « numéro indisponible » disparaît avec le choix.
  *
- * 2. **Toute autre défaillance de stockage est non bloquante mais jamais
+ * 2. **Toute défaillance de stockage est non bloquante mais jamais
  *    silencieuse** (`shared/lib/panne.ts`) : l'email part quand même, AHF
  *    reçoit la demande, et `persisted: false` dit l'autre moitié de la vérité.
  *
@@ -51,7 +49,6 @@ type Charge = {
     cp: string;
     ville: string;
   };
-  numero: number | null;
   modele: ModeleId;
   usage: string | null;
   quantite: number;
@@ -81,10 +78,6 @@ export async function POST(req: NextRequest) {
   if (!EMAIL_PATTERN.test(c.email)) {
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
-  if (body.numero == null || body.numero < 1 || body.numero > SERIE_TOTAL) {
-    return NextResponse.json({ error: "invalid_numero" }, { status: 400 });
-  }
-
   // ── Turnstile ────────────────────────────────────────────────────
   const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
   if (turnstileSecret) {
@@ -131,7 +124,6 @@ export async function POST(req: NextRequest) {
 
   // ── Insertion ────────────────────────────────────────────────────
   let persisted = true;
-  let conflit = false;
 
   try {
     const { error } = await getSupabaseAdmin()
@@ -144,7 +136,13 @@ export async function POST(req: NextRequest) {
         adresse_postale_client: c.adresse?.trim() || null,
         cp_client: c.cp?.trim() || null,
         ville_client: c.ville?.trim() || null,
-        slot: body.numero,
+        /* `null` : l'exemplaire est attribué par le conseiller depuis le CRM
+           (`LeadConfiguration.tsx`), jamais par le visiteur. L'index unique
+           partiel `leads_slot_confirme_unique` ne porte que sur les numéros
+           non nuls — plusieurs demandes en attente cohabitent donc sans se
+           bloquer, ce qui est exactement le mode « demandé puis confirmé »
+           décrit par ADR-030 § Écarts assumés. */
+        slot: null,
         statut: "nouveau",
         statut_commercial: "nouveau",
         source: "configurateur_v2",
@@ -194,23 +192,10 @@ export async function POST(req: NextRequest) {
         plu_lat: plu?.lat ?? null,
       });
 
-    if (error) {
-      /* 23505 sur l'index partiel : le numéro vient d'être confirmé par
-         quelqu'un d'autre. Ce n'est pas une panne, c'est une course perdue —
-         et elle a une réponse utile. */
-      if (error.code === "23505") conflit = true;
-      else throw error;
-    }
+    if (error) throw error;
   } catch (err) {
     persisted = false;
     signalerPanne("configurateur/reservation/supabase", err);
-  }
-
-  if (conflit) {
-    return NextResponse.json(
-      { error: "numero_indisponible", numero: body.numero, disponibles: await numerosLibres() },
-      { status: 409 },
-    );
   }
 
   // ── Emails ───────────────────────────────────────────────────────
@@ -240,8 +225,13 @@ export async function POST(req: NextRequest) {
     TEL: c.tel ?? "",
     ADRESSE: c.adresse ?? "",
     CP_VILLE: cpVille,
-    // Réservation
-    NUMERO: String(body.numero).padStart(2, "0"),
+    /* Réservation. ⚠ `NUMERO` reste envoyé, **vide** : le template 9 sert
+       aussi le tunnel v1, qui lui transmet encore un numéro. Retirer le
+       paramètre ici ne changerait rien au rendu (Brevo affiche un
+       `{{ params.NUMERO }}` absent comme une chaîne vide) ; c'est la ligne du
+       template qui doit disparaître, côté Brevo — action pour Richard, à faire
+       avant la bascule de `/configurer` sur le v2. */
+    NUMERO: "",
     RESERVATION_TTC: `${cfg.reservation.montantTtc.toLocaleString("fr-FR")} €`,
     SOUS_CONDITION: sousCondition,
     // Configuration
@@ -305,27 +295,6 @@ export async function POST(req: NextRequest) {
      `notified` que l'email est parti. Les confondre est ce qui a rendu une base
      en pause invisible pendant des semaines. */
   return NextResponse.json({ ok: true, persisted, notified });
-}
-
-/**
- * Numéros encore libres — ceux qu'aucun lead confirmé ne détient.
- *
- * Interrogé au moment du conflit seulement : le compteur public reste servi
- * par `chargerNumeros()` tant qu'ADR-009 n'a pas branché le temps réel.
- *
- * ⚠ Le comptage lui-même vit dans `@/shared/lib/numeros-serie` depuis que le
- * récapitulatif sectoriel annonce, lui aussi, combien de numéros restent. Ici
- * on ne garde que la conduite propre au tunnel : une base muette ne propose
- * rien plutôt qu'un numéro peut-être déjà pris — le visiteur reverrait la même
- * erreur.
- */
-async function numerosLibres(): Promise<number[]> {
-  const libres = await numerosLibresBase();
-  if (libres === null) {
-    signalerPanne("configurateur/reservation/numeros-libres", "comptage indisponible");
-    return [];
-  }
-  return libres;
 }
 
 /** Date d'approbation du document d'urbanisme, en format français. */

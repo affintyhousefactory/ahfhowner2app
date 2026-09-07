@@ -11,7 +11,15 @@
  * — cibles tactiles ≥ 44 px sur les en-têtes, ≥ 48 px sur les CTA.
  */
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  /* Aliasé : `TouchEvent` existe aussi comme type DOM global, et les deux ne
+     portent pas la même chose (`currentTarget` typé, notamment). */
+  type TouchEvent as ReactTouchEvent,
+} from "react";
 import Image from "next/image";
 import { cn } from "@/shared/lib/cn";
 import { eur } from "./store";
@@ -29,6 +37,7 @@ export function Section({
   ouvertParDefaut,
   saillant,
   badge,
+  onOuvrir,
   children,
 }: {
   n: number;
@@ -47,11 +56,23 @@ export function Section({
   saillant?: boolean;
   /** Court libellé posé à droite du titre — ex. « Gratuit · immédiat ». */
   badge?: string;
+  /**
+   * Appelé quand la section **s'ouvre** — jamais quand elle se referme.
+   *
+   * Sert aux sections dont l'ouverture doit préparer la scène : déplier
+   * « Ambiance intérieure » sans montrer l'intérieur laisserait choisir à
+   * l'aveugle. `onToggle` du `<details>` se déclenche dans les deux sens, d'où
+   * le filtre sur `open`.
+   */
+  onOuvrir?: () => void;
   children: ReactNode;
 }) {
   return (
     <details
       open={ouvertParDefaut}
+      onToggle={(e) => {
+        if (e.currentTarget.open) onOuvrir?.();
+      }}
       className={cn(
         "border-b border-line",
         saillant && "border-l-2 border-l-accent bg-accent/[0.035]",
@@ -183,6 +204,7 @@ export function Scene({
   vuesInterieures,
   interieurs,
   ambianceInterieureActive,
+  signalInterieur,
 }: {
   nom: string;
   sous: string;
@@ -210,6 +232,14 @@ export function Scene({
    */
   interieurs: { id: string; nom: string; vues: VueInterieure[] }[];
   ambianceInterieureActive: string;
+  /**
+   * Incrémenté à chaque ouverture de la section « Ambiance intérieure ».
+   *
+   * La scène montre alors l'intérieur, même si l'ambiance n'a pas changé — le
+   * cas courant, l'ambiance par défaut étant déjà posée. Un simple booléen ne
+   * suffirait pas : rouvrir la section n'aurait plus rien à observer.
+   */
+  signalInterieur: number;
 }) {
   /**
    * Face montrée — extérieur ou intérieur.
@@ -234,6 +264,23 @@ export function Scene({
     setFace("interieur");
   }, [ambianceInterieureActive]);
 
+  /* Ouverture de la rubrique : on montre ce qu'elle fait choisir. Distinct de
+     l'effet ci-dessus, qui ne se déclenche qu'au **changement** d'ambiance —
+     or l'ambiance par défaut est déjà posée au dépliement, donc rien ne
+     changerait et la scène resterait sur le bardage.
+
+     Comparaison à une ref, et non `if (signal === 0)` : ESLint refuse un
+     `setState` qu'il peut atteindre de façon synchrone dans un effet, et une
+     garde sur la prop ne le convainc pas — c'est la forme des deux effets
+     ci-dessus (`premierRendu`), reprise ici pour la même raison. Elle est
+     aussi plus juste : au montage les deux valent 0, aucune bascule. */
+  const dernierSignal = useRef(0);
+  useEffect(() => {
+    if (dernierSignal.current === signalInterieur) return;
+    dernierSignal.current = signalInterieur;
+    setFace("interieur");
+  }, [signalInterieur]);
+
   /* Vue courante du défilement intérieur. Bornée à la longueur réelle : passer
      de l'Arko Max (4 vues) à l'Arko One (3) ne doit pas laisser un index mort. */
   const [vue, setVue] = useState(0);
@@ -241,16 +288,68 @@ export function Scene({
 
   const interieur = face === "interieur" && vuesInterieures.length > 0;
 
+  /**
+   * Le visiteur a-t-il pris la main sur les visuels ?
+   *
+   * Dès qu'il glisse ou touche un point, le défilement automatique s'arrête et
+   * ne repart pas : reprendre la main puis se faire déplacer trois secondes
+   * plus tard est le comportement qu'on subit, pas celui qu'on choisit.
+   */
+  const [manuel, setManuel] = useState(false);
+
+  /**
+   * Séquence des visuels, telle que le pouce la parcourt : la vue extérieure,
+   * puis les vues intérieures. Elle ne remplace pas la bascule Extérieur /
+   * Intérieur (conservée, arbitrage de Richard du 2026-09-07) — elle lui donne
+   * un geste : glisser depuis l'extérieur fait entrer, glisser en arrière
+   * depuis la première vue intérieure fait ressortir. Sans ce franchissement,
+   * le geste serait mort sur l'extérieur, qui n'a plus qu'un seul rendu depuis
+   * que le bardage ne propose qu'une teinte.
+   */
+  const nbVisuels = 1 + vuesInterieures.length;
+  const iVisuel = interieur ? 1 + iVue : 0;
+
+  const allerAuVisuel = (i: number) => {
+    if (i < 0 || i >= nbVisuels) return;
+    setManuel(true);
+    if (i === 0) {
+      setFace("exterieur");
+    } else {
+      setFace("interieur");
+      setVue(i - 1);
+    }
+  };
+
+  /* Glissement latéral. `touch-pan-y` sur la scène laisse le défilement
+     vertical de la page intact — c'est lui le geste principal sur un tunnel
+     qui se lit du haut vers le bas ; le nôtre ne se déclenche donc que si le
+     mouvement est franchement horizontal (40 px, et plus large que haut). */
+  const depart = useRef<{ x: number; y: number } | null>(null);
+  const surDebutToucher = (e: ReactTouchEvent) => {
+    const t = e.touches[0];
+    depart.current = { x: t.clientX, y: t.clientY };
+  };
+  const surFinToucher = (e: ReactTouchEvent) => {
+    const d = depart.current;
+    depart.current = null;
+    if (!d) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - d.x;
+    const dy = t.clientY - d.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)) return;
+    allerAuVisuel(iVisuel + (dx < 0 ? 1 : -1));
+  };
+
   /* Défilement automatique des vues intérieures — seulement quand l'intérieur
      est effectivement montré, et jamais sous `prefers-reduced-motion` : un
      carrousel qui tourne tout seul est précisément ce que ce réglage demande
      d'éviter. Les points restent alors le seul moyen de naviguer, ce qui suffit. */
   useEffect(() => {
-    if (!interieur || vuesInterieures.length < 2) return;
+    if (!interieur || vuesInterieures.length < 2 || manuel) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(() => setVue((v) => v + 1), 4200);
     return () => clearInterval(id);
-  }, [interieur, vuesInterieures.length]);
+  }, [interieur, vuesInterieures.length, manuel]);
   return (
     /* Hauteur constante (arbitrage Richard, 2026-08-02). Une scène qui rétrécit
        au défilement recadre le rendu : à 132 px sur un visuel 4:3, `object-cover`
@@ -258,8 +357,10 @@ export function Scene({
        semblait remonter dans le cadre. Mieux vaut un tiers d'écran constant
        qu'un rendu qui s'ampute. */
     <div
+      onTouchStart={surDebutToucher}
+      onTouchEnd={surFinToucher}
       className={cn(
-        "sticky top-0 z-10 flex h-[232px] flex-col justify-between overflow-hidden border-b border-line bg-ink p-4",
+        "sticky top-0 z-10 flex h-[232px] touch-pan-y flex-col justify-between overflow-hidden border-b border-line bg-ink p-4",
         "lg:top-3 lg:h-[min(calc(100svh-1.5rem),640px)] lg:self-start lg:border-b-0 lg:border-r lg:p-5",
       )}
     >
@@ -339,7 +440,13 @@ export function Scene({
           </p>
           <p className="truncate text-[0.8rem] text-white/75">{sous}</p>
         </div>
-        <span className="shrink-0 rounded border border-white/25 bg-ink/40 px-1.5 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-white/80 backdrop-blur">
+        {/* Surimpressions retirées du visuel sur mobile (décision de Richard,
+            2026-09-07) : sur 390 px, le tag technique et les pastilles de
+            configuration mordaient le studio qu'ils étaient censés qualifier.
+            Le nom et la ligne de surface restent — sans eux, on ne sait plus
+            quel studio on regarde. Sur grand écran la place ne manque pas :
+            rien ne change. */}
+        <span className="hidden shrink-0 rounded border border-white/25 bg-ink/40 px-1.5 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-white/80 backdrop-blur lg:inline-block">
           {tag}
         </span>
       </div>
@@ -348,8 +455,10 @@ export function Scene({
           l'image. C'est ce qui s'est produit en ajoutant les points de vue :
           trois enfants au lieu de deux, et le bloc du milieu se centre. */}
       <div className="relative flex flex-col gap-2">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap items-end justify-end gap-3 lg:justify-between">
+        {/* `justify-end` sous 1024 px : les pastilles masquées, `justify-between`
+            collerait la bascule à gauche du visuel. */}
+        <div className="hidden flex-wrap gap-1.5 lg:flex">
           {pastilles.map((p) => (
             <span
               key={p}
@@ -408,7 +517,7 @@ export function Scene({
                 type="button"
                 aria-label={`Voir ${v.nom}`}
                 aria-current={i === iVue}
-                onClick={() => setVue(i)}
+                onClick={() => allerAuVisuel(1 + i)}
                 className={cn(
                   "h-1.5 rounded-full transition-all",
                   i === iVue ? "w-5 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70",

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ABOUT, BRAND, SERIE_COUNT, SERIE_TOTAL, reserverHref } from "@/lib/site";
+import { ABOUT, BRAND, SERIE_COUNT, SERIE_TOTAL, reserverHref, RESERVER_LABEL } from "@/lib/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { aboutPageSchema } from "@/lib/jsonld";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/Reveal";
@@ -347,7 +347,7 @@ export default function AProposPage() {
             </Reveal>
             <Reveal delay={0.05}>
               <Button href={reserverHref()} variant="accent" className="px-6 py-3">
-                Réserver un numéro
+                {RESERVER_LABEL}
                 <Arrow />
               </Button>
             </Reveal>

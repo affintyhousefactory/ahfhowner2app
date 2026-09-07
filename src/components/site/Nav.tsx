@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { NAV, BRAND, PRODUCT_LIST, SERIE_COUNT, SERIE_TOTAL, reserverHref } from "@/lib/site";
+import { NAV, BRAND, PRODUCT_LIST, SERIE_COUNT, SERIE_TOTAL, reserverHref, RESERVER_LABEL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { PhoneLink } from "@/components/ui/PhoneLink";
 import { cn } from "@/shared/lib/cn";
@@ -147,7 +147,7 @@ export function Nav() {
             size="sm"
             className="hidden sm:inline-flex"
           >
-            Réserver
+            {RESERVER_LABEL}
             <Arrow />
           </Button>
 
@@ -248,7 +248,7 @@ export function Nav() {
                   magnetic={false}
                   onClick={() => setMenu(false)}
                 >
-                  Réserver
+                  {RESERVER_LABEL}
                   <Arrow />
                 </Button>
               </div>
@@ -303,7 +303,7 @@ export function Nav() {
                   magnetic={false}
                   className="px-4 text-sm"
                 >
-                  Réserver
+                  {RESERVER_LABEL}
                   <Arrow />
                 </Button>
               </div>
@@ -336,7 +336,7 @@ export function Nav() {
               magnetic={false}
               onClick={() => setOpen(false)}
             >
-              Réserver
+              {RESERVER_LABEL}
               <Arrow />
             </Button>
           </div>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { BRAND, SERIE_TOTAL, reserverHref } from "@/lib/site";
+import { BRAND, SERIE_TOTAL, reserverHref, RESERVER_LABEL } from "@/lib/site";
 import { Button, Arrow } from "@/components/ui/Button";
 import { Ikurrina } from "@/components/ui/Ikurrina";
 import { contenuProduit } from "@/lib/produits/heure-bleue";
@@ -87,7 +87,7 @@ export function Hero() {
         </p>
         <div className="hero-rise flex flex-col gap-3 md:mt-8 md:flex-row md:flex-wrap md:items-center md:gap-4">
           <Button href={reserverHref()} variant="lumiere" className="w-full md:w-auto">
-            Réserver
+            {RESERVER_LABEL}
             <Arrow />
           </Button>
           <Button href="#produits" variant="contour-clair" className="w-full md:w-auto">
