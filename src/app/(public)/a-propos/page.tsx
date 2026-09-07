@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { ABOUT, BRAND, SERIE_COUNT, SERIE_TOTAL, reserverHref, RESERVER_LABEL } from "@/lib/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { aboutPageSchema } from "@/lib/jsonld";
@@ -285,8 +286,11 @@ export default function AProposPage() {
               <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
                 {eco.step} — {eco.eyebrow}
               </span>
+              {/* « Objectif zéro déchet » jusqu'au 2026-09-07 : une promesse
+                  absolue, écrite en dur, que rien ne mesure. Remplacée par ce
+                  que la démarche revendique réellement. */}
               <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-                Objectif zéro déchet
+                Mesurer avant d&apos;affirmer
               </span>
             </div>
           </Reveal>
@@ -308,6 +312,22 @@ export default function AProposPage() {
                   </div>
                 </StaggerItem>
               ))}
+              {eco.lien ? (
+                <StaggerItem>
+                  <Link
+                    href={eco.lien.href}
+                    className="group inline-flex items-baseline gap-2 text-sm text-accent underline decoration-accent/30 underline-offset-4 transition-colors hover:decoration-accent"
+                  >
+                    {eco.lien.libelle}
+                    <span
+                      aria-hidden
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                    >
+                      <Arrow />
+                    </span>
+                  </Link>
+                </StaggerItem>
+              ) : null}
             </Stagger>
 
             <Reveal delay={0.1}>
