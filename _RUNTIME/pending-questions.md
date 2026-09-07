@@ -1,23 +1,59 @@
 # PENDING QUESTIONS — Howner / ARKO
 
-## Questions ouvertes
+> Questions **réellement ouvertes**, rien d'autre. Une question tranchée quitte ce fichier :
+> la décision va dans `_RUNTIME/recent-decisions.md`, puis dans un ADR si elle est durable.
+> Élagué le 2026-09-07 — le fichier portait quatorze entrées dont sept périmées, et deux fausses.
 
-- ~~**Grille Arko One ?**~~ ✅ **répondu par la spec** (ADR-029) : base **69 900 €** (corrigée le 2026-08-22 ; la spec disait 77 900 €), emprise **6,65 × 3,60 m**. Les champs `perM2` / `terrassePerM2` deviennent sans objet — ADR-030 remplace le modèle de calcul (paliers de terrasse, options tarifées, transport par zone) au lieu de l'ajuster.
-- **Nombre d'ambiances au lancement ?** (§17.3, point ouvert d'ADR-030) — **trois sont livrées** (Littoral / Atelier / Basque, sur les rendus v1). Le tableau reste bouclé : passer à deux ne coûte qu'une ligne de `config.ts`. À confirmer par Howner quand les visuels définitifs arriveront.
-- **Bloc rentabilité en parcours particulier ?** (§17.5, point ouvert d'ADR-030) — ouvert ou réservé au professionnel. Drapeau par usage (`blocRentabilite: null` pour `annexe`), la bascule est gratuite. **Non tranché.**
-- ~~**Alerte Albert ADR-030**~~ ✅ **traitée verbalement le 2026-08-02** — écarts maintenus et assumés par Richard : §8 pré-analyse PLU conservée, §6-§7 aucun paiement en ligne, §5 transport au kilomètre, §5 Série 01 à 12 unités, plus le parti « colonne de sections dépliantes » au lieu du tunnel en 7 écrans.
-- ~~**Volume de la Série 01 — 6 ou 12 ?**~~ ✅ **tranché le 2026-08-02 : 12.** ADR-029 et le §5 de la spec sont amendés ; `SERIE_TOTAL` et `serie.unites` alignés.
-- **Échéancier de paiement — 40/50/10 % ou acompte 30 % ?** Trois versions coexistent : la FAQ et les CGV live disent 40/50/10, le §7 de la spec dit « acompte de confirmation 30 % », ADR-016 dit 10/30/40/20 (différé). **Non tranché le 2026-08-02** — la FAQ reste sur 40/50/10 par défaut, les pourcentages engageant contractuellement et les CGV n'étant pas confirmées par l'avocat (ADR-015). À reprendre avec le volet légal.
-- ⚠ **« Et si je n'ai pas encore de terrain ? » — contradiction assumée.** Richard a choisi le 2026-08-02 de **garder la réponse actuelle**, qui dit que l'acquisition du terrain relève du client. ADR-029 a pourtant fermé ce cas (cadre = annexe sur parcelle bâtie ou hébergement professionnel, terrain nu « prochainement »). L'accueil et la section 05 du configurateur ne disent donc pas la même chose. À revoir si le critère de recette §16 n°1 est audité.
-- **Asset vidéo Arko One ?** Absent du repo → fallback provisoire = footage Max (`placeholderMedia: true`). Fournir le fichier 20 m².
-- **`reserved` par produit ?** Jauges One/Max actuellement One=0, Max=4 (placeholder).
-- **Email de contact ?** Destinataire + service d'envoi pour `/contact` (Phase 4, lié ADR-014).
-- **Validation Albert — repositionnement bi-produit + déverrouillage configurateur + retrait wordmark ARKO ?** ADR-022/020.
-- ~~**Domaine de production ?**~~ **Tranché 2026-06-17 : `affinityhome.fr`** (constante `SITE_URL`, `src/lib/site.ts`).
-- ⚠ **Alerte Albert — RGPD confidentialité ?** La politique de confidentialité publiée (doc mutualisée AHF) déclare GA4 (cookies `_ga`), un bandeau de consentement et Brevo (newsletter) — **non déployés sur ce site** (pas d'analytics/cookies/newsletter aujourd'hui ; backend Phase 4). Arbitrer avant mise en prod indexée : (a) déployer réellement ces traceurs + bandeau consentement, ou (b) adapter la politique au périmètre réel du site.
-- **Fournisseur email transactionnel ?** Resend / Mailgun / SendGrid — bloque la confirmation Stripe (ADR-014).
-- **Validation Albert — charte Affinity ?** ADR-002 contredit le verrou « Argile & Encre » du PASSATION.
-- **Validation Albert — légal ?** Acompte vs arrhes + CGV (ADR-015) — bloque le lancement commercial.
+## Pour Richard — arbitrages qui bloquent quelque chose
 
-## Règle
-Une question tranchée → décision dans `_RUNTIME/recent-decisions.md`, puis ADR si durable.
+- **Échéance de l'objectif −10 %** (page RSE, en production depuis le 2026-09-07). Le texte publié
+  dit « −10 % par rapport à notre première mesure fiable », sans date. C'est la seule ligne de la
+  page qui engage un résultat, et aucune donnée ne permet de la trancher à sa place. **En combien de
+  temps, et à partir de quelle année de référence ?**
+- **Basculer les deux pages nouvelles en `"publiee"` ?** `/guide/demarche-rse-howner` et
+  `/hebergements-professionnels` sont servies mais **hors sitemap** (`statut: "a-venir"`, ADR-038).
+  Une vérification en production suffit à les ouvrir aux moteurs.
+- **Bascule du configurateur** — `/configurer` (v1) sert encore six numéros, trois teintes et
+  « Envoyer ma demande — n° NN », au sitemap en priorité 0.8. Seul endroit du site qui contredit les
+  décisions du 2026-09-07. Quand ?
+- **Rouvrir des teintes de bardage ?** Une seule est proposée depuis le 2026-09-07 (`surDemande` sur
+  les deux autres). En rouvrir une est un booléen dans `config.ts` — la question est commerciale,
+  pas technique. *(Remplace l'ancien point ouvert §17.3 d'ADR-030 sur le nombre d'ambiances.)*
+- **Bloc rentabilité en parcours particulier ?** (§17.5, point ouvert d'ADR-030) — ouvert ou réservé
+  au professionnel. Drapeau par usage (`blocRentabilite: null` pour `annexe`), bascule gratuite.
+- **Asset vidéo Arko One** — absent du dépôt, repli sur le footage Max (`placeholderMedia: true`,
+  mention « visuel provisoire » affichée). Fournir le fichier 20 m².
+- **`reserved` par produit** — jauges One/Max encore sur des valeurs de démonstration (ADR-009).
+  ⚠ Sans effet côté public depuis le 2026-09-07 : aucun volume ne s'affiche plus.
+
+## Alertes Albert — non traitées
+
+- **Positionnement RSE** — public depuis le 2026-09-07. Les allégations environnementales relèvent
+  d'un régime encadré ; la page a été écrite pour rester dans le démontrable, mais le sujet n'a pas
+  été porté.
+- **Charte Affinity** (ADR-002) — contredit le verrou « Argile & Encre » du PASSATION.
+- **Repositionnement bi-produit** (ADR-022) et **« studio de jardin »** du 2026-08-19.
+- **RGPD / confidentialité** — la politique publiée (doc mutualisée AHF) déclare GA4, un bandeau de
+  consentement et Brevo newsletter. Le site n'a ni analytics ni bandeau. Arbitrer : déployer
+  réellement, ou adapter la politique au périmètre réel.
+- **Contrat d'apporteur des agences** (ADR-044) — les templates 23 et 24 promettent une commission à
+  167 agences sans cadre juridique (loi Hoguet). Le volet ne démarre pas avant.
+
+## Légal — encore ouvert
+
+- **Échéancier de paiement** — trois versions coexistent : la FAQ et les CGV live disent 40/50/10,
+  le §7 de la spec dit « acompte de confirmation 30 % », ADR-016 dit 10/30/40/20 (différé). La FAQ
+  reste sur 40/50/10 par défaut. À reprendre avec l'avocat.
+- **Médiateur de la consommation non nommé** (art. L.616-1) — avant toute communication commerciale.
+- ⚠ **« Et si je n'ai pas encore de terrain ? »** — contradiction assumée par Richard le 2026-08-02 :
+  la réponse dit que l'acquisition relève du client, alors qu'ADR-029 ferme ce cas (annexe sur
+  parcelle bâtie ou hébergement professionnel ; terrain nu « prochainement »).
+
+---
+
+**Retirées le 2026-09-07** parce que tranchées ou fausses : grille Arko One (ADR-029), alerte Albert
+ADR-030 (traitée le 2026-08-02), volume de la Série 01 *(le fichier disait « tranché : 12 » alors
+que c'est 6 depuis le 2026-08-04 — et le volume ne s'affiche plus)*, domaine de production *(le
+fichier disait `affinityhome.fr` ; c'est `howner.fr`, cf. `SITE_URL`)*, email de contact et
+fournisseur d'email transactionnel *(Brevo, ADR-026, en production)*, validation légale des CGV
+*(levée le 2026-08-22)*.

@@ -3,71 +3,65 @@
 > Mémoire courte. Historique complet et backlog → `00_INDEX/PROJECT_STATE.md` § « Dernier point ».
 > Règle : 300–1200 tokens.
 
-## Décisions — 2026-08-28 (l'écran d'appel prend sa forme)
+## Décisions — 2026-09-07 (le site cesse de promettre ce qu'il ne tient pas)
 
-**`main` = `62250a24`.** Trois PR en production (#108, #109, #110), une migration (`lead_sourcing`).
+**`main` = `1cc3e4b8`.** Deux mises en production (#120, #122), **aucune migration**. La
+consolidation du 31 août (#115), ouverte depuis sept jours, est enfin partie.
 
-Le CRM tient désormais **le premier appel de bout en bout** : chercher si le contact est connu →
-cible et sourcing → ce qui n'est pas chiffrable → transport calculé seul → appel journalisé →
-récapitulatif relu avant envoi. Et la fiche se consulte par compartiments.
+### Le configurateur
+- **Le visiteur ne choisit plus son numéro.** `chargerNumeros()` renvoyait six numéros libres **en
+  dur**, jamais lus en base : la grille affichait un état qui n'existait pas. Le conseiller attribue
+  désormais depuis le CRM. Bouton **« Être rappelé »**, `slot: null`, 409 retiré.
+- **Bandeau « Arko — édition limitée », sans volume affiché** — une page HPA doit pouvoir proposer
+  plusieurs unités à un même client. Aucun nombre d'exemplaires ne s'écrit plus côté public.
+- **Bardage : anthracite seul**, par **drapeau `surDemande`, jamais par suppression** — les leads
+  antérieurs se relisent, rouvrir une teinte est un booléen.
+- **Visuel nu sur mobile** (tag et pastilles en `lg:`) et **glissement au pouce** avec franchissement
+  des faces. La bascule Extérieur / Intérieur est conservée — arbitrage de Richard contre ma
+  proposition de bande unique.
+- **Treize CTA passent à « Configurer »**, via la constante `RESERVER_LABEL` : le libellé était
+  réécrit dans onze fichiers.
 
-- **Étapes librement navigables** — Richard a retenu les étapes contre ma recommandation. Le risque
-  signalé (le prospect parle dans le désordre) est neutralisé : barre cliquable de bout en bout,
-  « Créer le lead » actif partout. **La structure guide, elle n'enferme pas.**
-- **Sourcing ≠ `source`** — le premier dit d'où vient le prospect (8 valeurs), le second comment la
-  ligne a été écrite (`admin`, `configurateur_v2`). C'est le sourcing qui dira si le phoning paie.
-- **Le premier appel entre au journal** — l'écran demandait un « prochain rappel » sans jamais
-  demander *quand* l'appel avait eu lieu (constat de Richard). Deux dates deviennent une : celle de
-  l'appel est **maintenant**. Son échec n'annule pas le lead (`appelJournalise`).
-- **Fiche en cinq onglets** avec compteurs — le journal d'appels cesse d'être en bas d'une colonne.
-- **Numéros cliquables** — premier pas vers Allo, **sans intégration** : le click-to-call passe par
-  l'extension Chrome. D'où les numéros visibles **dans la liste**, pas seulement sur la fiche : c'est
-  cette page que l'extension lit pour remplir le Power Dialer.
-- **Huit grilles étaient fixes** — sur 390 px, deux colonnes de champs sont des timbres-poste.
+> **Décision assumée contre ma recommandation** : la case CGV reste obligatoire pour être rappelé.
 
-## ⚠ Une régression introduite et fermée le jour même
-`TelephoneLien` portait un `onClick` **sans `"use client"`**, rendu depuis un **Server Component** :
-la fiche tombait en « This page couldn't load » — **mais seulement si le lead avait un numéro**.
-Signalée par Richard, corrigée (PR #109) en retirant le handler, inutile.
+### Deux pages hors classeur
+- **`/guide/demarche-rse-howner`** — ne rien revendiquer qui ne puisse être démontré. Onze
+  indicateurs sur douze « En cours de constitution », **quatre repères publics sourcés** portant la
+  mention « Repère public — pas notre chiffre ».
+- **`/hebergements-professionnels`** — ni prix, ni volume, ni délai ; l'appel mène au contact
+  pré-rempli, **pas au configurateur, qui répondrait par un prix à une question de faisabilité**.
+- **`/a-propos` a dû suivre** : sa section 04 promettait « zéro déchet » et « indéfiniment
+  recyclable ». **Deux surfaces qui parlent d'écologie ne peuvent pas tenir deux discours.**
 
-> **Leçon** : un composant partagé destiné à des pages serveur ne porte **aucun** gestionnaire
-> d'événement. Vérifié ensuite sur tout le back-office — c'était le seul cas.
+ADR-030, ADR-031 et ADR-038 amendées (périmètre à 21 routes, clause anti-greenwashing au §7).
 
-> **Leçon évitée de justesse** : monter tous les onglets d'emblée aurait cassé la carte — Leaflet en
-> `display:none` se dimensionne à zéro. D'où le montage à la première visite, puis conservation.
-
-## ⚠ Une consolidation a voyagé dans une PR de fonctionnalité
-Le `/memory-sync` du matin est parti en production avec la **PR #108**, dont la description n'en
-disait rien : la branche de la fonctionnalité avait été créée depuis la branche docs. Sans
-conséquence, mais **repartir de `main` avant d'ouvrir une branche**.
-
-## Allo — étudié, rien engagé
-Click-to-call = **extension Chrome**, zéro code. L'API expose `/v2/api/crm/people` et
-`/v2/api/dialing-queues/current`, **aucun endpoint de déclenchement d'appel**. Trois inconnues avant
-de s'engager : scope d'écriture réel, événements de webhook, clé de rapprochement des identités.
-**Dépendance externe critique → ADR + alerte Albert avant tout code**, comme Pennylane (ADR-036).
-
-## Leçons de méthode encore actives
-- **Un contrôle qui n'observe pas la sortie réelle ne contrôle rien** — septième occurrence.
-- **Une intégration tierce vérifiée en Preview ne prouve rien pour le domaine réel** quand elle
-  filtre par référent (clé Google Places).
-- **`success: true` d'une migration ne prouve rien** : vérifier par requête, puis tester la
-  contrainte par des écritures réelles annulées.
-- **Ne jamais réécrire une migration déjà appliquée** — le dépôt mentirait sur ce qui a tourné.
-- **Pas de test local.** Gate = `tsc` + `eslint` + `check:vocabulaire`, puis Preview.
+## Leçons de méthode
+- **`grep -c` compte des lignes, pas des occurrences.** Sur un HTML minifié servi sur une seule
+  ligne, il répond « 1 » quoi qu'il arrive — un contrôle qui semble passer sans rien mesurer.
+  `grep -o … | wc -l` est le seul comptage honnête. *Nouvelle occurrence de « un contrôle qui
+  n'observe pas la sortie réelle ne contrôle rien ».*
+- **Deux fois dans la journée**, `check:vocabulaire` a refusé un terme proscrit **cité dans le
+  commentaire qui documentait la règle**.
+- **Un déplacement de section casse l'alternance des fonds** — vérifier la séquence après, pas la
+  supposer.
+- ESLint refuse un `setState` atteignable synchroniquement dans un effet : une garde sur une prop ne
+  le convainc pas, une comparaison à une `ref` si (rejoué à l'identique depuis le 31/08).
+- **Pas de test local.** Gate = `tsc` + `eslint` + `check:vocabulaire`, puis le **build Vercel de la
+  PR** — attendu avant la fusion du lot RSE, la Preview n'ayant pas été vérifiée.
 
 ## Prochaine action
-1. **Poser `BREVO_TEMPLATE_MULTICFG=17`** sur les 3 scopes Vercel — sans elle, la Multi-Configuration
-   est livrée mais **inerte en production**.
-2. **Ouvrir `howner.fr/*` et `www.howner.fr/*`** dans les référents de la clé Google Places.
-3. **Envoyer un récapitulatif réel** — dernier maillon non éprouvé de la chaîne emails.
-4. **Temps 2 du CRM** — aucune issue d'appel ne décrit un rendez-vous ; c'est le chaînon qui manque
-   avant la qualification des services amont (`docs/CRM_PROCESS_COMMERCIAL.md`).
+1. **Basculer les deux pages en `"publiee"`** après vérification en production — elles sont servies
+   mais hors sitemap (27 URLs, vérifié).
+2. **Fixer l'échéance de l'objectif −10 %** (page RSE) — la seule ligne qui engage un résultat.
+3. **Bascule du configurateur** : `/configurer` (v1) sert encore six numéros et trois teintes, au
+   sitemap. Puis seulement, retirer la ligne « numéro » du template Brevo 9.
+4. **Alerte Albert** — positionnement RSE public depuis aujourd'hui.
 
 ## Blockers / À fournir
 - **Coordonnées exactes de l'atelier** (le transport en dépend).
-- **Albert** — charte Affinity (ADR-002), repositionnement bi-produit (ADR-022), repositionnement
-  « studio de jardin » du 2026-08-19, ouverture B2B de Biarritz, CGV rédigées en « maison ».
-  **À ajouter : Allo, si l'intégration est décidée.**
-- **Médiateur de la consommation non nommé** (art. L.616-1) — avant toute communication commerciale.
+- **Albert** — charte Affinity (ADR-002), repositionnement bi-produit (ADR-022), « studio de
+  jardin » du 2026-08-19, ouverture B2B de Biarritz, CGV rédigées en « maison », Allo si décidé,
+  **et désormais le positionnement RSE**.
+- **Médiateur de la consommation non nommé** (art. L.616-1).
 - **ADR-028** — test de réversibilité jamais exécuté.
+- Référents `howner.fr` de la clé Google Places ; récapitulatif réel jamais envoyé ; temps 2 du CRM.
