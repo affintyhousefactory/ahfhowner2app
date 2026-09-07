@@ -245,6 +245,31 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     priorite: 0.7,
   },
 
+  /* — Hébergements professionnels (2026-09-07) — hors classeur, comme la page
+       RSE. Elle s'adresse aux exploitants : campings et hôtellerie de plein
+       air d'abord (cible 1 du CRM, et le fichier de prospection existant), puis
+       domaines, hôtels et gîtes (cible 2).
+
+       Route `/hebergements-professionnels` et non une route « camping » :
+       fermer la moitié du sujet sur l'URL aurait obligé à une seconde page dès
+       le premier hôtel. « Hébergement » est par ailleurs un terme imposé par
+       ADR-029. Une page strictement HPA reste possible si le référencement le
+       justifie — elle se déclarera ici. */
+  {
+    route: "/hebergements-professionnels",
+    h1: "Vous exploitez un camping ou un établissement de plein air ?",
+    libelle: "Hébergements professionnels",
+    famille: "usage",
+    resume:
+      "Étude d'implantation de studios Arko sur votre site : potentiel de la parcelle, accès, raccordements, urbanisme et phasage — avant tout chiffrage.",
+    spec: "hebergements-professionnels.md",
+    /* `"a-venir"` jusqu'à vérification en Preview (ADR-038). Le lien du menu et
+       l'accroche de l'accueil y mènent déjà : la page répond, elle n'est
+       simplement pas encore annoncée aux moteurs. */
+    statut: "a-venir",
+    priorite: 0.8,
+  },
+
   /* — Démarche RSE (2026-09-07) — vingtième page, hors classeur « PagesSite_SEO ».
 
        Elle entre au registre pour la même raison que les dix-neuf autres : le

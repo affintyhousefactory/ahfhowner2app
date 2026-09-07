@@ -3,6 +3,7 @@ import { Promesse } from "@/components/site/Promise";
 import { ProductsShowcase } from "@/components/site/ProductsShowcase";
 import { Reassurance } from "@/components/site/Reassurance";
 import { Demarche } from "@/components/site/Demarche";
+import { Professionnels } from "@/components/site/Professionnels";
 import { Faq } from "@/components/site/Faq";
 import { StickyCta } from "@/components/site/StickyCta";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -18,6 +19,7 @@ export default function Home() {
         <ProductsShowcase />
         <Reassurance />
         <Demarche />
+        <Professionnels />
         <Faq />
       </main>
       <StickyCta />

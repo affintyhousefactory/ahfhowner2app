@@ -23,7 +23,7 @@ export function Faq() {
         <Reveal>
           <div className="rule flex items-baseline justify-between pt-5">
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              012 — Questions
+              013 — Questions
             </span>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
               L'essentiel

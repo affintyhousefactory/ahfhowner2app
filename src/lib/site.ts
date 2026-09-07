@@ -590,6 +590,11 @@ export const FAQ: { q: string; a: string | string[] }[] = [
 // garde un point de vérité unique.
 export const NAV: { label: string; href: string }[] = [
   ...(FEATURES.mandataire ? [{ label: "Terrains", href: "/terrains" }] : []),
+  /* Ajouté le 2026-09-07 : les exploitants d'établissements n'ont pas le même
+     parcours qu'un particulier — ils ne cherchent pas un prix mais une
+     faisabilité. Placé avant « À propos » : c'est une porte d'entrée produit,
+     pas une page institutionnelle. */
+  { label: "Professionnels", href: "/hebergements-professionnels" },
   { label: "À propos", href: "/a-propos" },
   { label: "Contact",  href: "/contact" },
 ];
