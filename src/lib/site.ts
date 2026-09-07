@@ -474,6 +474,22 @@ export const getProduct = (key: string | null | undefined): Product =>
 export const SERIES_DEADLINE_ISO = "2026-07-17T23:59:59+02:00";
 export const SERIES_DEADLINE_LABEL = "Fin des réservations Série 01";
 
+/**
+ * Titre du bloc « En confiance » — reformulé le 2026-09-07.
+ *
+ * Il s'ouvrait sur « Réserver, sans rien risquer en deux étapes », au moment
+ * où tous les CTA du site cessaient de dire « Réserver » (`RESERVER_LABEL`).
+ * Le titre promettait donc un geste que plus aucun bouton ne proposait, et que
+ * le parcours n'accomplit pas : la réservation vient **après** l'entretien et
+ * le devis — c'est exactement ce que décrivent les deux étapes numérotées
+ * juste en dessous.
+ *
+ * Il vit ici et non dans le composant, avec les deux listes qu'il chapeaute :
+ * elles se relisent ensemble ou pas du tout.
+ */
+export const REASSURANCE_TITRE =
+  "Configurer, puis décider — en deux étapes, sans rien risquer.";
+
 export const REASSURANCE_INTRO = [
   {
     t: "Notre insight et expertise",

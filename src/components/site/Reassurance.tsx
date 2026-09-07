@@ -1,6 +1,6 @@
 "use client";
 
-import { REASSURANCE, REASSURANCE_INTRO } from "@/lib/site";
+import { REASSURANCE, REASSURANCE_INTRO, REASSURANCE_TITRE } from "@/lib/site";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/Reveal";
 
 export function Reassurance() {
@@ -19,7 +19,7 @@ export function Reassurance() {
         </Reveal>
         <Reveal delay={0.05}>
           <h2 className="titre-xl mt-12 max-w-4xl text-balance text-canvas md:mt-16">
-            Réserver, sans rien risquer en deux étapes.
+            {REASSURANCE_TITRE}
           </h2>
         </Reveal>
 
