@@ -29,10 +29,10 @@ export function Demarche() {
         <Reveal>
           <div className="flex items-baseline justify-between border-t border-line pt-5">
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              011 — Notre démarche
+              011 — Notre démarche RSE
             </span>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              RSE
+              HOWNER · ARKO
             </span>
           </div>
         </Reveal>
@@ -59,7 +59,7 @@ export function Demarche() {
         <Reveal delay={0.2}>
           <div className="mt-10">
             <Button href={RSE.route} variant="outline">
-              Découvrir notre démarche
+              Découvrir notre démarche RSE
               <Arrow />
             </Button>
           </div>
