@@ -1,10 +1,11 @@
 "use client";
 
 /**
- * Les six sections du configurateur v2 (ADR-030).
+ * Les huit sections du configurateur v2 (ADR-030).
  *
- * 01 Le studio · 02 Ambiance · 03 Terrasse · 04 Options ·
- * 05 Votre situation terrain · 06 Réserver un numéro
+ * 01 Le studio · 02 Bardage extérieur · 03 Ambiance intérieure · 04 Terrasse ·
+ * 05 Options · 06 Votre situation terrain · 07 Adresse du terrain ·
+ * 08 Vos coordonnées
  *
  * Le studio ouvre le parcours et arrive présélectionné depuis le menu ;
  * l'implantation et le terrain passent en avant-dernier, là où l'engagement se
@@ -12,7 +13,7 @@
  * conseiller) — décision du 2026-08-01.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -33,7 +34,6 @@ import {
   CONTACT_TERRAIN_NU,
 } from "@/lib/configurateur/mentions";
 import { distanceAtelierKm, prixOption } from "@/lib/configurateur/config";
-import { chargerNumeros, estSelectionnable, nbDisponibles } from "@/lib/configurateur/numeros";
 import { useConfigurateur, eur, surfaceFr } from "./store";
 import { Choix, Eyebrow, Mention, Section } from "./ui";
 import type { ParcelleData } from "@/shared/types/plu";
@@ -107,13 +107,20 @@ export function SectionAmbiance() {
 
   return (
     <Section n={2} titre="Bardage extérieur" resume={`${a?.nom} · inclus`}>
-      {/* Le tableau `ambiances` doit rester bouclé : la v1 peut sortir à 2
-          comme à 3 items (§17.3, arbitrage ouvert). */}
+      {/* Le tableau reste bouclé : le sélecteur ne présume ni du nombre de
+          teintes, ni du fait qu'il n'y en ait qu'une. Depuis le 2026-09-07
+          seul l'anthracite est proposé (`surDemande` sur les deux autres) — en
+          rouvrir une est un booléen dans la grille, et cette grille passe
+          telle quelle par `c.bardages`, jamais par `cfg.ambiances`. */}
       {/* La sélection est signalée par la teinte de l'ambiance, pas par
           l'accent : trois boutons cerclés du même orange ne diraient pas
           lequel des trois bardages on est en train de regarder. */}
-      <div role="tablist" aria-label="Bardage extérieur" className="grid grid-cols-3 gap-2">
-        {c.cfg.ambiances.map((x) => {
+      <div
+        role="tablist"
+        aria-label="Bardage extérieur"
+        className={cn("grid gap-2", c.bardages.length > 1 ? "grid-cols-3" : "grid-cols-1")}
+      >
+        {c.bardages.map((x) => {
           const actif = c.ambiance === x.id;
           return (
             <button
@@ -142,6 +149,16 @@ export function SectionAmbiance() {
           );
         })}
       </div>
+      {/* Dit ce que le sélecteur ne montre plus. Sans cette phrase, un
+          sélecteur à une seule teinte se lit comme un produit qui n'en propose
+          qu'une — alors que les autres existent, et se décident à l'entretien.
+          Les teintes ne sont pas nommées : elles s'arrêtent avec le conseiller,
+          « à discrétion » (décision de Richard, 2026-09-07). */}
+      <p className="rounded-xl border border-line bg-paper px-3 py-2.5 text-[0.78rem] leading-relaxed text-muted">
+        D&apos;autres teintes de bardage sont disponibles à la demande. Elles
+        s&apos;arrêtent avec votre conseiller, lors de l&apos;entretien qui suit
+        votre demande.
+      </p>
       <Mention texte={MENTIONS.ambiance} />
     </Section>
   );
@@ -171,6 +188,12 @@ export function SectionAmbianceInterieure() {
       n={3}
       titre="Ambiance intérieure"
       resume={`${a?.nom ?? ""} · incluse`}
+      /* Déplier la rubrique pose l'ambiance par défaut — « Ambiance bois », la
+         première de la grille — et bascule la scène sur l'intérieur (décision
+         de Richard, 2026-09-07). Sans cela, on choisissait une finition en
+         regardant le bardage. Un choix déjà fait n'est jamais écrasé : seule
+         la face change à la réouverture. */
+      onOuvrir={c.ouvrirInterieur}
     >
       <div
         role="tablist"
@@ -503,119 +526,34 @@ export function SectionAdresseTerrain() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 08 — choisir son numéro de série                                    */
+/* 08 — vos coordonnées                                                */
 /* ------------------------------------------------------------------ */
 
-export function SectionReservation() {
-  const c = useConfigurateur();
-  const numeros = useMemo(() => chargerNumeros(c.cfg.serie.unites), [c.cfg.serie.unites]);
+/*
+ * La section « Réserver un numéro » vivait ici jusqu'au 2026-09-07.
+ *
+ * Elle est retirée, pas masquée : le visiteur ne choisit plus son exemplaire.
+ * Le numéro est attribué par le conseiller depuis le CRM, après vérification
+ * de la disponibilité réelle — `LeadConfiguration.tsx`, champ `slot`. La
+ * grille publique affichait de toute façon un état qui n'était lu nulle part
+ * (`chargerNumeros()` renvoyait six numéros libres en dur), donc une promesse
+ * que le parcours ne savait pas tenir. La demande devient une demande de
+ * rappel, et l'écran ne parle plus de numéro du tout.
+ *
+ * ⚠ `src/lib/configurateur/numeros.ts` n'est plus lu par aucun écran. Il reste
+ * au dépôt le temps d'ADR-031 : c'est la seule trace écrite du mode « demandé
+ * puis confirmé » et de la règle qui fait passer un numéro d'un état à
+ * l'autre. Le supprimer effacerait la spec avec le code mort.
+ */
 
-  const dispo = nbDisponibles(numeros);
-  const choisiDemande = c.numero != null && numeros.find((x) => x.n === c.numero)?.etat === "demande";
-
-  return (
-    <Section
-      n={8}
-      titre="Réserver un numéro"
-      resume={`${c.cfg.serie.libelle} · ${dispo} restant${dispo > 1 ? "s" : ""}`}
-    >
-      <div className="flex items-baseline justify-between gap-3">
-        <Eyebrow>
-          {c.cfg.serie.libelle} — {c.cfg.serie.unites} unités
-        </Eyebrow>
-        <span className="font-mono text-[0.66rem] tracking-[0.06em] text-accent">
-          {dispo} restant{dispo > 1 ? "s" : ""}
-        </span>
-      </div>
-
-      {/* `cfg-numeros` : cible du focus quand la barre signale qu'aucun numéro
-          n'est choisi. `tabIndex={-1}` rend le bloc focusable par programme
-          sans l'insérer dans l'ordre de tabulation. */}
-      <div id="cfg-numeros" tabIndex={-1} className="grid grid-cols-6 gap-1.5 scroll-mt-32 outline-none">
-        {numeros.map((x) => {
-          const libre = estSelectionnable(x);
-          const actif = c.numero === x.n;
-          return (
-            <button
-              key={x.n}
-              type="button"
-              disabled={!libre}
-              aria-pressed={libre ? actif : undefined}
-              aria-label={libre ? `Réserver le numéro ${x.n}` : `Numéro ${x.n}, déjà réservé`}
-              onClick={() => libre && c.setNumero(actif ? null : x.n)}
-              className={cn(
-                "flex min-h-[54px] flex-col items-center justify-center rounded-xl border px-0.5 py-1 transition-all",
-                !libre && "cursor-not-allowed border-dashed border-line bg-paper text-muted/50",
-                libre && !actif && "border-line bg-surface hover:border-accent/45",
-                actif && "border-accent bg-accent/10 shadow-[inset_0_0_0_1px_var(--color-accent)]",
-              )}
-            >
-              <b className="font-mono text-[0.9rem] font-semibold tabular-nums">
-                {String(x.n).padStart(2, "0")}
-              </b>
-              <span className="font-mono text-[0.46rem] uppercase tracking-[0.04em]">
-                {libre ? "libre" : "réservé"}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      <p className="font-mono text-[0.64rem] leading-relaxed text-muted">
-        {c.numero
-          ? `Le n° ${String(c.numero).padStart(2, "0")} vous est attribué à la signature du devis.`
-          : "Le numéro choisi vous est attribué à la signature du devis."}
-      </p>
-
-      {/* Seul le conflit reste ici : c'est le seul retour qui demande une
-          action **à cet endroit précis** — rechoisir un numéro. Les autres
-          (succès, échec, envoi partiel) s'affichent au pied, contre le bouton
-          qui vient d'être cliqué : c'est là que le regard se trouve. */}
-      {c.envoi.phase === "conflit" && (
-        <p className="rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.78rem] leading-relaxed text-[#8a6a2f]">
-          Ce numéro vient d&apos;être confirmé par un autre client — à quelques
-          minutes près. Votre configuration est intacte :{" "}
-          {c.numerosLibres.length > 0
-            ? `choisissez un autre numéro (${c.numerosLibres.map((n) => String(n).padStart(2, "0")).join(", ")} encore libres).`
-            : "choisissez un autre numéro ci-dessus."}
-        </p>
-      )}
-
-      {/* Dit ce qui manque là où le geste se fait, plutôt que d'attendre le bas
-          de page : sans numéro sélectionné, la suite du formulaire n'a pas
-          d'objet. */}
-      {c.numero == null && (
-        <p className="rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2 text-[0.75rem] leading-relaxed text-ink">
-          Choisissez d&apos;abord un numéro ci-dessus : c&apos;est lui qui sera retenu
-          pour votre réservation.
-        </p>
-      )}
-
-      {/* « Demandé » n'apparaît qu'après sélection, pour celui qui est concerné. */}
-      {choisiDemande && (
-        <p className="rounded-xl border border-[#8a6a2f]/30 bg-[#8a6a2f]/[0.07] px-3 py-2 text-[0.73rem] leading-relaxed text-[#8a6a2f]">
-          Ce numéro fait l&apos;objet d&apos;une autre demande en cours. Nous vous confirmons
-          son attribution lors de l&apos;appel — un autre numéro reste disponible si besoin.
-        </p>
-      )}
-
-    </Section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* 09 — vos coordonnées                                                */
-/* ------------------------------------------------------------------ */
 
 /**
- * Détachée de la réservation le 2026-08-20.
+ * Détachée de la réservation le 2026-08-20, dernière section du parcours
+ * depuis le 2026-09-07.
  *
- * Choisir un numéro et se présenter sont deux gestes différents : le premier
- * est un choix, le second une saisie. Les tenir dans un même accordéon
- * obligeait à traverser tout le récapitulatif de prix pour passer de l'un à
- * l'autre.
- *
- * Les consentements restent ici, avec les coordonnées qu'ils engagent.
+ * Elle porte désormais le seul geste qui reste au visiteur : se présenter pour
+ * être rappelé. Les consentements restent ici, avec les coordonnées qu'ils
+ * engagent.
  */
 export function SectionCoordonnees() {
   const c = useConfigurateur();
@@ -629,7 +567,7 @@ export function SectionCoordonnees() {
 
   return (
     <Section
-      n={9}
+      n={8}
       titre="Vos coordonnées"
       resume={rempli ? `${c.contact.prenom} ${c.contact.nom}` : "Tous les champs requis"}
     >

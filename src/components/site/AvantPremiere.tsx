@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { BRAND, SERIE_TOTAL, reserverHref } from "@/lib/site";
+import { SERIE_TOTAL, reserverHref, RESERVER_LABEL } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button, Arrow } from "@/components/ui/Button";
 
@@ -78,7 +78,7 @@ export function AvantPremiere() {
         <Reveal delay={0.15}>
           <div className="mt-8 flex items-center gap-4">
             <Button href={reserverHref("one")} variant="accent">
-              Réserver — {BRAND.deposit.toLocaleString("fr-FR")} €
+              {RESERVER_LABEL}
               <Arrow />
             </Button>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-muted">

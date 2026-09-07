@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { RESERVER_PATH, SERIES_DEADLINE_ISO, SERIES_DEADLINE_LABEL } from "@/lib/site";
+import { RESERVER_PATH, SERIES_DEADLINE_ISO, SERIES_DEADLINE_LABEL, RESERVER_LABEL } from "@/lib/site";
 import { useCountdown } from "@/components/effects/useCountdown";
 import { cn } from "@/shared/lib/cn";
 
@@ -77,7 +77,7 @@ export function CountdownBanner({
         <span aria-hidden className="hidden text-canvas/30 md:inline">
           ·
         </span>
-        <span className="hidden text-canvas/80 md:inline">Réserver →</span>
+        <span className="hidden text-canvas/80 md:inline">{RESERVER_LABEL} →</span>
       </Link>
     </div>
   );

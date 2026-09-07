@@ -24,6 +24,7 @@ import {
 import {
   loadConfig,
   getModele,
+  ambiancesPubliques,
   optionsPourModele,
   paliersPourModele,
   prixOption,
@@ -59,13 +60,19 @@ export const SECTIONS = [
      distinctes — où l'on implante, puis où se trouve le terrain — méritent deux
      sections. */
   { n: 7, cle: "adresse", titre: "Adresse du terrain" },
-  { n: 8, cle: "reservation", titre: "Réserver un numéro" },
-  /* Les coordonnées quittent la réservation le 2026-08-20 : choisir un numéro
-     et se présenter sont deux gestes différents, et le récapitulatif de prix
-     qui les séparait obligeait à le traverser pour passer de l'un à l'autre.
-     Ce récapitulatif vit désormais au pied du parcours, où il explique le total
-     affiché juste à côté. */
-  { n: 9, cle: "coordonnees", titre: "Vos coordonnées" },
+  /* La section « Réserver un numéro » est retirée le 2026-09-07 (décision de
+     Richard) : le visiteur ne choisit plus son exemplaire. Le numéro est
+     attribué par le conseiller depuis le CRM, une fois la disponibilité
+     vérifiée — la grille publique en affichait un état qui n'était même pas
+     lu en base (`chargerNumeros()` était un placeholder statique). Le parcours
+     ne promet donc plus un numéro qu'il ne savait pas tenir : il demande un
+     rappel.
+
+     Les coordonnées, qui portaient le 9, prennent sa place. Renuméroter plutôt
+     que laisser un trou : le rang affiché est une position dans le parcours,
+     pas un identifiant — un « 09 » après un « 07 » ferait chercher l'écran
+     manquant. */
+  { n: 8, cle: "coordonnees", titre: "Vos coordonnées" },
 ] as const;
 
 /** Verdict de la pré-analyse. `null` = aucune adresse analysée. */
@@ -90,7 +97,6 @@ export type Contact = {
  */
 export type Manque = {
   cle:
-    | "numero"
     | "prenom"
     | "nom"
     | "adresse_postale"
@@ -116,7 +122,6 @@ export type EtatEnvoi =
   | { phase: "envoi" }
   | { phase: "envoye" }
   | { phase: "partiel"; persisted: boolean; notified: boolean }
-  | { phase: "conflit" }
   | { phase: "erreur"; message: string };
 
 export type PreAnalyse = {
@@ -144,11 +149,35 @@ type Ctx = {
   setAmbiance: (a: string) => void;
   ambianceInterieure: string;
   setAmbianceInterieure: (a: string) => void;
+  /**
+   * L'ouverture de la section « Ambiance intérieure » prépare la scène.
+   *
+   * Deux gestes en un, appelés au dépliement (décision de Richard,
+   * 2026-09-07) : poser l'ambiance par défaut si le visiteur n'en a pas encore
+   * choisi une, et **montrer l'intérieur**. Déplier la rubrique en laissant le
+   * bardage à l'écran ferait choisir à l'aveugle — le rendu est le seul
+   * argument de ce choix.
+   */
+  ouvrirInterieur: () => void;
+  /**
+   * Compteur d'appels à `ouvrirInterieur()`, lu par la scène.
+   *
+   * Un compteur et non un booléen : rouvrir la section une troisième fois doit
+   * agir comme la deuxième. Un booléen resterait à `true` et la scène, déjà
+   * revenue à l'extérieur entre-temps, n'aurait aucun changement à observer.
+   */
+  signalInterieur: number;
   /** Vues intérieures du modèle courant, pour l'ambiance sélectionnée. */
   vuesInterieures: VueInterieure[];
   /** Toutes les ambiances intérieures, vues déjà résolues pour ce modèle. */
   interieurs: { id: string; nom: string; vues: VueInterieure[] }[];
-  /** Bardages, rendu déjà résolu pour ce modèle. */
+  /**
+   * Bardages **proposés au visiteur**, rendu déjà résolu pour ce modèle.
+   *
+   * Les teintes « sur demande » n'y sont pas : ni dans le sélecteur, ni dans
+   * la pile de rendus préchargés par la scène — précharger un visuel qu'aucun
+   * bouton n'atteint ferait payer un téléchargement pour rien.
+   */
   bardages: { id: string; nom: string; teinte: string; visuel: string }[];
   terrasse: PalierId;
   setTerrasse: (t: PalierId) => void;
@@ -192,9 +221,9 @@ type Ctx = {
   /**
    * Où en est la demande.
    *
-   * `conflit` n'est pas une erreur : c'est une course perdue sur un numéro que
-   * quelqu'un vient de confirmer. Elle a sa propre réponse — rechoisir — et ne
-   * doit ni se confondre avec une panne, ni faire perdre la configuration.
+   * `partiel` reste distinct d'`envoye` : la demande peut arriver sans être
+   * enregistrée, et le visiteur mérite de le savoir. C'est la confusion des
+   * deux qui a rendu une base en pause invisible pendant des semaines.
    */
   envoi: EtatEnvoi;
   soumettre: () => Promise<void>;
@@ -206,11 +235,6 @@ type Ctx = {
    * éloignés pour une même valeur.
    */
   setCaptchaToken: (t: string | null) => void;
-  /** Numéros encore libres, renvoyés par le serveur en cas de conflit. */
-  numerosLibres: number[];
-
-  numero: number | null;
-  setNumero: (n: number | null) => void;
 
   paliers: Palier[];
   optionsDisponibles: Option[];
@@ -235,18 +259,30 @@ export function ConfigurateurProvider({
   modeleInitial?: ModeleId;
 }) {
   const cfg = useMemo(() => loadConfig(), []);
+  /* Résolus une fois : le sélecteur, la scène et le défaut initial doivent
+     tous trois parler des mêmes teintes. Les recalculer de trois côtés, c'est
+     le jour où l'un des trois oublie le filtre et propose une teinte que les
+     deux autres ignorent. */
+  const bardagesPublics = useMemo(() => ambiancesPubliques(cfg), [cfg]);
 
   const [usage, setUsage] = useState<UsageId | null>(null);
   const [quantite, setQuantite] = useState(1);
   const [modele, setModeleState] = useState<ModeleId>(modeleInitial);
-  const [ambiance, setAmbiance] = useState<string>(cfg.ambiances[0].id);
+  /* `bardagesPublics[0]` et non `cfg.ambiances[0]` : la première teinte de la
+     grille est le gris clair, qui n'est plus proposé. Partir dessus donnerait
+     un parcours dont l'aperçu ne correspond à aucun bouton du sélecteur. */
+  const [ambiance, setAmbiance] = useState<string>(bardagesPublics[0].id);
   const [ambianceInterieure, setAmbianceInterieure] = useState<string>(
     cfg.ambiancesInterieures[0].id,
   );
   const [terrasse, setTerrasse] = useState<PalierId>("sans");
+  /* Le visiteur a-t-il touché au sélecteur d'ambiance intérieure ? Sert à ne
+     poser le défaut qu'une fois : rouvrir la section ne doit pas effacer un
+     choix délibéré pour lui substituer le premier de la liste. */
+  const [interieurChoisi, setInterieurChoisi] = useState(false);
+  const [signalInterieur, setSignalInterieur] = useState(0);
   const [options, setOptions] = useState<string[]>([]);
   const [preAnalyse, setPreAnalyse] = useState<PreAnalyse | null>(null);
-  const [numero, setNumero] = useState<number | null>(null);
   const [eligibilite, setEligibilite] = useState<Eligibilite>(null);
   const [contact, setContactState] = useState<Contact>({
     prenom: "",
@@ -266,7 +302,6 @@ export function ConfigurateurProvider({
 
   const [envoi, setEnvoi] = useState<EtatEnvoi>({ phase: "repos" });
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [numerosLibres, setNumerosLibres] = useState<number[]>([]);
 
   /* Changer de studio purge les options devenues incompatibles : le poêle
      n'existe pas sur l'Arko One, et une option fantôme fausserait le total. */
@@ -278,6 +313,18 @@ export function ConfigurateurProvider({
     },
     [cfg],
   );
+
+  /* Le choix manuel se distingue du défaut : c'est lui qui rend l'ambiance
+     intransigeante à la réouverture. */
+  const choisirInterieur = useCallback((id: string) => {
+    setInterieurChoisi(true);
+    setAmbianceInterieure(id);
+  }, []);
+
+  const ouvrirInterieur = useCallback(() => {
+    if (!interieurChoisi) setAmbianceInterieure(cfg.ambiancesInterieures[0].id);
+    setSignalInterieur((n) => n + 1);
+  }, [cfg, interieurChoisi]);
 
   const toggleOption = useCallback((id: string) => {
     setOptions((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -311,7 +358,7 @@ export function ConfigurateurProvider({
   }, [cfg, modele, terrasse, options, preAnalyse]);
 
   /**
-   * Envoie la demande de numéro (ADR-031).
+   * Envoie la demande de rappel (ADR-031).
    *
    * Les prix ne sont pas transmis comme vérité : le serveur les recalcule
    * depuis sa propre grille. `totalAffiche` ne part que pour être comparé —
@@ -338,7 +385,6 @@ export function ConfigurateurProvider({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contact,
-            numero,
             modele,
             usage,
             quantite,
@@ -356,13 +402,6 @@ export function ConfigurateurProvider({
           }),
         });
 
-        if (res.status === 409) {
-          const data = (await res.json()) as { disponibles?: number[] };
-          setNumerosLibres(data.disponibles ?? []);
-          setNumero(null);
-          setEnvoi({ phase: "conflit" });
-          return;
-        }
         if (!res.ok) {
           /* Le motif compte : un échec de vérification anti-robot ne se
              corrige pas comme une panne, et dire « réessayez » à quelqu'un
@@ -391,7 +430,7 @@ export function ConfigurateurProvider({
         setEnvoi({ phase: "erreur", message: "Connexion interrompue — réessayez." });
       }
     },
-    [contact, numero, modele, usage, quantite, ambiance, ambianceInterieure, terrasse, options, prix, preAnalyse, optin, captchaToken],
+    [contact, modele, usage, quantite, ambiance, ambianceInterieure, terrasse, options, prix, preAnalyse, optin, captchaToken],
   );
 
   const value = useMemo<Ctx>(() => {
@@ -409,7 +448,6 @@ export function ConfigurateurProvider({
     const telPlausible = contact.tel.replace(/\D/g, "").length >= 8;
 
     const manques: Manque[] = [];
-    if (numero == null) manques.push({ cle: "numero", libelle: "choisir un numéro de série", ancre: "cfg-numeros" });
     /* ⚠ Le test d'éligibilité du terrain **ne bloque pas** la réservation
        (décision de Richard, 2026-08-20). Un visiteur qui ne connaît pas encore
        sa parcelle, dont le terrain sort du référentiel, ou que la pré-analyse
@@ -439,13 +477,15 @@ export function ConfigurateurProvider({
       ambiance,
       setAmbiance,
       ambianceInterieure,
-      setAmbianceInterieure,
+      setAmbianceInterieure: choisirInterieur,
+      ouvrirInterieur,
+      signalInterieur,
       /* Résolu ici et non dans la scène : le modèle décide des vues
          disponibles (l'Arko Max a un salon, l'Arko One non), et un composant
          qui irait les chercher lui-même finirait par indexer en dur. */
       vuesInterieures:
         cfg.ambiancesInterieures.find((a) => a.id === ambianceInterieure)?.vues[modele] ?? [],
-      bardages: cfg.ambiances.map((a) => ({
+      bardages: bardagesPublics.map((a) => ({
         id: a.id,
         nom: a.nom,
         teinte: a.teinte,
@@ -475,9 +515,6 @@ export function ConfigurateurProvider({
       envoi,
       soumettre,
       setCaptchaToken,
-      numerosLibres,
-      numero,
-      setNumero,
       paliers,
       optionsDisponibles,
       optionsStructurelles: optionsDisponibles.filter((o) => o.structurelle),
@@ -489,7 +526,7 @@ export function ConfigurateurProvider({
       transportDetailPerKm: transportPerKm(m),
       total,
     };
-  }, [cfg, usage, quantite, modele, setModele, ambiance, ambianceInterieure, terrasse, options, toggleOption, preAnalyse, numero, eligibilite, contact, setContact, optin, cgv, envoi, soumettre, numerosLibres, prix]);
+  }, [cfg, bardagesPublics, usage, quantite, modele, setModele, ambiance, ambianceInterieure, choisirInterieur, ouvrirInterieur, signalInterieur, terrasse, options, toggleOption, preAnalyse, eligibilite, contact, setContact, optin, cgv, envoi, soumettre, prix]);
 
   return <ConfigCtx.Provider value={value}>{children}</ConfigCtx.Provider>;
 }

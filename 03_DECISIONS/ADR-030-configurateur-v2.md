@@ -1,7 +1,7 @@
 # ADR-030 — Configurateur v2 : parcours en 7 écrans, grilles pilotées par données
 
 - **Statut** : **Accepté — parcours livré sur `/configurer/v2` (branche mergée sur `dev` le 2026-08-02) ; bascule sur `/configurer` conditionnée à ADR-031**
-- **Date** : 2026-08-01 — **amendé le 2026-08-02** (§ Amendement — mise en œuvre)
+- **Date** : 2026-08-01 — **amendé le 2026-08-02** (§ Amendement — mise en œuvre), les 2026-08-20 et 2026-08-21 (bardage, ambiance intérieure, contrôles de saisie), et le **2026-09-07** (visuel sur mobile, teinte unique, retrait du choix de numéro)
 - **Phase** : All
 - **Faisabilité** : 🟠 Moyenne — le parcours et les grilles sont entièrement spécifiés ; les montants d'options restent provisoires (§17.4) et deux points d'arbitrage conditionnent la mise en ligne
 - **Alerte Albert** : **traitée verbalement par Richard le 2026-08-02 — écarts maintenus et assumés.** Quatre écarts par rapport à la spécification (§8 pré-analyse PLU conservée, §6-§7 aucun paiement en ligne, §5 transport au kilomètre, ~~§5 Série 01 maintenue à 12 unités~~ — **annulé le 2026-08-04, la série revient à 6 : cet écart-là n'existe plus**), plus le parti « colonne de sections dépliantes » au lieu du tunnel en 7 écrans. **Écart supplémentaire du 2026-08-04 : le « Pack prêt à louer » du §5 est retiré de la grille** (§ Écarts assumés, point 3 bis) — **à porter à Albert avec les autres**. Ce sont des arbitrages produit, pas des impossibilités techniques ; Richard les assume et les reprendra avec Albert si le cas se présente. Deux points ouverts lui reviennent par ailleurs (§ Points ouverts).
@@ -425,6 +425,161 @@ se relit pas avec cette grille, et `grillePerimee` doit le dire.
 Le bouton, une fois actif, **ne fait toujours rien** : le handler reste vide.
 Les contrôles empêchent une demande incomplète de partir, ils ne créent pas le
 départ. C'est ADR-031.
+
+---
+
+## Amendement du 2026-09-07 — le visuel sur mobile, une seule teinte, plus de numéro
+
+Quatre décisions de Richard, prises dans la même passe parce qu'elles touchent
+le même écran. Trois portent sur ce que le visiteur voit, la quatrième sur ce
+qu'on lui demande de choisir.
+
+### 1. Les surimpressions quittent le visuel sur mobile
+
+Sur 390 px, le tag technique (`arko-max · gris_anthracite`) et les pastilles de
+configuration — bardage, ambiance intérieure, terrasse, chaque option cochée —
+se posaient sur le studio qu'elles étaient censées qualifier. Plus le visiteur
+configurait, plus il masquait ce qu'il configurait.
+
+Elles passent en `lg:` : **retirées sous 1024 px, inchangées au-dessus**, où la
+place ne manque pas et où lire la configuration d'un coup d'œil reste utile.
+
+**Le nom du studio et sa ligne de surface restent, aux deux tailles.** Ce sont
+les seules surimpressions qui disent *ce qu'on regarde* plutôt que *ce qu'on a
+coché* ; les retirer aurait laissé une image sans légende, la section 01 étant
+souvent défilée hors du champ.
+
+> Conséquence de mise en page : la rangée du bas passe en `justify-end
+> lg:justify-between`. Avec les pastilles masquées, `justify-between` aurait
+> collé la bascule Extérieur / Intérieur au bord gauche.
+
+### 2. Le pouce navigue dans les visuels
+
+Le seul moyen de changer de vue était le point de pagination — une cible de
+6 px, au doigt, sur un visuel qui occupe un tiers de l'écran. Le geste attendu
+d'une galerie sur téléphone est le glissement latéral ; il n'existait pas.
+
+Il existe désormais sur toute la scène, avec **franchissement des faces** :
+glisser depuis l'extérieur fait entrer, glisser en arrière depuis la première
+vue intérieure fait ressortir. Sans ce franchissement, le geste serait mort sur
+l'extérieur, qui n'a plus qu'un seul rendu depuis le point 3 ci-dessous.
+
+**La bascule Extérieur / Intérieur est conservée** — arbitrage de Richard,
+contre la proposition d'une bande unique. Le glissement lui ajoute un geste, il
+ne la remplace pas.
+
+Trois précautions, qui sont la raison d'être de ce paragraphe :
+
+- `touch-pan-y` sur la scène : le défilement vertical de la page reste au
+  navigateur. C'est lui le geste principal d'un tunnel qui se lit de haut en
+  bas — le nôtre ne doit jamais le confisquer ;
+- seuil de 40 px **et** mouvement plus large que haut : un défilement vertical
+  légèrement oblique ne doit pas changer de vue ;
+- **le défilement automatique s'arrête à la première reprise en main et ne
+  repart pas.** Reprendre la main puis se faire déplacer trois secondes plus
+  tard est un comportement qu'on subit, pas qu'on choisit.
+
+### 3. Le sélecteur de bardage ne propose plus que l'anthracite
+
+Décision commerciale : les autres teintes existent, mais elles s'arrêtent avec
+le conseiller, **à discrétion, après entretien**. Le sélecteur en montre une,
+et une phrase dit ce qu'il ne montre plus — **sans nommer les teintes**, ce qui
+serait déjà les proposer.
+
+**Mise en œuvre par drapeau, jamais par suppression.** `Ambiance` gagne un
+champ `surDemande?: boolean` ; `gris_clair` et `vert` le portent. Trois
+conséquences, qui sont l'intérêt du procédé :
+
+- les leads antérieurs qui portent ces teintes **se relisent normalement** —
+  `loadConfig()` résout toujours leur libellé, le CRM n'affiche pas un trou ;
+- **en rouvrir une est un booléen**, pas une réécriture — exactement ce que le
+  §12 de la spec attend d'une grille (« elles bougeront ») ;
+- la scène ne précharge plus que les teintes proposées : empiler un rendu
+  qu'aucun bouton n'atteint faisait payer un téléchargement pour rien.
+
+Le point 1 des § Points ouverts — « le tableau `ambiances` doit être bouclé,
+jamais codé en dur, la v1 doit fonctionner avec 2 comme avec 3 » — vaut
+désormais **aussi pour 1**. Le sélecteur passe en une colonne sous ce seuil, et
+lit `c.bardages` (les teintes publiques) et non `cfg.ambiances`.
+
+⚠ **La version de grille n'est pas incrémentée.** Aucun prix, palier ni option
+ne bouge, et aucun identifiant ne change : une configuration antérieure se
+relit à l'identique. Incrémenter aurait marqué `grillePerimee` sur tous les
+leads existants pour un changement qui ne touche pas leur lecture — le drapeau
+aurait crié sans avoir rien à dire.
+
+### 4. Le parcours passe de neuf à huit sections
+
+La section **08 « Réserver un numéro » est retirée** — voir ADR-031
+§ Amendement du 2026-09-07 pour la décision elle-même et ses effets serveur.
+Ici, ce qui change dans le parcours :
+
+| | |
+|---|---|
+| **08** | Vos coordonnées — reprend le rang laissé libre |
+| ~~09~~ | — |
+
+Renumérotée plutôt que laissée à 09 : le rang affiché est une **position dans
+le parcours**, pas un identifiant. Un « 09 » succédant à un « 07 » aurait fait
+chercher l'écran manquant.
+
+Le point 5 de l'amendement du 2026-08-20 (« le bouton exige une demande
+exploitable ») perd sa première condition : **le numéro n'en est plus une**.
+Restent l'adresse postale, le code postal, la ville, le téléphone, l'email et
+les CGV.
+
+### 5. Un bandeau d'édition ouvre la colonne — sans volume
+
+La rareté était portée par la grille des six numéros. Elle disparaît avec elle,
+et se dit maintenant en tête de la colonne de décisions : **« Arko — édition
+limitée / Exemplaires en nombre limité »**.
+
+⚠ **Aucun nombre d'exemplaires n'est affiché, et c'est le point structurant.**
+Une page dédiée aux établissements HPA doit pouvoir en proposer plusieurs à un
+même client — le configurateur sait déjà traiter ce cas (section 01, devis
+dédié au-delà du seuil de l'usage `pro`). Publier un plafond de six fermerait
+cette porte avant qu'elle n'ouvre.
+
+Cela **restreint le § E de l'amendement du 2026-08-02** (« compteur de rareté »)
+sans l'annuler : `SERIE_TOTAL` et `serie.unites` restent la source technique et
+doivent toujours porter la même valeur — le comptage des numéros libres et
+l'attribution en CRM les lisent. Ce qui change, c'est qu'**elles ne s'affichent
+plus dans le tunnel**. La règle « aucun littéral de volume ne se recopie dans
+une page » devient de ce fait plus facile à tenir : il n'y a plus de volume à
+recopier.
+
+> Le bandeau vit dans la colonne et non dans l'en-tête du tunnel : sur 390 px,
+> la barre fixe tient déjà le logo et la ligne d'appel, et elle s'efface au
+> défilement (§ D) — la mention serait partie avec elle.
+
+### 6. Le bouton s'appelle « Être rappelé »
+
+« Réserver le n° 03 » annonçait un acte que le parcours n'accomplissait pas :
+aucun numéro n'était retenu, aucun paiement n'était pris (ADR-008), et le
+conseiller rappelait pour tout confirmer. Le libellé dit maintenant ce qui se
+passe réellement.
+
+Deux libellés subsistent à côté : **« Être rappelé — sous condition* »** quand
+le terrain n'est pas testé ou jugé non éligible (la note sous le bouton
+l'explique, règle inchangée du point 6 de l'amendement du 2026-08-20), et
+**« Demander un devis dédié »** au-delà du seuil professionnel — à partir de
+trois unités, ce n'est plus un rappel commercial mais une étude chiffrée, et
+celui qui la déclenche doit lire ce qu'il déclenche.
+
+### Ce que cet amendement ne fait pas
+
+- **La case CGV reste obligatoire** — arbitrage de Richard, contre ma
+  recommandation. J'avais relevé qu'exiger l'acceptation de conditions de vente
+  pour obtenir un rappel est disproportionné et fragilise le consentement
+  recueilli ; Richard maintient. Le point est noté ici pour qu'ADR-015 puisse
+  le reprendre si l'avocat le soulève, pas pour être rouvert de mon fait.
+- **Le tunnel v1 n'est pas touché.** `/configurer` sert toujours sa grille de
+  six numéros, ses trois teintes et son bouton « Envoyer ma demande — n° NN »,
+  et reste au sitemap en priorité 0.8. Un visiteur qui y arrive par un moteur
+  voit exactement ce que cet amendement retire. Le traiter relève de la bascule
+  (§ Conséquences d'ADR-031), pas de ce lot.
+- **Aucune migration.** `slot` est déjà nullable et l'attribution existe déjà
+  en CRM ; il n'y a rien à changer en base.
 
 ## Points ouverts — arbitrage Howner
 
