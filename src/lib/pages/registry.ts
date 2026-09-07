@@ -245,6 +245,35 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
     priorite: 0.7,
   },
 
+  /* — Démarche RSE (2026-09-07) — vingtième page, hors classeur « PagesSite_SEO ».
+
+       Elle entre au registre pour la même raison que les dix-neuf autres : le
+       fil d'Ariane, le maillage et le sitemap la lisent ici, et nulle part
+       ailleurs. Sa spec ne vient pas du classeur mais d'un brief propre
+       (Drive « AHF - Plans_SiteWeb_Inspirations », 2026-09-07).
+
+       Elle n'est pas rendue par le gabarit `ArticleGuide` : quatre de ses blocs
+       — cycle de vie, engagements, grille d'indicateurs, trajectoire — sont
+       l'argument lui-même et ne survivraient pas à une mise en puces. D'où une
+       route statique dédiée, qui prime sur `/guide/[slug]`. Le registre, lui,
+       ne fait pas la différence : il porte des routes, pas des gabarits. */
+  {
+    route: "/guide/demarche-rse-howner",
+    h1:
+      "Construire moins grand. Construire mieux. Mesurer ce que nous pouvons améliorer.",
+    libelle: "Notre démarche RSE",
+    famille: "guide",
+    resume:
+      "Pas de greenwashing : ce que Howner mesure, ce qu'il ne mesure pas encore, et les indicateurs qu'il construit pour pouvoir le démontrer.",
+    spec: "guide-10-demarche-rse.md",
+    /* ⚠ `"a-venir"` tant que la page n'a pas été vue en Preview (ADR-038) —
+       le sitemap n'annonce que ce qui est servi et vérifié. Le bloc « 011 »
+       de l'accueil y renvoie en attendant : la page répond, elle n'est
+       simplement pas encore déclarée aux moteurs. */
+    statut: "a-venir",
+    priorite: 0.7,
+  },
+
   /* — Pages locales (lot 4) — chacune porte du contenu propre à sa commune
        (ADR-038 §4). Sans cette matière, elles ne passent pas en `"publiee"`. */
   {
