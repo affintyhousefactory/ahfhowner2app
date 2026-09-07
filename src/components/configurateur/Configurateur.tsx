@@ -24,7 +24,6 @@ import {
   SectionAmbianceInterieure,
   SectionModule,
   SectionOptions,
-  SectionReservation,
   SectionCoordonnees,
   DetailConfiguration,
   SectionTerrain,
@@ -97,6 +96,7 @@ function Parcours() {
 
       <div className="flex min-w-0 flex-col bg-surface">
         <div className="flex-1">
+          <BandeauEdition />
           <SectionModule />
           <SectionAmbiance />
           <SectionAmbianceInterieure />
@@ -104,7 +104,6 @@ function Parcours() {
           <SectionOptions />
           <SectionTerrain />
           <SectionAdresseTerrain />
-          <SectionReservation />
           <SectionCoordonnees />
         </div>
 
@@ -116,10 +115,10 @@ function Parcours() {
             mention={MENTIONS.prix.courte}
             action={libelleAction(c)}
             /* Le bouton ne s'active que lorsque **tout** ce qui compose une
-               demande exploitable est là : un numéro, une adresse, des
+               demande exploitable est là : une adresse postale, des
                coordonnées joignables et les CGV. Il ne dépendait auparavant
-               que des CGV — on pouvait donc « réserver » sans numéro ni
-               contact, et la demande n'aurait mené nulle part. */
+               que des CGV — on pouvait donc envoyer une demande sans contact,
+               et elle n'aurait mené nulle part. */
             actionDesactivee={c.manques.length > 0}
             motif={
               c.manques.length > 0
@@ -153,11 +152,45 @@ function Parcours() {
 }
 
 /**
+ * Bandeau d'édition — en tête de la colonne, avant la première section.
+ *
+ * Posé le 2026-09-07, en remplacement de la section « Réserver un numéro » :
+ * la rareté était portée par la grille des six numéros, qui disparaît avec
+ * elle. Elle se dit maintenant en un bandeau, à l'endroit où le parcours
+ * commence.
+ *
+ * ⚠ **Aucun nombre d'exemplaires n'est affiché** (décision de Richard,
+ * 2026-09-07). Annoncer un plafond fermerait la porte à l'établissement qui en
+ * voudrait plusieurs — le configurateur sait déjà traiter ce cas (section 01,
+ * devis dédié au-delà du seuil), et une page dédiée aux établissements HPA
+ * viendra le prendre en charge. La série reste limitée, son volume ne se
+ * publie pas ici.
+ *
+ * Il vit dans la colonne et non dans l'en-tête du tunnel : sur 390 px, la
+ * barre fixe tient déjà le logo et la ligne d'appel, et elle s'efface au
+ * défilement — la mention en serait partie avec elle.
+ */
+function BandeauEdition() {
+  return (
+    <div className="border-b border-line bg-paper px-4 py-3">
+      <p className="font-mono text-[0.66rem] uppercase tracking-[0.18em] text-accent">
+        Arko — édition limitée
+      </p>
+      <p className="mt-1 text-[0.78rem] leading-relaxed text-muted">
+        Exemplaires en nombre limité. Votre configuration est étudiée par notre
+        conseiller, qui vous rappelle pour la suite.
+      </p>
+    </div>
+  );
+}
+
+/**
  * Retour de soumission affiché contre le bouton.
  *
- * Le conflit de numéro est absent : il a sa place dans la section 08, à côté
- * de la grille où le visiteur doit rechoisir. Tous les autres retours se
- * lisent ici, là où le clic vient d'avoir lieu.
+ * Tous les retours se lisent ici, là où le clic vient d'avoir lieu. Aucun ne
+ * parle plus de numéro d'exemplaire depuis le 2026-09-07 : le visiteur n'en
+ * choisit pas, et lui en promettre un dans l'accusé de réception rouvrirait
+ * par l'email ce que le parcours vient de fermer.
  */
 function retourSoumission(
   c: ReturnType<typeof useConfigurateur>,
@@ -167,13 +200,13 @@ function retourSoumission(
       return {
         ton: "ok",
         texte:
-          "Demande envoyée. Vous recevez un récapitulatif par email, et nous vous rappelons pour confirmer votre numéro.",
+          "Demande envoyée. Vous recevez un récapitulatif par email, et notre conseiller vous rappelle pour la suite de votre projet.",
       };
     case "partiel":
       return {
         ton: "alerte",
         texte: c.envoi.notified
-          ? "Votre demande nous est parvenue, mais son enregistrement n'a pas abouti. Nous vous rappelons — conservez cette page ou notez votre numéro."
+          ? "Votre demande nous est parvenue, mais son enregistrement n'a pas abouti. Nous vous rappelons — conservez cette page par précaution."
           : "Votre demande nous est parvenue, mais l'email de récapitulatif n'a pas pu partir. Nous vous rappelons.",
       };
     case "erreur":
@@ -201,16 +234,23 @@ function sousCondition(c: ReturnType<typeof useConfigurateur>) {
 }
 
 /**
- * Libellé du bouton de réservation.
+ * Libellé du bouton d'envoi.
+ *
+ * « Être rappelé » depuis le 2026-09-07 (décision de Richard) : le bouton ne
+ * réserve plus rien — il n'y a plus de numéro à retenir, et l'exemplaire est
+ * attribué par le conseiller. Annoncer « Réserver » ce qui n'est qu'une prise
+ * de contact promettait un acte que le parcours n'accomplissait pas.
+ *
+ * Le devis dédié garde son libellé : à partir de trois unités, ce n'est plus
+ * un rappel commercial mais une étude chiffrée, et le pro qui la demande doit
+ * lire ce qu'il déclenche.
  *
  * L'astérisque renvoie à la note affichée juste sous le bouton : le visiteur
  * doit savoir ce qu'il engage avant de cliquer, pas après.
  */
 function libelleAction(c: ReturnType<typeof useConfigurateur>) {
   if (c.devisDedie) return "Demander un devis dédié";
-  if (c.numero == null) return "Réserver un numéro";
-  const n = String(c.numero).padStart(2, "0");
-  return sousCondition(c) ? `Réserver le n° ${n} sous condition*` : `Réserver le n° ${n}`;
+  return sousCondition(c) ? "Être rappelé — sous condition*" : "Être rappelé";
 }
 
 /**
