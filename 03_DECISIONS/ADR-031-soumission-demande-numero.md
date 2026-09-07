@@ -1,7 +1,7 @@
 # ADR-031 — Soumission de la demande de numéro : du configurateur au lead
 
 - **Statut** : Accepté
-- **Date** : 2026-08-21
+- **Date** : 2026-08-21 — **amendée le 2026-09-07** (le visiteur ne choisit plus son exemplaire : §5 sans objet, `slot` à `null`)
 - **Phase** : 4
 - **Faisabilité** : 🟠 Moyenne — aucune inconnue technique, mais deux objets de base à corriger avant la première écriture.
 - **Alerte Albert** : **Oui — première écriture en production depuis le site public, et changement de règle sur l'unicité du numéro de série.**
@@ -228,6 +228,83 @@ les migrations passent en production à la validation de la PR `dev` → `main`.
 
 **Reste à écrire** : la route `POST /api/configurateur/reservation` et le
 branchement du bouton. Les migrations ne font qu'ouvrir la voie.
+
+---
+
+## Amendement du 2026-09-07 — le visiteur ne choisit plus son exemplaire
+
+Décision de Richard : **la grille de numéros disparaît du parcours public.**
+L'exemplaire est attribué par le conseiller depuis le CRM, une fois la
+disponibilité vérifiée.
+
+### Pourquoi, et ce que cela répare
+
+`chargerNumeros()` était un placeholder : il renvoyait six numéros libres **en
+dur**, sans jamais lire la base. La grille affichait donc un état qui n'existait
+pas, et le § Conséquences de cet ADR le disait déjà — « le compteur public peut
+enfin refléter la base plutôt qu'une liste statique ». Il n'y a pas eu de
+préjudice : la table de production compte peu de leads et aucun numéro n'a été
+attribué en double. Mais la promesse était intenable telle quelle.
+
+Deux voies s'offraient : **brancher la grille sur la base** (ADR-009, temps
+réel), ou **retirer le choix**. Richard retient la seconde, et c'est la bonne
+au regard de ce que le parcours est devenu : sans paiement en ligne (ADR-008),
+un numéro « choisi » n'engageait rien, et il fallait de toute façon un appel
+pour le confirmer. Le choix décorait une décision prise ailleurs.
+
+### Ce qui change, par rapport aux paragraphes de la décision initiale
+
+| § | Ce qui était décidé | Ce qui s'applique depuis le 2026-09-07 |
+|---|---|---|
+| §5 | Numéro déjà confirmé → **409** + liste des numéros libres, l'écran invite à rechoisir | **Sans objet.** Aucun numéro n'est demandé : il n'y a plus de course à arbitrer. Le 409, l'état `conflit` du parcours et la fonction `numerosLibres()` de la route sont retirés |
+| §6 | `slot` ← le numéro demandé | `slot` ← **`null`**. Le conseiller l'attribue depuis `LeadConfiguration.tsx` |
+| §7 | Template Brevo dédié | Inchangé — mais `NUMERO` part **vide** (voir Reste à faire) |
+
+**§2 reste vrai et reste utile.** L'unicité porte sur le numéro *confirmé*
+(`leads_slot_confirme_unique`, index partiel `WHERE slot IS NOT NULL`) : elle
+protège désormais l'attribution faite en CRM, qui est le seul endroit où un
+numéro se pose. La migration `20260821_adr031_soumission_numero.sql` reste
+appliquée et pertinente — **rien à défaire en base**, et `slot` était déjà
+nullable.
+
+**§4 reste vrai** : l'échec ne se tait jamais et ne bloque pas. Un seul
+ajustement — une violation `23505` à l'insertion n'est plus interprétée comme
+« numéro pris ». Avec `slot: null`, l'index partiel ne s'applique pas ; un
+doublon viendrait d'ailleurs, et le traiter en « rechoisissez un numéro »
+aurait affiché au visiteur une explication fausse. Il redevient ce qu'il est :
+une panne d'écriture, signalée (`signalerPanne`) et non bloquante.
+
+### Ce que le visiteur voit à la place
+
+Le bouton s'appelle **« Être rappelé »** et un bandeau **« Arko — édition
+limitée / Exemplaires en nombre limité »** ouvre la colonne, **sans volume
+affiché** — ADR-030 § Amendement du 2026-09-07, points 5 et 6. L'accusé de
+réception à l'écran ne promet plus de « confirmer votre numéro » mais un rappel
+du conseiller : rouvrir par l'email ce que le parcours vient de fermer aurait
+été le pire des deux mondes.
+
+### Reste à faire — hors de ce lot
+
+1. **Template Brevo 9** — il porte encore une ligne « numéro ». La route envoie
+   `NUMERO: ""` : le rendu est vide, jamais faux, mais la ligne doit disparaître
+   **côté Brevo**. ⚠ Le même template sert le tunnel v1, qui lui transmet
+   toujours un vrai numéro — la retirer maintenant priverait le v1 de
+   l'information. À traiter **avec la bascule**, pas avant. Action de Richard,
+   dans l'interface Brevo, suivie de `npm run check:vocabulaire:brevo`.
+2. **`/configurer` (v1)** sert toujours sa grille de six numéros et reste au
+   sitemap. C'est désormais le principal écart entre ce que le site promet et
+   ce qu'il tient. Relève de la bascule, déjà inscrite au § Conséquences.
+3. **`src/lib/configurateur/numeros.ts`** n'est plus lu par aucun écran. Il est
+   **conservé au dépôt** : c'est la seule trace écrite du mode « demandé puis
+   confirmé » et de la correspondance statut → état de numéro. Le supprimer
+   effacerait la spécification avec le code mort.
+
+### Ce que cet amendement ne fait pas
+
+Il ne rouvre pas ADR-009 : le temps réel sur les numéros devient **sans objet
+côté public**, puisqu'il n'y a plus rien à afficher. S'il revient un jour, ce
+sera pour le CRM — montrer au conseiller ce qui est réellement pris au moment
+où il attribue.
 
 ## Sources
 
