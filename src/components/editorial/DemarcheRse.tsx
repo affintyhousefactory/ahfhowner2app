@@ -75,9 +75,112 @@ export function DemarcheRse() {
         </div>
       </section>
 
+      {/* — 1. Les indicateurs — **en tête de page** depuis le 2026-09-07
+          (décision de Richard). C'est la section qui prouve la méthode : la
+          placer avant les convictions qu'elle sert à vérifier évite de faire
+          lire trois écrans d'intentions avant la seule page où l'on montre ce
+          qu'on ne sait pas encore.
+
+          Elle affiche deux choses qui ne doivent jamais se confondre : notre
+          état de mesure (l'étiquette) et un ordre de grandeur public (le
+          repère, avec sa source cliquable). D'où deux traitements visuels
+          distincts et une mention explicite sur chaque repère. */}
+      <section className="bg-surface py-16 md:py-24">
+        <div className="container-page">
+          <div className="max-w-3xl">
+            <Reveal>
+              <h2 className="titre-l text-balance text-ink">{RSE.indicateurs.titre}</h2>
+            </Reveal>
+            <Reveal delay={0.05}>
+              <p className="mt-5 text-[1.05rem] leading-relaxed text-ink/85">
+                {RSE.indicateurs.intro}
+              </p>
+            </Reveal>
+          </div>
+
+          <div className="mt-12 grid gap-px bg-line md:grid-cols-2">
+            {RSE.indicateurs.items.map((ind, i) => (
+              <Reveal key={ind.libelle} delay={0.02 * i}>
+                <div className="flex h-full flex-col bg-surface p-5">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-baseline">
+                    <div className="min-w-0">
+                      <h3 className="text-[0.98rem] font-medium tracking-tight text-ink">
+                        {ind.libelle}
+                      </h3>
+                      {ind.note ? (
+                        <p className="mt-1.5 text-[0.85rem] leading-relaxed text-muted">
+                          {ind.note}
+                        </p>
+                      ) : null}
+                    </div>
+                    {/* L'état est un libellé, jamais un chiffre ni une jauge :
+                        une barre de progression suggérerait une avancée
+                        quantifiée que nous ne mesurons pas. */}
+                    <span
+                      className={
+                        ind.etat === "mesure-en-cours"
+                          ? "shrink-0 whitespace-nowrap border border-accent/40 px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.1em] text-accent"
+                          : "shrink-0 whitespace-nowrap border border-line px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.1em] text-muted"
+                      }
+                    >
+                      {ETATS_INDICATEUR[ind.etat]}
+                    </span>
+                  </div>
+
+                  {/* Le repère public — visuellement détaché de ce qui précède,
+                      et annoncé comme extérieur à Howner dès son étiquette. Un
+                      ordre de grandeur posé sans cette précaution se lirait
+                      comme notre résultat. */}
+                  {ind.repere ? (
+                    <div className="mt-4 border-t border-dashed border-line pt-3">
+                      <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted">
+                        Repère public — pas notre chiffre
+                      </p>
+                      <p className="mt-1.5 font-mono text-[0.9rem] tabular-nums text-ink">
+                        {ind.repere.valeur}
+                      </p>
+                      <p className="mt-1.5 text-[0.82rem] leading-relaxed text-muted">
+                        {ind.repere.precision}
+                      </p>
+                      <a
+                        href={ind.repere.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-block text-[0.8rem] text-muted underline decoration-line underline-offset-4 transition-colors hover:text-ink"
+                      >
+                        {ind.repere.source}
+                      </a>
+                    </div>
+                  ) : null}
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          {/* L'objectif chiffré vient après la grille, pas avant : il ne se
+              comprend qu'une fois vu ce qui est mesuré et ce qui ne l'est pas
+              encore. Sa réserve est attachée, jamais reléguée. */}
+          <div className="mt-12 max-w-3xl border-l-2 border-accent pl-6">
+            <Reveal>
+              <p className="titre-s text-ink">{RSE.indicateurs.objectif.titre}</p>
+            </Reveal>
+            <Reveal delay={0.05}>
+              <p className="mt-3 text-[1.05rem] leading-relaxed text-ink/85">
+                {RSE.indicateurs.objectif.texte}
+              </p>
+            </Reveal>
+            <Reserve>{RSE.indicateurs.objectif.reserve}</Reserve>
+          </div>
+
+          <div className="mt-8 max-w-3xl">
+            <Reserve>{RSE.indicateurs.reserve}</Reserve>
+          </div>
+        </div>
+      </section>
+
       <article className="bg-canvas py-16 md:py-24">
         <div className="container-page">
-          {/* — 1. Notre conviction — */}
+          {/* — 2. Notre conviction — */}
           <div className="max-w-3xl">
             <Reveal>
               <h2 className="titre-l text-balance text-ink">{RSE.conviction.titre}</h2>
@@ -91,7 +194,7 @@ export function DemarcheRse() {
 
           <Citation texte={RSE.conviction.citation} />
 
-          {/* — 2. La sobriété — */}
+          {/* — 3. La sobriété — */}
           <div className="mt-16 max-w-3xl md:mt-24">
             <Reveal>
               <h2 className="titre-l text-balance text-ink">{RSE.sobriete.titre}</h2>
@@ -116,7 +219,7 @@ export function DemarcheRse() {
         </div>
       </article>
 
-      {/* — 3. Le cycle de vie — fond distinct : c'est le cœur méthodologique. */}
+      {/* — 4. Le cycle de vie — fond distinct : c'est le cœur méthodologique. */}
       <section className="bg-surface py-16 md:py-24">
         <div className="container-page">
           <div className="max-w-3xl">
@@ -175,7 +278,7 @@ export function DemarcheRse() {
 
       <article className="bg-canvas py-16 md:py-24">
         <div className="container-page">
-          {/* — 4. Réduire les pertes — */}
+          {/* — 5. Réduire les pertes — */}
           <div className="max-w-3xl">
             <Reveal>
               <h2 className="titre-l text-balance text-ink">{RSE.pertes.titre}</h2>
@@ -201,7 +304,7 @@ export function DemarcheRse() {
         </div>
       </article>
 
-      {/* — 5. Le territoire — fond sombre : c'est la section que la spec veut
+      {/* — 6. Le territoire — fond sombre : c'est la section que la spec veut
           la plus forte, et la seule qui ne parle pas d'environnement. */}
       <section className="bg-ink py-16 text-canvas md:py-24">
         <div className="container-page">
@@ -248,7 +351,7 @@ export function DemarcheRse() {
         </div>
       </section>
 
-      {/* — 6. Les engagements — */}
+      {/* — 7. Les engagements — */}
       <section className="bg-canvas py-16 md:py-24">
         <div className="container-page">
           <div className="max-w-3xl">
@@ -282,60 +385,8 @@ export function DemarcheRse() {
         </div>
       </section>
 
-      {/* — 7. Les indicateurs — la section la plus délicate : elle affiche des
-          cases vides, et c'est volontaire. Un état, jamais une valeur. */}
-      <section className="bg-surface py-16 md:py-24">
-        <div className="container-page">
-          <div className="max-w-3xl">
-            <Reveal>
-              <h2 className="titre-l text-balance text-ink">{RSE.indicateurs.titre}</h2>
-            </Reveal>
-            <Reveal delay={0.05}>
-              <p className="mt-5 text-[1.05rem] leading-relaxed text-ink/85">
-                {RSE.indicateurs.intro}
-              </p>
-            </Reveal>
-          </div>
-
-          <div className="mt-12 grid gap-px bg-line md:grid-cols-2">
-            {RSE.indicateurs.items.map((ind, i) => (
-              <Reveal key={ind.libelle} delay={0.02 * i}>
-                <div className="flex h-full flex-col justify-between gap-3 bg-surface p-5 sm:flex-row sm:items-baseline">
-                  <div className="min-w-0">
-                    <h3 className="text-[0.98rem] font-medium tracking-tight text-ink">
-                      {ind.libelle}
-                    </h3>
-                    {ind.note ? (
-                      <p className="mt-1.5 text-[0.85rem] leading-relaxed text-muted">
-                        {ind.note}
-                      </p>
-                    ) : null}
-                  </div>
-                  {/* L'état est un libellé, jamais un chiffre ni une jauge :
-                      une barre de progression suggérerait une avancée
-                      quantifiée que nous ne mesurons pas. */}
-                  <span
-                    className={
-                      ind.etat === "mesure-en-cours"
-                        ? "shrink-0 whitespace-nowrap border border-accent/40 px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.1em] text-accent"
-                        : "shrink-0 whitespace-nowrap border border-line px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.1em] text-muted"
-                    }
-                  >
-                    {ETATS_INDICATEUR[ind.etat]}
-                  </span>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-
-          <div className="mt-8 max-w-3xl">
-            <Reserve>{RSE.indicateurs.reserve}</Reserve>
-          </div>
-        </div>
-      </section>
-
       {/* — 8. La trajectoire — un mouvement, d'où le filet qui relie les rangs. */}
-      <section className="bg-canvas py-16 md:py-24">
+      <section className="bg-surface py-16 md:py-24">
         <div className="container-page">
           <div className="max-w-3xl">
             <Reveal>
@@ -369,7 +420,7 @@ export function DemarcheRse() {
       </section>
 
       {/* — 9. Conclusion — */}
-      <section className="bg-surface py-16 md:py-24">
+      <section className="bg-canvas py-16 md:py-24">
         <div className="container-page">
           <div className="max-w-3xl">
             <Reveal>
@@ -404,7 +455,7 @@ export function DemarcheRse() {
         </div>
       </section>
 
-      <section className="bg-canvas py-16 md:py-24">
+      <section className="bg-surface py-16 md:py-24">
         <div className="container-page">
           <div className="max-w-3xl">
             <Reveal>

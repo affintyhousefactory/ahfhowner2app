@@ -741,21 +741,43 @@ export const ABOUT = {
         },
       ],
     },
+    /* ⚠ Réécrite le 2026-09-07 pour être cohérente avec `/guide/demarche-rse-howner`
+       (décision de Richard). Elle affirmait trois choses que Howner ne peut pas
+       démontrer aujourd'hui — « objectif zéro déchet », « indéfiniment
+       recyclable », « le respect de la Terre » — et une quatrième qui n'était
+       pas mesurée : que la légèreté de l'acier « limite l'impact sur les sols ».
+
+       Ce sont des allégations environnementales au sens du code de la
+       consommation, et surtout la contradiction directe de la page qui annonce
+       ne rien revendiquer sans preuve. Deux surfaces qui parlent d'écologie ne
+       peuvent pas tenir deux discours : celle qui promet le plus décide de ce
+       qu'on nous opposera.
+
+       Les faits conservés sont ceux qui restent vrais sans mesure : les
+       technopieux évitent une dalle massive, l'acier entre dans une filière de
+       recyclage établie, et l'atelier permet de compter ce qu'un chantier
+       disperse. Le reste renvoie à la page RSE, qui dit où en est la mesure. */
     {
       id: "eco-responsabilite",
       step: "04",
       eyebrow: "Ancrée dans le futur",
-      title: "Un studio respectueux.",
+      title: "Un studio qui se mesure.",
       points: [
         {
-          k: "Éco-responsabilité",
-          d: "Parce que le respect du paysage est au cœur de notre démarche, la légèreté de l'acier limite l'impact sur les sols et évite les lourdes fondations.",
+          k: "Se poser sans terrasser",
+          d: "La légèreté de la structure acier autorise une pose sur technopieux, sans dalle massive ni terrassement lourd. Le terrain reste réversible — ce que nous cherchons à documenter, comme le reste de notre démarche.",
         },
         {
-          k: "Une empreinte durable",
-          d: "L'acier utilisé est indéfiniment recyclable. Fabriquées Hors-Site dans notre atelier avec un objectif zéro déchet, nos structures marient l'amour du design et le respect de la Terre.",
+          k: "Compter plutôt qu'affirmer",
+          d: "L'acier entre dans une filière de recyclage établie, et l'atelier nous permet de suivre les chutes qu'un chantier disperse. Nous préférons mesurer ces effets avant de les revendiquer.",
         },
       ],
+      /* Lien vers la démarche : le libellé annonce ce qu'on y trouve — un état
+         de mesure, pas une promesse de plus. */
+      lien: {
+        libelle: "Ce que nous mesurons, et ce que nous ne mesurons pas encore",
+        href: "/guide/demarche-rse-howner",
+      },
     },
   ],
 } as const;

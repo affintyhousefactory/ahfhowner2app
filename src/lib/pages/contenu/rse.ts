@@ -48,23 +48,46 @@ export type EtapeCycle = {
 };
 
 /**
+ * Repère public affiché en regard d'un indicateur.
+ *
+ * ⚠ **Ce n'est jamais un chiffre Howner.** C'est un ordre de grandeur publié
+ * par une source officielle, qui donne au lecteur une échelle de lecture
+ * pendant que notre propre mesure se constitue. La distinction doit rester
+ * lisible à l'écran, faute de quoi le repère serait lu comme notre résultat —
+ * exactement le glissement que cette page refuse.
+ *
+ * Chaque repère porte sa source **et son lien** : un chiffre public non
+ * vérifiable ne vaut pas mieux qu'un chiffre inventé.
+ */
+export type Repere = {
+  /** La valeur publique, telle que la source l'écrit. */
+  valeur: string;
+  /** Ce que cette valeur mesure — et, s'il y a lieu, pourquoi elle ne nous est pas applicable. */
+  precision: string;
+  source: string;
+  url: string;
+};
+
+/**
  * État d'un indicateur. Deux valeurs, et deux seulement.
  *
- * Un troisième état « publié » viendra le jour où un chiffre existe. Le créer
- * d'avance inviterait à s'en servir trop tôt.
+ * Un troisième état « publié » viendra le jour où un chiffre Howner existe. Le
+ * créer d'avance inviterait à s'en servir trop tôt.
  */
-export type EtatIndicateur = "mesure-en-cours" | "a-construire";
+export type EtatIndicateur = "mesure-en-cours" | "en-constitution";
 
 export type Indicateur = {
   libelle: string;
   etat: EtatIndicateur;
   /** Précision affichée sous le libellé — ce qui manque, ou ce qui existe déjà. */
   note?: string;
+  /** Ordre de grandeur public, quand il en existe un qui éclaire vraiment. */
+  repere?: Repere;
 };
 
 export const ETATS_INDICATEUR: Record<EtatIndicateur, string> = {
   "mesure-en-cours": "Mesure en cours",
-  "a-construire": "Indicateur à construire",
+  "en-constitution": "En cours de constitution",
 };
 
 export const RSE = {
@@ -227,31 +250,82 @@ export const RSE = {
     ],
   },
 
-  /* — 8. Les indicateurs — */
+  /* — 8. Les indicateurs — remontés en tête de page le 2026-09-07 (décision de
+       Richard) : c'est la section qui prouve la méthode, elle passe donc avant
+       les intentions qu'elle sert à vérifier. */
   indicateurs: {
     titre: "Des engagements aux données",
     intro:
-      "Voici les indicateurs que nous voulons suivre. Aucun chiffre n'est affiché : ceux que nous ne mesurons pas encore sont annoncés comme tels, et cette page se remplira à mesure qu'ils deviendront fiables.",
+      "Voici les indicateurs que nous voulons suivre, et où nous en sommes vraiment. Nos mesures sont en cours de constitution : aucun chiffre Howner n'est affiché tant qu'il n'est pas fiable. En regard, lorsqu'il en existe un, nous plaçons un ordre de grandeur public et sourcé — pour donner une échelle de lecture, jamais pour la faire passer pour la nôtre.",
+    /* ⚠ Formulé sans base ni échéance inventées. Un « −10 % » sans année de
+       référence ne veut rien dire, et en poser une au jugé serait la seule
+       vraie approximation de cette page. L'échéance reste à arrêter par
+       Richard ; elle sera publiée avec la première mesure. */
+    objectif: {
+      titre: "Notre objectif : −10 %",
+      texte:
+        "Sur chaque indicateur que nous parviendrons à mesurer, nous visons une réduction de 10 % par rapport à notre première mesure fiable.",
+      reserve:
+        "Un pourcentage n'a de sens qu'avec une base : l'année de référence sera celle où l'indicateur devient fiable, et nous la publierons avec lui. Tant qu'elle n'existe pas, cet objectif est une intention datée — pas un résultat.",
+    },
     items: [
-      { libelle: "Empreinte carbone d'un Arko", etat: "a-construire", note: "Suppose la consolidation des données fournisseurs" },
-      { libelle: "Énergie consommée en fabrication, par studio", etat: "a-construire" },
-      { libelle: "Quantité de déchets générés", etat: "a-construire" },
-      { libelle: "Part des déchets valorisés", etat: "a-construire" },
-      { libelle: "Taux de perte matière sur l'acier LSF", etat: "a-construire" },
-      { libelle: "Part des composants disposant d'une FDES ou d'un PEP", etat: "a-construire" },
-      { libelle: "Distance moyenne fournisseurs → atelier", etat: "a-construire" },
+      {
+        libelle: "Empreinte carbone d'un Arko",
+        etat: "en-constitution",
+        note: "Suppose la consolidation des données environnementales fournisseurs",
+        repere: {
+          valeur: "530 kgCO₂e/m² en 2025, 475 en 2028, 415 en 2031",
+          precision:
+            "Seuils de l'indicateur Ic construction que la RE2020 impose aux logements individuels neufs. Un studio de jardin annexe n'entre pas dans ce champ réglementaire : nous citons ces valeurs comme repère de secteur, pas comme une norme qui nous serait applicable.",
+          source: "RE2020 — ministère de la Transition écologique",
+          url: "https://rt-re-batiment.developpement-durable.gouv.fr/",
+        },
+      },
+      { libelle: "Énergie consommée en fabrication, par studio", etat: "en-constitution" },
+      {
+        libelle: "Quantité de déchets générés",
+        etat: "en-constitution",
+        repere: {
+          valeur: "46 millions de tonnes par an",
+          precision:
+            "Déchets produits chaque année par le secteur du bâtiment en France, toutes activités confondues — dont l'essentiel provient de la démolition et de la réhabilitation. C'est un volume national, pas un ratio par ouvrage : il situe l'enjeu, il ne se compare pas à un studio.",
+          source: "Ministère de la Transition écologique",
+          url: "https://www.ecologie.gouv.fr/dechets-du-batiment",
+        },
+      },
+      {
+        libelle: "Part des déchets valorisés",
+        etat: "en-constitution",
+        repere: {
+          valeur: "70 % visés, 40 à 60 % constatés en construction neuve",
+          precision:
+            "Objectif de valorisation matière fixé par la directive-cadre européenne sur les déchets et repris à l'article 79 de la loi de transition énergétique. Le taux réellement atteint varie fortement selon l'activité.",
+          source: "Ministère de la Transition écologique",
+          url: "https://www.ecologie.gouv.fr/politiques-publiques/dechets-du-batiment-travaux-publics",
+        },
+      },
+      { libelle: "Taux de perte matière sur l'acier LSF", etat: "en-constitution" },
+      { libelle: "Part des composants disposant d'une FDES ou d'un PEP", etat: "en-constitution" },
+      { libelle: "Distance moyenne fournisseurs → atelier", etat: "en-constitution" },
       {
         libelle: "Distance atelier → site d'installation",
         etat: "mesure-en-cours",
         note: "Calculée pour chaque projet dans le configurateur ; pas encore consolidée",
+        repere: {
+          valeur: "de l'ordre de 80 à 160 gCO₂e par tonne-kilomètre",
+          precision:
+            "Facteurs d'émission du transport routier de marchandises, très variables selon le porteur, son chargement et son taux de retour à vide. C'est la fourchette dans laquelle se situera notre livraison, pas notre résultat.",
+          source: "Base Empreinte — ADEME",
+          url: "https://base-empreinte.ademe.fr/",
+        },
       },
-      { libelle: "Part des achats réalisés en France et en Europe", etat: "a-construire" },
-      { libelle: "Heures de formation", etat: "a-construire" },
-      { libelle: "Accidents du travail avec arrêt", etat: "a-construire" },
-      { libelle: "Part des fournisseurs stratégiques évalués", etat: "a-construire" },
+      { libelle: "Part des achats réalisés en France et en Europe", etat: "en-constitution" },
+      { libelle: "Heures de formation", etat: "en-constitution" },
+      { libelle: "Accidents du travail avec arrêt", etat: "en-constitution" },
+      { libelle: "Part des fournisseurs stratégiques évalués", etat: "en-constitution" },
     ] satisfies readonly Indicateur[],
     reserve:
-      "Un indicateur sans valeur n'est pas un oubli : c'est l'état réel de notre mesure aujourd'hui. Nous préférons l'écrire que remplir cette grille de chiffres approximatifs.",
+      "Huit indicateurs n'ont pas de repère public qui les éclaire vraiment : nous préférons laisser la colonne vide plutôt que d'y placer un chiffre approchant. Un indicateur sans valeur n'est pas un oubli — c'est l'état réel de notre mesure aujourd'hui.",
   },
 
   /* — 9. Notre trajectoire — */
