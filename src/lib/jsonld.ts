@@ -30,9 +30,11 @@ export function organizationSchema(): JsonLdObject {
     // affiche désormais le même bloc NAP, et deux copies auraient divergé.
     legalName: COMPANY.legalName,
     url: SITE_URL,
-    // ADR-029 amendée le 2026-08-19 — « studio de jardin » remplace « maison ».
+    // ADR-029 amendée le 2026-08-19 — « studio de jardin » remplace « maison » —
+    // puis le 2026-09-11 : Howner se qualifie « fabricant-installateur »,
+    // fabrication hors-site — le rôle réellement exercé, aucun autre.
     description:
-      "Studios de jardin d'exception livrés prêts à vivre, fabriqués au Pays-Basque.",
+      "Fabricant-installateur de studios de jardin d'exception, fabriqués hors-site au Pays-Basque, livrés prêts à vivre.",
     email: CONTACT.email,
     // Profils officiels — `sameAs` est le champ par lequel un moteur rattache
     // un compte social à l'entité (knowledge panel). Sans lui, le lien du pied

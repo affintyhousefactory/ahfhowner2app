@@ -4,11 +4,13 @@
 > Mettre à jour la section « Dernier point » en fin de session. Ne pas dupliquer cet état ailleurs.
 
 ## Résumé exécutif
-Site **bi-produit** de réservation — **Arko One** (20 m²) + **Arko Max** (40 m²), ADR-022, sur un **pool commun de 6 exemplaires** numérotés 1→6 (`SERIE_TOTAL`, One et Max confondus — ce n'est pas 6 + 6 ; **ramené de 12 à 6 le 2026-08-04**, arbitrage de Richard). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Portail admin livré et en production ; portail mandataire ⏸ suspendu** (ADR-028). **Configurateur v2 livré sur `/configurer/v2`** (`noindex`), l'entonnoir public y mène entièrement — le CTA final **n'a pas de handler** (ADR-031). **Blocker légal levé le 2026-08-22** (CGV validées, ADR-015) ; l'encaissement reste à brancher (ADR-008).
+Site **bi-produit** de réservation — **Arko One** (20 m²) + **Arko Max** (40 m²), ADR-022, sur un **pool commun de 6 exemplaires** numérotés 1→6 (`SERIE_TOTAL`, One et Max confondus — ce n'est pas 6 + 6 ; **ramené de 12 à 6 le 2026-08-04**, arbitrage de Richard). **Front complet et validé** (Lighthouse 100/100/100/100, LCP 0.8s, CLS 0). **Portail admin livré et en production ; portail mandataire ⏸ suspendu** (ADR-028). **Configurateur v2 livré sur `/configurer/v2`** (`noindex`), l'entonnoir public y mène entièrement ; la demande part réellement (ADR-031) et **le visiteur ne choisit plus son exemplaire depuis le 2026-09-07** — le numéro est attribué par le conseiller en CRM, le bouton dit « Être rappelé ». **Blocker légal levé le 2026-08-22** (CGV validées, ADR-015) ; l'encaissement reste à brancher (ADR-008).
 
 > ✅ **Réaligné le 2026-08-19** — PR #75 (`dev` → `main`, 33 commits) mergée, `main` = `29a96b4a`, production déployée depuis `main` et vérifiée en ligne. L'anomalie du 2026-08-18 (production promue depuis `feat/adr-035-crm-leads`, `main` figé au 20/07) est **résorbée**. **Leçon conservée : l'état déployé se lit sur les alias Vercel, pas seulement sur les branches git** — un `promote` court-circuite `main` sans laisser de trace côté git.
 >
-> 🟠 **L'entonnoir mène au v2 et son CTA final reste sans handler — assumé par Richard le 2026-08-19.** Ce n'est plus un blocage : c'est une décision. La réservation se fait par la ligne téléphonique en attendant ADR-031. ⚠ **Le guardrail d'ADR-030 (« cet état ne doit pas atteindre `main` ») est de ce fait caduc et doit être amendé.** ⚠️ **Voir « Dernier point » 2026-07-13 — CGV non confirmées avocat déjà live en prod, liées au tunnel de réservation.** Sources de vérité : `src/lib/site.ts` (marque/pricing), `src/lib/configurateur/config.ts` (grilles v2), `DESIGN.md` (charte), `03_DECISIONS/` (ADR).
+> ✅ **Périmé le 2026-09-07** — ~~« L'entonnoir mène au v2 et son CTA final reste sans handler »~~. La soumission existe (ADR-031), et le parcours ne réserve plus rien : il demande un rappel. Le guardrail d'ADR-030 (« cet état ne doit pas atteindre `main` ») est **amendé**, pas seulement caduc.
+>
+> 🟠 **Ce qui reste ouvert à sa place : `/configurer` (tunnel v1) sert toujours sa grille de six numéros, ses trois teintes et son bouton « Envoyer ma demande — n° NN », au sitemap en priorité 0.8.** C'est désormais le seul endroit du site qui contredit les décisions du 2026-09-07. Relève de la bascule (ADR-031 § Conséquences). ⚠️ **Voir « Dernier point » 2026-07-13 — CGV non confirmées avocat déjà live en prod, liées au tunnel de réservation.** Sources de vérité : `src/lib/site.ts` (marque/pricing), `src/lib/configurateur/config.ts` (grilles v2), `DESIGN.md` (charte), `03_DECISIONS/` (ADR).
 
 ## État actuel
 - Phase 1 (front) livrée et validée. **Refonte multi-pages bi-produit** (Arko One + Arko Max) livrée le 2026-06-16 (ADR-020/021/022). Phase 1.5 (SEO) métadonnées par page posées, reste sitemap/robots/JSON-LD. Phase 4 (backend) non démarrée. **Légal levé le 2026-08-22** (ADR-015).
@@ -61,7 +63,9 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Admin — écrans Mandataires / Affectations / GED / Terrains | `(admin)/admin/(protected)/{mandataires,affectations,ged,terrains}`, **`src/proxy.ts`** | ⏸ **suspendu** — 404 au **proxy** (layout parent client : `notFound()` seul ne coupait pas) + gardes en page | réactivation par flag | 028 |
 | Public — `/terrains`, `/rechercheterrain`, `/terrain`, `/cgu-mandataire` | pages `(public)/**` | ⏸ **suspendu** — 404, hors sitemap, en `disallow` | réactivation par flag | 018, 028 |
 | Devis 3 couches multi-produit (v1) | `Configurator.tsx`, `config-store.tsx` | ✅ sert toujours `/configurer` — remplacé à terme par le v2 | retrait à la bascule | 005,020 |
-| **Configurateur v2** | `src/app/(configurateur)/**`, `src/components/configurateur/*`, `src/lib/configurateur/*` | ✅ livré sur **`/configurer/v2`** (`noindex`) — colonne de sections, grilles en données, ambiances visuelles, coque sans nav | bascule sur `/configurer` + levée du `noindex` | 030, 031 |
+| **Configurateur v2** | `src/app/(configurateur)/**`, `src/components/configurateur/*`, `src/lib/configurateur/*` | ✅ **en production** sur `/configurer/v2` (`noindex`) — 8 sections, grilles en données, visuel nu sur mobile, glissement au pouce, bardage anthracite seul (`surDemande`), **plus de choix de numéro**, bouton « Être rappelé » | bascule sur `/configurer` + levée du `noindex` + retrait du v1 | 030, 031 |
+| **Page « Démarche RSE »** | `(public)/guide/demarche-rse-howner/page.tsx`, `contenu/rse.ts`, `editorial/DemarcheRse.tsx` | ✅ **en production** (2026-09-07) — 10 sections, grille d'indicateurs sans chiffre Howner, 4 repères publics sourcés, objectif −10 %, accroche « 011 » sur l'accueil | ⏳ `statut: "a-venir"` → `"publiee"` après vérification ; **échéance du −10 % à fixer** | 038, 029 |
+| **Page « Hébergements professionnels »** | `(public)/hebergements-professionnels/page.tsx`, `contenu/hebergements-professionnels.ts`, `site/Professionnels.tsx` | ✅ **en production** (2026-09-07) — étude d'implantation HPA/hôtels, sans prix ni volume, CTA vers `/contact` pré-rempli, accroche « 012 » + entrée `NAV` | ⏳ `statut: "a-venir"` → `"publiee"` après vérification | 038 |
 | **CRM — dashboard de suivi** | `(admin)/admin/(protected)/page.tsx`, `shared/components/admin/{StatutsCommerciauxDonut,ConseillersBar}.tsx` | ✅ livré (branche) — indicateurs de retard, charge par conseiller, table de priorité | — | 035 |
 | **CRM — liste + Kanban** | `(admin)/admin/(protected)/leads/page.tsx`, `components/admin/LeadsVue.tsx` | ✅ livré (branche) — colonne « Affectation » retirée, `?vue=kanban` | — | 035, 028 |
 | **CRM — journal d'appels** | `components/admin/LeadAppels.tsx`, `api/admin/leads/[id]/appels` | ✅ livré (branche) — table `lead_appels`, trigger `dernier_appel_at` | migration à appliquer | 035 |
@@ -79,7 +83,7 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 | Stockage leads + consentement PLU | `src/app/api/reservation/route.ts`, `src/lib/supabase.ts` | Non-bloquant, lazy client | Migration preprod/prod | 007 |
 | Calcul livraison GPS | `src/components/site/Reservation.tsx`, `src/lib/site.ts` (TRANSPORT) | ✅ Haversine × road_factor × poids × tarif — réactif via `plu_result_updated` | Coordonnées atelier à affiner | — |
 | SEO | `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `viewer/layout.tsx`, `lib/jsonld.ts`, `seo/JsonLd.tsx`, `llms.txt/route.ts` | ✅ P0+P1 (sitemap/robots/OG/twitter/canonical/noindex + JSON-LD Org/Product/FAQ + llms.txt) | P2 polish | 018 |
-| **Page « À propos »** | `(public)/a-propos/page.tsx`, `ABOUT` (`site.ts`), `aboutPageSchema()` | ✅ livré (branche) — composant serveur, contenu en données, JSON-LD `AboutPage`, entrée `NAV` + sitemap + `llms.txt` | — | 037, 029 |
+| **Page « À propos »** | `(public)/a-propos/page.tsx`, `ABOUT` (`site.ts`), `aboutPageSchema()` | ✅ en production — composant serveur, contenu en données, JSON-LD `AboutPage`, entrée `NAV` + sitemap + `llms.txt`. **Section 04 réécrite le 2026-09-07** : « zéro déchet », « indéfiniment recyclable » et « respect de la Terre » retirés, lien vers la démarche RSE ajouté | — | 037, 029, 038 |
 
 ## Risques principaux
 
@@ -201,6 +205,80 @@ ANTHROPIC_API_KEY=                 # optionnel (ADR-017)
 ```
 Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO_BASE_EUR`) — ADR-003.
 
+## Dernier point — 2026-09-11
+
+**`main` = `1cc3e4b8`, inchangé.** Branche `feat/adr-029-doctrine-lexicale` (portée depuis `docs/consolidation-2026-09-07`, dont le commit de consolidation n'est pas encore fusionné). Aucune migration, aucune mise en production.
+
+### La doctrine lexicale entre dans ADR-029
+
+Richard dépose une doctrine d'un genre nouveau : jusqu'ici la marque disait **quel produit** on vend ; elle dit désormais **qui** le vend, et interdit de s'attribuer par les mots un rôle qu'on n'exerce pas. Howner est **fabricant-installateur** — fabrication hors-site, atelier, livraison, pose — pas constructeur, pas maître d'œuvre, pas cabinet d'architecture. Copie versionnée `docs/specs/DOCTRINE_LEXICALE_HOWNER.md`, ADR-029 § Amendement du 2026-09-11.
+
+- **Quinze formules entrent dans `PROSCRITS`** (source unique, donc site **et** templates Brevo). Chaque motif éprouvé sur une phrase fautive et une phrase légitime avant d'entrer — « Variable selon les constructeurs » (tiny houses) passe, « constructeur de maisons » non.
+- **Le site public n'en employait aucune.** Sondé avant d'écrire une ligne : zéro occurrence sur le périmètre du contrôle.
+- **Deux auto-qualifications machine réécrites** — `llms.txt` et le JSON-LD `Organization` disent « fabricant-installateur … fabriqués hors-site ». « dessiné **et suivi** par notre architecte intégrée » devient « dessiné par » : le suivi de projet est exactement ce qu'on ne revendique pas.
+- **Rien dans les textes lus par un humain** (`/a-propos`, pied de page) : la qualification « fabricant-installateur » est de la copie de marque, à rédiger avec Richard.
+- La liste « avec prudence » (architecture, conception, faisabilité, implantation, accompagnement) **n'est pas automatisée, à dessein** : ces mots décrivent légitimement le studio ; seul un relecteur voit s'ils qualifient Howner.
+
+> **Point ouvert n° 4 d'ADR-029 — arbitrage de Richard.** La doctrine n'autorise « architecte » que pour une personne **habilitée et désignée** ; la formulation en vigueur est **anonyme par choix** (« sans prénom »). Les deux tirent en sens contraire, et le titre d'architecte est le seul mot de la doctrine dont l'usage indu est une **infraction pénale** (loi du 3 janvier 1977), pas un simple risque de requalification. Reco : nommer si elle est inscrite à l'Ordre, retirer « architecte » sinon — y compris des `<h1>` dictés.
+
+> **Troisième occurrence** de « `check:vocabulaire` refuse le terme cité dans le commentaire qui le documente » (`jsonld.ts`). La règle d'exemption ne couvre que les lignes portant `ADR-029` ; un commentaire multi-lignes n'en porte qu'une. Reformulé sans citer la formule — c'est la bonne issue, pas un élargissement de l'exemption.
+
+> **Vu en passant, non traité** : `llms.txt` annonce encore « série limitée à N exemplaires » et « réserver un exemplaire numéroté avec un acompte remboursable » — contraire aux décisions du 2026-09-07 (aucun volume public, plus de choix de numéro). À reprendre avec la bascule `/configurer`.
+
+### ⚠ Points ouverts au 2026-09-11
+- **Point ouvert n° 4 d'ADR-029** (architecte) — bloque le copy des `<h1>` et de la prochaine campagne Brevo.
+- **Copie « fabricant-installateur »** pour `/a-propos` et le pied de page — avec Richard.
+- **CGV** : relire leur description de la prestation à l'aune de la doctrine (dossier avocat, ADR-015).
+- **`llms.txt`** contredit le 07/09 (volume, numéro, acompte).
+- Reportés du 07/09 : bascule `"publiee"` des deux pages, échéance −10 %, bascule `/configurer`, alerte Albert (RSE).
+
+## Dernier point — 2026-09-07
+
+**`main` = `1cc3e4b8`.** Deux mises en production (PR #120 puis #122), quatre PR fusionnées, **aucune migration** — la base n'a pas bougé de la journée. La consolidation du 31 août (#115), ouverte depuis sept jours, est partie avec la première.
+
+### 1. Le configurateur cesse de promettre ce qu'il ne tient pas
+
+Quatre décisions prises ensemble, détail dans ADR-030 § Amendement du 2026-09-07 :
+
+- **le visuel respire sur mobile** — tag technique et pastilles de configuration passent en `lg:` ; plus on configurait, plus on masquait ce qu'on configurait ;
+- **le pouce navigue dans les visuels**, avec franchissement des faces ; la bascule Extérieur / Intérieur est conservée (arbitrage de Richard contre ma proposition de bande unique) ;
+- **le bardage ne propose plus que l'anthracite**, par **drapeau `surDemande` et non par suppression** : les leads antérieurs se relisent, rouvrir une teinte est un booléen ;
+- **le visiteur ne choisit plus son exemplaire.** `chargerNumeros()` renvoyait six numéros libres **en dur**, jamais lus en base : la grille affichait un état qui n'existait pas. Deux voies s'offraient — brancher la grille sur la base (ADR-009) ou retirer le choix. Richard retient la seconde, et c'est la bonne : sans paiement en ligne, un numéro « choisi » n'engageait rien et un appel le confirmait de toute façon.
+
+Conséquences : bouton **« Être rappelé »**, bandeau « Arko — édition limitée » **sans volume affiché** (une page HPA doit pouvoir en proposer plusieurs), `slot: null` à l'insertion, 409 « numéro indisponible » retiré. **Les treize CTA du site disent « Configurer »**, via une constante `RESERVER_LABEL` posée à côté de `RESERVER_PATH` — le libellé était réécrit dans onze fichiers.
+
+> **Décision assumée contre ma recommandation** : la case CGV reste obligatoire pour être rappelé. Portée à ADR-030 pour qu'ADR-015 la reprenne si l'avocat la soulève.
+
+### 2. Deux pages éditoriales hors classeur
+
+**`/guide/demarche-rse-howner`** — la règle éditoriale *est* la page : ne rien revendiquer qui ne puisse être démontré. Aucun chiffre Howner, aucune formulation absolue, aucune déduction implicite. Onze indicateurs sur douze sont « En cours de constitution » ; le seul en « Mesure en cours » est la distance atelier → site, réellement calculée par le configurateur. Quatre **repères publics sourcés** (RE2020, déchets du bâtiment, valorisation, transport) portent la mention **« Repère public — pas notre chiffre »**, et celui de la RE2020 précise qu'un studio de jardin annexe n'entre pas dans son champ.
+
+**`/hebergements-professionnels`** — étude d'implantation pour campings, hôtellerie de plein air, domaines et gîtes. Ni prix, ni volume, ni délai : le brief l'exige, et l'appel mène au formulaire de contact pré-rempli plutôt qu'au configurateur, **qui répondrait par un prix à une question de faisabilité**.
+
+L'accueil gagne « 011 — Notre démarche RSE » et « 012 — Professionnels » (la FAQ passe à 013) ; le menu gagne « Professionnels ».
+
+**⚠ `/a-propos` a dû suivre.** Sa section 04 affirmait « objectif zéro déchet », « indéfiniment recyclable » et « le respect de la Terre » — exactement ce que la page RSE écarte, à deux clics de distance. Réécrite. **Deux surfaces qui parlent d'écologie ne peuvent pas tenir deux discours : celle qui promet le plus décide de ce qu'on nous opposera.**
+
+### 3. Vérifié sur la sortie réelle, pas sur des codes HTTP
+
+Production sondée après chaque fusion : 13 « Configurer » et 0 « Réserver » sur l'accueil ; sur `/a-propos`, **zéro occurrence** des trois formules retirées ; **27 URLs au sitemap et aucune des deux nouvelles pages** — le guardrail ADR-038 tient, elles sont servies sans être annoncées.
+
+> **Leçon de méthode, nouvelle celle-ci** : `grep -c` compte des **lignes**, pas des occurrences. Sur un HTML minifié servi sur une seule ligne, il répond « 1 » quoi qu'il arrive — un contrôle qui semble passer alors qu'il n'a rien mesuré. `grep -o … | wc -l` est le seul comptage honnête ici.
+
+> **Deux fois dans la journée**, `check:vocabulaire` a refusé un terme proscrit **cité dans le commentaire qui documentait la règle**. Un garde-fou qui ne s'applique pas à celui qui le documente n'en serait pas un.
+
+> **Rappel confirmé** : ESLint refuse un `setState` atteignable de façon synchrone dans un effet ; une garde sur une prop ne le convainc pas, une comparaison à une `ref` si (leçon du 2026-08-31, rejouée à l'identique).
+
+### ⚠ Points ouverts au 2026-09-07
+
+- **Échéance de l'objectif −10 %** (page RSE) **non fixée** — le texte dit « par rapport à notre première mesure fiable », sans date. Poser une échéance au jugé aurait été la seule vraie approximation de la page. **Arbitrage de Richard attendu.**
+- **Alerte Albert non traitée** — le positionnement RSE est public depuis le 2026-09-07.
+- **Les deux nouvelles pages sont en `"a-venir"`** : servies, hors sitemap et hors maillage. À basculer en `"publiee"` après vérification en production.
+- **Template Brevo 9** — porte encore une ligne « numéro ». La route envoie `NUMERO: ""` : rendu vide, jamais faux. À retirer **côté Brevo**, mais **pas avant la bascule** — le tunnel v1 utilise le même template et lui transmet un vrai numéro.
+- **`/configurer` (v1)** sert toujours six numéros et trois teintes, au sitemap en priorité 0.8. Seul endroit du site qui contredit les décisions du jour.
+- **Preview non vérifiée sur le lot RSE** — passage en production décidé par Richard, risque contenu par le `statut: "a-venir"`.
+- Inchangés : référents Google Places, récapitulatif réel jamais envoyé, temps 2 du CRM, coordonnées de l'atelier.
+
 ## Dernier point — 2026-08-31 (soir)
 
 **`main` = `dfe8f653`.** ADR-044 livrée de bout en bout : quatre lots, deux PR (#113 → `dev`, #114 → `main`), migration appliquée **sur les deux bases**.
@@ -266,9 +344,9 @@ Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se m
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** ; **amendé le 2026-08-26** : deux listes (Prospects = CRM / Newsletter = consentement), `{{ unsubscribe_link }}` était un tag inexistant, plaquette jointe par lien ; ⚠ **double opt-in toujours non câblé** | ✅ |
 | 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** ; **amendé le 2026-08-28** : ⚠ l'autocomplétion Google Places n'a **jamais** fonctionné en production — clé restreinte par référent, `howner.fr` non autorisé | 🟠 |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
-| 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** | ✅ |
-| 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — livré** ; **amendé les 2026-08-02 puis 2026-08-20/21** (bardage renommé, ambiance intérieure, 9 sections, contrôles de saisie, socle du prix) ; bascule sur `/configurer` conditionnée à 031 | 🟠 |
-| 031 | **Soumission de la demande de numéro** (configurateur v2 → lead CRM) | **Accepté — migrations appliquées et vérifiées sur Preview (2026-08-21)** ; unicité déplacée sur le numéro **confirmé**, éprouvée par essai réel ; **reste la route et le branchement du bouton** ; Prod à la validation `dev` → `main` | 🟠 |
+| 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** ; **amendée le 2026-09-11** (doctrine lexicale : Howner est **fabricant-installateur**, quinze formules de rôle proscrites, « architecte » = point ouvert n° 4) | ✅ |
+| 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — livré** ; **amendé les 2026-08-02, 2026-08-20/21 puis 2026-09-07** (surimpressions retirées sur mobile, glissement au pouce, teinte unique par drapeau `surDemande`, parcours ramené à 8 sections, bandeau « édition limitée » **sans volume**, bouton « Être rappelé ») ; bascule sur `/configurer` conditionnée à 031 | 🟠 |
+| 031 | **Soumission de la demande de numéro** (configurateur v2 → lead CRM) | **Accepté — livré et en production** ; unicité sur le numéro **confirmé**, éprouvée par essai réel — elle protège désormais l'attribution faite en CRM. **Amendée le 2026-09-07** : le visiteur ne choisit plus son exemplaire (§5 sans objet, plus de 409 ; §6 `slot: null`). Rien à défaire en base | 🟠 |
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |
 | 033 | Back-office des grilles tarifaires (`loadConfig()` → base) | Réservé — à écrire | ❓ |
 | 034 | Espace client (dépôt de pièces) | Réservé — à écrire ; GED prête côté CRM (`origine = 'client'`) | ❓ |
@@ -277,13 +355,20 @@ Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se m
 | 043 | **Téléphonie Allo** — click-to-call (extension, sans code), synchronisation des contacts, journal d'appels alimenté par webhook | **Réservé — à écrire** ; faisabilité étudiée le 2026-08-28. ⚠ Dépendance externe critique, **alerte Albert** | ❓ |
 | 036 | **Synchronisation Pennylane** — le statut « Paiement réservé » posé depuis l'encaissement réel (MCP/API) | **Réservé — à écrire** ; dépendance externe critique, **alerte Albert** | ❓ |
 | 037 | **Page « À propos »** (`/a-propos`) — ADN de marque, sans partenaire nommé | **Accepté — livré (`dev`, 2026-08-17)** ; **alerte Albert** : nom du bureau d'études retiré (ADR-029 §67) + slug à confirmer | ✅ |
-| 038 | **19 pages éditoriales SEO** (usages, guides, local) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — TERMINÉ : lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
+| 038 | **21 pages éditoriales SEO** (usages, guides, local, RSE, professionnels) — registre de routes, arbitrage des URL en collision, régime vocabulaire | **Accepté — lots 0 à 4 livrés et en production, 19 pages publiées (27 URLs au sitemap)** ; **amendée le 2026-09-07** : périmètre porté à 21 routes (2 pages hors classeur, en `"a-venir"` — servies, hors sitemap), règle sur les sorties de gabarit, **clause anti-greenwashing ajoutée au §7** ; **alertes Albert** : contenus réglementaires au dossier avocat, concurrent nommé retiré de la spec du guide « Prix », **ouverture B2B non prévue (section « plusieurs unités » de Biarritz)**, **CGV toujours rédigées en « maison » / CCMI** (ADR-015) | ✅ |
 | 039 | **Authentification réelle du back-office** — session en cookie, garde au proxy, gardes serveur sur 10 pages et 26 handlers, policies RLS corrigées | **Accepté — livré et VÉRIFIÉ EN PRODUCTION le 2026-08-25** (PR #89) ; fuite fermée, migration appliquée | ✅ |
 | 040 | **Pages produit « Heure bleue »** — refonte des deux pages produit, fond sombre, quatre moments framer-motion, copy réécrit (amende 002) | **Accepté — livré, à vérifier en Preview** ; **alerte Albert** (écart assumé à la charte Affinity) | ✅ |
 | 041 | **Charte « Heure bleue »** — deux registres, accent chaud, teintes en tokens (remplace 002) | **Accepté — socle livré, application par lots** ; **alerte Albert** | ✅ |
 | 044 | **Domaine « Agents immobiliers partenaires »** — table dédiée `agents_immo` (≠ leads), vivier lu dans la liste Brevo `Agents` (id 9, 167 contacts), journal d'appels, suivi du dernier email, `leads.agent_id` comme assiette de la future commission | **Accepté — LIVRÉ ET EN PRODUCTION le 2026-08-31** (PR #113 → `dev`, #114 → `main`), 4 lots ; templates **23** (unitaire) et **24** (campagne) rédigés. ⚠ **alerte Albert** : le template 24 promet une commission d'apporteur avant tout cadre juridique (loi Hoguet) ; **4 templates Brevo actifs violent ADR-029**, dont le 22 en production | ✅ |
 
 ## Prochaines priorités (actionnable sans blocage externe)
+
+0-bis. **Suites du 2026-09-11** (doctrine lexicale) : **trancher le point ouvert n° 4 d'ADR-029** (architecte habilitée et désignée ?) ; rédiger avec Richard la qualification « fabricant-installateur » sur `/a-propos` et le pied de page ; relire les CGV à l'aune de la doctrine (ADR-015) ; corriger `llms.txt` (volume, numéro, acompte) avec la bascule `/configurer`.
+0. **Suites du 2026-09-07** — dans l'ordre où elles débloquent :
+   - **basculer les deux pages nouvelles en `"publiee"`** (`/guide/demarche-rse-howner`, `/hebergements-professionnels`) après vérification en production. Deux lignes au registre ; elles entrent alors au sitemap, à la navigation et au maillage ;
+   - **fixer l'échéance de l'objectif −10 %** de la page RSE — seule ligne de la page qui engage un résultat, et la seule qu'aucune donnée ne permet de trancher à ma place ;
+   - **bascule du configurateur** (voir §12 ci-dessous), qui ferme aussi le sujet du template Brevo 9 ;
+   - **alerte Albert** : positionnement RSE public depuis le 2026-09-07.
 1. ~~**Merger `feat/terrain-address-lookup`**~~ ✅ mergé 2026-06-27.
 2. ~~**`PackTerrainContactForm` submit câblé**~~ ✅ câblé 2026-06-27.
 3. ~~**Brevo contacts opt-in (DOI)**~~ ✅ livré 2026-06-29 — PRs #12+#13 mergées sur main.
@@ -297,8 +382,8 @@ Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se m
 11. ~~**Fix HTML front indexable**~~ ✅ livré en prod 2026-07-20 (PR #54 → `dev`, PR #55 → `main`). **ADR-018 SEO reste P2** (polish non bloquant).
     - **Placeholders Brevo `LEAD_DESCRIPTION` / `LEAD_PRODUIT`** à ajouter au template `BREVO_TEMPLATE_AFFECTATION` (15) — reliquat ADR-027.
 12. ~~**Configurateur v2 — parcours et écrans**~~ ✅ livré sur `dev` le 2026-08-02 (`/configurer/v2`, `noindex`). **Suite actionnable** :
-    - **ADR-031** — soumission de la demande de numéro : le bouton « Réserver ce numéro » n'a pas encore de handler (`onAction` vide). Sans lui, la bascule sur `/configurer` casserait l'entonnoir.
-    - **Bascule `/configurer` + levée du `noindex`** — à faire *après* ADR-031, avec retrait de `Configurator.tsx` / `config-store.tsx` (v1).
+    - ~~**ADR-031** — soumission de la demande de numéro~~ ✅ **livrée et en production**. **Amendée le 2026-09-07** : le visiteur ne choisit plus son exemplaire, le conseiller l'attribue en CRM.
+    - **Bascule `/configurer` + levée du `noindex`** — c'est désormais **la priorité du domaine** : le v1 sert encore six numéros, trois teintes et un bouton « Envoyer ma demande — n° NN », au sitemap en priorité 0.8. Il contredit seul les décisions du 2026-09-07. Comprend le retrait de `Configurator.tsx` / `config-store.tsx`, la sortie de `/configurer` du sitemap, **puis** le retrait de la ligne « numéro » du template Brevo 9 — dans cet ordre, le v1 alimentant encore ce paramètre.
     - ~~Volume de série~~ ✅ retranché le 2026-08-04 : **6 unités** (annule le « reste à 12 » du 02/08), ADR-029 et ADR-030 amendées.
     - ~~Alerte Albert~~ ✅ traitée verbalement le 2026-08-02 — écarts maintenus et assumés.
 13. **ADR-035 — CRM interne** ✅ livré sur `feat/adr-035-crm-leads` (2026-08-04). **Suite actionnable** :
