@@ -31,6 +31,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 Termes interdits : **maison**, **maison individuelle**, résidence principale, **clé en main**, toute raison sociale autre que Howner (exception : bloc d'identification du pied de page), tout nom de fournisseur — plus modulaire, préfabriqué, tiny house, conteneur, catalogue.
 > Exception unique : « tiny house » sur `/studio-jardin-tiny-house` (ADR-029 § Amendement du 2026-08-20), via le champ `sauf` du contrôle — un terme, un chemin, jamais un fichier entier.
 Vocabulaire imposé : **studio de jardin**, unité, hébergement, annexe, espace supplémentaire, prêt à vivre. **Masculin.**
+> Doctrine lexicale (ADR-029 § Amendement du 2026-09-11) : Howner est **fabricant-installateur**, fabrication **hors-site** — jamais constructeur, maître d'œuvre ni cabinet d'architecture ; pas de « permis garanti », « validation urbanistique », « nous nous occupons de tout » (dans `PROSCRITS`). « architecte » seulement pour une personne habilitée et désignée — point ouvert n° 4, arbitrage de Richard.
 « Notre architecte intégrée » (sans prénom). « Puigbo » (sans accent).
 Cadre de vente : annexe sur parcelle bâtie ou hébergement professionnel ; terrain nu **non ouvert**.
 Routes produit : `/studio-jardin-arko-one`, `/studio-jardin-arko-max`. Redirections permanentes depuis `/arko-*` — ne pas les retirer.

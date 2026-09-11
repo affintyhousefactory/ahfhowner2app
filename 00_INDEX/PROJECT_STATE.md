@@ -205,6 +205,33 @@ ANTHROPIC_API_KEY=                 # optionnel (ADR-017)
 ```
 Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO_BASE_EUR`) — ADR-003.
 
+## Dernier point — 2026-09-11
+
+**`main` = `1cc3e4b8`, inchangé.** Branche `feat/adr-029-doctrine-lexicale` (portée depuis `docs/consolidation-2026-09-07`, dont le commit de consolidation n'est pas encore fusionné). Aucune migration, aucune mise en production.
+
+### La doctrine lexicale entre dans ADR-029
+
+Richard dépose une doctrine d'un genre nouveau : jusqu'ici la marque disait **quel produit** on vend ; elle dit désormais **qui** le vend, et interdit de s'attribuer par les mots un rôle qu'on n'exerce pas. Howner est **fabricant-installateur** — fabrication hors-site, atelier, livraison, pose — pas constructeur, pas maître d'œuvre, pas cabinet d'architecture. Copie versionnée `docs/specs/DOCTRINE_LEXICALE_HOWNER.md`, ADR-029 § Amendement du 2026-09-11.
+
+- **Quinze formules entrent dans `PROSCRITS`** (source unique, donc site **et** templates Brevo). Chaque motif éprouvé sur une phrase fautive et une phrase légitime avant d'entrer — « Variable selon les constructeurs » (tiny houses) passe, « constructeur de maisons » non.
+- **Le site public n'en employait aucune.** Sondé avant d'écrire une ligne : zéro occurrence sur le périmètre du contrôle.
+- **Deux auto-qualifications machine réécrites** — `llms.txt` et le JSON-LD `Organization` disent « fabricant-installateur … fabriqués hors-site ». « dessiné **et suivi** par notre architecte intégrée » devient « dessiné par » : le suivi de projet est exactement ce qu'on ne revendique pas.
+- **Rien dans les textes lus par un humain** (`/a-propos`, pied de page) : la qualification « fabricant-installateur » est de la copie de marque, à rédiger avec Richard.
+- La liste « avec prudence » (architecture, conception, faisabilité, implantation, accompagnement) **n'est pas automatisée, à dessein** : ces mots décrivent légitimement le studio ; seul un relecteur voit s'ils qualifient Howner.
+
+> **Point ouvert n° 4 d'ADR-029 — arbitrage de Richard.** La doctrine n'autorise « architecte » que pour une personne **habilitée et désignée** ; la formulation en vigueur est **anonyme par choix** (« sans prénom »). Les deux tirent en sens contraire, et le titre d'architecte est le seul mot de la doctrine dont l'usage indu est une **infraction pénale** (loi du 3 janvier 1977), pas un simple risque de requalification. Reco : nommer si elle est inscrite à l'Ordre, retirer « architecte » sinon — y compris des `<h1>` dictés.
+
+> **Troisième occurrence** de « `check:vocabulaire` refuse le terme cité dans le commentaire qui le documente » (`jsonld.ts`). La règle d'exemption ne couvre que les lignes portant `ADR-029` ; un commentaire multi-lignes n'en porte qu'une. Reformulé sans citer la formule — c'est la bonne issue, pas un élargissement de l'exemption.
+
+> **Vu en passant, non traité** : `llms.txt` annonce encore « série limitée à N exemplaires » et « réserver un exemplaire numéroté avec un acompte remboursable » — contraire aux décisions du 2026-09-07 (aucun volume public, plus de choix de numéro). À reprendre avec la bascule `/configurer`.
+
+### ⚠ Points ouverts au 2026-09-11
+- **Point ouvert n° 4 d'ADR-029** (architecte) — bloque le copy des `<h1>` et de la prochaine campagne Brevo.
+- **Copie « fabricant-installateur »** pour `/a-propos` et le pied de page — avec Richard.
+- **CGV** : relire leur description de la prestation à l'aune de la doctrine (dossier avocat, ADR-015).
+- **`llms.txt`** contredit le 07/09 (volume, numéro, acompte).
+- Reportés du 07/09 : bascule `"publiee"` des deux pages, échéance −10 %, bascule `/configurer`, alerte Albert (RSE).
+
 ## Dernier point — 2026-09-07
 
 **`main` = `1cc3e4b8`.** Deux mises en production (PR #120 puis #122), quatre PR fusionnées, **aucune migration** — la base n'a pas bougé de la journée. La consolidation du 31 août (#115), ouverte depuis sept jours, est partie avec la première.
@@ -317,7 +344,7 @@ Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se m
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** ; **amendé le 2026-08-26** : deux listes (Prospects = CRM / Newsletter = consentement), `{{ unsubscribe_link }}` était un tag inexistant, plaquette jointe par lien ; ⚠ **double opt-in toujours non câblé** | ✅ |
 | 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** ; **amendé le 2026-08-28** : ⚠ l'autocomplétion Google Places n'a **jamais** fonctionné en production — clé restreinte par référent, `howner.fr` non autorisé | 🟠 |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
-| 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** | ✅ |
+| 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** ; **amendée le 2026-09-11** (doctrine lexicale : Howner est **fabricant-installateur**, quinze formules de rôle proscrites, « architecte » = point ouvert n° 4) | ✅ |
 | 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — livré** ; **amendé les 2026-08-02, 2026-08-20/21 puis 2026-09-07** (surimpressions retirées sur mobile, glissement au pouce, teinte unique par drapeau `surDemande`, parcours ramené à 8 sections, bandeau « édition limitée » **sans volume**, bouton « Être rappelé ») ; bascule sur `/configurer` conditionnée à 031 | 🟠 |
 | 031 | **Soumission de la demande de numéro** (configurateur v2 → lead CRM) | **Accepté — livré et en production** ; unicité sur le numéro **confirmé**, éprouvée par essai réel — elle protège désormais l'attribution faite en CRM. **Amendée le 2026-09-07** : le visiteur ne choisit plus son exemplaire (§5 sans objet, plus de 409 ; §6 `slot: null`). Rien à défaire en base | 🟠 |
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |
@@ -336,6 +363,7 @@ Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se m
 
 ## Prochaines priorités (actionnable sans blocage externe)
 
+0-bis. **Suites du 2026-09-11** (doctrine lexicale) : **trancher le point ouvert n° 4 d'ADR-029** (architecte habilitée et désignée ?) ; rédiger avec Richard la qualification « fabricant-installateur » sur `/a-propos` et le pied de page ; relire les CGV à l'aune de la doctrine (ADR-015) ; corriger `llms.txt` (volume, numéro, acompte) avec la bascule `/configurer`.
 0. **Suites du 2026-09-07** — dans l'ordre où elles débloquent :
    - **basculer les deux pages nouvelles en `"publiee"`** (`/guide/demarche-rse-howner`, `/hebergements-professionnels`) après vérification en production. Deux lignes au registre ; elles entrent alors au sitemap, à la navigation et au maillage ;
    - **fixer l'échéance de l'objectif −10 %** de la page RSE — seule ligne de la page qui engage un résultat, et la seule qu'aucune donnée ne permet de trancher à ma place ;

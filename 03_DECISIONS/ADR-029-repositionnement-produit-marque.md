@@ -44,6 +44,10 @@ La spec est catégorique et le formule comme une contrainte de développement : 
 > Le 03/08 « maison » était devenu le terme imposé ; le 19/08 il **redevient
 > interdit** et cède la place à **« studio de jardin »**. Les deux mouvements
 > sont datés plutôt qu'effacés — l'historique explique le code qu'on lit.
+> **Amendé une troisième fois le 2026-09-11** (doctrine lexicale) : la
+> blocklist gagne quinze formules qui prêtent à Howner un rôle qu'il n'exerce
+> pas, et le vocabulaire imposé gagne **« fabricant-installateur »** et
+> **« fabrication hors-site »**.
 
 **Interdits** : ~~maison, votre maison~~, maison individuelle, résidence principale, clé en main, toute raison sociale autre que Howner, tout nom de fournisseur ou de sous-traitant.
 
@@ -340,6 +344,104 @@ L'écart entre les deux modèles passe de 22 000 € à **30 000 €**. C'est un
 Le prix au m² de l'Arko One (`ONE_PRICING.perM2 = 2250`) reste marqué `TODO ARKO ONE` et **n'a pas été recalculé** : 69 900 € / 20 m² donne 3 495 €/m², soit un tiers de plus que la valeur inscrite. Ce littéral n'alimente aucun affichage de la page Arko One aujourd'hui, mais il devient franchement faux — à confirmer avec le prix définitif.
 
 
+## Amendement du 2026-09-11 — doctrine lexicale : le mot dit le rôle réellement exercé
+
+**Décision de Richard**, qui dépose une doctrine lexicale de portée générale et
+demande qu'elle amende le présent ADR. Copie versionnée :
+`docs/specs/DOCTRINE_LEXICALE_HOWNER.md`. Elle ne remplace pas la blocklist —
+elle ajoute une **règle de nature différente**.
+
+**De quoi il s'agit.** Les amendements précédents disaient *quel produit* on
+vend (un studio de jardin, pas une maison). Celui-ci dit *qui* le vend, et
+interdit de s'attribuer par les mots un rôle qu'on n'exerce pas. Howner est un
+**fabricant-installateur** : il fabrique hors-site, dans son atelier, puis livre
+et pose. Il n'est pas constructeur de maisons, pas maître d'œuvre, pas cabinet
+d'architecture ; il ne garantit ni permis ni validation urbanistique, et ne
+« s'occupe pas de tout ». Chacune de ces formules rapproche la société d'une
+qualification juridique — CCMI, maîtrise d'œuvre, exercice de l'architecture —
+avec le régime de responsabilité et d'assurance qui l'accompagne. La phrase de
+clôture de la doctrine fait règle : *« Ne jamais chercher à contourner une
+qualification juridique par le vocabulaire. La description publique doit
+correspondre exactement au rôle contractuel, technique, assurantiel et
+réglementaire réellement exercé par AHF. »*
+
+C'est la suite logique du 19/08 : ce jour-là le produit sortait du champ CCMI ;
+aujourd'hui l'entreprise cesse de s'y décrire.
+
+**Trois listes, trois traitements.**
+
+1. **Privilégier** — *fabricant-installateur, fabrication hors-site, atelier,
+   livraison, installation, pose, modèle ARKO, studio de jardin, première
+   analyse de compatibilité de la parcelle, prérequis terrain, intervenant
+   spécialisé indépendant, bureau d'études structure indépendant, « développé
+   ou conçu avec une architecte » (si l'intervention est réelle et
+   justifiable)*. Ces termes **entrent dans le vocabulaire imposé** du §2.
+   « hors-site », retiré de la blocklist le 2026-07-09, y est désormais
+   **recommandé** — le site l'emploie déjà 69 fois.
+2. **Avec prudence** — *architecture, architectural, conception, étude de
+   faisabilité, implantation, prêt à vivre, hors d'eau / hors d'air,
+   accompagnement, architecte (uniquement si une personne effectivement
+   habilitée est précisément désignée)*. **Non automatisés, à dessein** : ces
+   mots sont légitimes quand ils décrivent l'objet (« une architecture
+   contemporaine », « les règles d'implantation ») et fautifs quand ils
+   qualifient Howner (« notre service architecture »). Un motif ne fait pas
+   cette différence ; une relecture, si. Règle de relecture : **le mot
+   décrit-il le studio, ou prête-t-il un rôle à Howner ?**
+3. **Éviter pour qualifier Howner / AHF** — les quinze formules de la doctrine
+   **entrent dans `PROSCRITS`** (`scripts/vocabulaire-proscrits.mjs`), donc
+   dans les deux contrôles (site et templates Brevo). Motifs ajoutés :
+   constructeur de maisons, maître / maîtrise d'œuvre, cabinet / agence /
+   bureau d'architecture, « Howner Architecture », service architecture,
+   « nous nous occupons de tout », validation urbanistique, permis garanti,
+   « projet entièrement suivi par notre architecte ». « clé en main » et
+   « prise en charge globale » y figuraient déjà. Chaque motif a été **éprouvé
+   sur une phrase fautive et une phrase légitime** avant d'entrer — un
+   contrôle qui passe du premier coup sur un site conforme n'a rien prouvé.
+
+**Deux termes imposés se réconcilient avec la liste « prudence ».**
+
+- **« prêt à vivre »** reste imposé (§2, 19/08) : il désigne le **niveau
+  d'équipement à la livraison** — le studio arrive fini, on n'y fait pas de
+  travaux. Il ne dit **jamais** que le studio peut être occupé sans autorisation
+  ni démarche : « prêt à vivre » ne se colle pas à « sans permis », « sans
+  démarche », « dès demain ».
+- **« notre architecte intégrée »** reste la formulation en vigueur (ADR-004 →
+  ADR-029), **mais** la doctrine y ajoute une condition qui n'était pas écrite :
+  « architecte » ne s'emploie que si une personne **effectivement habilitée**
+  (inscrite à l'Ordre) est **précisément désignée**. « Sans prénom » et
+  « précisément désignée » tirent en sens contraire. → **Point ouvert n° 4**,
+  arbitrage de Richard. En attendant, ce que la doctrine tranche déjà est
+  appliqué : « dessiné **et suivi** par notre architecte intégrée » (llms.txt)
+  devient « dessiné par » — le suivi de projet est exactement ce qu'on ne
+  revendique pas.
+
+**Ce qui est appliqué le jour même.** Les deux endroits où Howner se qualifie
+lui-même pour les machines — `llms.txt` et le JSON-LD `Organization`
+(`jsonld.ts`, `description`) — disent désormais **« fabricant-installateur …
+fabriqués hors-site »**. Le site public, sondé sur le périmètre du contrôle,
+n'employait **aucune** des quinze formules proscrites (une occurrence de
+« constructeurs » sur `/studio-jardin-tiny-house` désigne les fabricants de
+tiny houses, pas Howner — hors motif, à dessein).
+
+**Ce qui ne l'est pas — et pourquoi.** La qualification « fabricant-
+installateur » n'apparaît encore dans **aucun texte lu par un humain**
+(`/a-propos`, pied de page, méga-menu). C'est de la copie de marque : elle se
+rédige avec Richard, pas à sa place. De même les **`<h1>` dictés** des pages
+produit (« Studio de jardin de 20 m² **d'architecte** ») et « écrins
+d'architecte » (`site.ts`) relèvent du point ouvert n° 4 — ils ne sont pas
+fautifs si l'intervention d'une architecte est réelle et justifiable, ce que
+seul Richard peut affirmer.
+
+**Portée.** Comme le reste d'ADR-029 : tout le site hors pages légales
+(§5), domaine mandataire suspendu et back-office ; templates Brevo via
+`check-vocabulaire-brevo.mjs` (ADR-044 §10). **`CLAUDE.md` / `AGENTS.md`**
+mis à jour dans le même geste.
+
+**Alerte Albert.** Non — la doctrine émane de Richard. Mais elle **rejoint le
+dossier avocat** (ADR-015) : c'est la pièce qui décrit le rôle réellement
+exercé par AHF, et les CGV du 22/08 doivent la refléter (leur §1 et leur
+description de la prestation sont à relire à cette aune).
+
 ## Points ouverts — arbitrage Howner requis
 
 Ces trois points sont apparus en croisant la spec avec le code existant. Aucun n'empêche de commencer ; les deux premiers doivent être tranchés avant la réécriture des textes, le troisième avant toute mise en ligne.
@@ -349,6 +451,23 @@ Ces trois points sont apparus en croisant la spec avec le code existant. Aucun n
 **2. « module » imposé vs « modulaire » interdit.** Lecture retenue : cumulatives, voir §2 de la décision. Si Howner considère que la spec lève la blocklist ADR-004, il faut le dire explicitement : la réécriture de 105 occurrences dépend de cette règle.
 
 **3. « Une seule identité » vs réalité juridique.** Le §1 exige que Howner soit seule citée, « y compris mentions légales, coordonnées bancaires ». Or les mentions légales déclarent aujourd'hui **Affinity House Factory, SAS** comme éditeur — obligation légale de nommer l'entité réelle. Howner ne peut être seule citée que s'il s'agit d'un nom commercial déposé d'AHF, et la mention de l'entité juridique reste obligatoire. **Ce point ne peut pas être appliqué à la lettre sur les pages légales sans validation juridique.** Il rejoint §17.10.
+
+**4. « notre architecte intégrée » — habilitée et désignée ? (2026-09-11)** La
+doctrine lexicale n'autorise « architecte » que pour une personne
+**effectivement habilitée** (inscrite à l'Ordre, art. 9 de la loi du 3 janvier
+1977 : le titre est protégé) et **précisément désignée**. La formulation en
+vigueur est anonyme par choix (« sans prénom »). Trois issues : **(a)** la
+personne est inscrite à l'Ordre → on la nomme (nom, ou au moins « architecte
+DPLG / HMONP inscrite à l'Ordre ») et « notre architecte intégrée » reste ;
+**(b)** elle ne l'est pas → « architecte » disparaît du site, y compris des
+`<h1>` dictés (« d'architecte ») et des « écrins d'architecte », au profit de
+« conçu avec une architecte » **seulement si** une architecte habilitée
+intervient réellement, sinon « dessiné par notre équipe de conception » ;
+**(c)** statu quo assumé, porté au dossier avocat. **Recommandation : (a) si
+elle est vraie, (b) sinon — le titre d'architecte est le seul mot de la
+doctrine dont l'usage indu est une infraction pénale, pas seulement un risque
+de requalification.** Trancher avant la prochaine campagne Brevo et avant la
+bascule `/configurer`, qui réécrit du copy.
 
 ## Faisabilité
 
@@ -372,3 +491,4 @@ Ces trois points sont apparus en croisant la spec avec le code existant. Aucun n
 
 `docs/specs/SPEC_CONFIGURATEUR_HOWNER_v1.md` §1, §2, §5, §16, §17 — copie versionnée de la spécification d'Albert (source : Drive `AHF - Plans_SiteWeb_Inspirations`, déclaré dans `project-access.json`).
 `src/lib/site.ts` (BRAND, PRODUCTS, FAQ), `src/app/(public)/mentions-legales/page.tsx`, ADR-004 (remplacé), ADR-015 (risque CGV), ADR-021, ADR-022.
+`docs/specs/DOCTRINE_LEXICALE_HOWNER.md` — doctrine lexicale déposée par Richard le 2026-09-11 (§ Amendement du 2026-09-11) ; `scripts/vocabulaire-proscrits.mjs` (source unique de la blocklist, ADR-044 §10).
