@@ -207,7 +207,7 @@ Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO
 
 ## Dernier point — 2026-09-11
 
-**`main` = `1cc3e4b8`, inchangé.** Branche `feat/adr-029-doctrine-lexicale` (portée depuis `docs/consolidation-2026-09-07`, dont le commit de consolidation n'est pas encore fusionné). Aucune migration, aucune mise en production.
+**`main` = `1cc3e4b8`, inchangé.** Branche `feat/adr-029-doctrine-lexicale` → **PR #123 vers `dev`**, qui emporte aussi la consolidation du 7/09 (`1147a4b8`, non fusionnée jusque-là). Aucune migration, aucune mise en production.
 
 ### La doctrine lexicale entre dans ADR-029
 

@@ -5,7 +5,7 @@
 
 ## Décisions — 2026-09-11 (la doctrine lexicale entre dans ADR-029)
 
-**`main` = `1cc3e4b8`**, inchangé. Branche `feat/adr-029-doctrine-lexicale`, non poussée. Aucune migration.
+**`main` = `1cc3e4b8`**, inchangé. Branche `feat/adr-029-doctrine-lexicale` → **PR #123 vers `dev`** (emporte la consolidation du 7/09). Aucune migration.
 
 - **Doctrine lexicale de Richard** actée : ADR-029 § Amendement du 2026-09-11, copie versionnée
   `docs/specs/DOCTRINE_LEXICALE_HOWNER.md`. Howner est **fabricant-installateur** (hors-site,
