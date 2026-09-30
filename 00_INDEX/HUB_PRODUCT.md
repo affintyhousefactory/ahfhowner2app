@@ -13,7 +13,7 @@ Point d'entrée pour : les produits Arko One / Arko Max, le pricing, la mécaniq
 | **Arko One** | 20 m² | 12 | **69 900 €** | base + emprise 6,65 × 3,60 m confirmées (spec §5, ADR-029) ; reste de la grille remplacé par ADR-030 |
 | **Arko Max** | 40 m² (= ARKO historique) | 5 | **99 900 €** | base confirmée (spec §5, ADR-029) ; reste de la grille remplacé par ADR-030 |
 
-Origine livraison Bayonne. « Notre architecte intégrée ». Fondateur « Puigbo ». « Arko One »/« Arko Max » = noms produits (wordmark ARKO retiré de l'accueil — ADR-022).
+Origine livraison Bayonne. « Notre conseiller » (« architecte » proscrit, ADR-029 § 2026-09-30). Fondateur « Puigbo ». « Arko One »/« Arko Max » = noms produits (wordmark ARKO retiré de l'accueil — ADR-022).
 
 ## Pricing — devis 3 couches (verrouillé, ADR-005)
 | Couche | Contenu |
@@ -25,7 +25,18 @@ Origine livraison Bayonne. « Notre architecte intégrée ». Fondateur « Puigb
 Montants en env (ADR-003) : acompte 1 500 €, base par produit (`PRODUCTS[key].pricing.base`). **Ne jamais coder en dur.** Le configurateur lit le produit actif (sélecteur One/Max, `?produit=` — ADR-020).
 
 ## Réservation
-Choix d'un numéro + acompte (Stripe, ADR-008) ; liste d'attente si épuisé (ADR-010). Jauge live par produit (ADR-009). Échéancier 10/30/40/20 % → différé (ADR-016). Réservation product-aware (`/configurer`).
+⚠ **Depuis le 2026-09-07 (ADR-031 § Amendement), le visiteur ne choisit plus son exemplaire.** Le
+configurateur v2 recueille une **demande de rappel** — bouton « Être rappelé », `slot: null` — et le
+numéro est attribué par le conseiller depuis le CRM après vérification de la disponibilité. La
+grille publique affichait un état statique, jamais lu en base.
+
+Aucun volume d'exemplaires ne s'affiche plus côté public : « Arko — édition limitée », sans nombre
+(une page HPA doit pouvoir en proposer plusieurs). `SERIE_TOTAL` reste la source technique.
+
+Historique : acompte (Stripe, ADR-008, retiré du MVP) ; liste d'attente si épuisé (ADR-010) ; jauge
+live par produit (ADR-009, sans objet côté public tant qu'il n'y a plus de grille) ; échéancier
+10/30/40/20 % → différé (ADR-016). ⚠ **Le tunnel v1 (`/configurer`) sert encore la grille de six
+numéros** — à retirer à la bascule.
 
 ## Décisions liées
 | ADR | Sujet | Statut |

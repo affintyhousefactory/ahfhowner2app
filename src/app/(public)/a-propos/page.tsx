@@ -37,8 +37,8 @@ const VISUELS = {
   },
   ingenierie: {
     src: "/assets/arko/sketch/arko-sketch-ink.jpg",
-    alt: "Esquisse d'architecte de l'Arko, tracé à l'encre",
-    legende: "Du trait d'architecte à la modélisation 3D",
+    alt: "Esquisse de l'Arko, tracé à l'encre",
+    legende: "Du trait à l'encre à la modélisation 3D",
   },
   eco: {
     src: "/assets/arko/exterior/arko-forest.jpg",

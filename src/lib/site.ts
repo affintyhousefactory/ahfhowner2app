@@ -3,7 +3,7 @@
    Règles de marque ABSOLUES — voir ADR-029 (remplace ADR-004).
    Vocabulaire imposé : studio de jardin, unité, hébergement, annexe,
    espace supplémentaire, prêt à vivre.
-   « notre architecte intégrée » sans prénom. Fondateur = Puigbo
+   « notre conseiller » sans prénom. Fondateur = Puigbo
    (sans accent). Contrôle : node scripts/check-vocabulaire.mjs
    ============================================================ */
 
@@ -150,7 +150,7 @@ export const SERIE_COUNT = 2;
 // JSON-LD Organization s'y branchent. Surchargeable par env pour ne pas
 // dépendre d'un commit le jour où le numéro change.
 const PHONE_DISPLAY =
-  process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+33 (0)5 64 37 37 14";
+  process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+33 (0)7 56 90 81 91";
 
 export const CONTACT = {
   /**
@@ -241,7 +241,7 @@ export const BRAND = {
   h1: "Studios de jardin Howner, un espace supplémentaire dessiné pour vous",
   baseline: "Un espace supplémentaire, dessiné pour vous",
   subline:
-    "Deux modèles d'architecte, livrés prêts à vivre. Fabriqués au Pays-Basque.",
+    "Deux modèles d'exception, livrés prêts à vivre. Fabriqués au Pays-Basque.",
   series: "Série 01",
   total: SERIE_TOTAL, // pool commun (One + Max confondus)
   reserved: 3, // placeholder Phase 1 — Supabase Realtime Phase 4 (ADR-009)
@@ -257,10 +257,10 @@ export const BRAND = {
 } as const;
 
 export const MANIFESTO =
-  "On a retiré les mètres carrés superflus. Pas la lumière, pas la hauteur, pas le soin. Arko est pensé par notre architecte intégrée comme un lieu de vie entier — simplement plus juste.";
+  "On a retiré les mètres carrés superflus. Pas la lumière, pas la hauteur, pas le soin. Arko est pensé dans notre atelier comme un lieu de vie entier — simplement plus juste.";
 
 export const PROMISE =
-  "Un studio de jardin d'architecte fabriqué Hors-Site dans notre atelier, livré prêt à vivre, en 12 semaines.";
+  "Un studio de jardin d'exception fabriqué Hors-Site dans notre atelier, livré prêt à vivre, en 12 semaines.";
 
 // Paramètres transport convoi — source de vérité en DB (config_variables namespace 'transport').
 // Fallback env/constante jusqu'à implémentation du chargement DB (Phase 4).
@@ -359,9 +359,9 @@ export const PRODUCTS = {
        depuis juin — une redirection permanente la couvre (`next.config.ts`),
        sans quoi le référencement acquis serait perdu. */
     slug: "/studio-jardin-arko-one",
-    tagline: "20 m² d'architecte, l'essentiel juste.",
+    tagline: "20 m² d'exception, l'essentiel juste.",
     /* `<h1>` de la page produit. Porte la catégorie, que `name` ne dit pas. */
-    h1: "Studio de jardin de 20 m² d'architecte, l'essentiel juste",
+    h1: "Studio de jardin de 20 m² d'exception, l'essentiel juste",
     area: "20 m²",
     footprint: "6,65 × 3,60 m", // ADR-029 — emprise §5 de la spec configurateur v2
     total: SERIE_TOTAL, // pool partagé One + Max
@@ -388,12 +388,12 @@ export const PRODUCTS = {
     key: "max" as const,
     name: "Arko Max",
     slug: "/studio-jardin-arko-max",
-    tagline: "40 m² d'architecte, livrés prêts à vivre.",
+    tagline: "40 m² d'exception, livrés prêts à vivre.",
     /* ⚠ Texte dicté par Richard le 2026-08-19, repris tel quel. Le pluriel
        « livrés prêts » ne s'accorde pas avec le singulier « Studio » — repli
        de l'ancien « Deux maisons … livrées prêtes » (ADR-029). Signalé, non corrigé
        d'autorité : c'est de la copie de marque. */
-    h1: "Studio de jardin de 40 m² d'architecte, livrés prêts à vivre.",
+    h1: "Studio de jardin de 40 m² d'exception, livrés prêts à vivre.",
     area: BRAND.area,
     footprint: BRAND.footprint,
     total: SERIE_TOTAL, // pool partagé One + Max
@@ -493,7 +493,7 @@ export const REASSURANCE_TITRE =
 export const REASSURANCE_INTRO = [
   {
     t: "Notre insight et expertise",
-    d: "Chaque ARKO est dessinée et suivie par notre architecte intégrée, de l'esquisse à la pose.",
+    d: "Chaque ARKO est dessiné et fabriqué dans notre atelier. Notre conseiller reste votre interlocuteur, de la configuration à la pose.",
   },
   {
     t: "Le savoir-faire d'atelier",
@@ -504,7 +504,7 @@ export const REASSURANCE_INTRO = [
 export const REASSURANCE = [
   {
     t: "Premier contact",
-    d: "30 min en visio avec notre architecte intégrée pour valider votre projet et recevoir votre devis.",
+    d: "30 min en visio avec notre conseiller pour valider votre projet et recevoir votre devis.",
   },
   {
     t: "Devis signé, nous réservons votre ARKO",
@@ -702,7 +702,7 @@ export const ABOUT = {
         },
         {
           k: "Le design",
-          d: "Nos modèles Arko One et Arko Max sont de véritables écrins d'architecte, où chaque ligne invite à la sérénité et à la reconnexion avec l'extérieur.",
+          d: "Nos modèles Arko One et Arko Max sont de véritables écrins d'exception, où chaque ligne invite à la sérénité et à la reconnexion avec l'extérieur.",
         },
         {
           k: "L'expérience",
@@ -738,7 +738,7 @@ export const ABOUT = {
       points: [
         {
           k: "Une conception sur-mesure",
-          d: "Chaque courbe, chaque ouverture imaginée par notre architecte intégrée est certifiée par une ingénierie de pointe, assurant à votre studio une robustesse absolue face au temps.",
+          d: "Chaque courbe, chaque ouverture dessinée dans notre atelier est certifiée par une ingénierie de pointe, assurant à votre studio une robustesse absolue face au temps.",
         },
         {
           k: "La fabrication de précision",

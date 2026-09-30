@@ -53,8 +53,8 @@ export function Footer() {
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-canvas/60">
-              Deux studios de jardin d'architecte, conçus avec notre architecte
-              intégrée et livrés prêts à vivre. Fabriqués au Pays-Basque.
+              Deux studios de jardin d'exception, dessinés dans notre atelier
+              et livrés prêts à vivre. Fabriqués au Pays-Basque.
             </p>
             {/* Sous la baseline, dans le bloc d'identité : c'est là qu'on
                 cherche « qui est cette marque », pas dans les colonnes de
@@ -204,8 +204,8 @@ export function Footer() {
         </address>
 
         <p className="border-t border-canvas/15 py-6 text-center font-mono text-[0.7rem] uppercase tracking-[0.18em] text-canvas/60">
-          {BRAND.maker} · Arko One · Arko Max · {BRAND.madeIn} — Conçu avec
-          notre architecte intégrée
+          {BRAND.maker} · Arko One · Arko Max · {BRAND.madeIn} — Dessiné et
+          fabriqué dans notre atelier
         </p>
 
         <div className="flex flex-col gap-3 border-t border-canvas/15 py-7 text-xs text-canvas/60 sm:flex-row sm:items-center sm:justify-between">

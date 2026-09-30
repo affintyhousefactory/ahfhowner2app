@@ -115,7 +115,7 @@ const CONTENUS: Record<ProductKey, ContenuProduit> = {
     eyebrow: "Arko One · 20 m²",
     titre: ["À vingt pas de chez vous,", "et tout à fait ailleurs."],
     accroche:
-      "Un studio de jardin d'architecte, livré prêt à vivre et posé sur votre parcelle en une journée.",
+      "Un studio de jardin d'exception, livré prêt à vivre et posé sur votre parcelle en une journée.",
     hero: {
       /* Vue extérieure propre à l'Arko One, fournie par Richard le 2026-08-25.
          Elle remplace un intérieur de l'Arko **Max** servi faute de mieux —

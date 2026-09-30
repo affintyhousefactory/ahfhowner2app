@@ -32,7 +32,7 @@ export default function ContactPage() {
             </h1>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-muted">
               Une question sur Arko One, Arko Max, votre terrain ou la
-              réservation ? Notre architecte intégrée vous répond.
+              réservation ? Notre conseiller vous répond.
             </p>
 
             {/* Voie directe, en regard du formulaire : une question de
