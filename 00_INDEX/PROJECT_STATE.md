@@ -91,8 +91,8 @@ Devis 3 couches (maison + livraison + frais terrain), **logique verrouillée** (
 |---|---|---|---|
 | ~~Prix publics faux (59 900 / 89 900 €)~~ ✅ corrigés le 2026-07-31. ~~Réservation affichée 5 000 € vs 2 000 € au §7~~ ✅ **alignée à 2 000 € le 2026-08-02** (`DEPOSIT_EUR`, FAQ et réassurance interpolées ; variable Vercel absente des 3 scopes, le fallback fait foi) | Commercial | ⚪ Levé | 029 |
 | **Entonnoir de réservation sans handler final** (CTA v2) — **assumé par Richard le 2026-08-19**, réservation par téléphone jusqu'à ADR-031. Guardrail ADR-030 à amender | Conversion | 🟠 Assumé | 030, 031 |
-| **⚠️ CGV non confirmées avocat (`f3de62fe`) déjà LIVE en prod** (`/cgv`, liée au checkbox d'acceptation de `Reservation.tsx`) — engagement contractuel possible sur texte non validé | Risque juridique direct | 🔴 Critique | 015 |
-| Légal acompte/arrhes + CGV non validés | Pas de vente | 🔴 Critique | 015 |
+| ~~CGV non confirmées avocat déjà live en prod~~ ✅ **levé le 2026-08-22** (ADR-015 § Amendement) | Risque juridique | ⚪ Levé | 015 |
+| Réserves CGV : médiateur de la consommation (L.616-1) et assureurs non nommés ; vocabulaire CGV à aligner sur la doctrine lexicale | Juridique | 🟠 Moyenne | 015, 029 |
 | RLS Supabase mal configurée | Fuite leads/réservations | 🔴 Critique | 007 |
 | Charte Affinity non validée Albert | Dérive identité vs PASSATION | 🟠 Moyenne | 002 |
 | API terrain externes (GPU/IGN/Apify) | Feature dégradée | 🟠 Moyenne | 011,012 |
@@ -179,7 +179,7 @@ BREVO_TEMPLATE_AGENCES_CAMPAGNE=24 # campagne (`contact.AGENCE_OU_ENSEIGNE`) —
 # L'autocomplétion d'adresse est donc morte en production depuis juillet — elle échoue
 # en silence, la saisie manuelle prend le relais. Ouvrir `https://howner.fr/*` et
 # `https://www.howner.fr/*` dans la console. Voir ADR-027 § Amendement du 2026-08-28.
-NEXT_PUBLIC_GOOGLE_PLACES_API_KEY= # serveur de clé Google, restrictions à corriger
+NEXT_PUBLIC_GOOGLE_PLACES_API_KEY= # référent howner.fr ouvert le 2026-09-30 (Richard) — à confirmer en prod
 
 # Plaquette commerciale (ADR-026 § Amendement 2026-08-26)
 # Repli codé : public/documents/plaquette-howner-2026.pdf (1,7 Mo). La variable ne sert
@@ -345,7 +345,7 @@ Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se m
 | 012 | LandTool annonce Apify | Proposé | 🟠 |
 | 013 | Contact terrain → leads | Proposé | ✅ |
 | 014 | Service email transactionnel | **Remplacé → ADR-026** | ✅ |
-| 015 | Légal acompte/arrhes/CGV | **Bloqué (avocat) — ⚠️ nouvelle CGV (`f3de62fe`) déployée en prod le 2026-07-13 SANS confirmation avocat obtenue** | 🔴 |
+| 015 | Légal acompte/arrhes/CGV | **Levé le 2026-08-22** (CGV du 22/08 réputées relues et valides, décision de Richard) — réserves : médiateur non nommé, assureurs non nommés, vocabulaire CGV à aligner sur ADR-029 et la doctrine | 🟠 |
 | 016 | Échéancier 10/30/40/20 % | Différé | 🟠 |
 | 017 | Enrichissement terrain Anthropic | Différé (option) | ⚪ |
 | 018 | Socle SEO | **Accepté — P0+P1 livrés** | ✅ |
@@ -357,9 +357,9 @@ Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se m
 | 024 | Bandeau consentement cookies + Cloudflare Turnstile | Accepté | ✅ |
 | 025 | Page `/rechercheterrain` — recherche personnalisée de parcelles | Accepté — **⏸ suspendue (028)** | ✅ |
 | 026 | Emails Brevo templates dashboard + Supabase contacts | **Accepté — livré** ; **amendé le 2026-08-26** : deux listes (Prospects = CRM / Newsletter = consentement), `{{ unsubscribe_link }}` était un tag inexistant, plaquette jointe par lien ; ⚠ **double opt-in toujours non câblé** | ✅ |
-| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** ; **amendé le 2026-08-28** : ⚠ l'autocomplétion Google Places n'a **jamais** fonctionné en production — clé restreinte par référent, `howner.fr` non autorisé | 🟠 |
+| 027 | Refonte fiche Lead admin — recherche terrain, affectation géo, GED double | **Accepté — livré ; affectation + GED mandataire ⏸ suspendues (028)** ; **amendé le 2026-08-28** : ⚠ l'autocomplétion Google Places n'a **jamais** fonctionné en production — clé restreinte par référent, `howner.fr` non autorisé ; **référent ouvert par Richard le 2026-09-30** — à confirmer par une saisie réelle en production | 🟠 |
 | 028 | **Suspension réversible du domaine « Mandataire & Terrain »** | **Accepté — livré** | ✅ |
-| 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** ; **amendée le 2026-09-11** (doctrine lexicale : Howner est **fabricant-installateur**, quinze formules de rôle proscrites, « architecte » = point ouvert n° 4) | ✅ |
+| 029 | **Repositionnement produit & marque** — cadre de vente, vocabulaire, prix (remplace 004) | **Accepté — lot 1 livré** ; **amendée le 2026-09-11** (doctrine lexicale : Howner est **fabricant-installateur**, quinze formules de rôle proscrites, « architecte » = point ouvert n° 4) ; **amendée le 2026-09-30** : point n° 4 clos, « architecte » proscrit → « notre conseiller » / « d'exception » / « dessiné dans notre atelier », motif dans `PROSCRITS` | ✅ |
 | 030 | **Configurateur v2** — grilles pilotées par données (remplace 005 et 020) | **Accepté — livré** ; **amendé les 2026-08-02, 2026-08-20/21 puis 2026-09-07** (surimpressions retirées sur mobile, glissement au pouce, teinte unique par drapeau `surDemande`, parcours ramené à 8 sections, bandeau « édition limitée » **sans volume**, bouton « Être rappelé ») ; bascule sur `/configurer` conditionnée à 031 | 🟠 |
 | 031 | **Soumission de la demande de numéro** (configurateur v2 → lead CRM) | **Accepté — livré et en production** ; unicité sur le numéro **confirmé**, éprouvée par essai réel — elle protège désormais l'attribution faite en CRM. **Amendée le 2026-09-07** : le visiteur ne choisit plus son exemplaire (§5 sans objet, plus de 409 ; §6 `slot: null`). Rien à défaire en base | 🟠 |
 | 032 | Dossier terrain (qualification, uploads, rendez-vous) | Réservé — à écrire | ❓ |

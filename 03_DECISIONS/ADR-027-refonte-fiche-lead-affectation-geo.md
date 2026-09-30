@@ -136,3 +136,11 @@ redéploiement — la restriction est évaluée à chaque appel.
 restent saisissables au clavier. Seule l'assistance est morte. `AdresseAutocomplete`
 (2026-08-27) a été écrit sur ce principe — sans clé, sans réseau ou sans
 autorisation, la saisie demeure.
+
+## Amendement du 2026-09-30 — référent `howner.fr` ouvert
+
+Richard déclare avoir autorisé `https://howner.fr/*` sur la clé Google Places
+(Google Cloud Console). **Non encore constaté** : la preuve est une adresse
+réellement autocomplétée sur `howner.fr` (configurateur ou formulaire terrain),
+ou un appel Places qui ne renvoie plus 403 depuis ce référent. Tant que ce
+constat n'est pas fait, le risque reste ouvert à 🟠 dans `PROJECT_STATE`.
