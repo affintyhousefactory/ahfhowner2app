@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f0;padding:36px 16px;">
+<tr><td align="center">
+<table cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;width:100%;max-width:560px;">
+<tr><td>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:32px 40px 0;">
+<!-- ⚠️ Remplacer par URL hébergée ex. https://affinityhousefactory.com/images/howner-logo.png -->
+<img src="https://affinityhousefactory.com/images/howner-logo.png" width="34" height="44" alt="Howner" style="display:block;margin-bottom:10px;">
+<p style="margin:0 0 3px;font-family:Georgia,Times New Roman,serif;font-size:18px;font-weight:400;color:#1a1a18;letter-spacing:-0.2px;">Howner</p>
+<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:3px;color:#888;text-transform:uppercase;">By Affinity House Factory</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 0;"><h1 style="font-family:Georgia,Times New Roman,serif;font-size:24px;font-weight:400;color:#1a1a18;margin:0;line-height:1.2;letter-spacing:-0.3px;">Nouveau mandataire<br>inscrit.</h1></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:20px;line-height:20px;font-size:20px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0;">Un nouveau mandataire vient de finaliser son inscription sur le portail Howner. Validation manuelle requise avant activation.</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:24px;line-height:24px;font-size:24px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">IDENTITÉ</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">NOM / RAISON SOCIALE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.NOM_RAISON_SOCIALE }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">PRÉNOM SIGNATAIRE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PRENOM }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">FORME JURIDIQUE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.FORME_JURIDIQUE }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">SIRET</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.SIRET }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+{% if params.ADRESSE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ADRESSE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.ADRESSE }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">CARTE PROFESSIONNELLE T</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">RÉSEAU / TITULAIRE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.RESEAU_CARTE_T }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">N° CARTE T</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.CARTE_T_NUMERO }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">CONTACT RGPD (ART. 28)</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">CONTACT DPA</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.DPA_NOM }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">EMAIL DPA</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.DPA_EMAIL }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">CONTRAT</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+{% if params.DATE_SIGNATURE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">DATE DE SIGNATURE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.DATE_SIGNATURE }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-left:3px solid #d4a017;background-color:#fffbf0;padding:15px 20px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#a07010;text-transform:uppercase;margin:0 0 5px;">STATUT</p>
+<p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;">Validation manuelle requise — en attente</p>
+</td></tr></table></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;"><a href="https://howner.fr/admin/mandataires/{{ params.SIRET }}" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1a1a18;text-decoration:underline;letter-spacing:0.3px;">→ Accéder au dossier dans Howner Admin</a></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 40px;">
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 18px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Affinity House Factory — <a href="https://affinityhousefactory.com" style="color:#aaa;text-decoration:none;">affinityhousefactory.com</a></p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Email interne — ne pas transférer.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0;">Howner — Portail mandataire AHF.</p>
+</td></tr></table></td></tr>
+</table></td></tr></table>
+</body></html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f0;padding:36px 16px;">
+<tr><td align="center">
+<table cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;width:100%;max-width:560px;">
+<tr><td>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:28px 40px 0;">
+<table cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="vertical-align:middle;padding-right:16px;"><img src="https://howner.fr/images/howner-logo.png" width="64" height="64" alt="Howner" style="display:block;"></td>
+<td style="vertical-align:middle;">
+<p style="margin:0 0 2px;font-family:Georgia,Times New Roman,serif;font-size:20px;font-weight:400;color:#1a1a18;letter-spacing:-0.2px;">Howner</p>
+<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:3px;color:#888;text-transform:uppercase;">By Affinity House Factory</p>
+</td></tr></table>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 0;"><h1 style="font-family:Georgia,Times New Roman,serif;font-size:24px;font-weight:400;color:#1a1a18;margin:0;line-height:1.2;letter-spacing:-0.3px;">Récapitulatif<br>de votre demande.</h1></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:20px;line-height:20px;font-size:20px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0 0 6px;">Bonjour <strong style="color:#1a1a18;">{{ params.PRENOM }} {{ params.NOM }}</strong>,</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0;">Voici le récapitulatif de votre demande. Nous revenons vers vous sous 48 h ouvrées.</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:24px;line-height:24px;font-size:24px;">&nbsp;</td></tr></table>
+
+{% if params.NUMERO %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">VOTRE RÉSERVATION</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">N° DE SÉRIE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.NUMERO }}</p>
+</td></tr></table></td></tr></table>
+
+{% if params.RESERVATION_TTC %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:2px solid #1a1a18;padding:18px 22px;background-color:#f8f8f5;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ACOMPTE DE RÉSERVATION TTC</p>
+<p style="font-family:Georgia,Times New Roman,serif;font-size:22px;font-weight:700;color:#1a1a18;margin:0;">{{ params.RESERVATION_TTC }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.SOUS_CONDITION %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">CONDITIONS</p><p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#3a3a38;margin:0;line-height:1.65;">{{ params.SOUS_CONDITION }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+{% endif %}
+
+
+{% if params.MODELE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">VOTRE STUDIO DE JARDIN</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">MODÈLE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.MODELE }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">BARDAGE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.BARDAGE }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">AMBIANCE INTÉRIEURE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.INTERIEUR }}</p>
+</td></tr></table></td></tr></table>
+
+{% if params.STUDIO_TTC %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:2px solid #1a1a18;padding:18px 22px;background-color:#f8f8f5;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">STUDIO DE JARDIN TTC</p>
+<p style="font-family:Georgia,Times New Roman,serif;font-size:22px;font-weight:700;color:#1a1a18;margin:0;">{{ params.STUDIO_TTC }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.TERRASSE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">TERRASSE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.TERRASSE }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.TERRASSE_TTC %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">TERRASSE TTC</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.TERRASSE_TTC }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.OPTIONS_LABELS %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">OPTIONS</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.OPTIONS_LABELS }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.OPTIONS_TTC %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">OPTIONS TTC</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.OPTIONS_TTC }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.LIVRAISON %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">LIVRAISON / TRANSPORT</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.LIVRAISON }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.TOTAL_ESTIME %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:2px solid #1a1a18;padding:18px 22px;background-color:#f8f8f5;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">TOTAL ESTIMÉ TTC</p>
+<p style="font-family:Georgia,Times New Roman,serif;font-size:22px;font-weight:700;color:#1a1a18;margin:0;">{{ params.TOTAL_ESTIME }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.GRILLE_VERSION %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">GRILLE TARIFAIRE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.GRILLE_VERSION }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+{% endif %}
+
+
+{% if params.PLU_ZONE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">ANALYSE TERRAIN (PLU)</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">PARCELLE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_PARCELLE }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ZONE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_ZONE }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+{% if params.PLU_ADRESSE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ADRESSE ANALYSÉE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_ADRESSE }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.PLU_TYPEDOC %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">DOCUMENT URBANISME</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_TYPEDOC }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.PLU_DATAPPRO %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">DATE D’APPROBATION</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PLU_DATAPPRO }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.PLU_PRESCRIPTIONS %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">PRESCRIPTIONS</p><p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#3a3a38;margin:0;line-height:1.65;">{{ params.PLU_PRESCRIPTIONS }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.PLU_SERVITUDES %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">SERVITUDES</p><p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#3a3a38;margin:0;line-height:1.65;">{{ params.PLU_SERVITUDES }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">VOS COORDONNÉES</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">PRÉNOM</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.PRENOM }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">NOM</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.NOM }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">EMAIL</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.EMAIL }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">TÉLÉPHONE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.TEL }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+{% if params.ADRESSE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">ADRESSE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.ADRESSE }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+{% if params.CP_VILLE %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">CODE POSTAL / VILLE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.CP_VILLE }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:16px;line-height:16px;font-size:16px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border:1px solid #e8e8e4;border-radius:2px;padding:20px 22px;">
+
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin:0 0 7px;">Compris dans le prix</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#3a3a38;line-height:1.75;margin:0;"><a href="https://howner.fr/a-propos#acier-leger" style="color:#1a1a18;text-decoration:underline;">Ossature LSF * — technologie Light Steel Frame</a>, isolation biosourcée, bardage joint debout, menuiseries double vitrage aluminium, chauffage électrique, électricité, plomberie, cuisine et salle d’eau, fondations sur pieux vissés, fabrication, transport, levage et pose.</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:12px;line-height:12px;font-size:12px;">&nbsp;</td></tr></table>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin:0 0 7px;">Non inclus</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#3a3a38;line-height:1.75;margin:0;">Terrassement, travaux d’aménagement VRD ** (voirie et réseaux divers), raccordements aux réseaux, assainissement non collectif — micro-station ***, étude de sol si exigée, aménagement des accès camion et grue si nécessaire, mobilier et décoration.</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:14px;line-height:14px;font-size:14px;">&nbsp;</td></tr></table>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#3a3a38;line-height:1.75;margin:0;" style="color:#888;">* technologie LSF, Light Steel Frame<br>** Prix estimatif entre 5 000 € et 15 000 € selon distance et difficultés de raccordement<br>*** Prix estimatif entre 4 000 € et 12 000 €</p>
+
+
+{% if params.PLAQUETTE_URL %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:14px;line-height:14px;font-size:14px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="border:1px solid #1a1a18;border-radius:3px;padding:14px 18px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="vertical-align:middle;width:28px;font-size:22px;line-height:1;padding-right:14px;">&#x1F4C4;</td>
+<td style="vertical-align:middle;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin:0 0 3px;">Document</p>
+<a href="{{ params.PLAQUETTE_URL }}" style="font-family:Georgia,Times New Roman,serif;font-size:14px;color:#1a1a18;text-decoration:none;border-bottom:1px solid #1a1a18;">{{ params.PLAQUETTE_LIBELLE }}</a>
+</td>
+<td style="vertical-align:middle;text-align:right;white-space:nowrap;">
+<a href="{{ params.PLAQUETTE_URL }}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#fff;background-color:#1a1a18;text-decoration:none;padding:8px 16px;border-radius:2px;">Télécharger</a>
+</td>
+</tr></table>
+</td></tr></table>
+{% endif %}
+
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:16px;line-height:16px;font-size:16px;">&nbsp;</td></tr></table>
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 16px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#3a3a38;line-height:1.65;margin:0 0 14px;">Après votre échange avec notre conseiller, vous recevrez un devis détaillé mentionnant un échéancier et une demande de paiement de réservation validant votre exclusivité.</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="border-left:3px solid #1a1a18;padding:12px 16px;background-color:#f8f8f5;">
+<p style="font-family:Georgia,Times New Roman,serif;font-size:20px;font-weight:700;color:#1a1a18;margin:0 0 3px;">2 000 €</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#3a3a38;margin:0;line-height:1.5;">Versement initial de réservation Arko — intégralement remboursable avant signature du contrat</p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:12px;line-height:12px;font-size:12px;">&nbsp;</td></tr></table>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#888;margin:0;">Conditions précisées dans les <a href="https://howner.fr/cgv" style="color:#1a1a18;text-decoration:underline;">CGV</a>.</p>
+
+</td></tr></table>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 40px;">
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 22px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#3a3a38;margin:0 0 12px;line-height:1.5;text-align:center;">Une question rapide&nbsp;? Échangeons directement.</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="text-align:center;padding-bottom:24px;">
+<a href="https://wa.me/33564373714?text=Bonjour%2C+je+souhaite+des+informations+sur+votre+studio." style="display:inline-block;background-color:#25D366;border-radius:4px;text-decoration:none;padding:12px 24px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;">&#x1F4AC;&nbsp;&nbsp;Discuter sur WhatsApp</a>
+</td></tr></table>
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 18px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Affinity House Factory — <a href="https://affinityhousefactory.com" style="color:#aaa;text-decoration:none;">affinityhousefactory.com</a></p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Howner — une marque de Affinity House Factory.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 16px;">Cet email confirme la réception de votre demande.</p>
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 14px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#aaa;margin:0;line-height:2;letter-spacing:0.2px;">
+<a href="{{ unsubscribe_link }}" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">Se désinscrire</a>
+<span style="color:#e8e8e4;padding:0 8px;">&middot;</span>
+<a href="{{ update_profile }}" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">Gérer mes préférences</a>
+<span style="color:#e8e8e4;padding:0 8px;">&middot;</span>
+<a href="https://affinityhousefactory.com/compte/supprimer" style="color:#aaa;font-family:Arial,Helvetica,sans-serif;font-size:10px;text-decoration:underline;">Supprimer mon compte</a>
+</p>
+</td></tr></table></td></tr>
+</table></td></tr></table>
+</body></html>

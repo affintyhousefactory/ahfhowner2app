@@ -16,13 +16,15 @@
   `NEXT_PUBLIC_CONTACT_PHONE` mise à jour par Richard.
 - Richard a fait : référent `howner.fr` sur la clé Google Places ; `BREVO_TEMPLATE_MULTICFG=17` sur Vercel.
 
-## Brevo — à corriger dans le dashboard (écriture non faite, écrase sans historique)
+## Brevo — ✅ corrigé le 2026-09-30 (feu vert de Richard)
+12 templates réécrits par API, relus identiques, `check:vocabulaire:brevo` ✅. Sauvegarde **avant** correction :
+`docs/emails/sauvegarde-2026-09-30/` (25 templates). 21 : « notre conseiller vous indique les pièces à réunir ».
+Détail de ce qui a été corrigé :
 - **Ancien numéro en dur** (`tel:` et **`wa.me/33564373714`**) dans 12 templates actifs :
   9, 10, 17, 18, 19, 20, 21, 22, 23, 24, 26, 32. Sauvegarde HTML prise en scratchpad de session.
 - **« architecte »** dans 19, 21, 26 (dont « notre architecte monte le dossier » — rôle non exercé).
 - **« maison »** dans 24 (préexistant).
 
 ## Prochaine action
-1. Feu vert de Richard pour réécrire les templates Brevo.
-2. Bascule `/configurer` (+ `llms.txt` : volume, numéro, acompte ; template 9).
-3. Copie « fabricant-installateur » `/a-propos` + pied de page, avec Richard.
+1. Bascule `/configurer` (+ `llms.txt` : volume, numéro, acompte ; template 9).
+2. Copie « fabricant-installateur » `/a-propos` + pied de page, avec Richard.

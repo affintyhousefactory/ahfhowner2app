@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f0;padding:36px 16px;">
+<tr><td align="center">
+<table cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;width:100%;max-width:560px;">
+<tr><td>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:32px 40px 0;">
+<!-- ⚠️ Remplacer par URL hébergée ex. https://affinityhousefactory.com/images/howner-logo.png -->
+<img src="https://affinityhousefactory.com/images/howner-logo.png" width="34" height="44" alt="Howner" style="display:block;margin-bottom:10px;">
+<p style="margin:0 0 3px;font-family:Georgia,Times New Roman,serif;font-size:18px;font-weight:400;color:#1a1a18;letter-spacing:-0.2px;">Howner</p>
+<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:3px;color:#888;text-transform:uppercase;">By Affinity House Factory</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 0;"><h1 style="font-family:Georgia,Times New Roman,serif;font-size:24px;font-weight:400;color:#1a1a18;margin:0;line-height:1.2;letter-spacing:-0.3px;">Votre demande<br>est bien reçue.</h1></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:20px;line-height:20px;font-size:20px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0 0 6px;">Bonjour <strong style="color:#1a1a18;">{{ params.PRENOM }}</strong>,</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#3a3a38;line-height:1.65;margin:0;">Nous avons bien reçu votre demande de partenariat mandataire Howner. Voici un récapitulatif de votre dossier.</p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:22px;line-height:22px;font-size:22px;">&nbsp;</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-left:3px solid #d4a017;background-color:#fffbf0;padding:18px 22px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#d4a017;text-transform:uppercase;margin:0 0 6px;">STATUT DE VOTRE DOSSIER</p>
+<p style="font-family:Georgia,Times New Roman,serif;font-size:17px;color:#1a1a18;margin:0 0 4px;line-height:1.3;">{{ params.STATUT }}</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#3a3a38;margin:0;line-height:1.5;">Notre équipe examine votre dossier. Vous serez notifié(e) par email dès validation.</p>
+</td></tr></table></td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0;border-bottom:1px solid #e8e8e4;padding-bottom:10px;">VOTRE DOSSIER</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:8px;line-height:8px;font-size:8px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 12px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="50%" style="padding-right:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">NOM / RAISON SOCIALE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.NOM_RAISON_SOCIALE }}</p></td></tr></table></td>
+<td width="50%" style="padding-left:6px;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;"><p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">DATE DE SIGNATURE</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.DATE_SIGNATURE }}</p></td></tr></table></td>
+</tr></table></td></tr></table>
+
+{% if params.RESEAU_CARTE_T %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#f8f8f5;padding:15px 18px;border-left:3px solid #1a1a18;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2.5px;color:#888;text-transform:uppercase;margin:0 0 6px;">RÉSEAU CARTE T</p><p style="font-family:Georgia,Times New Roman,serif;font-size:15px;color:#1a1a18;margin:0;line-height:1.4;">{{ params.RESEAU_CARTE_T }}</p>
+</td></tr></table></td></tr></table>{% endif %}
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:16px;line-height:16px;font-size:16px;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 40px 13px;"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#1a1a18;border-radius:3px;"><a href="{{ params.LIEN_PORTAIL }}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;color:#ffffff;text-decoration:none;padding:12px 24px;letter-spacing:0.8px;text-transform:uppercase;">Accéder à mon portail mandataire</a></td></tr></table></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:24px 40px 40px;">
+<hr style="border:none;border-top:1px solid #e8e8e4;margin:0 0 18px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Affinity House Factory — <a href="https://affinityhousefactory.com" style="color:#aaa;text-decoration:none;">affinityhousefactory.com</a></p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0 0 3px;">Howner — une marque de Affinity House Factory.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#aaa;margin:0;">Cet email est envoyé dans le cadre de votre contrat-cadre AHF.</p>
+</td></tr></table></td></tr>
+</table></td></tr></table>
+</body></html>
