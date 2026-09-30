@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   /* « Série 01 » → « Édition Arko » (2026-08-25) : le libellé a changé dans le
      configurateur, et une métadonnée qui dit autre chose que la page est une
      seconde vérité de plus. */
-  description: `Arko One : studio de jardin d'architecte de 20 m², livré prêt à vivre. Édition Arko — ${SERIE_TOTAL} exemplaires numérotés. Fabriqué au Pays-Basque.`,
+  description: `Arko One : studio de jardin d'exception de 20 m², livré prêt à vivre. Édition Arko — ${SERIE_TOTAL} exemplaires numérotés. Fabriqué au Pays-Basque.`,
   alternates: { canonical: "/studio-jardin-arko-one" },
 };
 

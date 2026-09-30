@@ -20,7 +20,7 @@ Routes App Router : `/` · `/arko-one` · `/arko-max` · `/configurer` · `/conf
 | `src/app/*/page.tsx` | Routes (pages produit, configurer, terrain, contact, légal) |
 | `src/components/site/*` | Sections + `Nav`, `ProductHero`, `ProductsShowcase`, `ContactForm`, `LegalShell`, `ProductSync` |
 | `src/components/configurateur/*` | **Configurateur v2** — `Configurateur` (assemblage), `sections`, `ui` (`Section`/`Choix`/`Scene`/`BarrePrix`), `store` |
-| `src/lib/configurateur/*` | Grilles (`config`), textes de mentions (`mentions`), numéros de série (`numeros`) |
+| `src/lib/configurateur/*` | Grilles (`config`, dont le drapeau `surDemande` des teintes), textes de mentions (`mentions`), ⚠ `numeros` — **plus lu par aucun écran depuis le 2026-09-07**, conservé comme seule trace écrite du mode « demandé puis confirmé » |
 | `src/components/arko3d/*` | 3D — **`/viewer` only** |
 
 ## Décisions liées

@@ -215,7 +215,7 @@ export function SectionCloture({ produit }: { produit: ProductKey }) {
         <div className="mt-16 flex items-center gap-5">
           <span aria-hidden className="h-px flex-grow bg-white/[.09]" />
           <span className="text-center font-mono text-[0.66rem] uppercase tracking-[0.16em] text-nuit-faible">
-            Dessiné par notre architecte intégrée · Fabriqué au Pays-Basque
+            Dessiné dans notre atelier · Fabriqué au Pays-Basque
           </span>
         </div>
       </Reveal>

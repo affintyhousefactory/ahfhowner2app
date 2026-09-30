@@ -781,7 +781,7 @@ function NotFoundResult({ parcelle, isDark }: { parcelle: string; isDark: boolea
       <ul className={cn("mt-3 space-y-1 text-xs", textMuted)}>
         <li>· Vérifiez le numéro sur <a href="https://cadastre.gouv.fr" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">cadastre.gouv.fr</a></li>
         <li>· Consultez le PLU de la commune directement en mairie</li>
-        <li>· Contactez-nous : notre architecte intégrée analyse votre terrain manuellement</li>
+        <li>· Contactez-nous : notre conseiller analyse votre terrain manuellement</li>
       </ul>
     </div>
   );

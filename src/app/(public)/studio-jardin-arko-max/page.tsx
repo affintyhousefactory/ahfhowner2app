@@ -18,7 +18,7 @@ import { contenuProduit } from "@/lib/produits/heure-bleue";
 
 export const metadata: Metadata = {
   title: "Studio de jardin 40 m² — Arko Max | HOWNER",
-  description: `Arko Max : studio de jardin d'architecte de 40 m² (T2), livré prêt à vivre. Édition Arko — ${SERIE_TOTAL} exemplaires numérotés. Fabriqué au Pays-Basque.`,
+  description: `Arko Max : studio de jardin d'exception de 40 m² (T2), livré prêt à vivre. Édition Arko — ${SERIE_TOTAL} exemplaires numérotés. Fabriqué au Pays-Basque.`,
   alternates: { canonical: "/studio-jardin-arko-max" },
 };
 

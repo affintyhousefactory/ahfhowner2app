@@ -110,4 +110,50 @@ export const PROSCRITS = [
   { mot: "financement garanti", libelle: "financement garanti (§30 CGV)" },
   { mot: "terrain garanti", libelle: "terrain garanti (§30 CGV)" },
   { mot: "pr[êe]ts? [àa] louer", libelle: "prêt à louer (§30 CGV)" },
+
+  /* ── Doctrine lexicale du 2026-09-11 — le mot dit le rôle réellement exercé ─
+     ADR-029 § Amendement du 2026-09-11, source `docs/specs/DOCTRINE_LEXICALE_HOWNER.md`.
+     Howner est un **fabricant-installateur** de studios de jardin fabriqués
+     hors-site. Les formules ci-dessous lui prêtent un autre rôle — constructeur
+     de maisons, maître d'œuvre, cabinet d'architecture — ou promettent ce
+     qu'il ne maîtrise pas : une autorisation d'urbanisme, un projet « suivi
+     de bout en bout ». Chacune rapproche la société d'une qualification
+     juridique (CCMI, maîtrise d'œuvre, exercice de l'architecture) qui n'est
+     pas la sienne, avec le régime de responsabilité et d'assurance qui va
+     avec. La doctrine est nette : on ne contourne pas une qualification par
+     le vocabulaire — et on ne s'en attribue pas une non plus.
+
+     « constructeur de maisons » est déjà couvert par « maison » ; la ligne
+     explicite reste, pour la même raison que la ligne CCMI plus haut.
+     « clé en main » et « prise en charge globale » figurent déjà plus haut.
+     La liste « à utiliser avec prudence » de la doctrine (architecture,
+     conception, étude de faisabilité, implantation, prêt à vivre,
+     accompagnement…) n'est PAS automatisée : ces mots sont
+     légitimes quand ils décrivent l'objet, pas quand ils qualifient Howner.
+     C'est une relecture, pas un motif. */
+  { mot: "constructeurs? de maisons?", libelle: "constructeur de maisons (doctrine lexicale — Howner est fabricant-installateur)" },
+  { mot: "ma[îi]tres? d[’'](?:œ|oe)uvre", libelle: "maître d’œuvre (doctrine lexicale — rôle non exercé)" },
+  { mot: "ma[îi]trise d[’'](?:œ|oe)uvre", libelle: "maîtrise d’œuvre (doctrine lexicale — rôle non exercé)" },
+  { mot: "(?:cabinet|agence|bureau)s? d[’']architecture", libelle: "cabinet / agence / bureau d’architecture (doctrine lexicale)" },
+  { mot: "howner architecture", libelle: "« Howner Architecture » (doctrine lexicale)" },
+  { mot: "(?:notre|le|un) service architecture", libelle: "service architecture (doctrine lexicale)" },
+  { mot: "nous nous occupons de tout", libelle: "nous nous occupons de tout (doctrine lexicale — promesse globale)" },
+  { mot: "validation urbanistique", libelle: "validation urbanistique (doctrine lexicale — la mairie décide, pas Howner)" },
+  { mot: "permis garanti", libelle: "permis garanti (doctrine lexicale)" },
+  { mot: "(?:entièrement|intégralement) suivi par (?:notre|un|une|l[’']) ?architecte", libelle: "projet entièrement suivi par notre architecte (doctrine lexicale)" },
+
+  /* « architecte » — ADR-029 § Amendement du 2026-09-30 (point ouvert n° 4 tranché
+     par Richard) : le mot sort de tout le site, au profit de « conseiller »
+     pour la personne et de « d'exception » pour le studio. Le titre est
+     protégé (loi du 3 janvier 1977) : son usage indu est pénal, pas un simple
+     risque de requalification.
+     Deux emplois restent, parce qu'ils désignent un tiers et jamais Howner :
+     l'Architecte des Bâtiments de France (exclu par le motif lui-même) et la
+     question réglementaire du guide permis 40 m² — le recours obligatoire à
+     un professionnel habilité, selon la surface (seul chemin toléré). */
+  {
+    mot: "architectes?(?! des b)",
+    libelle: "architecte (ADR-029 — dire « notre conseiller » ou « d'exception »)",
+    sauf: ["src/lib/pages/contenu/guides.ts"],
+  },
 ];

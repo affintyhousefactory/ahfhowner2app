@@ -29,7 +29,7 @@ const page = pageParRoute(ROUTE)!;
 export const metadata: Metadata = {
   title: "Bureau pour télétravail dans le jardin | HOWNER",
   description:
-    "Créez un véritable bureau pour télétravailler dans votre jardin : studios de jardin d'architecte Arko One et Arko Max, ossature acier LSF, configuration en ligne.",
+    "Créez un véritable bureau pour télétravailler dans votre jardin : studios de jardin d'exception Arko One et Arko Max, ossature acier LSF, configuration en ligne.",
   alternates: { canonical: ROUTE },
 };
 
