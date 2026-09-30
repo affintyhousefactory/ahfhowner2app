@@ -5,16 +5,15 @@
 
 ## Décisions — 2026-09-30 (« architecte » sort du site ; nouveau numéro)
 
-**`main` = `1cc3e4b8`**, inchangé. Travail ajouté à `feat/adr-029-doctrine-lexicale` → **PR #123 vers `dev`**.
+**En production : `main` = `9367ab37`** (PR #123 → `dev`, PR #124 → `main`). Aucune migration.
 
 - **Point ouvert n° 4 d'ADR-029 tranché par Richard** : « retirer partout architecte et remplacer par
   conseiller ». Personne → « notre conseiller » ; studio → « d'exception » ; conception → « dessiné
   dans notre atelier » (un conseiller ne dessine pas). ADR-029 § Amendement du 2026-09-30.
 - Motif `architectes?(?! des b)` dans `PROSCRITS` (site + Brevo), éprouvé 3 fautives / 4 légitimes.
   Restent : ABF (exclu par le motif), question réglementaire du guide 40 m² (`sauf`).
-- **Téléphone → `+33 (0)7 56 90 81 91`** : repli de `site.ts` changé. ⚠ **`NEXT_PUBLIC_CONTACT_PHONE`
-  sur Vercel (Production + Preview) porte encore l'ancien numéro et prime sur le repli** — à changer
-  par Richard (refusé à Claude), puis redéployer.
+- **Téléphone → `+33 (0)7 56 90 81 91`** : repli de `site.ts` changé. Variable Vercel
+  `NEXT_PUBLIC_CONTACT_PHONE` mise à jour par Richard.
 - Richard a fait : référent `howner.fr` sur la clé Google Places ; `BREVO_TEMPLATE_MULTICFG=17` sur Vercel.
 
 ## Brevo — à corriger dans le dashboard (écriture non faite, écrase sans historique)
@@ -24,7 +23,6 @@
 - **« maison »** dans 24 (préexistant).
 
 ## Prochaine action
-1. Richard : `NEXT_PUBLIC_CONTACT_PHONE` sur Vercel ; feu vert pour réécrire les templates Brevo.
-2. Fusionner PR #123 après vérification Preview.
-3. Bascule `/configurer` (+ `llms.txt` : volume, numéro, acompte ; template 9).
-4. Copie « fabricant-installateur » `/a-propos` + pied de page, avec Richard.
+1. Feu vert de Richard pour réécrire les templates Brevo.
+2. Bascule `/configurer` (+ `llms.txt` : volume, numéro, acompte ; template 9).
+3. Copie « fabricant-installateur » `/a-propos` + pied de page, avec Richard.
