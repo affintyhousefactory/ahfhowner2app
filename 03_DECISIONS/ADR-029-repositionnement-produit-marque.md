@@ -442,6 +442,59 @@ dossier avocat** (ADR-015) : c'est la pièce qui décrit le rôle réellement
 exercé par AHF, et les CGV du 22/08 doivent la refléter (leur §1 et leur
 description de la prestation sont à relire à cette aune).
 
+## Amendement du 2026-09-30 — « architecte » sort du site, « conseiller » le remplace
+
+**Décision de Richard, le 2026-09-30, qui tranche le point ouvert n° 4 :
+« retirer partout architecte et remplacer par conseiller ».** Issue (b) du point
+ouvert, sans sa variante « conçu avec une architecte » : le mot disparaît de
+tout le copy.
+
+**Deux remplacements, selon ce que le mot désignait.**
+- **La personne** — « notre architecte intégrée » → **« notre conseiller »**
+  (contact, visio de premier contact, analyse manuelle de terrain, échange
+  hébergements professionnels). Le terme rejoint celui du CRM (ADR-035) et
+  d'ADR-031 : le conseiller est celui qui rappelle et attribue l'exemplaire.
+- **Le studio** — « studio de jardin d'architecte », « 20 m² d'architecte »,
+  « écrins d'architecte », « un espace d'architecte » → **« d'exception »**, le
+  qualificatif déjà imposé par l'amendement du 2026-08-19. Titres `<title>`,
+  Open Graph, manifeste, `<h1>` dictés des deux pages produit et de la page
+  haut de gamme, métadonnées, JSON-LD `Product`.
+
+**Là où « conseiller » aurait menti, on dit l'atelier.** Un conseiller ne dessine
+pas : « dessiné par notre architecte intégrée », « imaginée par », « pensé
+par », « conçu avec » deviennent **« dessiné dans notre atelier »** — le rôle
+réellement exercé (fabricant-installateur, doctrine du 2026-09-11).
+« dessinée **et suivie** … de l'esquisse à la pose » devient « dessiné et
+fabriqué dans notre atelier. Notre conseiller reste votre interlocuteur, de la
+configuration à la pose » : un interlocuteur, pas un suivi de projet.
+« constructibilité définitive **validée** avec notre architecte intégrée »
+(`LandTool`) devient « à confirmer en mairie, avec notre conseiller » — la
+mairie décide, pas Howner.
+
+**Ce qui reste, parce que le mot y désigne un tiers.**
+- **Architecte des Bâtiments de France** (`locales.ts`, `ParcelleAnalyse.tsx`)
+  — une autorité, exclue par le motif lui-même (`architectes?(?! des b)`).
+- **« Le recours à un architecte est-il obligatoire ? »** (guide permis 40 m²,
+  `guides.ts`) — question réglementaire sur le client, seul chemin toléré
+  (`sauf`).
+- **Hors contrôle, non modifiés** : `cgu-mandataire` (clause de
+  responsabilité, domaine suspendu ADR-028) et `contrat-pdf.ts` (contrat
+  mandataire, qui dit aussi « maisons compactes d'architecte » — à reprendre
+  avec l'ensemble du domaine le jour où le flag est levé).
+
+**Garde-fou.** `architectes?(?! des b)` entre dans `PROSCRITS` — donc site **et**
+templates Brevo. Éprouvé avant d'entrer : pris sur « notre architecte
+intégrée », « d'architecte », « Nos architectes » ; passe sur « Architecte
+des Bâtiments de France », « architecture », « architectural ».
+La consigne « notre architecte intégrée (sans prénom) » de `CLAUDE.md` /
+`AGENTS.md` / `site.ts` est remplacée par « notre conseiller ».
+
+**Accord.** « conseiller », masculin générique, comme dans le CRM.
+
+**Au dossier avocat (ADR-015).** Le risque pénal du titre protégé est levé côté
+site. Les CGV du 22/08 sont à relire sur ce point comme sur le reste de la
+doctrine.
+
 ## Points ouverts — arbitrage Howner requis
 
 Ces trois points sont apparus en croisant la spec avec le code existant. Aucun n'empêche de commencer ; les deux premiers doivent être tranchés avant la réécriture des textes, le troisième avant toute mise en ligne.
@@ -452,7 +505,7 @@ Ces trois points sont apparus en croisant la spec avec le code existant. Aucun n
 
 **3. « Une seule identité » vs réalité juridique.** Le §1 exige que Howner soit seule citée, « y compris mentions légales, coordonnées bancaires ». Or les mentions légales déclarent aujourd'hui **Affinity House Factory, SAS** comme éditeur — obligation légale de nommer l'entité réelle. Howner ne peut être seule citée que s'il s'agit d'un nom commercial déposé d'AHF, et la mention de l'entité juridique reste obligatoire. **Ce point ne peut pas être appliqué à la lettre sur les pages légales sans validation juridique.** Il rejoint §17.10.
 
-**4. « notre architecte intégrée » — habilitée et désignée ? (2026-09-11)** La
+**4. ✅ Tranché le 2026-09-30 — voir § Amendement du 2026-09-30 (« conseiller »).** ~~« notre architecte intégrée » — habilitée et désignée ? (2026-09-11)~~ La
 doctrine lexicale n'autorise « architecte » que pour une personne
 **effectivement habilitée** (inscrite à l'Ordre, art. 9 de la loi du 3 janvier
 1977 : le titre est protégé) et **précisément désignée**. La formulation en

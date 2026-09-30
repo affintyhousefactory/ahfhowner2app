@@ -27,7 +27,7 @@ const page = pageParRoute(ROUTE)!;
 export const metadata: Metadata = {
   title: "Studio de jardin ou tiny house : que choisir ? | HOWNER",
   description:
-    "Mobilité ou implantation durable : ce qui sépare vraiment une tiny house d'un studio de jardin d'architecte. Comparaison honnête, et les deux modèles Arko.",
+    "Mobilité ou implantation durable : ce qui sépare vraiment une tiny house d'un studio de jardin d'exception. Comparaison honnête, et les deux modèles Arko.",
   alternates: { canonical: ROUTE },
 };
 
@@ -50,7 +50,7 @@ export default function StudioJardinTinyHousePage() {
         secondaire={{ libelle: "Voir les deux studios", href: "#modeles" }}
         visuel={{
           src: "/assets/arko/max/ecrin.avif",
-          alt: "Studio de jardin d'architecte Arko posé durablement dans un jardin arboré",
+          alt: "Studio de jardin d'exception Arko posé durablement dans un jardin arboré",
         }}
       />
 

@@ -7,7 +7,7 @@ import { Reveal, Stagger, StaggerItem } from "@/components/ui/Reveal";
 
 /* Parcours sobre : frise typographique des étapes + une seule image,
    le studio sur son terrain. Aucune imagerie de transport ni de levage —
-   on installe un studio de jardin d'architecte, on ne largue pas une boîte. */
+   on installe un studio de jardin d'exception, on ne largue pas une boîte. */
 
 export function Process() {
   return (

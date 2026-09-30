@@ -128,7 +128,7 @@ export const PROSCRITS = [
      « clé en main » et « prise en charge globale » figurent déjà plus haut.
      La liste « à utiliser avec prudence » de la doctrine (architecture,
      conception, étude de faisabilité, implantation, prêt à vivre,
-     accompagnement, architecte…) n'est PAS automatisée : ces mots sont
+     accompagnement…) n'est PAS automatisée : ces mots sont
      légitimes quand ils décrivent l'objet, pas quand ils qualifient Howner.
      C'est une relecture, pas un motif. */
   { mot: "constructeurs? de maisons?", libelle: "constructeur de maisons (doctrine lexicale — Howner est fabricant-installateur)" },
@@ -141,4 +141,19 @@ export const PROSCRITS = [
   { mot: "validation urbanistique", libelle: "validation urbanistique (doctrine lexicale — la mairie décide, pas Howner)" },
   { mot: "permis garanti", libelle: "permis garanti (doctrine lexicale)" },
   { mot: "(?:entièrement|intégralement) suivi par (?:notre|un|une|l[’']) ?architecte", libelle: "projet entièrement suivi par notre architecte (doctrine lexicale)" },
+
+  /* « architecte » — ADR-029 § Amendement du 2026-09-30 (point ouvert n° 4 tranché
+     par Richard) : le mot sort de tout le site, au profit de « conseiller »
+     pour la personne et de « d'exception » pour le studio. Le titre est
+     protégé (loi du 3 janvier 1977) : son usage indu est pénal, pas un simple
+     risque de requalification.
+     Deux emplois restent, parce qu'ils désignent un tiers et jamais Howner :
+     l'Architecte des Bâtiments de France (exclu par le motif lui-même) et la
+     question réglementaire du guide permis 40 m² — le recours obligatoire à
+     un professionnel habilité, selon la surface (seul chemin toléré). */
+  {
+    mot: "architectes?(?! des b)",
+    libelle: "architecte (ADR-029 — dire « notre conseiller » ou « d'exception »)",
+    sauf: ["src/lib/pages/contenu/guides.ts"],
+  },
 ];

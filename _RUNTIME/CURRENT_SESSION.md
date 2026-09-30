@@ -3,36 +3,28 @@
 > Mémoire courte. Historique complet et backlog → `00_INDEX/PROJECT_STATE.md` § « Dernier point ».
 > Règle : 300–1200 tokens.
 
-## Décisions — 2026-09-11 (la doctrine lexicale entre dans ADR-029)
+## Décisions — 2026-09-30 (« architecte » sort du site ; nouveau numéro)
 
-**`main` = `1cc3e4b8`**, inchangé. Branche `feat/adr-029-doctrine-lexicale` → **PR #123 vers `dev`** (emporte la consolidation du 7/09). Aucune migration.
+**`main` = `1cc3e4b8`**, inchangé. Travail ajouté à `feat/adr-029-doctrine-lexicale` → **PR #123 vers `dev`**.
 
-- **Doctrine lexicale de Richard** actée : ADR-029 § Amendement du 2026-09-11, copie versionnée
-  `docs/specs/DOCTRINE_LEXICALE_HOWNER.md`. Howner est **fabricant-installateur** (hors-site,
-  atelier, livraison, pose) — jamais constructeur, maître d'œuvre ni cabinet d'architecture.
-- **Quinze formules dans `PROSCRITS`** (site + Brevo), motifs éprouvés sur phrases fautive/légitime.
-  Le site n'en employait aucune.
-- **`llms.txt` et JSON-LD `Organization`** réécrits en « fabricant-installateur … hors-site » ;
-  « dessiné et suivi par » → « dessiné par ».
-- « prêt à vivre » reste imposé = niveau d'équipement à la livraison, jamais « sans démarche ».
-- **Point ouvert n° 4** : « architecte » seulement si personne habilitée **et** désignée — contredit
-  « sans prénom ». Reco : nommer si inscrite à l'Ordre, retirer sinon (titre protégé, loi de 1977).
+- **Point ouvert n° 4 d'ADR-029 tranché par Richard** : « retirer partout architecte et remplacer par
+  conseiller ». Personne → « notre conseiller » ; studio → « d'exception » ; conception → « dessiné
+  dans notre atelier » (un conseiller ne dessine pas). ADR-029 § Amendement du 2026-09-30.
+- Motif `architectes?(?! des b)` dans `PROSCRITS` (site + Brevo), éprouvé 3 fautives / 4 légitimes.
+  Restent : ABF (exclu par le motif), question réglementaire du guide 40 m² (`sauf`).
+- **Téléphone → `+33 (0)7 56 90 81 91`** : repli de `site.ts` changé. ⚠ **`NEXT_PUBLIC_CONTACT_PHONE`
+  sur Vercel (Production + Preview) porte encore l'ancien numéro et prime sur le repli** — à changer
+  par Richard (refusé à Claude), puis redéployer.
+- Richard a fait : référent `howner.fr` sur la clé Google Places ; `BREVO_TEMPLATE_MULTICFG=17` sur Vercel.
 
-## Leçons de méthode
-- **Troisième fois** : `check:vocabulaire` refuse le terme cité dans le commentaire qui le documente.
-  L'exemption ne couvre que les lignes portant `ADR-029` — reformuler, ne pas élargir l'exemption.
-- Un motif nouveau s'éprouve sur une phrase fautive **et** une légitime avant d'entrer : un contrôle
-  qui passe du premier coup sur un site conforme n'a rien prouvé.
+## Brevo — à corriger dans le dashboard (écriture non faite, écrase sans historique)
+- **Ancien numéro en dur** (`tel:` et **`wa.me/33564373714`**) dans 12 templates actifs :
+  9, 10, 17, 18, 19, 20, 21, 22, 23, 24, 26, 32. Sauvegarde HTML prise en scratchpad de session.
+- **« architecte »** dans 19, 21, 26 (dont « notre architecte monte le dossier » — rôle non exercé).
+- **« maison »** dans 24 (préexistant).
 
 ## Prochaine action
-1. **Trancher le point ouvert n° 4** (architecte) — bloque `<h1>` dictés et prochaine campagne Brevo.
-2. Copie « fabricant-installateur » pour `/a-propos` + pied de page, avec Richard.
-3. Reportés du 07/09 : bascule `"publiee"` des deux pages ; échéance −10 % ; bascule `/configurer`
-   (+ `llms.txt` : volume, numéro, acompte) ; alerte Albert RSE.
-
-## Blockers / À fournir
-- **Point ouvert n° 4 d'ADR-029** ; coordonnées exactes de l'atelier.
-- **Albert** — charte Affinity (ADR-002), bi-produit (ADR-022), « studio de jardin », B2B Biarritz,
-  CGV en « maison », positionnement RSE.
-- Médiateur de la consommation non nommé (L.616-1) ; ADR-028 réversibilité non testée ; référents
-  `howner.fr` Google Places ; récapitulatif réel jamais envoyé ; temps 2 du CRM.
+1. Richard : `NEXT_PUBLIC_CONTACT_PHONE` sur Vercel ; feu vert pour réécrire les templates Brevo.
+2. Fusionner PR #123 après vérification Preview.
+3. Bascule `/configurer` (+ `llms.txt` : volume, numéro, acompte ; template 9).
+4. Copie « fabricant-installateur » `/a-propos` + pied de page, avec Richard.

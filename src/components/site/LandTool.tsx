@@ -65,7 +65,7 @@ export function LandTool() {
 
           <p className="mt-5 font-mono text-[0.68rem] leading-relaxed text-canvas/60">
             Données Géoportail de l&apos;Urbanisme (GPU) — pré-analyse indicative,
-            constructibilité définitive validée avec notre architecte intégrée.
+            constructibilité à confirmer en mairie, avec notre conseiller.
           </p>
         </div>
       </div>

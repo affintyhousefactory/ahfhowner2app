@@ -24,9 +24,9 @@ const ROUTE = "/bureau-de-jardin";
 const page = pageParRoute(ROUTE)!;
 
 export const metadata: Metadata = {
-  title: "Bureau de jardin d'architecte — travailler chez soi, sans travailler dedans | HOWNER",
+  title: "Bureau de jardin d'exception — travailler chez soi, sans travailler dedans | HOWNER",
   description:
-    "Un vrai bureau indépendant à quelques mètres de chez vous : studio de jardin d'architecte Arko One ou Arko Max, ossature acier LSF, fabrication hors-site.",
+    "Un vrai bureau indépendant à quelques mètres de chez vous : studio de jardin d'exception Arko One ou Arko Max, ossature acier LSF, fabrication hors-site.",
   alternates: { canonical: ROUTE },
 };
 

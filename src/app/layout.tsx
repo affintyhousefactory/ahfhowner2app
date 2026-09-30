@@ -26,13 +26,13 @@ const mono = Space_Mono({
 // du chantier éditorial (lot 1), pas des métadonnées.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "HOWNER — Deux studios de jardin d'architecte, prêts à vivre",
+  title: "HOWNER — Deux studios de jardin d'exception, prêts à vivre",
   description:
     "HOWNER : deux studios de jardin d'exception, Arko One (20 m²) et Arko Max (40 m²), livrés prêts à vivre. Fabriqués au Pays-Basque. Découvrir, configurer, réserver.",
   keywords: ["HOWNER", "Arko One", "Arko Max", "studio de jardin", "studio de jardin premium", "Pays-Basque"],
   alternates: { canonical: "/" },
   openGraph: {
-    title: "HOWNER — Deux studios de jardin d'architecte, prêts à vivre",
+    title: "HOWNER — Deux studios de jardin d'exception, prêts à vivre",
     description:
       "Deux studios de jardin d'exception, Arko One (20 m²) et Arko Max (40 m²), livrés prêts à vivre. Fabriqués au Pays-Basque.",
     type: "website",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "HOWNER — Deux studios de jardin d'architecte, prêts à vivre",
+    title: "HOWNER — Deux studios de jardin d'exception, prêts à vivre",
     description:
       "Deux studios de jardin d'exception, Arko One (20 m²) et Arko Max (40 m²), livrés prêts à vivre. Fabriqués au Pays-Basque.",
   },

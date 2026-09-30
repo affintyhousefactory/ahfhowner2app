@@ -205,6 +205,20 @@ ANTHROPIC_API_KEY=                 # optionnel (ADR-017)
 ```
 Montants déjà en env (`NEXT_PUBLIC_RESERVATION_DEPOSIT_EUR`, `NEXT_PUBLIC_ARKO_BASE_EUR`) — ADR-003.
 
+## Dernier point — 2026-09-30
+
+**`main` = `1cc3e4b8`, inchangé.** Ajouté à `feat/adr-029-doctrine-lexicale` (PR #123 vers `dev`).
+
+- **Point ouvert n° 4 d'ADR-029 tranché** (décision de Richard) : « architecte » sort de tout le site
+  — « notre conseiller » (personne), « d'exception » (studio, y compris `<h1>` produit et `<title>`),
+  « dessiné dans notre atelier » (conception). Motif ajouté à `PROSCRITS`. ADR-029 § Amendement du 2026-09-30.
+- **Téléphone du site → `+33 (0)7 56 90 81 91`** (repli `site.ts`, ADR-003). ⚠ La variable Vercel
+  `NEXT_PUBLIC_CONTACT_PHONE` (Production + Preview) porte encore l'ancien numéro et prime — à changer.
+- ✅ Richard : `howner.fr` autorisé sur la clé Google Places ; `BREVO_TEMPLATE_MULTICFG=17` posée.
+- ⚠ **Brevo** : ancien numéro (`tel:` + WhatsApp) en dur dans 12 templates actifs ; « architecte »
+  dans 19/21/26 ; « maison » dans 24. Non réécrits — attente feu vert (écriture sans historique).
+- Gate : `tsc` ✅, `check:vocabulaire` ✅, eslint : 33 erreurs **préexistantes**, aucune ajoutée.
+
 ## Dernier point — 2026-09-11
 
 **`main` = `1cc3e4b8`, inchangé.** Branche `feat/adr-029-doctrine-lexicale` → **PR #123 vers `dev`**, qui emporte aussi la consolidation du 7/09 (`1147a4b8`, non fusionnée jusque-là). Aucune migration, aucune mise en production.
@@ -363,7 +377,8 @@ Le CRM porte désormais **deux populations aux cycles distincts**. Elles ne se m
 
 ## Prochaines priorités (actionnable sans blocage externe)
 
-0-bis. **Suites du 2026-09-11** (doctrine lexicale) : **trancher le point ouvert n° 4 d'ADR-029** (architecte habilitée et désignée ?) ; rédiger avec Richard la qualification « fabricant-installateur » sur `/a-propos` et le pied de page ; relire les CGV à l'aune de la doctrine (ADR-015) ; corriger `llms.txt` (volume, numéro, acompte) avec la bascule `/configurer`.
+0-ter. **Suites du 2026-09-30** : `NEXT_PUBLIC_CONTACT_PHONE` sur Vercel ; réécriture des templates Brevo (numéro, « architecte », « maison »).
+0-bis. **Suites du 2026-09-11** (doctrine lexicale) : ~~trancher le point ouvert n° 4~~ ✅ 2026-09-30 ; rédiger avec Richard la qualification « fabricant-installateur » sur `/a-propos` et le pied de page ; relire les CGV à l'aune de la doctrine (ADR-015) ; corriger `llms.txt` (volume, numéro, acompte) avec la bascule `/configurer`.
 0. **Suites du 2026-09-07** — dans l'ordre où elles débloquent :
    - **basculer les deux pages nouvelles en `"publiee"`** (`/guide/demarche-rse-howner`, `/hebergements-professionnels`) après vérification en production. Deux lignes au registre ; elles entrent alors au sitemap, à la navigation et au maillage ;
    - **fixer l'échéance de l'objectif −10 %** de la page RSE — seule ligne de la page qui engage un résultat, et la seule qu'aucune donnée ne permet de trancher à ma place ;

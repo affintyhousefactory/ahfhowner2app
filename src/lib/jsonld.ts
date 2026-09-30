@@ -81,7 +81,7 @@ export function productSchema(product: Product): JsonLdObject {
     "@type": "Product",
     name: product.name,
     // ADR-029 amendée — « studio de jardin » remplace « maison », accord au masculin.
-    description: `${product.name} — studio de jardin d'architecte de ${product.area}, livré prêt à vivre. ${product.series}, série limitée à ${product.total} exemplaires numérotés.`,
+    description: `${product.name} — studio de jardin d'exception de ${product.area}, livré prêt à vivre. ${product.series}, série limitée à ${product.total} exemplaires numérotés.`,
     category: "Studio de jardin",
     brand: { "@type": "Brand", name: BRAND.maker },
     url: `${SITE_URL}${product.slug}`,

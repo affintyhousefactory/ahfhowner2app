@@ -102,7 +102,7 @@ export const HEBERGEMENTS_PRO = {
   livrable: {
     titre: "Ce que vous obtenez",
     puces: [
-      "Un échange avec notre architecte intégrée sur votre site et vos usages",
+      "Un échange avec notre conseiller sur votre site et vos usages",
       "Une lecture des implantations possibles, avec leurs contraintes",
       "Les points réglementaires à instruire, identifiés tôt",
       "Une première enveloppe économique, avec ce qu'elle couvre et ce qu'elle ne couvre pas",

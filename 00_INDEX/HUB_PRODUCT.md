@@ -13,7 +13,7 @@ Point d'entrée pour : les produits Arko One / Arko Max, le pricing, la mécaniq
 | **Arko One** | 20 m² | 12 | **69 900 €** | base + emprise 6,65 × 3,60 m confirmées (spec §5, ADR-029) ; reste de la grille remplacé par ADR-030 |
 | **Arko Max** | 40 m² (= ARKO historique) | 5 | **99 900 €** | base confirmée (spec §5, ADR-029) ; reste de la grille remplacé par ADR-030 |
 
-Origine livraison Bayonne. « Notre architecte intégrée ». Fondateur « Puigbo ». « Arko One »/« Arko Max » = noms produits (wordmark ARKO retiré de l'accueil — ADR-022).
+Origine livraison Bayonne. « Notre conseiller » (« architecte » proscrit, ADR-029 § 2026-09-30). Fondateur « Puigbo ». « Arko One »/« Arko Max » = noms produits (wordmark ARKO retiré de l'accueil — ADR-022).
 
 ## Pricing — devis 3 couches (verrouillé, ADR-005)
 | Couche | Contenu |

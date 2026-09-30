@@ -58,11 +58,11 @@ export const PAGES_EDITORIALES: readonly PageEditoriale[] = [
   /* — Pages d'usage (lot 2) — une intention de recherche, une page. */
   {
     route: "/studio-jardin-haut-de-gamme",
-    h1: "Studio de jardin haut de gamme : un espace d'architecte, pensé autrement",
+    h1: "Studio de jardin haut de gamme : un espace d'exception, pensé autrement",
     libelle: "Studio haut de gamme",
     famille: "usage",
     resume:
-      "Deux studios de jardin d'architecte, une structure acier léger et une fabrication hors-site : ce que recouvre vraiment le haut de gamme.",
+      "Deux studios de jardin d'exception, une structure acier léger et une fabrication hors-site : ce que recouvre vraiment le haut de gamme.",
     spec: "page-studio-jardin-haut-de-gamme.md",
     statut: "publiee",
     priorite: 0.9,

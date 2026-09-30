@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "HOWNER — Studio de jardin d'architecte",
+    name: "HOWNER — Studio de jardin d'exception",
     short_name: "HOWNER",
     description:
       "Découvrir, configurer et réserver Arko One ou Arko Max. Studios de jardin d'exception fabriqués au Pays-Basque.",
