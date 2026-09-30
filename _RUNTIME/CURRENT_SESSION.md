@@ -5,26 +5,26 @@
 
 ## Décisions — 2026-09-30 (« architecte » sort du site ; nouveau numéro)
 
-**`main` = `1cc3e4b8`**, inchangé. Travail ajouté à `feat/adr-029-doctrine-lexicale` → **PR #123 vers `dev`**.
+**En production : `main` = `9367ab37`** (PR #123 → `dev`, PR #124 → `main`). Aucune migration.
 
 - **Point ouvert n° 4 d'ADR-029 tranché par Richard** : « retirer partout architecte et remplacer par
   conseiller ». Personne → « notre conseiller » ; studio → « d'exception » ; conception → « dessiné
   dans notre atelier » (un conseiller ne dessine pas). ADR-029 § Amendement du 2026-09-30.
 - Motif `architectes?(?! des b)` dans `PROSCRITS` (site + Brevo), éprouvé 3 fautives / 4 légitimes.
   Restent : ABF (exclu par le motif), question réglementaire du guide 40 m² (`sauf`).
-- **Téléphone → `+33 (0)7 56 90 81 91`** : repli de `site.ts` changé. ⚠ **`NEXT_PUBLIC_CONTACT_PHONE`
-  sur Vercel (Production + Preview) porte encore l'ancien numéro et prime sur le repli** — à changer
-  par Richard (refusé à Claude), puis redéployer.
+- **Téléphone → `+33 (0)7 56 90 81 91`** : repli de `site.ts` changé. Variable Vercel
+  `NEXT_PUBLIC_CONTACT_PHONE` mise à jour par Richard.
 - Richard a fait : référent `howner.fr` sur la clé Google Places ; `BREVO_TEMPLATE_MULTICFG=17` sur Vercel.
 
-## Brevo — à corriger dans le dashboard (écriture non faite, écrase sans historique)
+## Brevo — ✅ corrigé le 2026-09-30 (feu vert de Richard)
+12 templates réécrits par API, relus identiques, `check:vocabulaire:brevo` ✅. Sauvegarde **avant** correction :
+`docs/emails/sauvegarde-2026-09-30/` (25 templates). 21 : « notre conseiller vous indique les pièces à réunir ».
+Détail de ce qui a été corrigé :
 - **Ancien numéro en dur** (`tel:` et **`wa.me/33564373714`**) dans 12 templates actifs :
   9, 10, 17, 18, 19, 20, 21, 22, 23, 24, 26, 32. Sauvegarde HTML prise en scratchpad de session.
 - **« architecte »** dans 19, 21, 26 (dont « notre architecte monte le dossier » — rôle non exercé).
 - **« maison »** dans 24 (préexistant).
 
 ## Prochaine action
-1. Richard : `NEXT_PUBLIC_CONTACT_PHONE` sur Vercel ; feu vert pour réécrire les templates Brevo.
-2. Fusionner PR #123 après vérification Preview.
-3. Bascule `/configurer` (+ `llms.txt` : volume, numéro, acompte ; template 9).
-4. Copie « fabricant-installateur » `/a-propos` + pied de page, avec Richard.
+1. Bascule `/configurer` (+ `llms.txt` : volume, numéro, acompte ; template 9).
+2. Copie « fabricant-installateur » `/a-propos` + pied de page, avec Richard.
